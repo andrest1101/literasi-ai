@@ -8,18 +8,21 @@ import 'core/constants/app_styles.dart';
 import 'features/auth/presentation/screens/auth_screen.dart';
 import 'features/auth/presentation/screens/onboarding_screen.dart';
 import 'features/auth/presentation/screens/splash_screen.dart';
+import 'firebase_options.dart';
 
 /// Entry point LiterasiAI.
 ///
-/// Firebase diinisialisasi best-effort: jika `firebase_options.dart` /
-/// `google-services.json` belum ada (project Firebase user masih setup),
-/// app tetap jalan dalam mode offline.
+/// Firebase diinisialisasi dengan [DefaultFirebaseOptions] hasil
+/// `flutterfire configure` (project literasi-ai-f67aa). Jika init gagal
+/// (mis. google-services belum lengkap), app tetap jalan mode offline.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (_) {
-    debugPrint(AppStrings.geminiApiKeyMissing);
+    debugPrint('Firebase init gagal, lanjut mode offline.');
   }
   runApp(const ProviderScope(child: LiterasiAIApp()));
 }
