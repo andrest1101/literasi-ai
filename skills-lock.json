@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "flutter-build-responsive-layout": {
+      "source": "flutter/agent-plugins",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-build-responsive-layout/SKILL.md",
+      "computedHash": "6d74a9504c4e355c4c62f6fcb6c6dc0df67b56dd6616bea199e4e58f75b7729b"
+    },
+    "flutter-implement-json-serialization": {
+      "source": "flutter/agent-plugins",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-implement-json-serialization/SKILL.md",
+      "computedHash": "c2cf46854472a452dafa11f862f2bca3d9fe7286a5bb45d85b1efbcebc74b74e"
+    }
+  }
+}
