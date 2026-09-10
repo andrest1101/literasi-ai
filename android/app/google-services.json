@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "604940502186",
+    "project_id": "literasi-ai-f67aa",
+    "storage_bucket": "literasi-ai-f67aa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:604940502186:android:1390def3ab90085b653cd3",
+        "android_client_info": {
+          "package_name": "com.example.literasi_ai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsXe6AekkFub5yXWmvBg9tanIufD3dxf0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

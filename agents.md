@@ -35,4 +35,18 @@ When given a task or a feature request from the PRD:
 1. **Analyze Domain First:** Define entities and abstract repositories needed for the feature.
 2. **Build Data Layer:** Implement API data sources (Gemini/Firebase) and repository implementations.
 3. **Connect Presentation:** Wire up the UI screens and state using Riverpod providers.
-4. **Git Integration:** If the code compiles successfully and functions correctly, automatically execute conventional commit messages (e.g., `feat(quick_check): add text verification datasource and provider`).
+4. **Verify:** Run `flutter analyze` and `flutter test` until clean. Then STOP — do NOT commit.
+
+## 6. Git & Commit Policy (MANUAL oleh user — wajib dipatuhi)
+
+- **AI DILARANG menjalankan `git commit`, `git push`, atau amend/push apapun.** Semua commit dilakukan manual oleh user (pemilik repo).
+- Tugas AI terkait git HANYA:
+  1. Memberikan **deskripsi commit siap copy-paste** (conventional commits: `<type>(<scope>): <subject>` + body singkat).
+  2. Menyiapkan `git add` per kelompok file bila diminta user — tanpa commit.
+- **Jika file yang diubah banyak, pecah menjadi beberapa commit per tema**, contoh:
+  - `feat(onboarding): ...` untuk kode UI/fitur.
+  - `test(onboarding): ...` atau gabung ke feat bila kecil.
+  - `docs(progress): ...` untuk update `progress.md` / dokumentasi.
+  - `chore(firebase): ...` untuk config, bukan kode fitur.
+- Format type: `feat` (fitur), `fix` (bug), `docs`, `test`, `refactor`, `chore`, `style`.
+- Setiap deskripsi commit WAJIB menyebut hasil verifikasi (analyze/test) bila relevan.

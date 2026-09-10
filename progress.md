@@ -1,0 +1,75 @@
+_project ini adalah dokumen hidup — update sesuai perkembangan development._
+_Last updated: 12 september 2026_
+
+## Status: Onboarding Interaction Upgrade — SELESAI ✅
+
+### Yang dikerjakan
+- `agents.md`: tambah §6 Git & Commit Policy — AI dilarang commit/push, hanya beri deskripsi; file banyak dipecah per tema.
+- `app_strings.dart`: desc slide 1 digeneralisasi (chat/medsos/berita, tetap singkat) + eyebrow `VERIFIKASI TEKS / MULTI-FORMAT / RIWAYAT AMAN`.
+- `onboarding_visual.dart` (rewrite): `StatefulWidget` press-glow (scale 0.96x + glow + border aksen, ~180ms, Semantics+Tooltip),
+  responsif via LayoutBuilder+FittedBox (skala 0.72–1.0, anti-overflow layar kecil),
+  visual premium: dot-grid + orb gradien, slide 1 tumpukan kartu WA + medsos + strip sumber Chat/Medsos/Berita,
+  slide 2 scan-frame + orbit dots, slide 3 avatar stack + tombol gradien + glowing dots.
+- `onboarding_slide.dart`: tambah eyebrow pill + batasi deskripsi maxWidth 340.
+- `onboarding_screen.dart`: logo gradien + shadow, haptic di navigasi, tombol Next AnimatedSwitcher (panah→roket),
+  Semantics label di Back/Next, Back surface putih.
+- `pill_page_indicator.dart`: halaman lampau biru 0.5 (progres terasa).
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos (swipe, press-glow tap, back, start→auth).
+
+## Status: Onboarding Redesign — SELESAI ✅
+
+### Yang dikerjakan
+- `core/constants/app_strings.dart`: konten baru 3 slide (verifikasi teks, gambar+URL, riwayat)
+  + label `Lanjut / Mulai Sekarang / Kembali / Lewati`.
+- Baru `presentation/widgets/pill_page_indicator.dart`: pill animasi (aktif w=28 gelap, nonaktif w=8 abu).
+- Baru `presentation/widgets/onboarding_visual.dart`: 3 ilustrasi Flutter murni
+  (verdict card HOAKS 87% + confidence bar, kartu gambar+URL + chip floating, mini history list).
+- Baru `presentation/widgets/onboarding_slide.dart`: visual atas + heading 26px + deskripsi.
+- Rewrite `onboarding_screen.dart`: header brand + Lewati (fade di slide terakhir),
+  PageView swipe BouncingScrollPhysics, nav bawah [Back ikon panah lingkaran | Next→Mulai Sekarang].
+- Semua teks dibungkus ellipsis agar anti-overflow di font lebar.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos (swipe, back, start→auth).
+
+## Status: Phase 1 Foundation — SELESAI ✅
+
+### Step 0 — Restruktur Clean Architecture (sesuai PRD §8)
+- Hapus `domain/data_sources/` di chat/history/learn/quick_check (pelanggaran CA).
+- Rename `data_sources/` → `datasources/`, `use_cases/` → `usecases/` (samakan PRD).
+- Pangkas chat/history/learn ke `presentation/` saja (PRD hanya kasih data+domain penuh ke quick_check).
+- Tambah `lib/core/{constants,errors,utils}/`, `lib/shared/widgets/`, `lib/features/auth/` (full 3-layer).
+- Tambah `lib/app/home_screen.dart` (shell 5 tab).
+
+### Phase 1a — Dependencies
+- `flutter_riverpod, firebase_core, firebase_auth, cloud_firestore, google_sign_in`
+- `google_generative_ai` (gemini-1.5-flash), `http, image_picker, share_plus, screenshot`
+- `flutter pub get` OK, `flutter analyze` bersih, `flutter test` lolos.
+
+### Phase 1b — Design System
+- `core/constants/app_colors.dart` (warna PRD §7.2), `app_strings.dart` (ID),
+  `app_styles.dart` (Material 3 + Inter), `core/errors/failures.dart` (sealed Failure).
+- `core/utils/url_fetcher.dart` (fetch title/description, timeout 10s),
+  `core/utils/image_processor.dart` (gallery/camera wrapper).
+- `shared/widgets/`: `loading_overlay, error_widget (AppErrorWidget), bottom_nav_bar` (5 tab).
+
+### Phase 1c — App Shell & Routing
+- `main.dart`: ProviderScope + Material3, Firebase init best-effort (mode offline jika belum setup).
+- Routing: Splash (2s) → Onboarding (3 page) → Auth (Google placeholder + Anonymous) → Home (5 tab placeholder).
+- API key Gemini via `--dart-define=GEMINI_API_KEY=...` (tanpa hardcode, tanpa .env).
+- Test: `test/widget_test.dart` — Splash → Onboarding navigation.
+
+### Keputusan arsitektur
+- Konflik skill vs agents.md dimenangkan agents.md/PRD: Riverpod `Notifier/AsyncNotifier + ConsumerWidget`, bukan ChangeNotifier/get_it.
+- History: Firestore per-user (bukan lokal), dikerjakan Phase 3 setelah Firebase user siap.
+- Font: Inter (Google Sans tidak publik).
+
+## Next: Phase 2 — Quick Check (belum mulai)
+- [ ] Domain: `Verdict` enum + `verification_result.dart` entity
+- [ ] Data: `verification_result_model.dart` (fromJson/toJson) + `gemini_datasource.dart` (prompt PRD §6.1, dart-define key, fallback TIDAK_DAPAT_DIPASTIKAN)
+- [ ] Repo impl + `verify_claim.dart` usecase + `verification_provider.dart` (AsyncNotifier)
+- [ ] UI: input/analyzing/result + verdict_card/share_card + share via screenshot+share_plus
+- [ ] Mode gambar (image_picker + Gemini Vision) + mode URL (UrlFetcher)
+
+## Menunggu user: Setup Firebase
+- [ ] `flutterfire configure` untuk project literasi-ai → hasilkan `lib/firebase_options.dart`
+- [ ] Aktifkan Auth (Google + Anonymous) & Firestore di console
+- [ ] Kasih `google-services.json` / `GoogleService-Info.plist`
