@@ -1,5 +1,19 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 10 september 2026_
+_Last updated: 11 september 2026_
+
+## Status: Onboarding Redesign — SELESAI ✅
+
+### Yang dikerjakan
+- `core/constants/app_strings.dart`: konten baru 3 slide (verifikasi teks, gambar+URL, riwayat)
+  + label `Lanjut / Mulai Sekarang / Kembali / Lewati`.
+- Baru `presentation/widgets/pill_page_indicator.dart`: pill animasi (aktif w=28 gelap, nonaktif w=8 abu).
+- Baru `presentation/widgets/onboarding_visual.dart`: 3 ilustrasi Flutter murni
+  (verdict card HOAKS 87% + confidence bar, kartu gambar+URL + chip floating, mini history list).
+- Baru `presentation/widgets/onboarding_slide.dart`: visual atas + heading 26px + deskripsi.
+- Rewrite `onboarding_screen.dart`: header brand + Lewati (fade di slide terakhir),
+  PageView swipe BouncingScrollPhysics, nav bawah [Back ikon panah lingkaran | Next→Mulai Sekarang].
+- Semua teks dibungkus ellipsis agar anti-overflow di font lebar.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos (swipe, back, start→auth).
 
 ## Status: Phase 1 Foundation — SELESAI ✅
 
