@@ -1,5 +1,20 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 11 september 2026_
+_Last updated: 12 september 2026_
+
+## Status: Onboarding Interaction Upgrade — SELESAI ✅
+
+### Yang dikerjakan
+- `agents.md`: tambah §6 Git & Commit Policy — AI dilarang commit/push, hanya beri deskripsi; file banyak dipecah per tema.
+- `app_strings.dart`: desc slide 1 digeneralisasi (chat/medsos/berita, tetap singkat) + eyebrow `VERIFIKASI TEKS / MULTI-FORMAT / RIWAYAT AMAN`.
+- `onboarding_visual.dart` (rewrite): `StatefulWidget` press-glow (scale 0.96x + glow + border aksen, ~180ms, Semantics+Tooltip),
+  responsif via LayoutBuilder+FittedBox (skala 0.72–1.0, anti-overflow layar kecil),
+  visual premium: dot-grid + orb gradien, slide 1 tumpukan kartu WA + medsos + strip sumber Chat/Medsos/Berita,
+  slide 2 scan-frame + orbit dots, slide 3 avatar stack + tombol gradien + glowing dots.
+- `onboarding_slide.dart`: tambah eyebrow pill + batasi deskripsi maxWidth 340.
+- `onboarding_screen.dart`: logo gradien + shadow, haptic di navigasi, tombol Next AnimatedSwitcher (panah→roket),
+  Semantics label di Back/Next, Back surface putih.
+- `pill_page_indicator.dart`: halaman lampau biru 0.5 (progres terasa).
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos (swipe, press-glow tap, back, start→auth).
 
 ## Status: Onboarding Redesign — SELESAI ✅
 

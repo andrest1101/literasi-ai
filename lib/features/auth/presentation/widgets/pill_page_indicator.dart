@@ -23,6 +23,7 @@ class PillPageIndicator extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(count, (i) {
           final active = i == current;
+          final past = i < current;
           return AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
@@ -30,8 +31,11 @@ class PillPageIndicator extends StatelessWidget {
             width: active ? 28 : 8,
             height: 8,
             decoration: BoxDecoration(
-              color: active ? AppColors.textPrimary : AppColors.neutral
-                  .withValues(alpha: 0.35),
+              color: active
+                  ? AppColors.textPrimary
+                  : past
+                      ? AppColors.primary.withValues(alpha: 0.5)
+                      : AppColors.neutral.withValues(alpha: 0.35),
               borderRadius: BorderRadius.circular(4),
             ),
           );

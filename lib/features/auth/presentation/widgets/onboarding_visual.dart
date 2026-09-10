@@ -4,34 +4,114 @@ import '../../../../core/constants/app_colors.dart';
 
 /// Ilustrasi tiap slide onboarding — murni Flutter (tanpa aset gambar).
 ///
-/// Setiap visual adalah komposisi kartu floating + chip pill + badge
-/// di atas panggung gradien lembut, mengikuti bahasa referensi:
-/// elemen berlapis, sudut membulat besar, shadow halus.
-class OnboardingVisual extends StatelessWidget {
+/// Interaktif (press-glow): saat visual ditekan ia mengecil 0.96x dan
+/// glow + border aksen menyala; saat dilepas kembali normal (~180ms).
+/// Responsif: stage 320x300 diskalakan turun proporsional di layar sempit
+/// via [LayoutBuilder] + [FittedBox], sehingga tidak pernah overflow.
+class OnboardingVisual extends StatefulWidget {
   const OnboardingVisual({super.key, required this.index});
 
   final int index;
 
   @override
+  State<OnboardingVisual> createState() => _OnboardingVisualState();
+}
+
+class _OnboardingVisualState extends State<OnboardingVisual> {
+  bool _pressed = false;
+
+  static const _pressScale = 0.96;
+  static const _pressMs = 180;
+
+  void _setPressed(bool value) {
+    if (_pressed == value) return;
+    setState(() => _pressed = value);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final Widget visual = switch (index) {
+    final Widget visual = switch (widget.index) {
       0 => const _TextVerifyVisual(),
       1 => const _MediaVisual(),
       _ => const _HistoryVisual(),
     };
-    // Entrance satu-shot (finite) — aman untuk widget test.
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeOutCubic,
-      builder: (context, t, child) => Opacity(
-        opacity: t,
-        child: Transform.translate(
-          offset: Offset(0, 24 * (1 - t)),
-          child: child,
-        ),
-      ),
-      child: SizedBox(width: 320, height: 300, child: visual),
+    final label = switch (widget.index) {
+      0 => 'Ilustrasi verifikasi teks, ketuk untuk pratinjau efek',
+      1 => 'Ilustrasi analisis gambar dan tautan, ketuk untuk pratinjau efek',
+      _ => 'Ilustrasi riwayat verifikasi, ketuk untuk pratinjau efek',
+    };
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Stage referensi 320x300; skala turun bila ruang lebih sempit.
+        final scale = (constraints.maxWidth / 320).clamp(0.72, 1.0);
+        return Semantics(
+          button: true,
+          enabled: true,
+          label: label,
+          child: Tooltip(
+            message: 'Ketuk untuk melihat efek',
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapDown: (_) => _setPressed(true),
+              onTapUp: (_) => _setPressed(false),
+              onTapCancel: () => _setPressed(false),
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeOutCubic,
+                builder: (context, t, child) => Opacity(
+                  opacity: t,
+                  child: Transform.translate(
+                    offset: Offset(0, 24 * (1 - t)),
+                    child: child,
+                  ),
+                ),
+                child: AnimatedScale(
+                  scale: _pressed ? _pressScale : 1.0,
+                  duration: const Duration(milliseconds: _pressMs),
+                  curve: Curves.easeOut,
+                  child: SizedBox(
+                    width: 320 * scale,
+                    height: 300 * scale,
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: SizedBox(
+                        width: 320,
+                        height: 300,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: _pressMs),
+                          curve: Curves.easeOut,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(34),
+                            border: Border.all(
+                              color: _pressed
+                                  ? AppColors.primary.withValues(alpha: 0.55)
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withValues(
+                                  alpha: _pressed ? 0.34 : 0.12,
+                                ),
+                                blurRadius: _pressed ? 48 : 32,
+                                spreadRadius: _pressed ? 2 : 0,
+                                offset: const Offset(0, 16),
+                              ),
+                            ],
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: visual,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -40,56 +120,62 @@ class OnboardingVisual extends StatelessWidget {
 // Fondasi visual
 // ---------------------------------------------------------------------------
 
-/// Panggung gradien terang + dekorasi lingkaran tembus pandang.
+/// Panggung gradien terang + dekorasi lingkaran tembus pandang + grid halus.
 class _Stage extends StatelessWidget {
-  const _Stage({required this.children});
+  const _Stage({required this.children, this.accent = AppColors.primary});
 
   final List<Widget> children;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 320,
       height: 300,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
-        gradient: const LinearGradient(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [Colors.white, Color(0xFFEAF1FC)],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.12),
-            blurRadius: 32,
-            offset: const Offset(0, 16),
-          ),
-        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
+          // Grid titik halus.
+          const Positioned.fill(child: _DotGrid()),
+          // Orb dekoratif.
           Positioned(
-            top: -48,
-            right: -48,
+            top: -52,
+            right: -52,
             child: Container(
-              width: 140,
-              height: 140,
+              width: 148,
+              height: 148,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withValues(alpha: 0.08),
+                gradient: RadialGradient(
+                  colors: [
+                    accent.withValues(alpha: 0.16),
+                    accent.withValues(alpha: 0.0),
+                  ],
+                ),
               ),
             ),
           ),
           Positioned(
-            bottom: -56,
-            left: -36,
+            bottom: -60,
+            left: -40,
             child: Container(
-              width: 150,
-              height: 150,
+              width: 156,
+              height: 156,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary.withValues(alpha: 0.06),
+                gradient: RadialGradient(
+                  colors: [
+                    accent.withValues(alpha: 0.12),
+                    accent.withValues(alpha: 0.0),
+                  ],
+                ),
               ),
             ),
           ),
@@ -98,6 +184,33 @@ class _Stage extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Grid titik-titik halus ala bento premium.
+class _DotGrid extends StatelessWidget {
+  const _DotGrid();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(painter: _DotGridPainter());
+  }
+}
+
+class _DotGridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primary.withValues(alpha: 0.07);
+    const gap = 22.0;
+    for (var y = gap; y < size.height; y += gap) {
+      for (var x = gap; x < size.width; x += gap) {
+        canvas.drawCircle(Offset(x, y), 1.4, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 /// Baris skeleton teks tiruan.
@@ -120,7 +233,7 @@ class _Bar extends StatelessWidget {
   }
 }
 
-/// Chip pill floating (putih / gelap).
+/// Chip pill floating (putih / gelap) dengan ikon berbingkai.
 class _Chip extends StatelessWidget {
   const _Chip({
     required this.icon,
@@ -136,14 +249,18 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = iconColor ?? AppColors.primary;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding: const EdgeInsets.only(left: 6, right: 12, top: 6, bottom: 6),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
         color: dark ? AppColors.textPrimary : Colors.white,
+        border: dark
+            ? null
+            : Border.all(color: AppColors.neutral.withValues(alpha: 0.18)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: dark ? 0.22 : 0.1),
+            color: Colors.black.withValues(alpha: dark ? 0.24 : 0.1),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -153,17 +270,31 @@ class _Chip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (dark)
-            Container(
-              width: 6,
-              height: 6,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.success,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.success,
+                  ),
+                ),
+                const SizedBox(width: 7),
+              ],
             )
           else
-            Icon(icon, size: 14, color: iconColor ?? AppColors.primary),
-          const SizedBox(width: 6),
+            Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: accent.withValues(alpha: 0.14),
+              ),
+              child: Icon(icon, size: 13, color: accent),
+            ),
+          const SizedBox(width: 1),
           Text(
             label,
             style: TextStyle(
@@ -178,7 +309,7 @@ class _Chip extends StatelessWidget {
   }
 }
 
-/// Kartu putih standar dengan shadow lembut.
+/// Kartu putih standar dengan shadow lembut + border rambut.
 class _FloatCard extends StatelessWidget {
   const _FloatCard({required this.child});
 
@@ -191,6 +322,8 @@ class _FloatCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: Colors.white,
+        border:
+            Border.all(color: AppColors.neutral.withValues(alpha: 0.14)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.09),
@@ -204,8 +337,42 @@ class _FloatCard extends StatelessWidget {
   }
 }
 
+/// Avatar lingkaran dengan inisial (tanpa aset foto).
+class _Avatar extends StatelessWidget {
+  const _Avatar(this.initials, this.tint);
+
+  final String initials;
+  final Color tint;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 30,
+      height: 30,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [tint.withValues(alpha: 0.85), tint],
+        ),
+      ),
+      child: Center(
+        child: Text(
+          initials,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
-// Slide 1 — verifikasi teks instan
+// Slide 1 — verifikasi teks instan (multi-sumber: chat, medsos, portal berita)
 // ---------------------------------------------------------------------------
 
 class _TextVerifyVisual extends StatelessWidget {
@@ -214,34 +381,95 @@ class _TextVerifyVisual extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _Stage(
+      accent: AppColors.danger,
       children: [
-        // Kartu chat "diteruskan" di lapisan belakang, sedikit miring.
+        // Tumpukan 2 kartu sumber di belakang: chat + medsos.
         Positioned(
-          left: 16,
-          top: 36,
+          left: 14,
+          top: 26,
           child: Transform.rotate(
             angle: -0.1,
             child: const SizedBox(
-              width: 240,
+              width: 232,
               child: _FloatCard(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Pesan diteruskan',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: AppColors.textSecondary,
-                        fontStyle: FontStyle.italic,
-                      ),
+                    Row(
+                      children: [
+                        _Avatar('WA', AppColors.success),
+                        SizedBox(width: 7),
+                        Expanded(
+                          child: Text(
+                            'Grup Keluarga',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '09.41',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 8),
-                    _Bar(200),
+                    _Bar(190),
                     SizedBox(height: 6),
-                    _Bar(160),
+                    _Bar(150),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 76,
+          top: 14,
+          child: Transform.rotate(
+            angle: 0.09,
+            child: const SizedBox(
+              width: 228,
+              child: _FloatCard(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        _Avatar('X', AppColors.textPrimary),
+                        SizedBox(width: 7),
+                        Expanded(
+                          child: Text(
+                            '@info_viral • medsos',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.verified,
+                          size: 14,
+                          color: AppColors.neutral,
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    _Bar(186),
                     SizedBox(height: 6),
-                    _Bar(180),
+                    _Bar(168),
                   ],
                 ),
               ),
@@ -252,7 +480,7 @@ class _TextVerifyVisual extends StatelessWidget {
         Positioned(
           left: 28,
           right: 28,
-          top: 102,
+          top: 108,
           child: _FloatCard(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -315,9 +543,19 @@ class _TextVerifyVisual extends StatelessWidget {
                         horizontal: 10,
                         vertical: 4,
                       ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(999),
-                        color: AppColors.danger,
+                      decoration: const BoxDecoration(
+                        borderRadius:
+                            BorderRadius.all(Radius.circular(999)),
+                        gradient: LinearGradient(
+                          colors: [Color(0xFFF05545), AppColors.danger],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0x55EA4335),
+                            blurRadius: 10,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: const Text(
                         'HOAKS',
@@ -353,23 +591,34 @@ class _TextVerifyVisual extends StatelessWidget {
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(4)),
-                        color: AppColors.danger,
+                        gradient: LinearGradient(
+                          colors: [Color(0xFFF05545), AppColors.danger],
+                        ),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 8),
-                const _Bar(double.infinity),
-                const SizedBox(height: 6),
-                const _Bar(160),
+                const Row(
+                  children: [
+                    _SourceDot(
+                        icon: Icons.chat_bubble_outline, label: 'Chat'),
+                    SizedBox(width: 8),
+                    _SourceDot(
+                        icon: Icons.public_outlined, label: 'Medsos'),
+                    SizedBox(width: 8),
+                    _SourceDot(
+                        icon: Icons.newspaper_outlined, label: 'Berita'),
+                  ],
+                ),
               ],
             ),
           ),
         ),
         // Pill status AI melayang kanan atas.
         Positioned(
-          top: 32,
-          right: 18,
+          top: 46,
+          right: 16,
           child: Transform.rotate(
             angle: 0.05,
             child: const _Chip(
@@ -382,7 +631,7 @@ class _TextVerifyVisual extends StatelessWidget {
         // Chip kecepatan kiri bawah.
         const Positioned(
           left: 18,
-          bottom: 20,
+          bottom: 18,
           child: _Chip(
             icon: Icons.bolt_outlined,
             label: '±3 detik',
@@ -390,6 +639,47 @@ class _TextVerifyVisual extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Titik sumber teks (chat / medsos / berita) — bukti multi-sumber.
+class _SourceDot extends StatelessWidget {
+  const _SourceDot({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 7),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: AppColors.primary.withValues(alpha: 0.07),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 13, color: AppColors.primary),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -405,30 +695,49 @@ class _MediaVisual extends StatelessWidget {
   Widget build(BuildContext context) {
     return _Stage(
       children: [
-        // Cincin orbit dekoratif.
+        // Cincin orbit dekoratif + titik satelit.
         Center(
-          child: Container(
-            width: 252,
-            height: 252,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.14),
-                width: 1.5,
-              ),
-            ),
-            child: Center(
-              child: Container(
-                width: 178,
-                height: 178,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    width: 1.5,
+          child: SizedBox(
+            width: 264,
+            height: 264,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 264,
+                  height: 264,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color:
+                          AppColors.primary.withValues(alpha: 0.14),
+                      width: 1.5,
+                    ),
                   ),
                 ),
-              ),
+                Container(
+                  width: 186,
+                  height: 186,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color:
+                          AppColors.primary.withValues(alpha: 0.1),
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+                const Positioned(
+                  top: 18,
+                  right: 52,
+                  child: _OrbitDot(size: 10, color: AppColors.warning),
+                ),
+                const Positioned(
+                  bottom: 34,
+                  left: 40,
+                  child: _OrbitDot(size: 8, color: AppColors.success),
+                ),
+              ],
             ),
           ),
         ),
@@ -436,51 +745,94 @@ class _MediaVisual extends StatelessWidget {
         Positioned(
           left: 52,
           right: 52,
-          top: 52,
+          top: 50,
           child: _FloatCard(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  height: 100,
+                  height: 102,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        AppColors.primary.withValues(alpha: 0.16),
+                        AppColors.primary.withValues(alpha: 0.18),
                         AppColors.primary.withValues(alpha: 0.07),
                       ],
                     ),
                   ),
-                  child: const Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.image_outlined,
-                          size: 36,
-                          color: AppColors.primary,
+                  child: Stack(
+                    children: [
+                      const Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.image_outlined,
+                              size: 34,
+                              color: AppColors.primary,
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'foto_berita.png',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              '2,1 MB • teks terbaca',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 4),
-                        Text(
-                          'screenshot_wa.png',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                      ),
+                      // Bingkai pindai (scan frame) dekoratif.
+                      Positioned(
+                        left: 10,
+                        top: 10,
+                        child: Container(
+                          width: 18,
+                          height: 18,
+                          decoration: const BoxDecoration(
+                            border: Border(
+                              left: BorderSide(
+                                  color: AppColors.primary, width: 2),
+                              top: BorderSide(
+                                  color: AppColors.primary, width: 2),
+                            ),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(6),
+                            ),
                           ),
                         ),
-                        Text(
-                          '2,1 MB • terbaca jelas',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: AppColors.textSecondary,
+                      ),
+                      Positioned(
+                        right: 10,
+                        bottom: 10,
+                        child: Container(
+                          width: 18,
+                          height: 18,
+                          decoration: const BoxDecoration(
+                            border: Border(
+                              right: BorderSide(
+                                  color: AppColors.primary, width: 2),
+                              bottom: BorderSide(
+                                  color: AppColors.primary, width: 2),
+                            ),
+                            borderRadius: BorderRadius.only(
+                              bottomRight: Radius.circular(6),
+                            ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -491,7 +843,8 @@ class _MediaVisual extends StatelessWidget {
                       height: 30,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: AppColors.primary.withValues(alpha: 0.12),
+                        color:
+                            AppColors.primary.withValues(alpha: 0.12),
                       ),
                       child: const Icon(
                         Icons.link,
@@ -539,16 +892,16 @@ class _MediaVisual extends StatelessWidget {
         ),
         // Chip format melayang.
         Positioned(
-          left: 12,
-          top: 92,
+          left: 10,
+          top: 96,
           child: Transform.rotate(
             angle: -0.07,
             child: const _Chip(icon: Icons.image_outlined, label: 'Gambar'),
           ),
         ),
         Positioned(
-          right: 12,
-          bottom: 62,
+          right: 10,
+          bottom: 58,
           child: Transform.rotate(
             angle: 0.07,
             child: const _Chip(icon: Icons.link, label: 'URL'),
@@ -556,14 +909,18 @@ class _MediaVisual extends StatelessWidget {
         ),
         // Gelembung centang kanan atas.
         Positioned(
-          right: 38,
-          top: 34,
+          right: 36,
+          top: 30,
           child: Container(
             width: 32,
             height: 32,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.success,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF4DB96A), AppColors.success],
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Color(0x4D34A853),
@@ -572,10 +929,37 @@ class _MediaVisual extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Icon(Icons.check, size: 18, color: Colors.white),
+            child:
+                const Icon(Icons.check, size: 18, color: Colors.white),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _OrbitDot extends StatelessWidget {
+  const _OrbitDot({required this.size, required this.color});
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.5),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -590,11 +974,12 @@ class _HistoryVisual extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _Stage(
+      accent: AppColors.success,
       children: [
         Positioned(
           left: 30,
           right: 30,
-          top: 28,
+          top: 26,
           child: _FloatCard(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -621,7 +1006,8 @@ class _HistoryVisual extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(999),
-                        color: AppColors.primary.withValues(alpha: 0.12),
+                        color:
+                            AppColors.primary.withValues(alpha: 0.12),
                       ),
                       child: const Text(
                         '12 tersimpan',
@@ -657,7 +1043,17 @@ class _HistoryVisual extends StatelessWidget {
                   height: 38,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: AppColors.primary,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF4B8DF6), AppColors.primary],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            AppColors.primary.withValues(alpha: 0.35),
+                        blurRadius: 12,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
                   ),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -687,8 +1083,8 @@ class _HistoryVisual extends StatelessWidget {
         ),
         // Pill tersimpan melayang.
         Positioned(
-          top: 12,
-          right: 22,
+          top: 10,
+          right: 20,
           child: Transform.rotate(
             angle: 0.05,
             child: const _Chip(
@@ -698,16 +1094,20 @@ class _HistoryVisual extends StatelessWidget {
             ),
           ),
         ),
-        // Gelembung bagikan kiri bawah.
+        // Gelembung bagikan kiri bawah + avatar penumpuk.
         Positioned(
-          left: 20,
-          bottom: 26,
+          left: 18,
+          bottom: 22,
           child: Container(
             width: 44,
             height: 44,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.success,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF4DB96A), AppColors.success],
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Color(0x4D34A853),
@@ -716,11 +1116,50 @@ class _HistoryVisual extends StatelessWidget {
                 ),
               ],
             ),
-            child:
-                const Icon(Icons.share_outlined, size: 20, color: Colors.white),
+            child: const Icon(Icons.share_outlined,
+                size: 20, color: Colors.white),
+          ),
+        ),
+        const Positioned(
+          right: 24,
+          bottom: 30,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _Avatar('B', AppColors.primary),
+              _StackedAvatar('S', AppColors.warning),
+              _StackedAvatar('A', AppColors.success),
+            ],
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Avatar yang menumpuk ke kiri (efek sosial).
+class _StackedAvatar extends StatelessWidget {
+  const _StackedAvatar(this.initials, this.tint);
+
+  final String initials;
+  final Color tint;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(left: 6),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: _Avatar(initials, tint),
     );
   }
 }
@@ -743,7 +1182,17 @@ class _HistoryRow extends StatelessWidget {
         Container(
           width: 10,
           height: 10,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: dot),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: dot,
+            boxShadow: [
+              BoxShadow(
+                color: dot.withValues(alpha: 0.5),
+                blurRadius: 6,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
         ),
         const SizedBox(width: 8),
         Expanded(

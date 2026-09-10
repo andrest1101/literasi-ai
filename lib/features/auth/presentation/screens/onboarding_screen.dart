@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
@@ -8,8 +9,9 @@ import 'auth_screen.dart';
 
 /// Onboarding 3 slide — tampil saat pertama install (PRD §5).
 ///
-/// Gaya modern & clean: header brand + Lewati, kartu visual floating,
-/// judul tebal + deskripsi, pill indicator, nav [Back | Next/Get Started].
+/// Gaya modern & clean: header brand + Lewati, kartu visual floating
+/// interaktif (press-glow), eyebrow + judul tebal + deskripsi,
+/// pill indicator, nav [Back | Next/Get Started].
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -24,9 +26,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _page = 0;
 
   static const _slides = [
-    (AppStrings.onboardingTitle1, AppStrings.onboardingDesc1),
-    (AppStrings.onboardingTitle2, AppStrings.onboardingDesc2),
-    (AppStrings.onboardingTitle3, AppStrings.onboardingDesc3),
+    (
+      AppStrings.onboardingEyebrow1,
+      AppStrings.onboardingTitle1,
+      AppStrings.onboardingDesc1
+    ),
+    (
+      AppStrings.onboardingEyebrow2,
+      AppStrings.onboardingTitle2,
+      AppStrings.onboardingDesc2
+    ),
+    (
+      AppStrings.onboardingEyebrow3,
+      AppStrings.onboardingTitle3,
+      AppStrings.onboardingDesc3
+    ),
   ];
 
   bool get _isLast => _page == _slides.length - 1;
@@ -38,6 +52,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _goTo(int page) {
+    HapticFeedback.selectionClick();
     _controller.animateToPage(
       page,
       duration: const Duration(milliseconds: 350),
@@ -46,6 +61,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _next() {
+    HapticFeedback.lightImpact();
     if (_isLast) {
       Navigator.of(context).pushReplacementNamed(AuthScreen.route);
     } else {
@@ -74,16 +90,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: Row(
                 children: [
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: AppColors.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(13),
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF4B8DF6), AppColors.primary],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              AppColors.primary.withValues(alpha: 0.35),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: const Icon(
                       Icons.shield_outlined,
                       size: 20,
-                      color: AppColors.primary,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -106,8 +134,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         onPressed: _skip,
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.textSecondary,
+                          textStyle: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                        child: const Text(AppStrings.onboardingSkip),
+                        child:
+                            const Text(AppStrings.onboardingSkip),
                       ),
                     ),
                   ),
@@ -122,9 +154,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 itemCount: _slides.length,
                 onPageChanged: (i) => setState(() => _page = i),
                 itemBuilder: (context, i) {
-                  final (title, desc) = _slides[i];
+                  final (eyebrow, title, desc) = _slides[i];
                   return OnboardingSlide(
                     index: i,
+                    eyebrow: eyebrow,
                     title: title,
                     description: desc,
                   );
@@ -133,7 +166,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             // Pill indicator.
             PillPageIndicator(count: _slides.length, current: _page),
-            const SizedBox(height: 24),
+            const SizedBox(height: 22),
             // Nav bawah: [Back ikon | Next/Get Started].
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
@@ -147,50 +180,91 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       duration: const Duration(milliseconds: 250),
                       child: IgnorePointer(
                         ignoring: _page == 0,
-                        child: OutlinedButton(
-                          onPressed: _back,
-                          style: OutlinedButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            shape: const CircleBorder(),
-                            side: BorderSide(
-                              color: AppColors.neutral.withValues(alpha: 0.4),
+                        child: Semantics(
+                          button: true,
+                          label: AppStrings.onboardingBack,
+                          child: OutlinedButton(
+                            onPressed: _back,
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              shape: const CircleBorder(),
+                              backgroundColor: AppColors.surface,
+                              side: BorderSide(
+                                color: AppColors.neutral
+                                    .withValues(alpha: 0.35),
+                              ),
+                              foregroundColor: AppColors.textPrimary,
                             ),
-                            foregroundColor: AppColors.textPrimary,
+                            child:
+                                const Icon(Icons.arrow_back_rounded),
                           ),
-                          child: const Icon(Icons.arrow_back_rounded),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: FilledButton(
-                      onPressed: _next,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size.fromHeight(56),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
+                    child: Semantics(
+                      button: true,
+                      label: _isLast
+                          ? AppStrings.onboardingStart
+                          : AppStrings.onboardingNext,
+                      child: FilledButton(
+                        onPressed: _next,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size.fromHeight(56),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.1,
+                          ),
+                          elevation: 6,
+                          shadowColor: AppColors.primary
+                              .withValues(alpha: 0.45),
                         ),
-                        textStyle: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        elevation: 4,
-                        shadowColor:
-                            AppColors.primary.withValues(alpha: 0.4),
-                      ),
-                      child: _isLast
-                          ? const Text(AppStrings.onboardingStart)
-                          : const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(AppStrings.onboardingNext),
-                                SizedBox(width: 8),
-                                Icon(Icons.arrow_forward_rounded, size: 20),
-                              ],
+                        child: AnimatedSwitcher(
+                          duration:
+                              const Duration(milliseconds: 250),
+                          transitionBuilder: (child, anim) =>
+                              FadeTransition(
+                            opacity: anim,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, 0.3),
+                                end: Offset.zero,
+                              ).animate(anim),
+                              child: child,
                             ),
+                          ),
+                          child: _isLast
+                              ? const Row(
+                                  key: ValueKey('start'),
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                        AppStrings.onboardingStart),
+                                    SizedBox(width: 8),
+                                    Icon(Icons.rocket_launch_outlined,
+                                        size: 20),
+                                  ],
+                                )
+                              : const Row(
+                                  key: ValueKey('next'),
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(AppStrings.onboardingNext),
+                                    SizedBox(width: 8),
+                                    Icon(Icons.arrow_forward_rounded,
+                                        size: 20),
+                                  ],
+                                ),
+                        ),
+                      ),
                     ),
                   ),
                 ],

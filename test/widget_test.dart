@@ -5,22 +5,30 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:literasi_ai/main.dart';
 
 void main() {
-  testWidgets('Onboarding redesign: swipe, pill indicator, back & start',
+  testWidgets('Onboarding: swipe, press-glow, back & start',
       (WidgetTester tester) async {
     await tester.pumpWidget(const ProviderScope(child: LiterasiAIApp()));
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
 
-    // Slide 1: konten baru + tombol Lanjut + indikator 3 pill.
+    // Slide 1: eyebrow + konten generik + tombol Lanjut.
+    expect(find.text('VERIFIKASI TEKS'), findsOneWidget);
     expect(find.text('Cek Hoaks Instan dengan AI'), findsOneWidget);
     expect(find.text('Lanjut'), findsOneWidget);
     expect(find.text('Lewati'), findsOneWidget);
+
+    // Press-glow: tap visual tidak error, glow kembali normal.
+    await tester.tap(find.byType(PageView).first);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
+    expect(find.text('Cek Hoaks Instan dengan AI'), findsOneWidget);
 
     // Swipe (fling) ke slide 2.
     await tester.fling(find.byType(PageView), const Offset(-300, 0), 800);
     await tester.pumpAndSettle();
     expect(find.text('Analisis Gambar & Link'), findsOneWidget);
+    expect(find.text('MULTI-FORMAT'), findsOneWidget);
 
     // Tombol back (ikon panah) kembali ke slide 1.
     await tester.tap(find.byIcon(Icons.arrow_back_rounded));
