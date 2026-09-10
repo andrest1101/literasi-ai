@@ -1,6 +1,20 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
 _Last updated: 13 september 2026_
 
+## Status: Logo Google Resmi — SELESAI ✅
+
+### Yang dikerjakan
+- Daftarkan `assets/image/` dan `assets/animation/` di `pubspec.yaml`
+  (animation disiapkan kosong untuk Rive di masa depan).
+- `google_g_logo.dart` (rewrite): `Image.asset(logo_google.png)` resmi 4 warna
+  gantikan CustomPainter manual yang membuat huruf G terlihat menyatu.
+  Fallback lingkaran G bila aset gagal load. Posisi tombol tidak berubah.
+- Keputusan Rive: ditunda. File `.riv` belum ada (folder animation kosong),
+  maskot custom dipertahankan karena sudah mencakup semua state yang diminta.
+- Tech debt: PNG 190KB untuk ikon 20px, idealnya dikompres saat polish.
+- Verifikasi: `flutter pub get` OK, `flutter analyze` bersih,
+  `flutter test` lolos (termasuk render aset tanpa exception).
+
 ## Status: Auth Redesign Total (Maskot Interaktif) — SELESAI ✅
 
 ### Yang dikerjakan
