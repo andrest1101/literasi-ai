@@ -1,5 +1,37 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 13 september 2026_
+_Last updated: 15 september 2026_
+
+## Status: Refinement Auth (Spacing, Checklist, Footer, Bug Maskot) — SELESAI ✅
+
+### Yang dikerjakan
+- `authInputDecoration`: contentPadding vertikal 18, prefixIcon 20 dengan
+  constraints 48x48. Label floating dan hint tidak lagi mepet border.
+- `AuthHeading` dimigrasikan ke `AppStyles.heading` dan `AppStyles.body`.
+- Indikator sandi ditulis ulang: checklist polos tanpa kotak (ikon 16 +
+  teks 13, AnimatedSwitcher dan warna abu ke hijau). Tidak lagi mirip input.
+- Skala spacing 8/12/16/20/24/28 diterapkan konsisten di Masuk, Daftar,
+  dan Lupa Sandi. Footer Masuk diringankan tanpa menghapus teks apapun.
+- Fix bug: maskot kini menutup mata saat kolom Ulangi Kata Sandi fokus
+  (FocusNode sendiri + mood cover atau peek ikut toggle tampil).
+  Ada test regresi yang mengunci perilaku ini.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 3 test.
+
+## Status: Halaman Daftar dan Lupa Sandi — SELESAI ✅
+
+### Yang dikerjakan
+- Baru `register_screen.dart`: Nama, Email, Sandi, Konfirmasi, indikator syarat
+  live (6+ karakter, ada angka), maskot happy, tombol Back, validasi jujur.
+  Provider email belum aktif di backend, jadi Daftar mengarahkan ke jalur tersedia.
+- Baru `forgot_password_screen.dart`: kirim `sendPasswordResetEmail` asli Firebase,
+  banner sukses hijau, maskot happy setelah terkirim, tombol Back.
+- Baru `auth_form_parts.dart`: dekorasi input, eyebrow, heading, tombol utama,
+  tombol back, trust row, snackbar. Dipakai ketiga halaman, nol duplikasi.
+- Baru `password_requirement_list.dart`: indikator syarat sandi live reusable.
+- `auth_screen.dart` (refactor): pakai widget bersama, tambah tautan Daftar
+  dan Lupa Sandi. Posisi tombol Google dan anonim tidak berubah.
+- `main.dart`: daftarkan route `/register` dan `/forgot-password`.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 3 test
+  (termasuk segitiga Masuk ke Daftar ke Lupa Sandi dan kembali).
 
 ## Status: Logo Google Resmi — SELESAI ✅
 
