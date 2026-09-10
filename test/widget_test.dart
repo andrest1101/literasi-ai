@@ -43,9 +43,39 @@ void main() {
     expect(find.text('Riwayat Terpercaya, Akses Mudah'), findsOneWidget);
     expect(find.text('Mulai Sekarang'), findsOneWidget);
 
-    // Mulai Sekarang → Auth screen.
+    // Mulai Sekarang → Auth screen baru.
     await tester.tap(find.text('Mulai Sekarang'));
     await tester.pumpAndSettle();
     expect(find.text('Masuk ke LiterasiAI'), findsOneWidget);
+    expect(find.text('MASUK GRATIS'), findsOneWidget);
+    expect(
+        find.text('Masuk untuk menyimpan riwayat cek faktamu di semua perangkat.'),
+        findsOneWidget);
+    expect(find.text('Masuk dengan Google'), findsOneWidget);
+    expect(find.text('Lanjut tanpa akun'), findsOneWidget);
+    expect(find.byType(TextFormField), findsNWidgets(2));
+
+    // Maskot menutup mata saat kolom sandi fokus.
+    await tester.tap(find.widgetWithText(TextFormField, 'Kata sandi'));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+
+    // Toggle tampilkan sandi: maskot mengintip.
+    await tester.tap(find.byIcon(Icons.visibility_outlined));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
+
+    // Validasi: email kosong + sandi pendek memicu pesan error.
+    await tester.tap(find.text('Masuk'));
+    await tester.pumpAndSettle();
+    expect(find.text('Masukkan alamat email yang valid.'), findsOneWidget);
+    expect(find.text('Kata sandi minimal 6 karakter.'), findsOneWidget);
+
+    // Lanjut tanpa akun → Home (fallback offline bila Firebase absen).
+    await tester.ensureVisible(find.text('Lanjut tanpa akun'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lanjut tanpa akun'));
+    await tester.pumpAndSettle();
+    expect(find.text('Quick Check'), findsOneWidget);
   });
 }
