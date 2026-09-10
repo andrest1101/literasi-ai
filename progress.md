@@ -1,5 +1,34 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 12 september 2026_
+_Last updated: 13 september 2026_
+
+## Status: Auth Redesign Total (Maskot Interaktif) — SELESAI ✅
+
+### Yang dikerjakan
+- Hapus `auth_hero_card.dart` yang kaku. Header diganti maskot perisai bermata
+  (`login_mascot.dart`, Flutter murni tanpa Rive/Lottie): idle napas, typing melirik,
+  cover saat sandi fokus, peek saat sandi ditampilkan, happy/sad ikut hasil masuk.
+  Header gradien + curve lembut menyatu ke form.
+- Form email dan kata sandi real (validasi regex + min 6, toggle tampil, autofill).
+  Tombol Masuk memberi umpan balik jujur karena backend email belum ada.
+- Logo Google 4 warna resmi via CustomPainter (`google_g_logo.dart`, tanpa aset).
+  Tombol Google + divider "atau" + "Lanjut tanpa akun" + catatan offline + trust row.
+- Copy dibersihkan: tidak ada em dash di semua string user-facing.
+  Tidak ada kartu ganda, padding lega, tipografi Inter.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos
+  (maskot cover/peek, validasi form, anonim ke Home).
+
+## Status: Auth Screen Premium — SELESAI ✅
+
+### Yang dikerjakan
+- Baru `auth_hero_card.dart`: kartu hero gradien biru + mock verdict HOAKS 87% + chip "AI Aktif".
+- Rewrite `auth_screen.dart`: eyebrow MASUK • GRATIS, judul, 3 checklist manfaat + centang,
+  tombol anonim primary 56px + tombol Google putih berlogo, catatan offline, trust row gembok.
+- Wiring Google Sign-In asli (google_sign_in 6.x + Firebase credential); gagal → snackbar error,
+  user tetap bisa lanjut anonim — demo tidak buntu.
+- Anti-overflow via SingleChildScrollView, spinner per-tombol, Semantics label.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos (auth tampil + anonim → Home).
+- Catatan: SHA-1 debug `9B:B1:5F:...:5E:09` perlu didaftar di Firebase console
+  agar Google Sign-In Android berfungsi penuh (oauth_client masih kosong).
 
 ## Status: Onboarding Interaction Upgrade — SELESAI ✅
 
