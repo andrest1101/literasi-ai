@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:literasi_ai/features/auth/presentation/widgets/google_g_logo.dart';
 import 'package:literasi_ai/main.dart';
 
 void main() {
@@ -77,5 +78,17 @@ void main() {
     await tester.tap(find.text('Lanjut tanpa akun'));
     await tester.pumpAndSettle();
     expect(find.text('Quick Check'), findsOneWidget);
+  });
+
+  testWidgets('GoogleGLogo renders official asset without error',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(body: Center(child: GoogleGLogo(size: 24))),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(GoogleGLogo), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
