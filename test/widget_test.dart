@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:literasi_ai/features/auth/presentation/widgets/google_g_logo.dart';
+import 'package:literasi_ai/features/auth/presentation/widgets/login_mascot.dart';
 import 'package:literasi_ai/main.dart';
 
 void main() {
@@ -67,6 +68,8 @@ void main() {
     expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
 
     // Validasi: email kosong + sandi pendek memicu pesan error.
+    await tester.ensureVisible(find.text('Masuk'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Masuk'));
     await tester.pumpAndSettle();
     expect(find.text('Masukkan alamat email yang valid.'), findsOneWidget);
@@ -90,5 +93,66 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(GoogleGLogo), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Auth triangle: login to register to forgot and back',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const ProviderScope(child: LiterasiAIApp()));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    await tester.fling(find.byType(PageView), const Offset(-300, 0), 800);
+    await tester.pumpAndSettle();
+    await tester.fling(find.byType(PageView), const Offset(-300, 0), 800);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mulai Sekarang'));
+    await tester.pumpAndSettle();
+
+    // Masuk punya tautan daftar dan lupa sandi.
+    expect(find.text('Belum punya akun? Daftar'), findsOneWidget);
+    expect(find.text('Lupa kata sandi?'), findsOneWidget);
+
+    // Ke halaman Daftar: syarat sandi live + validasi.
+    await tester.ensureVisible(find.text('Belum punya akun? Daftar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Belum punya akun? Daftar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Buat Akun LiterasiAI'), findsOneWidget);
+    expect(find.text('DAFTAR GRATIS'), findsOneWidget);
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Kata sandi'), 'abc123');
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Daftar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Daftar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Masukkan namamu.'), findsOneWidget);
+    expect(find.text('Kata sandi tidak sama. Coba lagi.'), findsOneWidget);
+
+    // Maskot menutup mata saat kolom ulangi sandi difokuskan.
+    await tester.tap(
+        find.widgetWithText(TextFormField, 'Ulangi kata sandi'));
+    await tester.pumpAndSettle();
+    final header =
+        tester.widget<LoginMascotHeader>(find.byType(LoginMascotHeader));
+    expect(header.mood, MascotMood.cover);
+
+    // Kembali masuk, lalu ke Lupa Sandi.
+    await tester.ensureVisible(find.text('Sudah punya akun? Masuk'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sudah punya akun? Masuk'));
+    await tester.pumpAndSettle();
+    expect(find.text('Masuk ke LiterasiAI'), findsOneWidget);
+    await tester.ensureVisible(find.text('Lupa kata sandi?'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lupa kata sandi?'));
+    await tester.pumpAndSettle();
+    expect(find.text('Lupa Kata Sandi'), findsOneWidget);
+    expect(find.text('Kirim Tautan'), findsOneWidget);
+
+    // Validasi email kosong memicu pesan error.
+    await tester.tap(find.text('Kirim Tautan'));
+    await tester.pumpAndSettle();
+    expect(find.text('Masukkan alamat email yang valid.'), findsOneWidget);
   });
 }

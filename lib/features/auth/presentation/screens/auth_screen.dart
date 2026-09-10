@@ -6,13 +6,17 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:literasi_ai/app/home_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../widgets/auth_form_parts.dart';
 import '../widgets/google_g_logo.dart';
 import '../widgets/login_mascot.dart';
+import 'forgot_password_screen.dart';
+import 'register_screen.dart';
 
-/// Auth Screen: Google Sign-In, email link, dan anonim (PRD Fitur Auth).
+/// Auth Screen: Masuk via email, Google, atau tanpa akun (PRD Fitur Auth).
 ///
-/// Tata letak: header maskot interaktif, judul, form email, tombol Google,
-/// lalu opsi anonim. Maskot bereaksi: mengetik saat email diisi, menutup
+/// Tata letak: header maskot interaktif, judul, form email dan sandi,
+/// tautan lupa sandi, tombol Masuk, divider, tombol Google, opsi anonim,
+/// lalu tautan daftar. Maskot bereaksi: mengetik saat email diisi, menutup
 /// mata saat sandi fokus, mengintip saat sandi ditampilkan, ceria atau
 /// murung mengikuti hasil masuk.
 class AuthScreen extends ConsumerStatefulWidget {
@@ -92,21 +96,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     setState(() => _mood = success ? MascotMood.happy : MascotMood.sad);
   }
 
-  void _showError(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        action: SnackBarAction(
-          label: 'Tutup',
-          onPressed: () =>
-              ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-        ),
-      ),
-    );
-  }
-
   Future<void> _signInWithGoogle() async {
     setState(() => _googleLoading = true);
     try {
@@ -122,7 +111,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       _goHome();
     } catch (_) {
       _react(false);
-      _showError(AppStrings.authGoogleFailed);
+      if (mounted) {
+        showAuthMessage(context, AppStrings.authGoogleFailed);
+      }
     } finally {
       if (mounted) setState(() => _googleLoading = false);
     }
@@ -136,11 +127,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       _goHome();
     } on FirebaseAuthException catch (e) {
       _react(false);
-      _showError('${AppStrings.authAnonymousFailed} (${e.code})');
+      if (mounted) {
+        showAuthMessage(
+            context, '${AppStrings.authAnonymousFailed} (${e.code})');
+      }
       _goHome();
     } catch (_) {
       _react(false);
-      _showError(AppStrings.authAnonymousFailed);
+      if (mounted) {
+        showAuthMessage(context, AppStrings.authAnonymousFailed);
+      }
       _goHome();
     } finally {
       if (mounted) setState(() => _anonLoading = false);
@@ -155,20 +151,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
     setState(() => _emailLoading = true);
     try {
-      // Email link tidak dipakai di MVP. Tawarkan jalur yang tersedia.
+      // Provider email belum aktif di Firebase project ini.
+      // Validasi lolos, lalu arahkan jujur ke jalur yang tersedia.
       _react(true);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(AppStrings.authNoAccount),
-          behavior: SnackBarBehavior.floating,
-          action: SnackBarAction(
-            label: 'OK',
-            onPressed: () =>
-                ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-          ),
-        ),
-      );
+      showAuthMessage(context, AppStrings.authNoAccount);
     } finally {
       if (mounted) setState(() => _emailLoading = false);
     }
@@ -181,6 +168,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         _mood = _obscure ? MascotMood.cover : MascotMood.peek;
       }
     });
+  }
+
+  void _goRegister() {
+    Navigator.of(context).pushNamed(RegisterScreen.route);
+  }
+
+  void _goForgot() {
+    Navigator.of(context).pushNamed(ForgotPasswordScreen.route);
   }
 
   @override
@@ -200,30 +195,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const Center(
-                      child: _Eyebrow(text: AppStrings.authEyebrow),
+                      child: AuthEyebrow(text: AppStrings.authEyebrow),
                     ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      AppStrings.authTitle,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.3,
-                        color: AppColors.textPrimary,
-                      ),
+                    const SizedBox(height: 12),
+                    const AuthHeading(
+                      title: AppStrings.authTitle,
+                      subtitle: AppStrings.authSubtitle,
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      AppStrings.authSubtitle,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        height: 1.5,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
                     Form(
                       key: _formKey,
                       child: Column(
@@ -237,7 +216,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             autofillHints: const [AutofillHints.email],
                             onFieldSubmitted: (_) =>
                                 _passwordFocus.requestFocus(),
-                            decoration: _inputDecoration(
+                            decoration: authInputDecoration(
                               label: AppStrings.authEmailLabel,
                               hint: AppStrings.authEmailHint,
                               icon: Icons.mail_outline_rounded,
@@ -250,7 +229,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 14),
                           TextFormField(
                             controller: _passwordController,
                             focusNode: _passwordFocus,
@@ -258,7 +237,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             textInputAction: TextInputAction.done,
                             autofillHints: const [AutofillHints.password],
                             onFieldSubmitted: (_) => _signInWithEmail(),
-                            decoration: _inputDecoration(
+                            decoration: authInputDecoration(
                               label: AppStrings.authPasswordLabel,
                               hint: AppStrings.authPasswordHint,
                               icon: Icons.lock_outline_rounded,
@@ -283,45 +262,34 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
-                          Semantics(
-                            button: true,
-                            label: AppStrings.authSubmit,
-                            child: FilledButton(
-                              onPressed: _loading ? null : _signInWithEmail,
-                              style: FilledButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size.fromHeight(54),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: _goForgot,
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.primary,
                                 textStyle: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w700,
                                 ),
-                                elevation: 4,
-                                shadowColor: AppColors.primary
-                                    .withValues(alpha: 0.4),
                               ),
-                              child: _emailLoading
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : const Text(AppStrings.authSubmit),
+                              child: const Text(
+                                  AppStrings.authForgotLink),
                             ),
+                          ),
+                          const SizedBox(height: 8),
+                          AuthPrimaryButton(
+                            label: AppStrings.authSubmit,
+                            loading: _emailLoading,
+                            onPressed:
+                                _loading ? null : _signInWithEmail,
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 20),
                     const _DividerRow(text: AppStrings.authDivider),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 20),
                     Semantics(
                       button: true,
                       label: AppStrings.authGoogle,
@@ -355,7 +323,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     Semantics(
                       button: true,
                       label: AppStrings.authAnonymous,
@@ -385,6 +353,21 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
+                    Center(
+                      child: TextButton(
+                        onPressed: _goRegister,
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.textSecondary,
+                          textStyle: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        child:
+                            const Text(AppStrings.authGoRegister),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     const Text(
                       AppStrings.authOfflineNote,
                       textAlign: TextAlign.center,
@@ -394,94 +377,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         color: AppColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.lock_outline_rounded,
-                          size: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                        SizedBox(width: 6),
-                        Text(
-                          AppStrings.authTrust,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
+                    const SizedBox(height: 20),
+                    const AuthTrustRow(text: AppStrings.authTrust),
                   ],
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  InputDecoration _inputDecoration({
-    required String label,
-    required String hint,
-    required IconData icon,
-  }) {
-    final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
-      borderSide: BorderSide(
-        color: AppColors.neutral.withValues(alpha: 0.35),
-      ),
-    );
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      prefixIcon: Icon(icon, color: AppColors.textSecondary),
-      filled: true,
-      fillColor: AppColors.surface,
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      border: border,
-      enabledBorder: border,
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.6),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.danger),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide:
-            const BorderSide(color: AppColors.danger, width: 1.6),
-      ),
-    );
-  }
-}
-
-class _Eyebrow extends StatelessWidget {
-  const _Eyebrow({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        color: AppColors.primary.withValues(alpha: 0.1),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 1.2,
-          color: AppColors.primary,
         ),
       ),
     );

@@ -46,6 +46,36 @@ abstract final class AppStrings {
       'Masuk Google gagal. Periksa koneksi atau lanjut tanpa akun.';
   static const String authAnonymousFailed =
       'Mode offline. Firebase belum dikonfigurasi.';
+  static const String authGoRegister = 'Belum punya akun? Daftar';
+  static const String authGoLogin = 'Sudah punya akun? Masuk';
+  static const String authForgotLink = 'Lupa kata sandi?';
+
+  static const String registerTitle = 'Buat Akun LiterasiAI';
+  static const String registerSubtitle =
+      'Satu akun untuk menyimpan semua riwayat cek faktamu.';
+  static const String registerEyebrow = 'DAFTAR GRATIS';
+  static const String registerNameLabel = 'Nama lengkap';
+  static const String registerNameHint = 'Nama kamu';
+  static const String registerNameError = 'Masukkan namamu.';
+  static const String registerConfirmLabel = 'Ulangi kata sandi';
+  static const String registerConfirmHint = 'Ketik ulang kata sandi';
+  static const String registerMismatch = 'Kata sandi tidak sama. Coba lagi.';
+  static const String registerReqLength = 'Minimal 6 karakter';
+  static const String registerReqDigit = 'Mengandung angka';
+  static const String registerSubmit = 'Daftar';
+  static const String registerPending =
+      'Pendaftaran email segera dibuka. Untuk sekarang, masuk dengan Google atau lanjut tanpa akun.';
+
+  static const String forgotTitle = 'Lupa Kata Sandi';
+  static const String forgotSubtitle =
+      'Masukkan email terdaftar. Kami kirim tautan atur ulang ke sana.';
+  static const String forgotEyebrow = 'ATUR ULANG';
+  static const String forgotSubmit = 'Kirim Tautan';
+  static const String forgotSent =
+      'Tautan terkirim. Cek kotak masuk dan folder spam emailmu.';
+  static const String forgotFailed =
+      'Gagal mengirim. Pastikan email benar dan koneksi stabil.';
+  static const String forgotBack = 'Kembali masuk';
 
   static const String connectionSlow = 'Koneksi lambat, coba lagi.';
   static const String imageUnreadable =
