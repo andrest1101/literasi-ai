@@ -41,6 +41,10 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>LiterasiAI memakai kamera untuk memotret klaim yang ingin diverifikasi.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>LiterasiAI memakai galeri untuk memilih screenshot klaim yang ingin diverifikasi.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
