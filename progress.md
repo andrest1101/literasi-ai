@@ -1,6 +1,72 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
 _Last updated: 11 September 2026_
 
+## Status: Quick Check Mode Gambar + Session Upgrade — SELESAI
+
+### Yang dikerjakan
+- Tambah mode pemeriksaan `Teks | Gambar` lewat segmented control di session.
+  Caption gambar boleh kosong; bila diisi, validasi 10-2.000 karakter tetap berlaku.
+- Domain baru: `ImageAttachment` (JPG/PNG/WebP, maksimal 5 MB), interface
+  `ImagePickerService`, use case `VerifyImageClaim`, dan method repository gambar.
+- Data baru: `GeminiVisionDatasource` multimodal (`TextPart + DataPart`),
+  implementasi picker nyata, dan repository terpadu teks/gambar.
+- Permission platform: kamera/galeri Android dan usage description iOS.
+- UI session ditingkatkan: panel picker/preview profesional, metadata file,
+  catatan privasi, auto-scroll hasil, transisi `AnimatedSwitcher`, analyzing
+  khusus gambar, label sumber `TEKS/GAMBAR`, dan landing yang menyebut teks+gambar.
+- Hapus `verdict_card.dart` lama yang tidak dipakai setelah result section baru.
+- Test baru: validasi attachment, use case gambar, provider gambar/retry,
+  dan widget pick-verify-source tanpa network/key.
+- Perbaiki bug `GlobalKey` ganda pada transisi `AnimatedSwitcher` dan lint async context.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 37 test.
+
+## Status: Quick Check UI Redesign Total — SELESAI
+
+### Yang dikerjakan
+- Tab Quick Check di Home diubah menjadi landing ringkas dengan CTA `Mulai
+  Pemeriksaan`. Pemeriksaan berjalan di dedicated session screen via push route
+  agar punya ruang fokus penuh.
+- Session memakai stepper Input-Analisis-Hasil, input section satu permukaan
+  filled kontras, analyzing timeline tiga tahap + progress linear, dan result
+  section satu alur vertikal (verdict, confidence, klaim, analisis, saran).
+- Hilangkan pola kartu bertumpuk: hanya satu kartu hasil utama, sisanya divider,
+  catatan kaki, dan daftar tips ringan.
+- Perbaiki jarak berlebih akibat reuse `AuthFormCard` dengan padding overlay
+  medallion; input section kini punya komposisi sendiri yang proporsional.
+- Warna tetap palet resmi LiterasiAI tanpa ungu referensi; status memakai pita
+  tinted + badge, teks tetap gelap agar kontras.
+- Domain, datasource Gemini 3.5 Flash-Lite, validasi 10-2.000 karakter, dan
+  controller AsyncNotifier tidak berubah. API `verify/retry/reset` dipertahankan.
+- Route lama `/quick-check` dipertahankan sebagai wrapper kompatibilitas ke
+  session screen.
+- Test: landing CTA ke session, analyzing ke result, semua verdict render aman,
+  dan test lama disesuaikan ke struktur baru.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 24 test.
+
+## Status: Phase 2 Quick Check Teks — SELESAI
+
+### Yang dikerjakan
+- Domain Quick Check teks: enum `Verdict`, entity `VerificationResult` murni Dart,
+  repository interface, dan use case `VerifyClaim` dengan batas 10-2.000 karakter.
+- Data layer Gemini `gemini-3.5-flash-lite`: parsing JSON toleran code fence,
+  clamp confidence 0-100, timeout 30 detik untuk free tier, dan pesan error jujur
+  (timeout, invalid key, kuota, safety, model tidak ditemukan).
+- Verdict `TIDAK_DAPAT_DIPASTIKAN` dikembalikan sebagai hasil sukses, bukan error.
+- Presentation: `QuickCheckController` Riverpod `AsyncNotifier` dengan aksi verify,
+  retry, reset, dan cegah request ganda. Controller memakai raw claim untuk retry
+  agar gagal validasi ulang tetap bisa mencoba lagi.
+- UI profesional: hero Quick Check, kartu form dengan counter + tombol hapus,
+  status analyzing inline, kartu verdict dengan hierarki kuat, error card retry,
+  tips hasil terbaik, dan disclaimer AI. Terhubung ke tab Home dan route baru.
+- Sinkronkan model final ke `PRD.md`, `agents.md`, dan `pubspec.yaml` agar tidak
+  lagi menyebut `gemini-1.5-flash`.
+- API key tidak ditulis ke repo; datasource hanya memakai `--dart-define`.
+- Firebase `apiKey` di `firebase_options.dart` adalah client key publik hasil
+  FlutterFire, bukan Gemini key yang sempat bocor dan sudah di-revoke.
+- Test baru: parsing JSON, batas validasi, mapping failure, transisi provider,
+  alur widget input-loading-hasil-error-retry, dan verdict uncertain sebagai sukses.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 21 test.
+
 ## Status: Auth Hero Medallion Verifikasi — SELESAI
 
 ### Yang dikerjakan
