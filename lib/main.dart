@@ -10,6 +10,8 @@ import 'features/auth/presentation/screens/forgot_password_screen.dart';
 import 'features/auth/presentation/screens/onboarding_screen.dart';
 import 'features/auth/presentation/screens/register_screen.dart';
 import 'features/auth/presentation/screens/splash_screen.dart';
+import 'features/quick_check/presentation/screens/quick_check_screen.dart';
+import 'features/quick_check/presentation/screens/quick_check_session_screen.dart';
 import 'firebase_options.dart';
 
 /// Entry point LiterasiAI.
@@ -45,6 +47,8 @@ class LiterasiAIApp extends StatelessWidget {
         AuthScreen.route: (_) => const AuthScreen(),
         RegisterScreen.route: (_) => const RegisterScreen(),
         ForgotPasswordScreen.route: (_) => const ForgotPasswordScreen(),
+        QuickCheckScreen.route: (_) => const QuickCheckScreen(),
+        QuickCheckSessionScreen.route: (_) => const QuickCheckSessionScreen(),
         HomeScreen.route: (_) => const HomeScreen(),
       },
     );
