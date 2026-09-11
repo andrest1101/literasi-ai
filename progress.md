@@ -1,5 +1,93 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 12 september 2026_
+_Last updated: 16 september 2026_
+
+## Status: Penataan Footer Auth — SELESAI ✅
+
+### Yang dikerjakan
+- Baru `AuthBottomLink`: tautan penutup satu baris, awalan abu dan aksi biru
+  tebal. Dipakai Masuk ("Belum punya akun? Daftar") dan Daftar
+  ("Sudah punya akun? Masuk") sebagai elemen paling bawah.
+- Hapus catatan offline permanen dan trust row dari footer. Catatan offline
+  pindah jadi snackbar sekali tampil saat anonim sukses. Klaim privasi tanpa
+  bukti dihapus agar tidak menurunkan kepercayaan reviewer.
+- "Lanjut tanpa akun" tetap teks tanpa kartu agar tidak menyaingi tombol
+  Masuk dan Google. Hierarki CTA: primer, sekunder, tersier, penutup.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 3 test.
+
+## Status: Refinement Auth (Spacing, Checklist, Footer, Bug Maskot) — SELESAI ✅
+
+### Yang dikerjakan
+- `authInputDecoration`: contentPadding vertikal 18, prefixIcon 20 dengan
+  constraints 48x48. Label floating dan hint tidak lagi mepet border.
+- `AuthHeading` dimigrasikan ke `AppStyles.heading` dan `AppStyles.body`.
+- Indikator sandi ditulis ulang: checklist polos tanpa kotak (ikon 16 +
+  teks 13, AnimatedSwitcher dan warna abu ke hijau). Tidak lagi mirip input.
+- Skala spacing 8/12/16/20/24/28 diterapkan konsisten di Masuk, Daftar,
+  dan Lupa Sandi. Footer Masuk diringankan tanpa menghapus teks apapun.
+- Fix bug: maskot kini menutup mata saat kolom Ulangi Kata Sandi fokus
+  (FocusNode sendiri + mood cover atau peek ikut toggle tampil).
+  Ada test regresi yang mengunci perilaku ini.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 3 test.
+
+## Status: Halaman Daftar dan Lupa Sandi — SELESAI ✅
+
+### Yang dikerjakan
+- Baru `register_screen.dart`: Nama, Email, Sandi, Konfirmasi, indikator syarat
+  live (6+ karakter, ada angka), maskot happy, tombol Back, validasi jujur.
+  Provider email belum aktif di backend, jadi Daftar mengarahkan ke jalur tersedia.
+- Baru `forgot_password_screen.dart`: kirim `sendPasswordResetEmail` asli Firebase,
+  banner sukses hijau, maskot happy setelah terkirim, tombol Back.
+- Baru `auth_form_parts.dart`: dekorasi input, eyebrow, heading, tombol utama,
+  tombol back, trust row, snackbar. Dipakai ketiga halaman, nol duplikasi.
+- Baru `password_requirement_list.dart`: indikator syarat sandi live reusable.
+- `auth_screen.dart` (refactor): pakai widget bersama, tambah tautan Daftar
+  dan Lupa Sandi. Posisi tombol Google dan anonim tidak berubah.
+- `main.dart`: daftarkan route `/register` dan `/forgot-password`.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 3 test
+  (termasuk segitiga Masuk ke Daftar ke Lupa Sandi dan kembali).
+
+## Status: Logo Google Resmi — SELESAI ✅
+
+### Yang dikerjakan
+- Daftarkan `assets/image/` dan `assets/animation/` di `pubspec.yaml`
+  (animation disiapkan kosong untuk Rive di masa depan).
+- `google_g_logo.dart` (rewrite): `Image.asset(logo_google.png)` resmi 4 warna
+  gantikan CustomPainter manual yang membuat huruf G terlihat menyatu.
+  Fallback lingkaran G bila aset gagal load. Posisi tombol tidak berubah.
+- Keputusan Rive: ditunda. File `.riv` belum ada (folder animation kosong),
+  maskot custom dipertahankan karena sudah mencakup semua state yang diminta.
+- Tech debt: PNG 190KB untuk ikon 20px, idealnya dikompres saat polish.
+- Verifikasi: `flutter pub get` OK, `flutter analyze` bersih,
+  `flutter test` lolos (termasuk render aset tanpa exception).
+
+## Status: Auth Redesign Total (Maskot Interaktif) — SELESAI ✅
+
+### Yang dikerjakan
+- Hapus `auth_hero_card.dart` yang kaku. Header diganti maskot perisai bermata
+  (`login_mascot.dart`, Flutter murni tanpa Rive/Lottie): idle napas, typing melirik,
+  cover saat sandi fokus, peek saat sandi ditampilkan, happy/sad ikut hasil masuk.
+  Header gradien + curve lembut menyatu ke form.
+- Form email dan kata sandi real (validasi regex + min 6, toggle tampil, autofill).
+  Tombol Masuk memberi umpan balik jujur karena backend email belum ada.
+- Logo Google 4 warna resmi via CustomPainter (`google_g_logo.dart`, tanpa aset).
+  Tombol Google + divider "atau" + "Lanjut tanpa akun" + catatan offline + trust row.
+- Copy dibersihkan: tidak ada em dash di semua string user-facing.
+  Tidak ada kartu ganda, padding lega, tipografi Inter.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos
+  (maskot cover/peek, validasi form, anonim ke Home).
+
+## Status: Auth Screen Premium — SELESAI ✅
+
+### Yang dikerjakan
+- Baru `auth_hero_card.dart`: kartu hero gradien biru + mock verdict HOAKS 87% + chip "AI Aktif".
+- Rewrite `auth_screen.dart`: eyebrow MASUK • GRATIS, judul, 3 checklist manfaat + centang,
+  tombol anonim primary 56px + tombol Google putih berlogo, catatan offline, trust row gembok.
+- Wiring Google Sign-In asli (google_sign_in 6.x + Firebase credential); gagal → snackbar error,
+  user tetap bisa lanjut anonim — demo tidak buntu.
+- Anti-overflow via SingleChildScrollView, spinner per-tombol, Semantics label.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos (auth tampil + anonim → Home).
+- Catatan: SHA-1 debug `9B:B1:5F:...:5E:09` perlu didaftar di Firebase console
+  agar Google Sign-In Android berfungsi penuh (oauth_client masih kosong).
 
 ## Status: Onboarding Interaction Upgrade — SELESAI ✅
 
