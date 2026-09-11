@@ -1,5 +1,102 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 16 september 2026_
+_Last updated: 11 September 2026_
+
+## Status: Auth Hero Medallion Verifikasi — SELESAI
+
+### Yang dikerjakan
+- Ganti header balok gradien penuh dengan hero terpusat: judul, subtitle,
+  medallion verifikasi lingkaran berlapis, lalu card form yang overlap ringan.
+- Medallion memakai ikon verified-user + badge centang hijau sebagai focal point
+  tema cek-fakta, bukan orb AI generik dari referensi travel.
+- Tombol kembali dipindah ke baris atas latar terang untuk Daftar dan Lupa Sandi.
+- Card form diberi padding atas lebih besar agar medallion overlap tanpa menutup
+  judul seksi atau field pertama.
+- Test baru mengunci overlap medallion-card di Masuk, tombol kembali di Daftar,
+  dan ketahanan keyboard di Lupa Sandi.
+- Perubahan hanya di presentation layer; domain/data dan logika Firebase tidak
+  berubah, sesuai Clean Architecture.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 4 test.
+
+## Status: Auth Proporsi dan Hierarki Card Opsi A — SELESAI
+
+### Yang dikerjakan
+- `AuthPageShell` memakai header brand intrinsik berbasis `SafeArea`, bukan tinggi
+  tetap. Header berisi emblem 44px, nama LiterasiAI, tagline singkat, dan tombol
+  kembali bila tersedia di layar Daftar dan Lupa Sandi.
+- Judul halaman dipindah ke area konten shell agar tidak duplikat dengan brand.
+  Struktur menjadi brand, judul, card primer, panel sekunder, lalu tautan bawah.
+- Hapus badge `MASUK GRATIS`, `DAFTAR GRATIS`, dan `ATUR ULANG` dari semua layar.
+  Hapus widget `AuthEyebrow` dan `AuthHeading` yang sudah tidak dipakai.
+- `AuthFormCard` mendapat judul seksi dan subtitle agar form tidak terlihat kosong.
+  Card memakai border lebih tegas dan dua lapis shadow yang terkontrol.
+- Input memakai latar abu kebiruan muda agar kontras terhadap card putih. State
+  fokus tetap biru dan error tetap merah.
+- Tambah `AuthSecondaryPanel` untuk Google dan anonim agar aksi sekunder terasa
+  dikelompokkan tanpa membuat card kedua yang menyaingi CTA primer.
+- Terapkan spacing grid 8pt di Masuk, Daftar, dan Lupa Sandi. Konten dibatasi
+  lebar 520 agar proporsional di layar besar.
+- Pindahkan copy judul card ke `AppStrings` agar tidak hardcoded di widget UI.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 5 test.
+
+## Status: Auth Redesign Clean Header + Form Card — SELESAI ✅
+
+### Yang dikerjakan
+- Hapus maskot besar dari layar Masuk, Daftar, dan Lupa Sandi karena memakan
+  hampir setengah viewport dan terasa terlalu playful untuk aplikasi cek-fakta.
+- `AuthPageShell` diganti menjadi header brand kompak: gradien biru,
+  ikon verified-user, wordmark LiterasiAI, dan tagline singkat. Tidak memakai
+  ilustrasi onboarding agar onboarding tetap jadi tempat utama menjelaskan app.
+- Hilangkan sumber garis tengah/hairline dari header lama dengan menghapus
+  curve custom + transisi maskot compact. Header baru memakai edge sederhana
+  dengan radius bawah, tanpa boundary animasi yang rentan retak pixel.
+- Tambah `AuthFormCard`: email/sandi/tombol primer dibungkus satu card surface
+  dengan border halus dan shadow. Hierarki CTA jadi lebih jelas dan profesional:
+  aksi primer di card, Google/anonim/tautan sebagai aksi sekunder di bawah.
+- `auth_screen.dart`, `register_screen.dart`, `forgot_password_screen.dart`:
+  hapus state `MascotMood`, focus listener maskot, lookAt, dan import maskot.
+  Flow validasi, Google Sign-In, anonim, forgot password Firebase tetap sama.
+- Hapus `login_mascot.dart` karena tidak lagi dipakai, tidak menyisakan kode mati.
+- Test regresi diperbarui: mengunci header brand di luar scroll, `AuthFormCard`
+  tampil, keyboard tidak overflow, navigasi Masuk-Daftar-Lupa tetap aman.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 5 test.
+
+## Status: Pin Header Auth di Luar Scroll (HP Fisik) — SELESAI ✅
+
+### Yang dikerjakan
+- Baru `widgets/auth_page_shell.dart`: header maskot dipin DI LUAR scroll
+  (`Column[Flexible(header), Expanded(scroll form)]`), jadi auto-scroll
+  keyboard tidak bisa lagi mendorong maskot keluar viewport.
+  Deteksi keyboard via viewInsets tetap picu mode compact, Back overlay aman
+  notch via `MediaQuery.paddingOf`, header dibatasi `Flexible + ClipRect`
+  agar frame animasi tidak overflow di viewport sempit.
+- `auth_screen.dart`, `register_screen.dart`, `forgot_password_screen.dart`:
+  refactor ke `AuthPageShell`, form dipindah jadi child tanpa ubah validasi
+  atau wiring Firebase. Logika mood cover dan peek tidak berubah.
+- `login_mascot.dart`: shadow bawah saat compact sebagai batas tegas
+  header pinned dan form scroll.
+- Bug ditemukan saat verifikasi: simulasi keyboard 400 di test membuat
+  viewport sisa 200px lalu header expanded 232px overflow 80px di Column
+  shell (diagnostik penuh menunjuk `auth_page_shell.dart:39`).
+  Diperbaiki dengan `Flexible + ClipRect`, terbukti nol exception di debug.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 5 test
+  (3 lama + compact + pinned baru).
+
+## Status: Mini Sticky Mascot Header saat Keyboard — SELESAI ✅
+
+### Yang dikerjakan
+- `LoginMascotHeader`: param `compact` baru, animasi 250ms expanded 232px
+  ke compact 84px. Orb dan sparkle diganti kilau ringkas agar tidak berisik.
+  Curve dipertahankan tipis 14px supaya transisi ke form tetap mulus.
+- `LoginMascot`: param `size` baru (default 168, compact 56). Layout absolut
+  internal tetap 168 dan diskala via FittedBox, napas ikut proporsional.
+  Reaksi cover dan peek tetap terbaca di ukuran kecil.
+- `auth_screen.dart`, `register_screen.dart`, `forgot_password_screen.dart`:
+  deteksi `MediaQuery.viewInsetsOf(context).bottom > 0` lalu kirim
+  `compact: keyboardOpen` ke header. Logika mood dan focus tidak berubah.
+  Tombol Back Daftar dan Lupa Sandi tetap muat di header compact.
+- Test regresi: header expanded 168 tanpa keyboard, compact 56 saat keyboard,
+  mood cover render tanpa exception di mode compact.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 4 test.
 
 ## Status: Penataan Footer Auth — SELESAI ✅
 
