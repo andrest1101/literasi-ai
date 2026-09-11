@@ -255,22 +255,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     const SizedBox(height: 20),
                     Center(
-                      child: TextButton(
-                        onPressed: () => Navigator.of(context)
+                      child: AuthBottomLink(
+                        prefix: AppStrings.authGoLoginPrefix,
+                        action: AppStrings.authGoLoginAction,
+                        onTap: () => Navigator.of(context)
                             .pushReplacementNamed(AuthScreen.route),
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          textStyle: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        child:
-                            const Text(AppStrings.authGoLogin),
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const AuthTrustRow(text: AppStrings.authTrust),
                   ],
                 ),
               ),

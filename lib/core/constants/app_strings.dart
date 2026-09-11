@@ -38,16 +38,17 @@ abstract final class AppStrings {
   static const String authGoogle = 'Masuk dengan Google';
   static const String authAnonymous = 'Lanjut tanpa akun';
   static const String authOfflineNote =
-      'Tanpa akun pun bisa. Riwayat hanya tersimpan di perangkat ini.';
-  static const String authTrust = 'Data privat, tersimpan per akun';
+      'Mode tanpa akun. Riwayat hanya tersimpan di perangkat ini.';
   static const String authEmailSent =
       'Tautan masuk dikirim. Cek kotak masuk emailmu.';
   static const String authGoogleFailed =
       'Masuk Google gagal. Periksa koneksi atau lanjut tanpa akun.';
   static const String authAnonymousFailed =
       'Mode offline. Firebase belum dikonfigurasi.';
-  static const String authGoRegister = 'Belum punya akun? Daftar';
-  static const String authGoLogin = 'Sudah punya akun? Masuk';
+  static const String authGoRegisterPrefix = 'Belum punya akun?';
+  static const String authGoRegisterAction = 'Daftar';
+  static const String authGoLoginPrefix = 'Sudah punya akun?';
+  static const String authGoLoginAction = 'Masuk';
   static const String authForgotLink = 'Lupa kata sandi?';
 
   static const String registerTitle = 'Buat Akun LiterasiAI';

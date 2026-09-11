@@ -189,35 +189,55 @@ class AuthBackButton extends StatelessWidget {
   }
 }
 
-/// Baris catatan kaki trust (gembok + teks) halaman auth.
-class AuthTrustRow extends StatelessWidget {
-  const AuthTrustRow({super.key, required this.text});
+/// Tautan penutup di ujung bawah halaman auth.
+///
+/// Pola satu baris: awalan abu yang menjelaskan, aksi biru tebal yang bisa
+/// ditekan. Contoh: "Belum punya akun?" + "Daftar". Selalu jadi elemen
+/// terakhir halaman agar hierarki visual jelas.
+class AuthBottomLink extends StatelessWidget {
+  const AuthBottomLink({
+    super.key,
+    required this.prefix,
+    required this.action,
+    required this.onTap,
+  });
 
-  final String text;
+  final String prefix;
+  final String action;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(
-          Icons.lock_outline_rounded,
-          size: 14,
-          color: AppColors.textSecondary,
-        ),
-        const SizedBox(width: 6),
-        Flexible(
-          child: Text(
-            text,
+    return Semantics(
+      button: true,
+      label: '$prefix $action',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: RichText(
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+            text: TextSpan(
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
+              children: [
+                TextSpan(text: '$prefix '),
+                TextSpan(
+                  text: action,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }

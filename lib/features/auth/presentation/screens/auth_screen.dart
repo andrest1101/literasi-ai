@@ -124,6 +124,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     try {
       await FirebaseAuth.instance.signInAnonymously();
       _react(true);
+      // Catatan offline yang dulu teks permanen kini jadi pesan sekali
+      // tampil agar footer bernapas.
+      if (mounted) {
+        showAuthMessage(context, AppStrings.authOfflineNote);
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 600));
       _goHome();
     } on FirebaseAuthException catch (e) {
       _react(false);
@@ -354,31 +360,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                     const SizedBox(height: 8),
                     Center(
-                      child: TextButton(
-                        onPressed: _goRegister,
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.textSecondary,
-                          textStyle: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        child:
-                            const Text(AppStrings.authGoRegister),
+                      child: AuthBottomLink(
+                        prefix: AppStrings.authGoRegisterPrefix,
+                        action: AppStrings.authGoRegisterAction,
+                        onTap: _goRegister,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      AppStrings.authOfflineNote,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 12,
-                        height: 1.5,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const AuthTrustRow(text: AppStrings.authTrust),
+                    const SizedBox(height: 8),
                   ],
                 ),
               ),

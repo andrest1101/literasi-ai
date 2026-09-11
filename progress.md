@@ -1,5 +1,18 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 15 september 2026_
+_Last updated: 16 september 2026_
+
+## Status: Penataan Footer Auth — SELESAI ✅
+
+### Yang dikerjakan
+- Baru `AuthBottomLink`: tautan penutup satu baris, awalan abu dan aksi biru
+  tebal. Dipakai Masuk ("Belum punya akun? Daftar") dan Daftar
+  ("Sudah punya akun? Masuk") sebagai elemen paling bawah.
+- Hapus catatan offline permanen dan trust row dari footer. Catatan offline
+  pindah jadi snackbar sekali tampil saat anonim sukses. Klaim privasi tanpa
+  bukti dihapus agar tidak menurunkan kepercayaan reviewer.
+- "Lanjut tanpa akun" tetap teks tanpa kartu agar tidak menyaingi tombol
+  Masuk dan Google. Hierarki CTA: primer, sekunder, tersier, penutup.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 3 test.
 
 ## Status: Refinement Auth (Spacing, Checklist, Footer, Bug Maskot) — SELESAI ✅
 

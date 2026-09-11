@@ -75,10 +75,13 @@ void main() {
     expect(find.text('Masukkan alamat email yang valid.'), findsOneWidget);
     expect(find.text('Kata sandi minimal 6 karakter.'), findsOneWidget);
 
-    // Lanjut tanpa akun → Home (fallback offline bila Firebase absen).
+    // Lanjut tanpa akun → Home. Di test env Firebase absen sehingga
+    // jalur gagal yang jalan (tetap ke Home); snackbar info sukses hanya
+    // muncul di perangkat nyata.
     await tester.ensureVisible(find.text('Lanjut tanpa akun'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Lanjut tanpa akun'));
+    await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
     expect(find.text('Quick Check'), findsOneWidget);
   });
@@ -108,14 +111,17 @@ void main() {
     await tester.tap(find.text('Mulai Sekarang'));
     await tester.pumpAndSettle();
 
-    // Masuk punya tautan daftar dan lupa sandi.
-    expect(find.text('Belum punya akun? Daftar'), findsOneWidget);
+    // Masuk punya tautan daftar dan lupa sandi. RichText dicari utuh.
+    expect(find.text('Belum punya akun? Daftar', findRichText: true),
+        findsOneWidget);
     expect(find.text('Lupa kata sandi?'), findsOneWidget);
 
     // Ke halaman Daftar: syarat sandi live + validasi.
-    await tester.ensureVisible(find.text('Belum punya akun? Daftar'));
+    await tester.ensureVisible(
+        find.text('Belum punya akun? Daftar', findRichText: true));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Belum punya akun? Daftar'));
+    await tester
+        .tap(find.text('Belum punya akun? Daftar', findRichText: true));
     await tester.pumpAndSettle();
     expect(find.text('Buat Akun LiterasiAI'), findsOneWidget);
     expect(find.text('DAFTAR GRATIS'), findsOneWidget);
@@ -138,9 +144,11 @@ void main() {
     expect(header.mood, MascotMood.cover);
 
     // Kembali masuk, lalu ke Lupa Sandi.
-    await tester.ensureVisible(find.text('Sudah punya akun? Masuk'));
+    await tester.ensureVisible(
+        find.text('Sudah punya akun? Masuk', findRichText: true));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Sudah punya akun? Masuk'));
+    await tester
+        .tap(find.text('Sudah punya akun? Masuk', findRichText: true));
     await tester.pumpAndSettle();
     expect(find.text('Masuk ke LiterasiAI'), findsOneWidget);
     await tester.ensureVisible(find.text('Lupa kata sandi?'));
