@@ -18,7 +18,13 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _index = 0;
 
-  static const _titles = ['Quick Check', 'Chat AI', 'Riwayat', 'Belajar', 'Profil'];
+  static const _titles = [
+    'Quick Check',
+    'Chat AI',
+    'Riwayat',
+    'Belajar',
+    'Profil',
+  ];
 
   static const _placeholders = [
     'Quick Check — verifikasi teks, gambar, URL (Phase 2)',

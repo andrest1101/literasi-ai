@@ -199,8 +199,7 @@ class _DotGrid extends StatelessWidget {
 class _DotGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.primary.withValues(alpha: 0.07);
+    final paint = Paint()..color = AppColors.primary.withValues(alpha: 0.07);
     const gap = 22.0;
     for (var y = gap; y < size.height; y += gap) {
       for (var x = gap; x < size.width; x += gap) {
@@ -322,8 +321,7 @@ class _FloatCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: Colors.white,
-        border:
-            Border.all(color: AppColors.neutral.withValues(alpha: 0.14)),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.14)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.09),
@@ -544,8 +542,7 @@ class _TextVerifyVisual extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: const BoxDecoration(
-                        borderRadius:
-                            BorderRadius.all(Radius.circular(999)),
+                        borderRadius: BorderRadius.all(Radius.circular(999)),
                         gradient: LinearGradient(
                           colors: [Color(0xFFF05545), AppColors.danger],
                         ),
@@ -601,14 +598,11 @@ class _TextVerifyVisual extends StatelessWidget {
                 const SizedBox(height: 8),
                 const Row(
                   children: [
-                    _SourceDot(
-                        icon: Icons.chat_bubble_outline, label: 'Chat'),
+                    _SourceDot(icon: Icons.chat_bubble_outline, label: 'Chat'),
                     SizedBox(width: 8),
-                    _SourceDot(
-                        icon: Icons.public_outlined, label: 'Medsos'),
+                    _SourceDot(icon: Icons.public_outlined, label: 'Medsos'),
                     SizedBox(width: 8),
-                    _SourceDot(
-                        icon: Icons.newspaper_outlined, label: 'Berita'),
+                    _SourceDot(icon: Icons.newspaper_outlined, label: 'Berita'),
                   ],
                 ),
               ],
@@ -709,8 +703,7 @@ class _MediaVisual extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color:
-                          AppColors.primary.withValues(alpha: 0.14),
+                      color: AppColors.primary.withValues(alpha: 0.14),
                       width: 1.5,
                     ),
                   ),
@@ -721,8 +714,7 @@ class _MediaVisual extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color:
-                          AppColors.primary.withValues(alpha: 0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       width: 1.5,
                     ),
                   ),
@@ -803,9 +795,13 @@ class _MediaVisual extends StatelessWidget {
                           decoration: const BoxDecoration(
                             border: Border(
                               left: BorderSide(
-                                  color: AppColors.primary, width: 2),
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
                               top: BorderSide(
-                                  color: AppColors.primary, width: 2),
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
                             ),
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(6),
@@ -822,9 +818,13 @@ class _MediaVisual extends StatelessWidget {
                           decoration: const BoxDecoration(
                             border: Border(
                               right: BorderSide(
-                                  color: AppColors.primary, width: 2),
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
                               bottom: BorderSide(
-                                  color: AppColors.primary, width: 2),
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
                             ),
                             borderRadius: BorderRadius.only(
                               bottomRight: Radius.circular(6),
@@ -843,8 +843,7 @@ class _MediaVisual extends StatelessWidget {
                       height: 30,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color:
-                            AppColors.primary.withValues(alpha: 0.12),
+                        color: AppColors.primary.withValues(alpha: 0.12),
                       ),
                       child: const Icon(
                         Icons.link,
@@ -929,8 +928,7 @@ class _MediaVisual extends StatelessWidget {
                 ),
               ],
             ),
-            child:
-                const Icon(Icons.check, size: 18, color: Colors.white),
+            child: const Icon(Icons.check, size: 18, color: Colors.white),
           ),
         ),
       ],
@@ -1006,8 +1004,7 @@ class _HistoryVisual extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(999),
-                        color:
-                            AppColors.primary.withValues(alpha: 0.12),
+                        color: AppColors.primary.withValues(alpha: 0.12),
                       ),
                       child: const Text(
                         '12 tersimpan',
@@ -1048,8 +1045,7 @@ class _HistoryVisual extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color:
-                            AppColors.primary.withValues(alpha: 0.35),
+                        color: AppColors.primary.withValues(alpha: 0.35),
                         blurRadius: 12,
                         offset: const Offset(0, 5),
                       ),
@@ -1059,8 +1055,7 @@ class _HistoryVisual extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.share_outlined,
-                          size: 16, color: Colors.white),
+                      Icon(Icons.share_outlined, size: 16, color: Colors.white),
                       SizedBox(width: 6),
                       Flexible(
                         child: Text(
@@ -1116,8 +1111,11 @@ class _HistoryVisual extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Icon(Icons.share_outlined,
-                size: 20, color: Colors.white),
+            child: const Icon(
+              Icons.share_outlined,
+              size: 20,
+              color: Colors.white,
+            ),
           ),
         ),
         const Positioned(

@@ -29,17 +29,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     (
       AppStrings.onboardingEyebrow1,
       AppStrings.onboardingTitle1,
-      AppStrings.onboardingDesc1
+      AppStrings.onboardingDesc1,
     ),
     (
       AppStrings.onboardingEyebrow2,
       AppStrings.onboardingTitle2,
-      AppStrings.onboardingDesc2
+      AppStrings.onboardingDesc2,
     ),
     (
       AppStrings.onboardingEyebrow3,
       AppStrings.onboardingTitle3,
-      AppStrings.onboardingDesc3
+      AppStrings.onboardingDesc3,
     ),
   ];
 
@@ -101,8 +101,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color:
-                              AppColors.primary.withValues(alpha: 0.35),
+                          color: AppColors.primary.withValues(alpha: 0.35),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -138,8 +137,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        child:
-                            const Text(AppStrings.onboardingSkip),
+                        child: const Text(AppStrings.onboardingSkip),
                       ),
                     ),
                   ),
@@ -190,13 +188,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               shape: const CircleBorder(),
                               backgroundColor: AppColors.surface,
                               side: BorderSide(
-                                color: AppColors.neutral
-                                    .withValues(alpha: 0.35),
+                                color: AppColors.neutral.withValues(
+                                  alpha: 0.35,
+                                ),
                               ),
                               foregroundColor: AppColors.textPrimary,
                             ),
-                            child:
-                                const Icon(Icons.arrow_back_rounded),
+                            child: const Icon(Icons.arrow_back_rounded),
                           ),
                         ),
                       ),
@@ -224,14 +222,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             letterSpacing: 0.1,
                           ),
                           elevation: 6,
-                          shadowColor: AppColors.primary
-                              .withValues(alpha: 0.45),
+                          shadowColor: AppColors.primary.withValues(
+                            alpha: 0.45,
+                          ),
                         ),
                         child: AnimatedSwitcher(
-                          duration:
-                              const Duration(milliseconds: 250),
-                          transitionBuilder: (child, anim) =>
-                              FadeTransition(
+                          duration: const Duration(milliseconds: 250),
+                          transitionBuilder: (child, anim) => FadeTransition(
                             opacity: anim,
                             child: SlideTransition(
                               position: Tween<Offset>(
@@ -246,11 +243,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   key: ValueKey('start'),
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                        AppStrings.onboardingStart),
+                                    Text(AppStrings.onboardingStart),
                                     SizedBox(width: 8),
-                                    Icon(Icons.rocket_launch_outlined,
-                                        size: 20),
+                                    Icon(
+                                      Icons.rocket_launch_outlined,
+                                      size: 20,
+                                    ),
                                   ],
                                 )
                               : const Row(
@@ -259,8 +257,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   children: [
                                     Text(AppStrings.onboardingNext),
                                     SizedBox(width: 8),
-                                    Icon(Icons.arrow_forward_rounded,
-                                        size: 20),
+                                    Icon(Icons.arrow_forward_rounded, size: 20),
                                   ],
                                 ),
                         ),

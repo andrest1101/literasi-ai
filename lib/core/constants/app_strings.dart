@@ -1,7 +1,8 @@
 /// String terpusat — Bahasa Indonesia (PRD: AI response santai tapi informatif).
 abstract final class AppStrings {
   static const String appName = 'LiterasiAI';
-  static const String tagline = 'Cek dulu sebelum sebar. Hasil dalam hitungan detik.';
+  static const String tagline =
+      'Cek dulu sebelum sebar. Hasil dalam hitungan detik.';
 
   static const String onboardingTitle1 = 'Cek Hoaks Instan dengan AI';
   static const String onboardingEyebrow1 = 'VERIFIKASI TEKS';
@@ -24,7 +25,6 @@ abstract final class AppStrings {
   static const String authTitle = 'Masuk ke LiterasiAI';
   static const String authSubtitle =
       'Masuk untuk menyimpan riwayat cek faktamu di semua perangkat.';
-  static const String authEyebrow = 'MASUK GRATIS';
   static const String authEmailLabel = 'Email';
   static const String authEmailHint = 'nama@email.com';
   static const String authEmailError = 'Masukkan alamat email yang valid.';
@@ -32,6 +32,9 @@ abstract final class AppStrings {
   static const String authPasswordHint = 'Minimal 6 karakter';
   static const String authPasswordError = 'Kata sandi minimal 6 karakter.';
   static const String authSubmit = 'Masuk';
+  static const String authFormTitle = 'Masuk dengan email';
+  static const String authFormSubtitle =
+      'Validasi dulu, lalu lanjut ke jalur yang tersedia.';
   static const String authNoAccount =
       'Belum punya akun email? Coba masuk dengan Google atau lanjut tanpa akun.';
   static const String authDivider = 'atau';
@@ -54,13 +57,15 @@ abstract final class AppStrings {
   static const String registerTitle = 'Buat Akun LiterasiAI';
   static const String registerSubtitle =
       'Satu akun untuk menyimpan semua riwayat cek faktamu.';
-  static const String registerEyebrow = 'DAFTAR GRATIS';
   static const String registerNameLabel = 'Nama lengkap';
   static const String registerNameHint = 'Nama kamu';
   static const String registerNameError = 'Masukkan namamu.';
   static const String registerConfirmLabel = 'Ulangi kata sandi';
   static const String registerConfirmHint = 'Ketik ulang kata sandi';
   static const String registerMismatch = 'Kata sandi tidak sama. Coba lagi.';
+  static const String registerFormTitle = 'Data akun baru';
+  static const String registerFormSubtitle =
+      'Syarat sandi diperiksa otomatis saat kamu mengetik.';
   static const String registerReqLength = 'Minimal 6 karakter';
   static const String registerReqDigit = 'Mengandung angka';
   static const String registerSubmit = 'Daftar';
@@ -70,8 +75,10 @@ abstract final class AppStrings {
   static const String forgotTitle = 'Lupa Kata Sandi';
   static const String forgotSubtitle =
       'Masukkan email terdaftar. Kami kirim tautan atur ulang ke sana.';
-  static const String forgotEyebrow = 'ATUR ULANG';
   static const String forgotSubmit = 'Kirim Tautan';
+  static const String forgotFormTitle = 'Kirim tautan atur ulang';
+  static const String forgotFormSubtitle =
+      'Periksa juga folder spam setelah tautan dikirim.';
   static const String forgotSent =
       'Tautan terkirim. Cek kotak masuk dan folder spam emailmu.';
   static const String forgotFailed =

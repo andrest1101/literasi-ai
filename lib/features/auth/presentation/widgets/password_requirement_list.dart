@@ -66,10 +66,8 @@ class _RequirementRow extends StatelessWidget {
       children: [
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
-          transitionBuilder: (child, anim) => ScaleTransition(
-            scale: anim,
-            child: child,
-          ),
+          transitionBuilder: (child, anim) =>
+              ScaleTransition(scale: anim, child: child),
           child: Icon(
             met ? Icons.check_circle_rounded : Icons.circle_outlined,
             key: ValueKey(met),
