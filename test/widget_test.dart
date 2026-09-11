@@ -90,7 +90,13 @@ void main() {
     await tester.tap(find.text('Lanjut tanpa akun'));
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
+    // Tab Quick Check sekarang landing ringkas dengan CTA sesi dedicated.
     expect(find.text('Quick Check'), findsOneWidget);
+    expect(find.text('Mulai Pemeriksaan'), findsOneWidget);
+    await tester.tap(find.text('Mulai Pemeriksaan'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sesi pemeriksaan'), findsOneWidget);
+    expect(find.text('Verifikasi Sekarang'), findsOneWidget);
   });
 
   testWidgets('GoogleGLogo renders official asset without error', (
