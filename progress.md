@@ -1,6 +1,70 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
 _Last updated: 11 September 2026_
 
+## Status: Quick Check Status Flat Tanpa Panel — SELESAI
+
+### Yang dikerjakan
+- Hapus `_SessionStatusPanel` agar bagian Input-Analisis-Hasil tidak lagi memakai
+  kartu putih bertumpuk. Status kini menjadi progress rail flat: subtitle,
+  stepper, divider, lalu mode selector.
+- Pertahankan kartu input dan kartu hasil karena keduanya punya peran berbeda:
+  kartu kerja untuk field/CTA dan hero card untuk verdict. Tidak ada kartu baru.
+- Alignment stepper tetap full-width terhadap kontainer input; track tetap dari
+  pusat dot pertama ke pusat dot terakhir.
+- Tidak ada perubahan domain/data/Gemini/Riverpod, validasi teks, atau mode gambar.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 39 test.
+
+## Status: Quick Check Header A & Stepper Separation Fix — SELESAI
+
+### Yang dikerjakan
+- Terapkan opsi A untuk tombol kembali: satu lingkaran tonal 40px dengan border
+  biru lembut, shadow rendah, panah gelap, tooltip, dan Semantics. Slot AppBar
+  dirapikan ke 56px dengan title spacing 4px agar proporsional dan tidak kotak besar.
+- Perbaiki akar masalah stepper: Stack kini memakai top alignment agar track
+  benar-benar sejajar dengan pusat dot. Dot memakai ukuran tetap plus animasi
+  warna tanpa perubahan dimensi; ikon internal disesuaikan agar tidak terlihat membesar.
+- Pisahkan label dari baris dot dengan jarak 12px dan alur kiri-tengah-kanan.
+  Label aktif memakai teks gelap tebal, label lain memakai teks sekunder agar
+  tidak menyatu dengan warna biru track/dot.
+- Tambah panel status tenang berisi subtitle dan stepper di atas permukaan putih
+  dengan border halus dan shadow rendah, tanpa gradien atau blok warna mencolok.
+- Perkuat regression test: AppBar putih, satu aksi kembali, tooltip, target
+  sentuh, alignment label, dan status semantik stepper.
+- Tidak ada perubahan domain/data/Gemini/Riverpod, validasi teks, atau mode gambar.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 39 test.
+
+## Status: Quick Check Header & Stepper Polish — SELESAI
+
+### Yang dikerjakan
+- Hapus aksi kembali ganda di header sesi. Teks `Kembali ke Beranda` dihapus;
+  satu tombol back reusable memakai surface biru muda, border, shadow halus,
+  tooltip, dan Semantics dengan target sentuh minimal 44px.
+- App bar kini memakai surface putih dengan garis bawah neutral tipis. Judul
+  dirapikan sebagai application toolbar tanpa gradien atau blok warna berlebih.
+- Stepper Input-Analisis-Hasil disusun ulang: track membentang dari pusat dot
+  pertama hingga pusat dot terakhir, dot memiliki ukuran tetap pada semua state,
+  dan label diposisikan terpisah dengan jarak aman sehingga tidak tertutup dot.
+- Tambah regression test untuk satu aksi kembali, label stepper, target sentuh,
+  dan render tanpa exception. Tidak ada perubahan domain/data/Gemini/Riverpod.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 39 test.
+
+## Status: Quick Check Session Alignment & Counter Polish — SELESAI
+
+### Yang dikerjakan
+- Stepper Input-Analisis-Hasil ditulis ulang dengan track dari pusat dot pertama
+  ke pusat dot terakhir. Dot dan label kini memakai layout terpisah agar batas
+  stepper sejajar dengan kontainer input tanpa overflow di viewport sempit.
+- Ritme jarak subtitle, stepper, divider, selector mode, dan hint dirapikan ke
+  grid 8pt agar komposisi sesi terasa lebih seimbang.
+- Counter teks dipindahkan dari header ke pojok kanan bawah di dalam area input.
+  Format baru memakai pemisah ribuan Indonesia: `0 / 2.000 karakter` dan track
+  progres halus. Counter caption gambar memakai komponen yang sama.
+- Tambah ruang vertikal sebelum CTA Verifikasi agar tombol tidak menempel pada
+  kontainer input; state disabled/enabled biru tetap dipertahankan.
+- Test format counter Indonesia ditambahkan. Bug overflow stepper pada widget
+  test ditemukan dan diperbaiki sebelum finalisasi.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 38 test.
+
 ## Status: Quick Check Mode Gambar + Session Upgrade — SELESAI
 
 ### Yang dikerjakan
