@@ -76,7 +76,7 @@ class GeminiTextDatasource {
   String _friendlyMessage(String message) {
     final lower = message.toLowerCase();
     if (lower.contains('api key') || lower.contains('api_key')) {
-      return 'API key Gemini tidak valid. Periksa konfigurasi key-mu.';
+      return 'API key Gemini tidak valid. Periksa konfigurasi kunci API Anda.';
     }
     if (lower.contains('quota') ||
         lower.contains('rate') ||
@@ -84,7 +84,7 @@ class GeminiTextDatasource {
       return 'Batas pemakaian AI tercapai. Tunggu sebentar lalu coba lagi.';
     }
     if (lower.contains('blocked') || lower.contains('safety')) {
-      return 'Klaim tidak dapat diproses filter keamanan. Coba ubah redaksinya.';
+      return 'Informasi tidak dapat diproses filter keamanan. Coba ubah redaksinya.';
     }
     if (lower.contains('not found') || lower.contains('404')) {
       return 'Model AI tidak ditemukan. Periksa nama model yang dipakai.';

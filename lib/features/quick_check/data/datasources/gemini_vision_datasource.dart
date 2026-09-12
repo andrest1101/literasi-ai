@@ -101,7 +101,7 @@ class GeminiVisionDatasource {
   String _friendlyMessage(String message) {
     final lower = message.toLowerCase();
     if (lower.contains('api key') || lower.contains('api_key')) {
-      return 'API key Gemini tidak valid. Periksa konfigurasi key-mu.';
+      return 'API key Gemini tidak valid. Periksa konfigurasi kunci API Anda.';
     }
     if (lower.contains('quota') ||
         lower.contains('rate') ||

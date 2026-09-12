@@ -36,7 +36,7 @@ class VerifyImageClaim {
     if (normalized.isNotEmpty) {
       if (normalized.length < VerifyClaim.minLength) {
         throw const UnknownFailure(
-          'Caption minimal 10 karakter, atau kosongkan bila hanya mengandalkan gambar.',
+          'Caption minimal 10 karakter, atau kosongkan jika hanya mengandalkan gambar.',
         );
       }
       if (normalized.length > VerifyClaim.maxLength) {

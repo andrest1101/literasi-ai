@@ -23,14 +23,14 @@ class _QuickCheckAnalyzingIndicatorState
   late final AnimationController _controller;
 
   static const _textSteps = [
-    'Memahami klaim',
+    'Memahami informasi',
     'Menilai bukti',
-    'Menyusun verdict',
+    'Menyusun hasil',
   ];
   static const _imageSteps = [
     'Membaca gambar',
     'Menilai bukti',
-    'Menyusun verdict',
+    'Menyusun hasil',
   ];
 
   @override

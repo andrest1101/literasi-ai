@@ -18,12 +18,12 @@ class VerifyClaim {
     final claim = _normalize(rawClaim);
     if (claim.length < minLength) {
       throw const UnknownFailure(
-        'Tulis klaim minimal 10 karakter agar AI punya konteks yang cukup.',
+        'Tulis informasi minimal 10 karakter agar AI memiliki konteks yang cukup.',
       );
     }
     if (claim.length > maxLength) {
       throw const UnknownFailure(
-        'Klaim terlalu panjang. Batasi maksimal 2.000 karakter.',
+        'Informasi terlalu panjang. Batasi maksimal 2.000 karakter.',
       );
     }
     return _repository.verifyTextClaim(claim);

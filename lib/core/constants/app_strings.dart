@@ -87,75 +87,75 @@ abstract final class AppStrings {
 
   static const String quickCheckTitle = 'Quick Check';
   static const String quickCheckSubtitle =
-      'Verifikasi satu klaim dalam satu sesi fokus. Hasil terstruktur, tanpa gangguan.';
+      'Periksa satu informasi dalam satu sesi yang fokus. Hasilnya tersusun rapi dan mudah dibaca.';
   static const String quickCheckLandingBadge = 'VERIFIKASI AI';
   static const String quickCheckLandingTitle = 'Cek kebenaran sebelum sebar';
   static const String quickCheckLandingSubtitle =
-      'Tempel klaim teks atau lampirkan screenshot. AI memberi verdict, keyakinan, dan langkah lanjutan.';
+      'Tempel teks atau lampirkan tangkapan layar. AI memberikan hasil pemeriksaan, tingkat keyakinan, dan langkah lanjutan.';
   static const String quickCheckStartSession = 'Mulai Pemeriksaan';
   static const String quickCheckSessionTitle = 'Sesi pemeriksaan';
   static const String quickCheckSessionSubtitle =
-      'Fokus pada satu klaim. Kamu bisa kembali kapan pun tanpa kehilangan konteks tab utama.';
+      'Fokus pada satu informasi dalam satu sesi. Kamu bisa kembali kapan pun tanpa kehilangan konteks tab utama.';
   static const String quickCheckStepsTitle = 'Alur yang jelas';
   static const String quickCheckStep1Title = 'Teks atau gambar';
   static const String quickCheckStep1Subtitle = 'Teks 10-2.000 • gambar 5 MB';
   static const String quickCheckStep2Title = 'AI menganalisis';
   static const String quickCheckStep2Subtitle = 'Beberapa detik';
-  static const String quickCheckStep3Title = 'Terima verdict';
-  static const String quickCheckStep3Subtitle = 'HOAKS, VALID, dsb.';
+  static const String quickCheckStep3Title = 'Terima hasil';
+  static const String quickCheckStep3Subtitle = 'HOAKS, VALID, dan lainnya.';
   static const String quickCheckBackToHome = 'Kembali ke Beranda';
   static const String quickCheckModeText = 'Teks';
   static const String quickCheckModeImage = 'Gambar';
   static const String quickCheckModeHint =
-      'Pilih teks untuk tempel klaim, atau gambar untuk screenshot.';
-  static const String quickCheckImageTitle = 'Gambar klaim';
+      'Pilih Teks untuk menempelkan tulisan, atau Gambar untuk tangkapan layar.';
+  static const String quickCheckImageTitle = 'Gambar yang diperiksa';
   static const String quickCheckImageSubtitle =
-      'JPG, PNG, atau WebP maksimal 5 MB. AI membaca isi gambar dulu.';
+      'JPG, PNG, atau WebP maksimal 5 MB. AI membaca isi gambar terlebih dahulu.';
   static const String quickCheckImageEmptyTitle = 'Belum ada gambar';
   static const String quickCheckImageEmptySubtitle =
-      'Pilih screenshot chat atau berita dari galeri, atau potret langsung.';
+      'Pilih tangkapan layar percakapan atau berita dari galeri, atau ambil foto langsung.';
   static const String quickCheckPickGallery = 'Galeri';
   static const String quickCheckPickCamera = 'Kamera';
-  static const String quickCheckReplaceImage = 'Ganti';
+  static const String quickCheckReplaceImage = 'Ganti gambar';
   static const String quickCheckRemoveImage = 'Hapus gambar';
   static const String quickCheckCaptionLabel = 'Caption opsional';
   static const String quickCheckCaptionHint =
-      'Contoh: screenshot grup WA tentang vaksin, 12 Mei 2026.';
+      'Contoh: tangkapan layar grup WhatsApp tentang vaksin, 12 Mei 2026.';
   static const String quickCheckPrivacyNote =
       'Jangan upload KTP, dokumen pribadi, atau data sensitif. Gambar dikirim ke AI untuk analisis.';
   static const String quickCheckImageCancelled = 'Pemilihan gambar dibatalkan.';
-  static const String quickCheckSourceText = 'SUMBER: TEKS';
-  static const String quickCheckSourceImage = 'SUMBER: GAMBAR';
+  static const String quickCheckSourceText = 'Sumber: Teks';
+  static const String quickCheckSourceImage = 'Sumber: Gambar';
   static const String quickCheckImageAttached = 'Gambar terlampir';
-  static const String quickCheckFormTitle = 'Klaim yang dicek';
+  static const String quickCheckFormTitle = 'Informasi yang diperiksa';
   static const String quickCheckFormSubtitle =
-      'Tulis utuh satu klaim agar konteksnya jelas.';
-  static const String quickCheckInputLabel = 'Tulis atau tempel klaim';
+      'Tulis satu informasi secara lengkap agar konteksnya jelas.';
+  static const String quickCheckInputLabel = 'Tulis atau tempel informasi';
   static const String quickCheckInputHint =
-      'Contoh: Benarkah minum air rebusan daun ini bisa menyembuhkan semua penyakit?';
+      'Contoh: Apakah benar minum air rebusan daun ini dapat menyembuhkan semua penyakit?';
   static const String quickCheckTooShort =
-      'Tulis klaim minimal 10 karakter agar AI punya konteks yang cukup.';
+      'Tulis informasi minimal 10 karakter agar AI memiliki konteks yang cukup.';
   static const String quickCheckTooLong =
-      'Klaim terlalu panjang. Batasi maksimal 2.000 karakter.';
+      'Informasi terlalu panjang. Batasi maksimal 2.000 karakter.';
   static const String quickCheckVerify = 'Verifikasi Sekarang';
   static const String quickCheckClear = 'Bersihkan';
   static const String quickCheckAnalyzingTitle = 'AI sedang menganalisis';
   static const String quickCheckAnalyzingSubtitle =
       'Biasanya selesai dalam beberapa detik di koneksi normal.';
   static const String quickCheckResultTitle = 'Hasil verifikasi';
-  static const String quickCheckClaimLabel = 'Klaim';
-  static const String quickCheckExplanationLabel = 'Kenapa dinilai begitu?';
-  static const String quickCheckSuggestionLabel = 'Langkah berikutnya';
+  static const String quickCheckClaimLabel = 'Informasi yang diperiksa';
+  static const String quickCheckExplanationLabel = 'Penjelasan hasil';
+  static const String quickCheckSuggestionLabel = 'Saran tindak lanjut';
   static const String quickCheckConfidenceLabel = 'Tingkat keyakinan AI';
-  static const String quickCheckNewCheck = 'Cek klaim lain';
+  static const String quickCheckNewCheck = 'Periksa informasi lain';
   static const String quickCheckRetry = 'Coba lagi';
   static const String quickCheckTipsTitle = 'Cara dapat hasil terbaik';
   static const String quickCheckTip1 =
-      'Tempel kalimat utuh, bukan potongan yang ambigu.';
+      'Tempel kalimat secara utuh, bukan potongan yang ambigu.';
   static const String quickCheckTip2 =
-      'Hindari data pribadi seperti NIK atau info sensitif.';
+      'Hindari data pribadi seperti NIK atau informasi sensitif.';
   static const String quickCheckTip3 =
-      'Bandingkan hasil AI dengan sumber resmi sebelum menyebar.';
+      'Bandingkan hasil AI dengan sumber resmi sebelum menyebarkan.';
   static const String quickCheckDisclaimer =
       'Hasil ini adalah bantuan literasi AI, bukan kebenaran mutlak. Bandingkan dengan sumber resmi sebelum menyebarkan informasi.';
 
