@@ -146,7 +146,7 @@ void main() {
     await _tapVerify(tester);
     await tester.pump();
 
-    expect(find.text('Memahami klaim'), findsOneWidget);
+    expect(find.text('Memahami informasi'), findsOneWidget);
 
     await tester.pumpAndSettle();
     expect(find.byType(QuickCheckResultSection), findsOneWidget);

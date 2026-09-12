@@ -184,7 +184,7 @@ void main() {
 
     await tester.tap(find.text('Gambar'));
     await tester.pumpAndSettle();
-    expect(find.text('Gambar klaim'), findsOneWidget);
+    expect(find.text('Gambar yang diperiksa'), findsOneWidget);
 
     final galleryFinder = find.text('Galeri').first;
     await tester.ensureVisible(galleryFinder);
@@ -201,7 +201,7 @@ void main() {
 
     expect(find.byType(QuickCheckResultSection), findsOneWidget);
     expect(find.text('PERLU DICEK'), findsOneWidget);
-    expect(find.text('SUMBER: GAMBAR'), findsOneWidget);
+    expect(find.text('Sumber: Gambar'), findsOneWidget);
     expect(find.text('Gambar terlampir: klaim.png'), findsOneWidget);
   });
 
