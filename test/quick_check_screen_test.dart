@@ -8,6 +8,7 @@ import 'package:literasi_ai/features/quick_check/domain/entities/verification_re
 import 'package:literasi_ai/features/quick_check/domain/repositories/verification_repository.dart';
 import 'package:literasi_ai/features/quick_check/presentation/providers/verification_provider.dart';
 import 'package:literasi_ai/features/quick_check/presentation/screens/quick_check_session_screen.dart';
+import 'package:literasi_ai/features/quick_check/presentation/widgets/char_counter_text.dart';
 import 'package:literasi_ai/features/quick_check/presentation/widgets/quick_check_result_section.dart';
 
 class _FakeRepository implements VerificationRepository {
@@ -80,6 +81,12 @@ Future<void> _tapVerify(WidgetTester tester) async {
 }
 
 void main() {
+  test('character counter formats Indonesian thousands', () {
+    expect(CharCounterText.format(0), '0');
+    expect(CharCounterText.format(999), '999');
+    expect(CharCounterText.format(2000), '2.000');
+  });
+
   testWidgets('verify disabled for too short claim', (
     WidgetTester tester,
   ) async {

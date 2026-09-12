@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:literasi_ai/core/constants/app_colors.dart';
 import 'package:literasi_ai/features/quick_check/domain/entities/image_attachment.dart';
 import 'package:literasi_ai/features/quick_check/domain/entities/verification_result.dart';
 import 'package:literasi_ai/features/quick_check/domain/repositories/verification_repository.dart';
@@ -10,6 +11,7 @@ import 'package:literasi_ai/features/quick_check/presentation/screens/quick_chec
 import 'package:literasi_ai/features/quick_check/presentation/widgets/quick_check_analyzing_indicator.dart';
 import 'package:literasi_ai/features/quick_check/presentation/widgets/quick_check_input_section.dart';
 import 'package:literasi_ai/features/quick_check/presentation/widgets/quick_check_result_section.dart';
+import 'package:literasi_ai/features/quick_check/presentation/widgets/session_back_button.dart';
 
 class _FakeRepository implements VerificationRepository {
   _FakeRepository({this.delay});
@@ -49,6 +51,42 @@ class _FakeRepository implements VerificationRepository {
 }
 
 void main() {
+  testWidgets('session has one polished back action and stable stepper', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: QuickCheckSessionScreen())),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SessionBackButton), findsOneWidget);
+    expect(find.text('Kembali ke Beranda'), findsNothing);
+    expect(find.byTooltip('Kembali ke Beranda'), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+
+    final appBar = tester.widget<AppBar>(find.byType(AppBar));
+    expect(appBar.automaticallyImplyLeading, isFalse);
+    expect(appBar.backgroundColor, AppColors.surface);
+    expect(appBar.leading, isA<SessionBackButton>());
+
+    expect(find.text('Input'), findsOneWidget);
+    expect(find.text('Analisis'), findsOneWidget);
+    expect(find.text('Hasil'), findsOneWidget);
+    expect(tester.widget<Text>(find.text('Input')).textAlign, TextAlign.left);
+    expect(
+      tester.widget<Text>(find.text('Analisis')).textAlign,
+      TextAlign.center,
+    );
+    expect(tester.widget<Text>(find.text('Hasil')).textAlign, TextAlign.right);
+    expect(find.bySemanticsLabel('Langkah aktif'), findsOneWidget);
+    expect(find.bySemanticsLabel('Langkah berikutnya'), findsNWidgets(2));
+
+    final backSlot = tester.getSize(find.byType(SessionBackButton));
+    expect(backSlot.width, greaterThanOrEqualTo(44));
+    expect(backSlot.height, greaterThanOrEqualTo(44));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('landing CTA opens dedicated session screen', (
     WidgetTester tester,
   ) async {
