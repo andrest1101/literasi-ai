@@ -1,6 +1,19 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
 _Last updated: 11 September 2026_
 
+## Status: Quick Check Copy Formal — SELESAI
+
+### Yang dikerjakan
+- Ganti istilah user-facing yang membingungkan seperti “klaim” menjadi
+  “informasi”, “pesan”, “berita”, atau “gambar” dengan nada formal profesional.
+- Pertahankan sesuai permintaan: tanpa kalimat arti verdict, label
+  “Caption opsional”, catatan privasi KTP/data sensitif, serta judul dan
+  subjudul “AI sedang menganalisis”.
+- Selaraskan pesan validasi domain dan pesan error ramah Gemini agar konsisten
+  dengan AppStrings tanpa mengubah kontrak JSON, verdict, batas, atau provider.
+- Sesuaikan test sumber gambar ke label “Sumber: Gambar”.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 39 test.
+
 ## Status: Quick Check Status Flat Tanpa Panel — SELESAI
 
 ### Yang dikerjakan
