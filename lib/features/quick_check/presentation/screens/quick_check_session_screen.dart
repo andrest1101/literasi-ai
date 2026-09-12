@@ -12,6 +12,7 @@ import '../widgets/quick_check_analyzing_indicator.dart';
 import '../widgets/quick_check_image_section.dart';
 import '../widgets/quick_check_input_section.dart';
 import '../widgets/quick_check_result_section.dart';
+import '../widgets/session_back_button.dart';
 
 /// Dedicated session screen Quick Check teks dan gambar.
 ///
@@ -225,14 +226,33 @@ class _QuickCheckSessionScreenState
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        shadowColor: Colors.transparent,
+        toolbarHeight: 64,
+        leadingWidth: 56,
+        titleSpacing: 4,
+        leading: SessionBackButton(
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
         title: const Text(AppStrings.quickCheckSessionTitle),
         centerTitle: false,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).maybePop(),
-            child: const Text(AppStrings.quickCheckBackToHome),
+        titleTextStyle: const TextStyle(
+          fontSize: 19,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.3,
+          color: AppColors.textPrimary,
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: AppColors.neutral.withValues(alpha: 0.2),
           ),
-        ],
+        ),
       ),
       body: SingleChildScrollView(
         controller: _scrollController,
@@ -252,17 +272,17 @@ class _QuickCheckSessionScreenState
                     color: AppColors.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
                 _SessionStepper(step: step),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
                 const Divider(height: 1),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 _ModeSelector(
                   mode: _mode,
                   loading: loading,
                   onChanged: _switchMode,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 const Text(
                   AppStrings.quickCheckModeHint,
                   style: TextStyle(
@@ -271,7 +291,7 @@ class _QuickCheckSessionScreenState
                     color: AppColors.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 280),
                   switchInCurve: Curves.easeOutCubic,
@@ -354,6 +374,11 @@ class _QuickCheckSessionScreenState
   }
 }
 
+/// Panel status sesi dengan latar tenang.
+///
+/// Panel ini menyatukan subtitle dan stepper di atas satu permukaan putih
+/// agar AppBar yang datar tidak membuat bagian atas halaman terasa polos,
+/// tanpa memakai gradien atau blok warna yang mencolok.
 class _ModeSelector extends StatelessWidget {
   const _ModeSelector({
     required this.mode,
@@ -468,83 +493,145 @@ class _ModeButton extends StatelessWidget {
   }
 }
 
+/// Stepper sesi dengan center-dot alignment.
+///
+/// Garis penghubung membentang dari titik tengah dot pertama hingga titik
+/// tengah dot terakhir, sehingga tepi kiri/kanan stepper sejajar sempurna
+/// dengan batas kontainer input di bawahnya tanpa angka piksel hardcoded.
 class _SessionStepper extends StatelessWidget {
   const _SessionStepper({required this.step});
 
   final int step;
 
   static const _labels = ['Input', 'Analisis', 'Hasil'];
+  static const _dotSize = 22.0;
+  static const _trackHeight = 2.0;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        for (var i = 0; i < _labels.length; i++) ...[
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SizedBox(
+      height: 58,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          // Garis penuh sebagai track, di-inset setengah dot agar ujungnya
+          // tepat di pusat dot pertama dan terakhir.
+          Positioned(
+            left: _dotSize / 2,
+            right: _dotSize / 2,
+            // Pusatkan track 2px ke titik tengah dot 22px.
+            top: (_dotSize - _trackHeight) / 2,
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    _StepDot(active: i <= step, done: i < step),
-                    if (i < _labels.length - 1)
-                      Expanded(
-                        child: Container(
-                          height: 2,
-                          margin: const EdgeInsets.symmetric(horizontal: 6),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(2),
-                            color: i < step
-                                ? AppColors.primary
-                                : AppColors.neutral.withValues(alpha: 0.25),
-                          ),
-                        ),
+                for (var i = 0; i < _labels.length - 1; i++) ...[
+                  Expanded(
+                    child: Container(
+                      height: _trackHeight,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(2),
+                        color: i < step
+                            ? AppColors.primary
+                            : AppColors.neutral.withValues(alpha: 0.25),
                       ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  _labels[i],
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: i <= step ? FontWeight.w800 : FontWeight.w500,
-                    color: i <= step
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
+                    ),
                   ),
-                ),
+                ],
+              ],
+            ),
+          ),
+          // Dot diposisikan proporsional di atas track.
+          Row(
+            children: [
+              for (var i = 0; i < _labels.length; i++) ...[
+                if (i > 0) const Spacer(),
+                _StepDot(active: i <= step, done: i < step, size: _dotSize),
+              ],
+            ],
+          ),
+          // Label memakai kolom Expanded sendiri, tidak dikunci selebar dot.
+          // Jarak dibuat lega agar teks tidak menempel pada bullet, dan label
+          // aktif memakai teks gelap supaya tidak menyatu dengan warna biru.
+          Positioned(
+            top: _dotSize + 12,
+            left: 0,
+            right: 0,
+            child: Row(
+              children: [
+                for (var i = 0; i < _labels.length; i++)
+                  Expanded(
+                    child: Text(
+                      _labels[i],
+                      textAlign: i == 0
+                          ? TextAlign.left
+                          : i == _labels.length - 1
+                          ? TextAlign.right
+                          : TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        height: 1.3,
+                        fontWeight: i == step
+                            ? FontWeight.w800
+                            : i < step
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        color: i == step
+                            ? AppColors.textPrimary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
         ],
-      ],
+      ),
     );
   }
 }
 
 class _StepDot extends StatelessWidget {
-  const _StepDot({required this.active, required this.done});
+  const _StepDot({required this.active, required this.done, this.size = 22});
 
   final bool active;
   final bool done;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 22,
-      height: 22,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: done
-            ? AppColors.primary
-            : active
-            ? AppColors.primary.withValues(alpha: 0.16)
-            : AppColors.neutral.withValues(alpha: 0.16),
-      ),
-      child: Icon(
-        done ? Icons.check_rounded : Icons.circle,
-        size: done ? 13 : 7,
-        color: done ? Colors.white : AppColors.primary,
+    return Semantics(
+      label: done
+          ? 'Langkah selesai'
+          : active
+          ? 'Langkah aktif'
+          : 'Langkah berikutnya',
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: done
+              ? AppColors.primary
+              : active
+              ? AppColors.primary.withValues(alpha: 0.14)
+              : AppColors.surface,
+          border: Border.all(
+            color: done || active
+                ? AppColors.primary
+                : AppColors.neutral.withValues(alpha: 0.34),
+            width: done || active ? 1.4 : 1.2,
+          ),
+        ),
+        child: Icon(
+          done ? Icons.check_rounded : Icons.circle,
+          size: done ? size * 0.58 : size * 0.3,
+          color: done
+              ? Colors.white
+              : active
+              ? AppColors.primary
+              : AppColors.neutral,
+        ),
       ),
     );
   }

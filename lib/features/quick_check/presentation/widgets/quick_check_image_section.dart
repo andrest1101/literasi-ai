@@ -7,6 +7,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/image_attachment.dart';
 import '../../domain/repositories/image_picker_service.dart';
 import '../../domain/usecases/verify_claim.dart';
+import 'char_counter_text.dart';
 
 /// Panel lampiran gambar sesi Quick Check.
 ///
@@ -80,14 +81,14 @@ class QuickCheckImageSection extends StatelessWidget {
                   onRemove: onRemove,
                 ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 16),
         _CaptionField(
           controller: captionController,
           error: captionError,
           loading: loading,
           onClear: onClearCaption,
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         const Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -573,6 +574,11 @@ class _CaptionField extends StatelessWidget {
               ],
             ),
           ],
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: CharCounterText(length: controller.text.trim().length),
+          ),
         ],
       ),
     );

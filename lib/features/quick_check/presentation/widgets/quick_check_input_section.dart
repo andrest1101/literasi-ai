@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../domain/usecases/verify_claim.dart';
+import 'char_counter_text.dart';
 
 /// Area input sesi Quick Check — bukan kartu bertumpuk.
 ///
@@ -33,21 +34,14 @@ class QuickCheckInputSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            const Expanded(
-              child: Text(
-                AppStrings.quickCheckFormTitle,
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.2,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            _CounterPill(length: _length),
-          ],
+        const Text(
+          AppStrings.quickCheckFormTitle,
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.2,
+            color: AppColors.textPrimary,
+          ),
         ),
         const SizedBox(height: 6),
         const Text(
@@ -178,10 +172,15 @@ class QuickCheckInputSection extends StatelessWidget {
                   ],
                 ),
               ],
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: CharCounterText(length: _length),
+              ),
             ],
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 20),
         SizedBox(
           height: 56,
           child: FilledButton.icon(
@@ -234,40 +233,6 @@ class QuickCheckInputSection extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _CounterPill extends StatelessWidget {
-  const _CounterPill({required this.length});
-
-  final int length;
-
-  @override
-  Widget build(BuildContext context) {
-    final nearLimit = length >= VerifyClaim.maxLength - 100;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        color: nearLimit
-            ? AppColors.danger.withValues(alpha: 0.1)
-            : AppColors.primary.withValues(alpha: 0.1),
-        border: Border.all(
-          color: nearLimit
-              ? AppColors.danger.withValues(alpha: 0.3)
-              : AppColors.primary.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Text(
-        '$length/${VerifyClaim.maxLength}',
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
-          fontFeatures: const [FontFeature.tabularFigures()],
-          color: nearLimit ? AppColors.danger : AppColors.primary,
-        ),
-      ),
     );
   }
 }
