@@ -44,8 +44,7 @@ class OnboardingSlide extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
-                      color:
-                          AppColors.primary.withValues(alpha: 0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                     ),
                     child: Text(
                       eyebrow,

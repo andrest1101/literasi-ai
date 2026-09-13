@@ -26,7 +26,8 @@ class ImageProcessor {
     } catch (e) {
       if (e is Failure) rethrow;
       throw const UnknownFailure(
-          'Gambar tidak terbaca, upload ulang dengan pencahayaan lebih baik.');
+        'Gambar tidak terbaca, upload ulang dengan pencahayaan lebih baik.',
+      );
     }
   }
 }

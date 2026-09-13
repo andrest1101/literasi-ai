@@ -38,13 +38,16 @@ dependencies:
   # State management (wajib Riverpod — agents.md)
   flutter_riverpod: ^2.6.1
 
+  # Penyimpanan lokal ringan untuk flag onboarding sekali-per-install.
+  shared_preferences: ^2.2.3
+
   # Firebase (Auth + Firestore)
   firebase_core: ^3.15.2
   firebase_auth: ^5.7.0
   cloud_firestore: ^5.6.12
   google_sign_in: ^6.3.0
 
-  # AI Engine — Gemini gemini-1.5-flash
+  # AI Engine — Gemini gemini-3.5-flash-lite
   google_generative_ai: ^0.4.7
 
   # Input & sharing (PRD)

@@ -34,8 +34,8 @@ class PillPageIndicator extends StatelessWidget {
               color: active
                   ? AppColors.textPrimary
                   : past
-                      ? AppColors.primary.withValues(alpha: 0.5)
-                      : AppColors.neutral.withValues(alpha: 0.35),
+                  ? AppColors.primary.withValues(alpha: 0.5)
+                  : AppColors.neutral.withValues(alpha: 0.35),
               borderRadius: BorderRadius.circular(4),
             ),
           );

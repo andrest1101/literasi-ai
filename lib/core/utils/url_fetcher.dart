@@ -19,8 +19,11 @@ class UrlFetcher {
 
   final http.Client _client;
 
-  static final RegExp _titleExp =
-      RegExp(r'<title[^>]*>(.*?)</title>', caseSensitive: false, dotAll: true);
+  static final RegExp _titleExp = RegExp(
+    r'<title[^>]*>(.*?)</title>',
+    caseSensitive: false,
+    dotAll: true,
+  );
   static final RegExp _descExp = RegExp(
     '<meta[^>]+name="description"[^>]+content="([^"]*)"',
     caseSensitive: false,
@@ -40,7 +43,9 @@ class UrlFetcher {
           .get(uri, headers: {'Accept': 'text/html'})
           .timeout(const Duration(seconds: 10));
       if (response.statusCode != 200) {
-        throw NetworkFailure('Gagal memuat link (HTTP ${response.statusCode}).');
+        throw NetworkFailure(
+          'Gagal memuat link (HTTP ${response.statusCode}).',
+        );
       }
       final body = response.body;
       final title = _titleExp.firstMatch(body)?.group(1)?.trim() ?? uri.host;

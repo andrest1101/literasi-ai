@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_strings.dart';
+import '../providers/onboarding_provider.dart';
+import 'auth_screen.dart';
 import 'onboarding_screen.dart';
 
-/// Splash — tampil singkat lalu ke Onboarding (PRD §5 Screen Map).
+/// Splash — tampil singkat lalu routing sesuai flag onboarding.
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -18,10 +20,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed(OnboardingScreen.route);
-    });
+    _routeAfterSplash();
+  }
+
+  Future<void> _routeAfterSplash() async {
+    await Future<void>.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+    bool completed = false;
+    try {
+      final repository = await ref.read(onboardingRepositoryProvider.future);
+      completed = await repository.isCompleted();
+    } catch (_) {
+      completed = false;
+    }
+    if (!mounted) return;
+    Navigator.of(context).pushReplacementNamed(
+      completed ? AuthScreen.route : OnboardingScreen.route,
+    );
   }
 
   @override

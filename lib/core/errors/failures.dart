@@ -9,12 +9,15 @@ class NetworkFailure extends Failure {
 }
 
 class ServerFailure extends Failure {
-  const ServerFailure([super.message = 'Server AI tidak merespons, coba lagi.']);
+  const ServerFailure([
+    super.message = 'Server AI tidak merespons, coba lagi.',
+  ]);
 }
 
 class ParsingFailure extends Failure {
-  const ParsingFailure(
-      [super.message = 'Hasil AI tidak dapat diproses, coba lagi.']);
+  const ParsingFailure([
+    super.message = 'Hasil AI tidak dapat diproses, coba lagi.',
+  ]);
 }
 
 class AuthFailure extends Failure {
