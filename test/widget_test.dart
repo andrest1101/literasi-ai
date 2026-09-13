@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:literasi_ai/features/auth/presentation/screens/auth_screen.dart';
 import 'package:literasi_ai/features/auth/presentation/screens/forgot_password_screen.dart';
@@ -13,6 +14,7 @@ void main() {
   testWidgets('Onboarding: swipe, press-glow, back & start', (
     WidgetTester tester,
   ) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
     await tester.pumpWidget(const ProviderScope(child: LiterasiAIApp()));
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
@@ -115,6 +117,7 @@ void main() {
   testWidgets('Auth triangle: login to register to forgot and back', (
     WidgetTester tester,
   ) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
     await tester.pumpWidget(const ProviderScope(child: LiterasiAIApp()));
     await tester.pump();
     await tester.pump(const Duration(seconds: 2));
