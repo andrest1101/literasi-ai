@@ -19,10 +19,21 @@ import '../widgets/session_back_button.dart';
 /// Dibuka via push dari landing tab agar pemeriksaan punya ruang penuh.
 /// State verifikasi tetap AsyncNotifier; session menambah segmented mode dan
 /// state attachment lokal agar UX terasa seperti aplikasi profesional.
+/// Mode awal sesi — dipakai landing agar kartu Teks/Gambar langsung membuka
+/// sesi yang sesuai tanpa toggle tambahan.
+enum QuickCheckInitialMode { text, image }
+
 class QuickCheckSessionScreen extends ConsumerStatefulWidget {
-  const QuickCheckSessionScreen({super.key});
+  const QuickCheckSessionScreen({
+    super.key,
+    this.initialMode = QuickCheckInitialMode.text,
+    this.initialClaim,
+  });
 
   static const route = '/quick-check-session';
+
+  final QuickCheckInitialMode initialMode;
+  final String? initialClaim;
 
   @override
   ConsumerState<QuickCheckSessionScreen> createState() =>
@@ -50,6 +61,7 @@ class _QuickCheckSessionScreenState
   @override
   void initState() {
     super.initState();
+    _applyInitialArgs();
     _controller.addListener(() {
       if (!mounted) return;
       if (_localError != null) {
@@ -66,6 +78,25 @@ class _QuickCheckSessionScreenState
         setState(() {});
       }
     });
+  }
+
+  void _applyInitialArgs() {
+    _mode = widget.initialMode == QuickCheckInitialMode.image
+        ? _QuickCheckMode.image
+        : _QuickCheckMode.text;
+    final seed = widget.initialClaim?.trim();
+    if (seed != null && seed.isNotEmpty) {
+      _controller.text = seed;
+    }
+  }
+
+  @override
+  void didUpdateWidget(QuickCheckSessionScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialMode != widget.initialMode ||
+        oldWidget.initialClaim != widget.initialClaim) {
+      _applyInitialArgs();
+    }
   }
 
   @override

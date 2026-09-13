@@ -96,14 +96,33 @@ abstract final class AppStrings {
   static const String quickCheckSessionTitle = 'Sesi pemeriksaan';
   static const String quickCheckSessionSubtitle =
       'Fokus pada satu informasi dalam satu sesi. Kamu bisa kembali kapan pun tanpa kehilangan konteks tab utama.';
-  static const String quickCheckStepsTitle = 'Alur yang jelas';
-  static const String quickCheckStep1Title = 'Teks atau gambar';
-  static const String quickCheckStep1Subtitle = 'Teks 10-2.000 • gambar 5 MB';
-  static const String quickCheckStep2Title = 'AI menganalisis';
-  static const String quickCheckStep2Subtitle = 'Beberapa detik';
-  static const String quickCheckStep3Title = 'Terima hasil';
-  static const String quickCheckStep3Subtitle = 'HOAKS, VALID, dan lainnya.';
+  static const String quickCheckModePickerTitle = 'Pilih cara memeriksa';
+  static const String quickCheckModePickerSubtitle =
+      'Langsung masuk ke sesi yang sesuai tanpa langkah tambahan.';
+  static const String quickCheckTileTextTitle = 'Cek teks';
+  static const String quickCheckTileTextSubtitle = 'Tempel tulisan 10-2.000';
+  static const String quickCheckTileImageTitle = 'Cek gambar';
+  static const String quickCheckTileImageSubtitle = 'Screenshot maks 5 MB';
+  static const String quickCheckExampleTitle = 'Coba contoh sekali ketuk';
+  static const String quickCheckExampleSubtitle =
+      'Ketuk salah satu contoh untuk langsung mengisi sesi pemeriksaan.';
+  static const String quickCheckExampleCta = 'Cek ini';
+  static const String quickCheckExample1 =
+      'Apakah benar minum air rebusan daun tertentu dapat menyembuhkan semua penyakit?';
+  static const String quickCheckExample2 =
+      'Beredar pesan berantai tentang bantuan tunai yang meminta data rekening. Apakah ini penipuan?';
+  static const String quickCheckExample3 =
+      'Viral kabar libur nasional tambahan minggu ini. Apakah informasi ini valid?';
   static const String quickCheckBackToHome = 'Kembali ke Beranda';
+  static const String navCheck = 'Cek';
+  static const String navHistory = 'Riwayat';
+  static const String navLearn = 'Belajar';
+  static const String navProfile = 'Profil';
+  static const String chatTitle = 'Chat AI';
+  static const String chatFabLabel = 'Chat dengan AI Literasi';
+  static const String chatPlaceholderTitle = 'Chat AI segera hadir';
+  static const String chatPlaceholderSubtitle =
+      'Layanan tanya jawab literasi digital sedang disiapkan. Untuk sekarang, gunakan sesi pemeriksaan untuk verifikasi cepat.';
   static const String quickCheckModeText = 'Teks';
   static const String quickCheckModeImage = 'Gambar';
   static const String quickCheckModeHint =

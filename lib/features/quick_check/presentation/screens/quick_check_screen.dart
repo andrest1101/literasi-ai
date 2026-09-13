@@ -14,6 +14,21 @@ class QuickCheckScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const QuickCheckSessionScreen();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    var mode = QuickCheckInitialMode.text;
+    String? claim;
+    if (args is QuickCheckInitialMode) {
+      mode = args;
+    } else if (args is String) {
+      claim = args;
+    } else if (args is Map) {
+      final rawMode = args['mode'];
+      if (rawMode == QuickCheckInitialMode.image) {
+        mode = QuickCheckInitialMode.image;
+      }
+      final rawClaim = args['claim'];
+      if (rawClaim is String) claim = rawClaim;
+    }
+    return QuickCheckSessionScreen(initialMode: mode, initialClaim: claim);
   }
 }
