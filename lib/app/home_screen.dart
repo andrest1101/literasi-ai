@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/constants/app_strings.dart';
+import '../features/chat/presentation/screens/chat_screen.dart';
+import '../features/chat/presentation/widgets/chat_fab.dart';
 import '../features/quick_check/presentation/screens/quick_check_home_tab.dart';
 import '../shared/widgets/bottom_nav_bar.dart';
 
-/// Home shell — 5 tab sesuai Screen Map PRD §5.
-/// Isi tiap tab dibangun di Phase 2/3; placeholder inline agar tidak ada
-/// file stub yang harus dihapus nanti.
+/// Home shell — 4 tab + FAB Chat AI melayang di atas konten.
+///
+/// Chat dikeluarkan dari bottom nav agar nav tidak sesak. FAB 60px diposisikan
+/// via [Scaffold.floatingActionButton] dengan gap 16px di atas navbar sehingga
+/// area sentuh nav steril. Ikon opsi A: shield verified + badge sparkle AI,
+/// selaras identitas cek-fakta (bukan robot generik).
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -20,19 +26,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _index = 0;
 
   static const _titles = [
-    'Quick Check',
-    'Chat AI',
-    'Riwayat',
-    'Belajar',
-    'Profil',
+    AppStrings.quickCheckTitle,
+    AppStrings.navHistory,
+    AppStrings.navLearn,
+    AppStrings.navProfile,
   ];
 
   static const _placeholders = [
-    'Chat AI literasi digital (Phase 3)',
     'Riwayat verifikasi + Firestore (Phase 3)',
     'Mini-course literasi (Phase 4)',
     'Profil & Literacy Score (Phase 3)',
   ];
+
+  void _openChat() {
+    Navigator.of(context).pushNamed(ChatScreen.route);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +58,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: ChatFab(onTap: _openChat),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: AppBottomNavBar(
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),
