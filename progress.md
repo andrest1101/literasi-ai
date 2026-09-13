@@ -1,6 +1,20 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
 _Last updated: 11 September 2026_
 
+## Status: Onboarding Sekali-Per-Install — SELESAI
+
+### Yang dikerjakan
+- Tambah flag lokal `onboarding_completed_v1` via SharedPreferences agar
+  onboarding hanya tampil sekali per install, bukan setiap refresh/restart.
+- Bangun slice Clean Architecture auth: repository domain, datasource lokal,
+  repository impl, dan controller Riverpod AsyncNotifier yang testable.
+- Splash menunggu branding minimum lalu routing ke Auth bila flag selesai dan
+  ke Onboarding bila belum/gagal baca. Onboarding menyimpan flag saat
+  `Mulai Sekarang` maupun `Lewati`.
+- Tambah test datasource, controller, splash dua arah, dan persistensi skip.
+  Test startup lama memakai mock SharedPreferences agar tidak hang.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 44 test.
+
 ## Status: Quick Check Copy Formal — SELESAI
 
 ### Yang dikerjakan
