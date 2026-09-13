@@ -1,5 +1,34 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 11 September 2026_
+_Last updated: 14 September 2026_
+
+## Status: FAB Chat Melayang + Ikon Shield — SELESAI
+
+### Yang dikerjakan
+- FAB Chat dipisah ke `chat_fab.dart`: ikon opsi A `verified_user` +
+  badge sparkle AI, ring putih, shadow ganda, ukuran 60px.
+- FAB dipindah ke `Scaffold.floatingActionButton` dengan gap 16px di atas
+  navbar; navbar steril tanpa overlap maupun gangguan area sentuh.
+- Padding bawah landing 28 ke 96 agar tips tidak tertutup FAB.
+- Ikon diselaraskan: placeholder chat dan chip onboarding memakai bahasa
+  ikon yang sama, robot generik dihapus.
+- Test diperketat: cek tidak ada overlap rect FAB vs nav.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 48 test.
+
+## Status: Navbar 4 + FAB Chat & Landing Fungsional — SELESAI
+
+### Yang dikerjakan
+- Navbar dipangkas 5 ke 4 destinasi (Cek, Riwayat, Belajar, Profil) model
+  docked edge-to-edge: hairline atas, indikator pill biru, bukan floating.
+- Chat AI keluar dari tab menjadi FAB bulat 56px kanan-atas nav (gradien biru,
+  ikon robot, badge online) menuju route `/chat` placeholder Phase 3.
+- Landing Quick Check: 3 kartu statis `Alur yang jelas` dihapus, diganti mode
+  picker 2 tile berdampingan, carousel contoh sekali ketuk, dan tips bullet.
+- Session screen dukung `initialMode` + `initialClaim` (plus `didUpdateWidget`)
+  agar tile dan contoh langsung membuka sesi yang sesuai.
+- Test baru `home_nav_chat_test.dart`: 4 destinasi, FAB ke chat, tile ke mode
+  gambar, contoh mengisi sesi, switch tab. Bug listener ganda sisa edit
+  ditemukan dan diperbaiki sebelum finalisasi.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 48 test.
 
 ## Status: Onboarding Sekali-Per-Install — SELESAI
 
