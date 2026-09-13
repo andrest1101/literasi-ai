@@ -616,7 +616,7 @@ class _TextVerifyVisual extends StatelessWidget {
           child: Transform.rotate(
             angle: 0.05,
             child: const _Chip(
-              icon: Icons.smart_toy_outlined,
+              icon: Icons.auto_awesome_rounded,
               label: 'AI Menganalisis',
               dark: true,
             ),
