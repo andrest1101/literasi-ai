@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../providers/onboarding_provider.dart';
 import '../widgets/onboarding_slide.dart';
 import '../widgets/pill_page_indicator.dart';
 import 'auth_screen.dart';
@@ -12,18 +14,19 @@ import 'auth_screen.dart';
 /// Gaya modern & clean: header brand + Lewati, kartu visual floating
 /// interaktif (press-glow), eyebrow + judul tebal + deskripsi,
 /// pill indicator, nav [Back | Next/Get Started].
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   static const route = '/onboarding';
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
+  bool _finishing = false;
 
   static const _slides = [
     (
@@ -63,7 +66,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _next() {
     HapticFeedback.lightImpact();
     if (_isLast) {
-      Navigator.of(context).pushReplacementNamed(AuthScreen.route);
+      _finish();
     } else {
       _goTo(_page + 1);
     }
@@ -74,6 +77,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _skip() {
+    _finish();
+  }
+
+  Future<void> _finish() async {
+    if (_finishing) return;
+    setState(() => _finishing = true);
+    try {
+      await ref.read(onboardingControllerProvider.notifier).complete();
+    } catch (_) {
+      // Tetap lanjut ke Auth; splash berikutnya memakai default aman.
+    }
+    if (!mounted) return;
     Navigator.of(context).pushReplacementNamed(AuthScreen.route);
   }
 

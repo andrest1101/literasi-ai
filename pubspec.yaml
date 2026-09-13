@@ -38,6 +38,9 @@ dependencies:
   # State management (wajib Riverpod — agents.md)
   flutter_riverpod: ^2.6.1
 
+  # Penyimpanan lokal ringan untuk flag onboarding sekali-per-install.
+  shared_preferences: ^2.2.3
+
   # Firebase (Auth + Firestore)
   firebase_core: ^3.15.2
   firebase_auth: ^5.7.0
