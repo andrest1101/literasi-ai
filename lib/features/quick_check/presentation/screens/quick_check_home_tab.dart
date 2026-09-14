@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../shared/widgets/app_section_header.dart';
 import 'quick_check_session_screen.dart';
 
 /// Landing tab Quick Check — hero CTA + mode picker + contoh + tips.
@@ -39,7 +40,16 @@ class QuickCheckHomeTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const _HeroCard(),
+              const _Wordmark(),
+              const SizedBox(height: 14),
+              const AppSectionHeader(
+                eyebrow: AppStrings.homeCheckEyebrow,
+                titleLine1: AppStrings.homeCheckTitle1,
+                titleLine2: AppStrings.homeCheckTitle2,
+                subtitle: AppStrings.homeCheckSubtitle,
+              ),
+              const SizedBox(height: 18),
+              const _SessionCtaCard(),
               const SizedBox(height: 22),
               const _SectionHeader(
                 title: AppStrings.quickCheckModePickerTitle,
@@ -103,15 +113,47 @@ class QuickCheckHomeTab extends StatelessWidget {
   }
 }
 
-class _HeroCard extends StatelessWidget {
-  const _HeroCard();
+/// CTA sesi ringkas — hero besar dihapus karena judul editorial sudah dipegang
+/// [AppSectionHeader]. Kartu ini fokus satu tugas: masuk sesi pemeriksaan.
+/// Wordmark kecil khusus tab Cek — satu-satunya tempat nama app muncul di
+/// Home. Tab lain memakai judul kontekstualnya sendiri.
+class _Wordmark extends StatelessWidget {
+  const _Wordmark();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.verified_user_rounded,
+          size: 18,
+          color: AppColors.textSecondary,
+        ),
+        SizedBox(width: 7),
+        Text(
+          AppStrings.appName,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.2,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SessionCtaCard extends StatelessWidget {
+  const _SessionCtaCard();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(26),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -125,69 +167,60 @@ class _HeroCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(999),
-              color: Colors.white.withValues(alpha: 0.16),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.3),
-              ),
-            ),
-            child: const Text(
-              AppStrings.quickCheckLandingBadge,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.1,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          const Text(
-            AppStrings.quickCheckLandingTitle,
-            style: TextStyle(
-              fontSize: 26,
-              height: 1.18,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-              color: Colors.white,
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppStrings.quickCheckCtaTitle,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: 6),
+                Text(
+                  AppStrings.quickCheckCtaSubtitle,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    height: 1.6,
+                    color: Color(0xFFD6E5FE),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
-            AppStrings.quickCheckLandingSubtitle,
-            style: TextStyle(
-              fontSize: 13,
-              height: 1.6,
-              color: Color(0xFFD6E5FE),
-            ),
-          ),
-          const SizedBox(height: 18),
+          const SizedBox(width: 14),
           SizedBox(
-            width: double.infinity,
-            height: 54,
-            child: FilledButton.icon(
+            height: 52,
+            child: FilledButton(
               onPressed: () => Navigator.of(
                 context,
               ).pushNamed(QuickCheckSessionScreen.route),
-              icon: const Icon(Icons.arrow_forward_rounded, size: 22),
-              label: const Text(AppStrings.quickCheckStartSession),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(17),
                 ),
+                padding: const EdgeInsets.symmetric(horizontal: 18),
                 textStyle: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.w800,
                 ),
                 elevation: 0,
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(AppStrings.quickCheckStartSession),
+                  SizedBox(width: 6),
+                  Icon(Icons.arrow_forward_rounded, size: 19),
+                ],
               ),
             ),
           ),
