@@ -265,17 +265,15 @@ class _QuickCheckSessionScreenState
         shadowColor: Colors.transparent,
         toolbarHeight: 64,
         leadingWidth: 56,
-        titleSpacing: 4,
         leading: SessionBackButton(
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text(AppStrings.quickCheckSessionTitle),
+        title: const Text(AppStrings.quickCheckBackLabel),
         centerTitle: false,
         titleTextStyle: const TextStyle(
-          fontSize: 19,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -0.3,
-          color: AppColors.textPrimary,
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textSecondary,
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
@@ -287,7 +285,7 @@ class _QuickCheckSessionScreenState
       ),
       body: SingleChildScrollView(
         controller: _scrollController,
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Center(
           child: ConstrainedBox(
@@ -295,15 +293,8 @@ class _QuickCheckSessionScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  AppStrings.quickCheckSessionSubtitle,
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.6,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 16),
+                const _SessionHeader(),
+                const SizedBox(height: 18),
                 _SessionStepper(step: step),
                 const SizedBox(height: 18),
                 const Divider(height: 1),
@@ -401,6 +392,73 @@ class _QuickCheckSessionScreenState
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Header editorial compact sesi — two-tone kecil + eyebrow.
+///
+/// Versi ramping dari [AppSectionHeader]: judul 22px dengan kata kedua biru
+/// italic, tanpa emblem besar agar stepper dan form tetap jadi fokus utama.
+class _SessionHeader extends StatelessWidget {
+  const _SessionHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            color: AppColors.primary.withValues(alpha: 0.08),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.22),
+            ),
+          ),
+          child: const Text(
+            AppStrings.quickCheckSessionEyebrow,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+              color: AppColors.primary,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        RichText(
+          text: const TextSpan(
+            style: TextStyle(
+              fontSize: 22,
+              height: 1.2,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
+              color: AppColors.textPrimary,
+            ),
+            children: [
+              TextSpan(text: AppStrings.quickCheckSessionTitle1),
+              TextSpan(
+                text: AppStrings.quickCheckSessionTitle2,
+                style: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
+        const Text(
+          AppStrings.quickCheckSessionSubtitle,
+          style: TextStyle(
+            fontSize: 13,
+            height: 1.6,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 }

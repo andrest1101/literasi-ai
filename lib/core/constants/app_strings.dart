@@ -93,7 +93,13 @@ abstract final class AppStrings {
   static const String quickCheckLandingSubtitle =
       'Tempel teks atau lampirkan tangkapan layar. AI memberikan hasil pemeriksaan, tingkat keyakinan, dan langkah lanjutan.';
   static const String quickCheckStartSession = 'Mulai Pemeriksaan';
-  static const String quickCheckSessionTitle = 'Sesi pemeriksaan';
+  static const String quickCheckCtaTitle = 'Siap memeriksa informasi?';
+  static const String quickCheckCtaSubtitle =
+      'Masuk ke sesi fokus untuk teks atau gambar. Hasil keluar dalam hitungan detik.';
+  static const String quickCheckBackLabel = 'Kembali';
+  static const String quickCheckSessionTitle1 = 'Sesi ';
+  static const String quickCheckSessionTitle2 = 'pemeriksaan.';
+  static const String quickCheckSessionEyebrow = 'SESI FOKUS';
   static const String quickCheckSessionSubtitle =
       'Fokus pada satu informasi dalam satu sesi. Kamu bisa kembali kapan pun tanpa kehilangan konteks tab utama.';
   static const String quickCheckModePickerTitle = 'Pilih cara memeriksa';
@@ -118,7 +124,40 @@ abstract final class AppStrings {
   static const String navHistory = 'Riwayat';
   static const String navLearn = 'Belajar';
   static const String navProfile = 'Profil';
-  static const String chatTitle = 'Chat AI';
+  static const String homeCheckEyebrow = 'VERIFIKASI AI';
+  static const String homeCheckTitle1 = 'Cek kebenaran';
+  static const String homeCheckTitle2 = 'sebelum sebar.';
+  static const String homeCheckSubtitle =
+      'Satu sesi fokus untuk teks atau gambar. Hasil, keyakinan, dan saran tersusun rapi.';
+  static const String homeHistoryEyebrow = 'AKTIVITAS';
+  static const String homeHistoryTitle1 = 'Jejak';
+  static const String homeHistoryTitle2 = 'pemeriksaanmu.';
+  static const String homeHistorySubtitle =
+      'Hasil setiap sesi tersimpan otomatis setelah Phase 3 aktif.';
+  static const String homeHistoryPlaceholderTitle = 'Belum ada riwayat';
+  static const String homeHistoryPlaceholderSubtitle =
+      'Mulai pemeriksaan pertama dari tab Cek. Hasilnya akan tersimpan di sini setelah integrasi akun aktif.';
+  static const String homeLearnEyebrow = 'EDUKASI';
+  static const String homeLearnTitle1 = 'Naikkan';
+  static const String homeLearnTitle2 = 'literasimu.';
+  static const String homeLearnSubtitle =
+      'Tiga modul singkat plus kuis untuk melatih insting cek fakta.';
+  static const String homeLearnPlaceholderTitle = 'Modul segera hadir';
+  static const String homeLearnPlaceholderSubtitle =
+      'Tiga modul 5 menit: clickbait, gambar manipulasi, dan verifikasi sumber. Dibuka di Phase 4.';
+  static const String homeProfileEyebrow = 'AKUN';
+  static const String homeProfileTitle1 = 'Kelola';
+  static const String homeProfileTitle2 = 'profilmu.';
+  static const String homeProfileSubtitle =
+      'Skor literasi bertambah dari setiap pemeriksaan dan modul yang selesai.';
+  static const String homeProfilePlaceholderTitle = 'Skor segera hadir';
+  static const String homeProfilePlaceholderSubtitle =
+      'Setiap verifikasi +10 poin, modul +20, kuis benar +5. Level: Pemula sampai Ahli.';
+  static const String chatEyebrow = 'ASISTEN AI';
+  static const String chatTitle1 = 'Tanya';
+  static const String chatTitle2 = 'apa saja.';
+  static const String chatHeaderSubtitle =
+      'Diskusi santai soal hoaks dan literasi digital dalam Bahasa Indonesia.';
   static const String chatFabLabel = 'Chat dengan AI Literasi';
   static const String chatPlaceholderTitle = 'Chat AI segera hadir';
   static const String chatPlaceholderSubtitle =
