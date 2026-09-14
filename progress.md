@@ -1,5 +1,32 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 14 September 2026_
+_Last updated: 16 September 2026_
+
+## Status: Header Ramping Tanpa Brand Ganda — SELESAI
+
+### Yang dikerjakan
+- Hapus AppBar Home + `_BrandBar` + pill `AI Aktif` (status dekoratif tanpa
+  state nyata). Tiap tab pegang judul kontekstualnya sendiri via SafeArea body.
+- `AppSectionHeader` murni tipografi: emblem gradien dihapus, eyebrow
+  diperkecil, judul 30 ke 26px. Pembeda tab dari konten, bukan dekorasi sama.
+- Wordmark kecil hanya di tab Cek. Placeholder jujur: judul ekspektasi +
+  deskripsi phase tanpa klaim fungsi palsu.
+- Session dan Chat: AppBar tinggal tombol kembali + label kecil; judul tunggal
+  di body, tidak ada judul ganda.
+- Test rewrite: wordmark khusus Cek, tanpa AI Aktif, tanpa judul ganda.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 52 test.
+
+## Status: Header Editorial Two-Tone Semua Tab — SELESAI
+
+### Yang dikerjakan
+- Widget baru `AppSectionHeader`: eyebrow pill + judul two-tone (baris 1
+  gelap, baris 2 biru italic) + subtitle + emblem gradien + hairline.
+- Home: AppBar slim brand bar (logo + status AI Aktif), 4 tab memakai header
+  editorial dengan copy masing-masing. Hero tab Cek dihapus jadi CTA ringkas.
+- Session: header compact `SESI FOKUS` two-tone + stepper tetap. Chat: header
+  `Tanya apa saja.` + kartu status ringkas.
+- Test baru `section_header_test.dart` 4 test + selaraskan 2 test lama yang
+  merujuk hero lama. Bug tap CTA tertutup FAB diperbaiki via ensureVisible.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 52 test.
 
 ## Status: FAB Chat Melayang + Ikon Shield — SELESAI
 
