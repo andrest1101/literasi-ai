@@ -103,7 +103,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Cek kebenaran sebelum sebar'), findsOneWidget);
+    expect(find.text('Cek kebenaran'), findsOneWidget);
+    expect(find.text('sebelum sebar.'), findsOneWidget);
     await tester.tap(find.text('Mulai Pemeriksaan'));
     await tester.pumpAndSettle();
 

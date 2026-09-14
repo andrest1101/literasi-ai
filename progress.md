@@ -1,5 +1,61 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 11 September 2026_
+_Last updated: 16 September 2026_
+
+## Status: Header Ramping Tanpa Brand Ganda — SELESAI
+
+### Yang dikerjakan
+- Hapus AppBar Home + `_BrandBar` + pill `AI Aktif` (status dekoratif tanpa
+  state nyata). Tiap tab pegang judul kontekstualnya sendiri via SafeArea body.
+- `AppSectionHeader` murni tipografi: emblem gradien dihapus, eyebrow
+  diperkecil, judul 30 ke 26px. Pembeda tab dari konten, bukan dekorasi sama.
+- Wordmark kecil hanya di tab Cek. Placeholder jujur: judul ekspektasi +
+  deskripsi phase tanpa klaim fungsi palsu.
+- Session dan Chat: AppBar tinggal tombol kembali + label kecil; judul tunggal
+  di body, tidak ada judul ganda.
+- Test rewrite: wordmark khusus Cek, tanpa AI Aktif, tanpa judul ganda.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 52 test.
+
+## Status: Header Editorial Two-Tone Semua Tab — SELESAI
+
+### Yang dikerjakan
+- Widget baru `AppSectionHeader`: eyebrow pill + judul two-tone (baris 1
+  gelap, baris 2 biru italic) + subtitle + emblem gradien + hairline.
+- Home: AppBar slim brand bar (logo + status AI Aktif), 4 tab memakai header
+  editorial dengan copy masing-masing. Hero tab Cek dihapus jadi CTA ringkas.
+- Session: header compact `SESI FOKUS` two-tone + stepper tetap. Chat: header
+  `Tanya apa saja.` + kartu status ringkas.
+- Test baru `section_header_test.dart` 4 test + selaraskan 2 test lama yang
+  merujuk hero lama. Bug tap CTA tertutup FAB diperbaiki via ensureVisible.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 52 test.
+
+## Status: FAB Chat Melayang + Ikon Shield — SELESAI
+
+### Yang dikerjakan
+- FAB Chat dipisah ke `chat_fab.dart`: ikon opsi A `verified_user` +
+  badge sparkle AI, ring putih, shadow ganda, ukuran 60px.
+- FAB dipindah ke `Scaffold.floatingActionButton` dengan gap 16px di atas
+  navbar; navbar steril tanpa overlap maupun gangguan area sentuh.
+- Padding bawah landing 28 ke 96 agar tips tidak tertutup FAB.
+- Ikon diselaraskan: placeholder chat dan chip onboarding memakai bahasa
+  ikon yang sama, robot generik dihapus.
+- Test diperketat: cek tidak ada overlap rect FAB vs nav.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 48 test.
+
+## Status: Navbar 4 + FAB Chat & Landing Fungsional — SELESAI
+
+### Yang dikerjakan
+- Navbar dipangkas 5 ke 4 destinasi (Cek, Riwayat, Belajar, Profil) model
+  docked edge-to-edge: hairline atas, indikator pill biru, bukan floating.
+- Chat AI keluar dari tab menjadi FAB bulat 56px kanan-atas nav (gradien biru,
+  ikon robot, badge online) menuju route `/chat` placeholder Phase 3.
+- Landing Quick Check: 3 kartu statis `Alur yang jelas` dihapus, diganti mode
+  picker 2 tile berdampingan, carousel contoh sekali ketuk, dan tips bullet.
+- Session screen dukung `initialMode` + `initialClaim` (plus `didUpdateWidget`)
+  agar tile dan contoh langsung membuka sesi yang sesuai.
+- Test baru `home_nav_chat_test.dart`: 4 destinasi, FAB ke chat, tile ke mode
+  gambar, contoh mengisi sesi, switch tab. Bug listener ganda sisa edit
+  ditemukan dan diperbaiki sebelum finalisasi.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 48 test.
 
 ## Status: Onboarding Sekali-Per-Install — SELESAI
 

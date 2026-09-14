@@ -92,12 +92,20 @@ void main() {
     await tester.tap(find.text('Lanjut tanpa akun'));
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
-    // Tab Quick Check sekarang landing ringkas dengan CTA sesi dedicated.
-    expect(find.text('Quick Check'), findsOneWidget);
+    // Tab Quick Check sekarang header editorial + CTA sesi dedicated.
+    expect(find.text('LiterasiAI'), findsOneWidget);
+    expect(find.text('Cek kebenaran'), findsOneWidget);
+    expect(find.text('sebelum sebar.'), findsOneWidget);
     expect(find.text('Mulai Pemeriksaan'), findsOneWidget);
-    await tester.tap(find.text('Mulai Pemeriksaan'));
+    final ctaButton = find.widgetWithText(
+      FilledButton,
+      'Mulai Pemeriksaan',
+    );
+    await tester.ensureVisible(ctaButton);
     await tester.pumpAndSettle();
-    expect(find.text('Sesi pemeriksaan'), findsOneWidget);
+    await tester.tap(ctaButton);
+    await tester.pumpAndSettle();
+    expect(find.text('SESI FOKUS'), findsOneWidget);
     expect(find.text('Verifikasi Sekarang'), findsOneWidget);
   });
 

@@ -93,17 +93,75 @@ abstract final class AppStrings {
   static const String quickCheckLandingSubtitle =
       'Tempel teks atau lampirkan tangkapan layar. AI memberikan hasil pemeriksaan, tingkat keyakinan, dan langkah lanjutan.';
   static const String quickCheckStartSession = 'Mulai Pemeriksaan';
-  static const String quickCheckSessionTitle = 'Sesi pemeriksaan';
+  static const String quickCheckCtaTitle = 'Siap memeriksa informasi?';
+  static const String quickCheckCtaSubtitle =
+      'Masuk ke sesi fokus untuk teks atau gambar. Hasil keluar dalam hitungan detik.';
+  static const String quickCheckBackLabel = 'Kembali';
+  static const String quickCheckSessionTitle1 = 'Sesi ';
+  static const String quickCheckSessionTitle2 = 'pemeriksaan.';
+  static const String quickCheckSessionEyebrow = 'SESI FOKUS';
   static const String quickCheckSessionSubtitle =
       'Fokus pada satu informasi dalam satu sesi. Kamu bisa kembali kapan pun tanpa kehilangan konteks tab utama.';
-  static const String quickCheckStepsTitle = 'Alur yang jelas';
-  static const String quickCheckStep1Title = 'Teks atau gambar';
-  static const String quickCheckStep1Subtitle = 'Teks 10-2.000 • gambar 5 MB';
-  static const String quickCheckStep2Title = 'AI menganalisis';
-  static const String quickCheckStep2Subtitle = 'Beberapa detik';
-  static const String quickCheckStep3Title = 'Terima hasil';
-  static const String quickCheckStep3Subtitle = 'HOAKS, VALID, dan lainnya.';
+  static const String quickCheckModePickerTitle = 'Pilih cara memeriksa';
+  static const String quickCheckModePickerSubtitle =
+      'Langsung masuk ke sesi yang sesuai tanpa langkah tambahan.';
+  static const String quickCheckTileTextTitle = 'Cek teks';
+  static const String quickCheckTileTextSubtitle = 'Tempel tulisan 10-2.000';
+  static const String quickCheckTileImageTitle = 'Cek gambar';
+  static const String quickCheckTileImageSubtitle = 'Screenshot maks 5 MB';
+  static const String quickCheckExampleTitle = 'Coba contoh sekali ketuk';
+  static const String quickCheckExampleSubtitle =
+      'Ketuk salah satu contoh untuk langsung mengisi sesi pemeriksaan.';
+  static const String quickCheckExampleCta = 'Cek ini';
+  static const String quickCheckExample1 =
+      'Apakah benar minum air rebusan daun tertentu dapat menyembuhkan semua penyakit?';
+  static const String quickCheckExample2 =
+      'Beredar pesan berantai tentang bantuan tunai yang meminta data rekening. Apakah ini penipuan?';
+  static const String quickCheckExample3 =
+      'Viral kabar libur nasional tambahan minggu ini. Apakah informasi ini valid?';
   static const String quickCheckBackToHome = 'Kembali ke Beranda';
+  static const String navCheck = 'Cek';
+  static const String navHistory = 'Riwayat';
+  static const String navLearn = 'Belajar';
+  static const String navProfile = 'Profil';
+  static const String homeCheckEyebrow = 'VERIFIKASI AI';
+  static const String homeCheckTitle1 = 'Cek kebenaran';
+  static const String homeCheckTitle2 = 'sebelum sebar.';
+  static const String homeCheckSubtitle =
+      'Satu sesi fokus untuk teks atau gambar. Hasil, keyakinan, dan saran tersusun rapi.';
+  static const String homeHistoryEyebrow = 'AKTIVITAS';
+  static const String homeHistoryTitle1 = 'Jejak';
+  static const String homeHistoryTitle2 = 'pemeriksaanmu.';
+  static const String homeHistorySubtitle =
+      'Hasil setiap sesi tersimpan otomatis setelah Phase 3 aktif.';
+  static const String homeHistoryPlaceholderTitle = 'Belum ada riwayat';
+  static const String homeHistoryPlaceholderSubtitle =
+      'Mulai pemeriksaan pertama dari tab Cek. Hasilnya akan tersimpan di sini setelah integrasi akun aktif.';
+  static const String homeLearnEyebrow = 'EDUKASI';
+  static const String homeLearnTitle1 = 'Naikkan';
+  static const String homeLearnTitle2 = 'literasimu.';
+  static const String homeLearnSubtitle =
+      'Tiga modul singkat plus kuis untuk melatih insting cek fakta.';
+  static const String homeLearnPlaceholderTitle = 'Modul segera hadir';
+  static const String homeLearnPlaceholderSubtitle =
+      'Tiga modul 5 menit: clickbait, gambar manipulasi, dan verifikasi sumber. Dibuka di Phase 4.';
+  static const String homeProfileEyebrow = 'AKUN';
+  static const String homeProfileTitle1 = 'Kelola';
+  static const String homeProfileTitle2 = 'profilmu.';
+  static const String homeProfileSubtitle =
+      'Skor literasi bertambah dari setiap pemeriksaan dan modul yang selesai.';
+  static const String homeProfilePlaceholderTitle = 'Skor segera hadir';
+  static const String homeProfilePlaceholderSubtitle =
+      'Setiap verifikasi +10 poin, modul +20, kuis benar +5. Level: Pemula sampai Ahli.';
+  static const String chatEyebrow = 'ASISTEN AI';
+  static const String chatTitle1 = 'Tanya';
+  static const String chatTitle2 = 'apa saja.';
+  static const String chatHeaderSubtitle =
+      'Diskusi santai soal hoaks dan literasi digital dalam Bahasa Indonesia.';
+  static const String chatFabLabel = 'Chat dengan AI Literasi';
+  static const String chatPlaceholderTitle = 'Chat AI segera hadir';
+  static const String chatPlaceholderSubtitle =
+      'Layanan tanya jawab literasi digital sedang disiapkan. Untuk sekarang, gunakan sesi pemeriksaan untuk verifikasi cepat.';
   static const String quickCheckModeText = 'Teks';
   static const String quickCheckModeImage = 'Gambar';
   static const String quickCheckModeHint =
