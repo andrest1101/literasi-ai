@@ -8,9 +8,14 @@ import '../../../../core/constants/app_strings.dart';
 /// Memakai satu permukaan ringan dengan progress linear agar loading terasa
 /// hidup tanpa menyaingi hasil verdict.
 class QuickCheckAnalyzingIndicator extends StatefulWidget {
-  const QuickCheckAnalyzingIndicator({super.key, this.imageMode = false});
+  const QuickCheckAnalyzingIndicator({
+    super.key,
+    this.imageMode = false,
+    this.urlMode = false,
+  });
 
   final bool imageMode;
+  final bool urlMode;
 
   @override
   State<QuickCheckAnalyzingIndicator> createState() =>
@@ -32,6 +37,7 @@ class _QuickCheckAnalyzingIndicatorState
     'Menilai bukti',
     'Menyusun hasil',
   ];
+  static const _urlSteps = ['Memuat link', 'Menilai bukti', 'Menyusun hasil'];
 
   @override
   void initState() {
@@ -53,7 +59,11 @@ class _QuickCheckAnalyzingIndicatorState
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
-        final steps = widget.imageMode ? _imageSteps : _textSteps;
+        final steps = widget.urlMode
+            ? _urlSteps
+            : widget.imageMode
+            ? _imageSteps
+            : _textSteps;
         final progress = _controller.value;
         final activeStep = (progress * steps.length).floor().clamp(
           0,

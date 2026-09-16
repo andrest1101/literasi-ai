@@ -1,30 +1,116 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:screenshot/screenshot.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/utils/share_service.dart';
 import '../../domain/entities/verification_result.dart';
+import 'share_card.dart';
+import 'verdict_presentation.dart';
 
 /// Bagian hasil sesi — satu alur vertikal, bukan kartu bertumpuk.
 ///
 /// Struktur: header verdict → confidence → klaim → analisis → saran → aksi.
 /// Warna status hanya sebagai aksen pada pita dan badge; teks tetap gelap
 /// agar kontras dan profesional sesuai palet resmi LiterasiAI.
-class QuickCheckResultSection extends StatelessWidget {
+///
+/// Aksi terdiri dari tombol primer [Bagikan] (render [ShareCard] off-screen
+/// lalu kirim sebagai gambar PNG, fallback teks bila capture gagal) dan
+/// tautan sekunder "Periksa informasi lain".
+class QuickCheckResultSection extends StatefulWidget {
   const QuickCheckResultSection({
     super.key,
     required this.result,
     required this.loading,
     required this.onNewCheck,
+    this.shareService,
+    this.onCaptureImage,
   });
 
   final VerificationResult result;
   final bool loading;
   final VoidCallback onNewCheck;
 
+  /// Injeksi untuk test — menghindari share sheet asli.
+  final ShareService? shareService;
+
+  /// Injeksi capture untuk test — menggantikan `screenshot` asli.
+  final Future<Uint8List> Function()? onCaptureImage;
+
+  @override
+  State<QuickCheckResultSection> createState() => _QuickCheckResultSectionState();
+}
+
+class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
+  bool _sharing = false;
+
+  bool get _busy => widget.loading || _sharing;
+
+  Future<void> _share(BuildContext context) async {
+    if (_busy) return;
+    setState(() => _sharing = true);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final service = widget.shareService ?? ShareService();
+      final capture = widget.onCaptureImage;
+      if (capture != null) {
+        final bytes = await capture();
+        await service.shareImage(
+          imageBytes: bytes,
+          text: ShareService.buildShareText(widget.result),
+        );
+      } else {
+        final bytes = await ScreenshotController().captureFromWidget(
+          MediaQuery(
+            data: MediaQuery.of(context),
+            child: Material(child: ShareCard(result: widget.result)),
+          ),
+          context: context,
+        );
+        await service.shareImage(
+          imageBytes: bytes,
+          text: ShareService.buildShareText(widget.result),
+        );
+      }
+    } catch (_) {
+      try {
+        final service = widget.shareService ?? ShareService();
+        await service.shareTextFallback(widget.result);
+      } catch (_) {
+        if (context.mounted) {
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text(AppStrings.quickCheckShareFailed),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } finally {
+      if (mounted) setState(() => _sharing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final style = VerdictPresentation.of(result.verdict);
+    final style = VerdictPresentation.of(widget.result.verdict);
+    final sourceBadge = switch (widget.result.source) {
+      VerificationSource.image => (
+        icon: Icons.image_outlined,
+        label: AppStrings.quickCheckSourceImage,
+      ),
+      VerificationSource.url => (
+        icon: Icons.link_rounded,
+        label: AppStrings.quickCheckSourceUrl,
+      ),
+      VerificationSource.text => (
+        icon: Icons.text_snippet_outlined,
+        label: AppStrings.quickCheckSourceText,
+      ),
+    };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -42,7 +128,7 @@ class QuickCheckResultSection extends StatelessWidget {
               ),
             ),
             TextButton.icon(
-              onPressed: loading ? null : onNewCheck,
+              onPressed: _busy ? null : widget.onNewCheck,
               icon: const Icon(Icons.refresh_rounded, size: 18),
               label: const Text(AppStrings.quickCheckNewCheck),
               style: TextButton.styleFrom(
@@ -115,7 +201,7 @@ class QuickCheckResultSection extends StatelessWidget {
                               color: style.accent,
                             ),
                             child: Text(
-                              result.verdict.label,
+                              widget.result.verdict.label,
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
@@ -129,7 +215,7 @@ class QuickCheckResultSection extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                '${result.confidence}%',
+                                '${widget.result.confidence}%',
                                 style: const TextStyle(
                                   fontSize: 32,
                                   height: 1,
@@ -165,7 +251,7 @@ class QuickCheckResultSection extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _ConfidenceTrack(
-                      value: result.confidence,
+                      value: widget.result.confidence,
                       accent: style.accent,
                     ),
                     const SizedBox(height: 12),
@@ -187,17 +273,13 @@ class QuickCheckResultSection extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              result.source == VerificationSource.image
-                                  ? Icons.image_outlined
-                                  : Icons.text_snippet_outlined,
+                              sourceBadge.icon,
                               size: 13,
                               color: AppColors.textSecondary,
                             ),
                             const SizedBox(width: 5),
                             Text(
-                              result.source == VerificationSource.image
-                                  ? AppStrings.quickCheckSourceImage
-                                  : AppStrings.quickCheckSourceText,
+                              sourceBadge.label,
                               style: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,
@@ -209,8 +291,8 @@ class QuickCheckResultSection extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (result.source == VerificationSource.image &&
-                        result.imageFileName != null) ...[
+                    if (widget.result.source == VerificationSource.image &&
+                        widget.result.imageFileName != null) ...[
                       const SizedBox(height: 8),
                       Row(
                         children: [
@@ -222,7 +304,32 @@ class QuickCheckResultSection extends StatelessWidget {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              '${AppStrings.quickCheckImageAttached}: ${result.imageFileName}',
+                              '${AppStrings.quickCheckImageAttached}: ${widget.result.imageFileName}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    if (widget.result.source == VerificationSource.url &&
+                        widget.result.sourceUrl != null) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.public_rounded,
+                            size: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              '${AppStrings.quickCheckUrlAttached}: ${widget.result.sourceUrl}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
@@ -250,7 +357,7 @@ class QuickCheckResultSection extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        result.claim,
+                        widget.result.claim,
                         style: const TextStyle(
                           fontSize: 14,
                           height: 1.6,
@@ -266,7 +373,7 @@ class QuickCheckResultSection extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      result.explanation,
+                      widget.result.explanation,
                       style: const TextStyle(
                         fontSize: 14,
                         height: 1.65,
@@ -282,7 +389,7 @@ class QuickCheckResultSection extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      result.suggestion,
+                      widget.result.suggestion,
                       style: const TextStyle(
                         fontSize: 13,
                         height: 1.6,
@@ -296,16 +403,53 @@ class QuickCheckResultSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Row(
+        SizedBox(
+          height: 54,
+          child: FilledButton.icon(
+            onPressed: _busy ? null : () => _share(context),
+            icon: _sharing
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.4,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.ios_share_rounded, size: 20),
+            label: Text(
+              _sharing
+                  ? AppStrings.quickCheckSharing
+                  : AppStrings.quickCheckShare,
+            ),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: const Color(0xFFE8EDF5),
+              disabledForegroundColor: const Color(0xFF5B6B80),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
+              elevation: _sharing ? 0 : 5,
+              shadowColor: AppColors.primary.withValues(alpha: 0.35),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(
+            Icon(
               Icons.info_outline_rounded,
               size: 16,
               color: AppColors.textSecondary,
             ),
-            const SizedBox(width: 8),
-            const Expanded(
+            SizedBox(width: 8),
+            Expanded(
               child: Text(
                 AppStrings.quickCheckDisclaimer,
                 style: TextStyle(
@@ -396,34 +540,6 @@ class QuickCheckErrorSection extends StatelessWidget {
   }
 }
 
-/// Gaya presentasi tiap verdict — hanya memakai palet resmi LiterasiAI.
-class VerdictPresentation {
-  const VerdictPresentation({required this.accent, required this.icon});
-
-  final Color accent;
-  final IconData icon;
-
-  factory VerdictPresentation.of(Verdict verdict) {
-    return switch (verdict) {
-      Verdict.hoaks => const VerdictPresentation(
-        accent: AppColors.danger,
-        icon: Icons.gpp_bad_outlined,
-      ),
-      Verdict.valid => const VerdictPresentation(
-        accent: AppColors.success,
-        icon: Icons.verified_outlined,
-      ),
-      Verdict.perluDicek => const VerdictPresentation(
-        accent: Color(0xFFB7791F),
-        icon: Icons.search_outlined,
-      ),
-      Verdict.tidakDapatDipastikan => const VerdictPresentation(
-        accent: AppColors.neutral,
-        icon: Icons.help_outline_rounded,
-      ),
-    };
-  }
-}
 
 class _ConfidenceTrack extends StatelessWidget {
   const _ConfidenceTrack({required this.value, required this.accent});

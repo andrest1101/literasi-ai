@@ -7,21 +7,23 @@ import '../../../../core/errors/failures.dart';
 import '../../domain/entities/image_attachment.dart';
 import '../../domain/repositories/image_picker_service.dart';
 import '../../domain/usecases/verify_claim.dart';
+import '../../domain/usecases/verify_url_claim.dart';
 import '../providers/verification_provider.dart';
 import '../widgets/quick_check_analyzing_indicator.dart';
 import '../widgets/quick_check_image_section.dart';
 import '../widgets/quick_check_input_section.dart';
 import '../widgets/quick_check_result_section.dart';
+import '../widgets/quick_check_url_section.dart';
 import '../widgets/session_back_button.dart';
 
-/// Dedicated session screen Quick Check teks dan gambar.
+/// Dedicated session screen Quick Check teks, gambar, dan link.
 ///
 /// Dibuka via push dari landing tab agar pemeriksaan punya ruang penuh.
 /// State verifikasi tetap AsyncNotifier; session menambah segmented mode dan
 /// state attachment lokal agar UX terasa seperti aplikasi profesional.
-/// Mode awal sesi — dipakai landing agar kartu Teks/Gambar langsung membuka
-/// sesi yang sesuai tanpa toggle tambahan.
-enum QuickCheckInitialMode { text, image }
+/// Mode awal sesi — dipakai landing agar kartu Teks/Gambar/Link langsung
+/// membuka sesi yang sesuai tanpa toggle tambahan.
+enum QuickCheckInitialMode { text, image, url }
 
 class QuickCheckSessionScreen extends ConsumerStatefulWidget {
   const QuickCheckSessionScreen({
@@ -40,15 +42,17 @@ class QuickCheckSessionScreen extends ConsumerStatefulWidget {
       _QuickCheckSessionScreenState();
 }
 
-enum _QuickCheckMode { text, image }
+enum _QuickCheckMode { text, image, url }
 
 class _QuickCheckSessionScreenState
     extends ConsumerState<QuickCheckSessionScreen> {
   final _controller = TextEditingController();
   final _captionController = TextEditingController();
+  final _urlController = TextEditingController();
   final _scrollController = ScrollController();
   String? _localError;
   String? _captionError;
+  String? _urlError;
   _QuickCheckMode _mode = _QuickCheckMode.text;
   ImageAttachment? _image;
   bool _pickingImage = false;
@@ -78,12 +82,22 @@ class _QuickCheckSessionScreenState
         setState(() {});
       }
     });
+    _urlController.addListener(() {
+      if (!mounted) return;
+      if (_urlError != null) {
+        setState(() => _urlError = null);
+      } else {
+        setState(() {});
+      }
+    });
   }
 
   void _applyInitialArgs() {
-    _mode = widget.initialMode == QuickCheckInitialMode.image
-        ? _QuickCheckMode.image
-        : _QuickCheckMode.text;
+    _mode = switch (widget.initialMode) {
+      QuickCheckInitialMode.image => _QuickCheckMode.image,
+      QuickCheckInitialMode.url => _QuickCheckMode.url,
+      QuickCheckInitialMode.text => _QuickCheckMode.text,
+    };
     final seed = widget.initialClaim?.trim();
     if (seed != null && seed.isNotEmpty) {
       _controller.text = seed;
@@ -103,6 +117,7 @@ class _QuickCheckSessionScreenState
   void dispose() {
     _controller.dispose();
     _captionController.dispose();
+    _urlController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -146,12 +161,37 @@ class _QuickCheckSessionScreenState
     _scrollToResult();
   }
 
+  void _verifyUrl() {
+    FocusScope.of(context).unfocus();
+    final text = VerifyUrlClaim.normalize(_urlController.text);
+    if (text.length < VerifyUrlClaim.minLength) {
+      setState(() => _urlError = AppStrings.quickCheckUrlTooShort);
+      return;
+    }
+    if (text.length > VerifyUrlClaim.maxLength) {
+      setState(() => _urlError = AppStrings.quickCheckUrlTooLong);
+      return;
+    }
+    final uri = Uri.tryParse(text);
+    if (uri == null ||
+        !VerifyUrlClaim.allowedSchemes.contains(uri.scheme.toLowerCase()) ||
+        !uri.hasAuthority) {
+      setState(() => _urlError = AppStrings.quickCheckUrlInvalid);
+      return;
+    }
+    setState(() => _urlError = null);
+    ref.read(quickCheckControllerProvider.notifier).verifyUrl(text);
+    _scrollToResult();
+  }
+
   void _clear() {
     _controller.clear();
     _captionController.clear();
+    _urlController.clear();
     setState(() {
       _localError = null;
       _captionError = null;
+      _urlError = null;
       _image = null;
     });
     ref.read(quickCheckControllerProvider.notifier).reset();
@@ -160,6 +200,11 @@ class _QuickCheckSessionScreenState
   void _clearCaption() {
     _captionController.clear();
     if (mounted) setState(() => _captionError = null);
+  }
+
+  void _clearUrl() {
+    _urlController.clear();
+    if (mounted) setState(() => _urlError = null);
   }
 
   void _removeImage() {
@@ -177,6 +222,7 @@ class _QuickCheckSessionScreenState
       _mode = mode;
       _localError = null;
       _captionError = null;
+      _urlError = null;
     });
     ref.read(quickCheckControllerProvider.notifier).reset();
   }
@@ -318,27 +364,36 @@ class _QuickCheckSessionScreenState
                   duration: const Duration(milliseconds: 280),
                   switchInCurve: Curves.easeOutCubic,
                   switchOutCurve: Curves.easeInCubic,
-                  child: _mode == _QuickCheckMode.text
-                      ? QuickCheckInputSection(
-                          key: const ValueKey('text-mode'),
-                          controller: _controller,
-                          localError: _localError,
-                          loading: loading,
-                          valid: _valid,
-                          onVerify: _verify,
-                          onClear: _clear,
-                        )
-                      : QuickCheckImageSection(
-                          key: const ValueKey('image-mode'),
-                          image: _image,
-                          captionController: _captionController,
-                          captionError: _captionError,
-                          loading: loading || _pickingImage,
-                          onPick: _pickImage,
-                          onRemove: _removeImage,
-                          onVerify: _verifyImage,
-                          onClearCaption: _clearCaption,
-                        ),
+                  child: switch (_mode) {
+                    _QuickCheckMode.text => QuickCheckInputSection(
+                      key: const ValueKey('text-mode'),
+                      controller: _controller,
+                      localError: _localError,
+                      loading: loading,
+                      valid: _valid,
+                      onVerify: _verify,
+                      onClear: _clear,
+                    ),
+                    _QuickCheckMode.image => QuickCheckImageSection(
+                      key: const ValueKey('image-mode'),
+                      image: _image,
+                      captionController: _captionController,
+                      captionError: _captionError,
+                      loading: loading || _pickingImage,
+                      onPick: _pickImage,
+                      onRemove: _removeImage,
+                      onVerify: _verifyImage,
+                      onClearCaption: _clearCaption,
+                    ),
+                    _QuickCheckMode.url => QuickCheckUrlSection(
+                      key: const ValueKey('url-mode'),
+                      controller: _urlController,
+                      localError: _urlError,
+                      loading: loading,
+                      onVerify: _verifyUrl,
+                      onClear: _clearUrl,
+                    ),
+                  },
                 ),
                 const SizedBox(height: 24),
                 AnimatedSwitcher(
@@ -353,7 +408,7 @@ class _QuickCheckSessionScreenState
                           ? 'error'
                           : hasResult
                           ? 'result'
-                          : 'idle'}',
+                          : 'idle'}-${_mode.name}',
                     ),
                     child: state.when(
                       data: (result) {
@@ -368,6 +423,7 @@ class _QuickCheckSessionScreenState
                       },
                       loading: () => QuickCheckAnalyzingIndicator(
                         imageMode: _mode == _QuickCheckMode.image,
+                        urlMode: _mode == _QuickCheckMode.url,
                       ),
                       error: (error, _) => Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -507,6 +563,15 @@ class _ModeSelector extends StatelessWidget {
                 label: AppStrings.quickCheckModeImage,
                 selected: mode == _QuickCheckMode.image,
                 onTap: loading ? null : () => onChanged(_QuickCheckMode.image),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: _ModeButton(
+                icon: Icons.link_rounded,
+                label: AppStrings.quickCheckModeUrl,
+                selected: mode == _QuickCheckMode.url,
+                onTap: loading ? null : () => onChanged(_QuickCheckMode.url),
               ),
             ),
           ],

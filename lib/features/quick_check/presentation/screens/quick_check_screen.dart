@@ -25,6 +25,8 @@ class QuickCheckScreen extends StatelessWidget {
       final rawMode = args['mode'];
       if (rawMode == QuickCheckInitialMode.image) {
         mode = QuickCheckInitialMode.image;
+      } else if (rawMode == QuickCheckInitialMode.url) {
+        mode = QuickCheckInitialMode.url;
       }
       final rawClaim = args['claim'];
       if (rawClaim is String) claim = rawClaim;

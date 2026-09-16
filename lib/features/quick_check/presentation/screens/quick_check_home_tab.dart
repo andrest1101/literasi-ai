@@ -80,6 +80,11 @@ class QuickCheckHomeTab extends StatelessWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 12),
+              _UrlModeBanner(
+                onTap: () =>
+                    _openSession(context, mode: QuickCheckInitialMode.url),
+              ),
               const SizedBox(height: 22),
               const _SectionHeader(
                 title: AppStrings.quickCheckExampleTitle,
@@ -351,6 +356,98 @@ class _ModeTile extends StatelessWidget {
                     height: 1.5,
                     color: AppColors.textSecondary,
                   ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Banner mode link — full-width horizontal di bawah 2 tile berdampingan.
+///
+/// Ritme landing tetap heterogen: hero CTA penuh, 2 tile persegi, banner
+/// link horizontal, lalu carousel contoh. Ikon link + aksen hijau
+/// memberi identitas "artikel/web" yang beda dari tile Teks/Gambar.
+class _UrlModeBanner extends StatelessWidget {
+  const _UrlModeBanner({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: AppStrings.quickCheckTileUrlTitle,
+      child: Material(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(22),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(22),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: AppColors.success.withValues(alpha: 0.3),
+              ),
+              color: AppColors.success.withValues(alpha: 0.05),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x0D101A33),
+                  blurRadius: 16,
+                  offset: Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: AppColors.success.withValues(alpha: 0.12),
+                  ),
+                  child: const Icon(
+                    Icons.link_rounded,
+                    size: 23,
+                    color: AppColors.success,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppStrings.quickCheckTileUrlTitle,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.2,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Text(
+                        AppStrings.quickCheckTileUrlSubtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.5,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  size: 22,
+                  color: AppColors.textSecondary,
                 ),
               ],
             ),

@@ -63,6 +63,10 @@ class VerificationResultModel {
       'explanation': result.explanation,
       'suggestion': result.suggestion,
       'checkedAt': result.checkedAt.toIso8601String(),
+      'source': result.source.name,
+      if (result.imageFileName != null) 'imageFileName': result.imageFileName,
+      if (result.sourceUrl != null) 'sourceUrl': result.sourceUrl,
+      if (result.sourceTitle != null) 'sourceTitle': result.sourceTitle,
     };
   }
 

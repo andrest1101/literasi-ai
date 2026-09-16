@@ -95,7 +95,7 @@ abstract final class AppStrings {
   static const String quickCheckStartSession = 'Mulai Pemeriksaan';
   static const String quickCheckCtaTitle = 'Siap memeriksa informasi?';
   static const String quickCheckCtaSubtitle =
-      'Masuk ke sesi fokus untuk teks atau gambar. Hasil keluar dalam hitungan detik.';
+      'Masuk ke sesi fokus untuk teks, gambar, atau link. Hasil keluar dalam hitungan detik.';
   static const String quickCheckBackLabel = 'Kembali';
   static const String quickCheckSessionTitle1 = 'Sesi ';
   static const String quickCheckSessionTitle2 = 'pemeriksaan.';
@@ -128,7 +128,7 @@ abstract final class AppStrings {
   static const String homeCheckTitle1 = 'Cek kebenaran';
   static const String homeCheckTitle2 = 'sebelum sebar.';
   static const String homeCheckSubtitle =
-      'Satu sesi fokus untuk teks atau gambar. Hasil, keyakinan, dan saran tersusun rapi.';
+      'Satu sesi fokus untuk teks, gambar, atau link. Hasil, keyakinan, dan saran tersusun rapi.';
   static const String homeHistoryEyebrow = 'AKTIVITAS';
   static const String homeHistoryTitle1 = 'Jejak';
   static const String homeHistoryTitle2 = 'pemeriksaanmu.';
@@ -164,8 +164,11 @@ abstract final class AppStrings {
       'Layanan tanya jawab literasi digital sedang disiapkan. Untuk sekarang, gunakan sesi pemeriksaan untuk verifikasi cepat.';
   static const String quickCheckModeText = 'Teks';
   static const String quickCheckModeImage = 'Gambar';
+  static const String quickCheckModeUrl = 'Link';
   static const String quickCheckModeHint =
-      'Pilih Teks untuk menempelkan tulisan, atau Gambar untuk tangkapan layar.';
+      'Pilih Teks untuk tulisan, Gambar untuk tangkapan layar, atau Link untuk artikel berita.';
+  static const String quickCheckTileUrlTitle = 'Cek link';
+  static const String quickCheckTileUrlSubtitle = 'Artikel maks 2.000';
   static const String quickCheckImageTitle = 'Gambar yang diperiksa';
   static const String quickCheckImageSubtitle =
       'JPG, PNG, atau WebP maksimal 5 MB. AI membaca isi gambar terlebih dahulu.';
@@ -182,9 +185,27 @@ abstract final class AppStrings {
   static const String quickCheckPrivacyNote =
       'Jangan upload KTP, dokumen pribadi, atau data sensitif. Gambar dikirim ke AI untuk analisis.';
   static const String quickCheckImageCancelled = 'Pemilihan gambar dibatalkan.';
+  static const String quickCheckUrlTitle = 'Link artikel yang diperiksa';
+  static const String quickCheckUrlSubtitle =
+      'Tempel link berita http(s). AI memuat judul dan ringkasannya dulu, lalu menilai klaim utamanya.';
+  static const String quickCheckUrlFieldLabel = 'Tempel link berita';
+  static const String quickCheckUrlHint = 'https://contoh.id/berita-penting';
+  static const String quickCheckUrlPaste = 'Tempel';
+  static const String quickCheckUrlPasteEmpty =
+      'Clipboard kosong. Salin dulu link artikelnya.';
+  static const String quickCheckUrlPrivacyNote =
+      'AI memuat judul dan ringkasan artikel dari link ini. Jangan tempel link yang butuh login atau berisi data pribadi.';
+  static const String quickCheckUrlTooShort =
+      'Tempel link artikel yang valid agar AI bisa memuat isinya.';
+  static const String quickCheckUrlTooLong =
+      'Link terlalu panjang. Batasi maksimal 2.000 karakter.';
+  static const String quickCheckUrlInvalid =
+      'Link tidak valid. Pakai link http(s), contoh: https://contoh.id/berita.';
   static const String quickCheckSourceText = 'Sumber: Teks';
   static const String quickCheckSourceImage = 'Sumber: Gambar';
+  static const String quickCheckSourceUrl = 'Sumber: Link';
   static const String quickCheckImageAttached = 'Gambar terlampir';
+  static const String quickCheckUrlAttached = 'Link diperiksa';
   static const String quickCheckFormTitle = 'Informasi yang diperiksa';
   static const String quickCheckFormSubtitle =
       'Tulis satu informasi secara lengkap agar konteksnya jelas.';
@@ -207,6 +228,10 @@ abstract final class AppStrings {
   static const String quickCheckConfidenceLabel = 'Tingkat keyakinan AI';
   static const String quickCheckNewCheck = 'Periksa informasi lain';
   static const String quickCheckRetry = 'Coba lagi';
+  static const String quickCheckShare = 'Bagikan Hasil';
+  static const String quickCheckSharing = 'Menyiapkan gambar...';
+  static const String quickCheckShareFailed =
+      'Gagal menyiapkan gambar. Mencoba bagikan sebagai teks.';
   static const String quickCheckTipsTitle = 'Cara dapat hasil terbaik';
   static const String quickCheckTip1 =
       'Tempel kalimat secara utuh, bukan potongan yang ambigu.';

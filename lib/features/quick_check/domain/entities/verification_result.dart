@@ -23,9 +23,9 @@ enum Verdict {
 }
 
 /// Sumber bukti yang diverifikasi.
-enum VerificationSource { text, image }
+enum VerificationSource { text, image, url }
 
-/// Hasil verifikasi satu klaim teks atau gambar.
+/// Hasil verifikasi satu klaim teks, gambar, atau link artikel.
 class VerificationResult {
   const VerificationResult({
     required this.claim,
@@ -36,6 +36,8 @@ class VerificationResult {
     required this.checkedAt,
     this.source = VerificationSource.text,
     this.imageFileName,
+    this.sourceUrl,
+    this.sourceTitle,
   });
 
   final String claim;
@@ -49,6 +51,12 @@ class VerificationResult {
   final VerificationSource source;
   final String? imageFileName;
 
+  /// Link artikel asli untuk mode URL.
+  final String? sourceUrl;
+
+  /// Judul artikel hasil fetch untuk mode URL.
+  final String? sourceTitle;
+
   /// Hasil aman saat model tidak dapat memastikan — tetap sukses, bukan error.
   factory VerificationResult.uncertain(
     String claim, {
@@ -59,6 +67,8 @@ class VerificationResult {
     DateTime? checkedAt,
     VerificationSource source = VerificationSource.text,
     String? imageFileName,
+    String? sourceUrl,
+    String? sourceTitle,
   }) {
     return VerificationResult(
       claim: claim,
@@ -69,6 +79,8 @@ class VerificationResult {
       checkedAt: checkedAt ?? DateTime.now(),
       source: source,
       imageFileName: imageFileName,
+      sourceUrl: sourceUrl,
+      sourceTitle: sourceTitle,
     );
   }
 }

@@ -12,6 +12,7 @@ import '../../domain/repositories/image_picker_service.dart';
 import '../../domain/repositories/verification_repository.dart';
 import '../../domain/usecases/verify_claim.dart';
 import '../../domain/usecases/verify_image_claim.dart';
+import '../../domain/usecases/verify_url_claim.dart';
 
 /// Dependensi Quick Check — dapat di-override di test dengan fake.
 final geminiTextDatasourceProvider = Provider<GeminiTextDatasource>((ref) {
@@ -41,6 +42,10 @@ final verifyImageClaimProvider = Provider<VerifyImageClaim>((ref) {
   return VerifyImageClaim(ref.watch(verificationRepositoryProvider));
 });
 
+final verifyUrlClaimProvider = Provider<VerifyUrlClaim>((ref) {
+  return VerifyUrlClaim(ref.watch(verificationRepositoryProvider));
+});
+
 /// State verifikasi klaim teks.
 ///
 /// `null` berarti belum ada hasil (idle). Loading, data, dan error memakai
@@ -54,6 +59,7 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
   String? _lastClaim;
   ImageAttachment? _lastImage;
   String _lastCaption = '';
+  String? _lastUrl;
 
   String? get lastClaim => _lastClaim;
 
@@ -67,6 +73,7 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
     _lastClaim = rawClaim;
     _lastImage = null;
     _lastCaption = '';
+    _lastUrl = null;
     state = const AsyncLoading();
     try {
       final result = await ref.read(verifyClaimProvider).call(rawClaim);
@@ -85,12 +92,30 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
     _lastImage = image;
     _lastCaption = caption;
     _lastClaim = caption.isEmpty ? 'Gambar: ${image.fileName}' : caption;
+    _lastUrl = null;
     state = const AsyncLoading();
     try {
       final result = await ref
           .read(verifyImageClaimProvider)
           .call(image: image, caption: caption);
       _lastClaim = result.claim;
+      state = AsyncData(result);
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+    }
+  }
+
+  Future<void> verifyUrl(String rawUrl) async {
+    if (state.isLoading) return;
+    _lastUrl = rawUrl;
+    _lastImage = null;
+    _lastCaption = '';
+    _lastClaim = rawUrl;
+    state = const AsyncLoading();
+    try {
+      final result = await ref.read(verifyUrlClaimProvider).call(rawUrl);
+      _lastClaim = result.claim;
+      _lastUrl = result.sourceUrl ?? rawUrl;
       state = AsyncData(result);
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
@@ -104,6 +129,11 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
       await verifyImage(image: image, caption: _lastCaption);
       return;
     }
+    final url = _lastUrl;
+    if (url != null) {
+      await verifyUrl(url);
+      return;
+    }
     final claim = _lastClaim;
     if (claim == null) return;
     await verify(claim);
@@ -113,6 +143,7 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
     _lastClaim = null;
     _lastImage = null;
     _lastCaption = '';
+    _lastUrl = null;
     state = const AsyncData(null);
   }
 }

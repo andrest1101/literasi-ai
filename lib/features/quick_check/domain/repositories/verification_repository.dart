@@ -1,7 +1,7 @@
 import '../entities/image_attachment.dart';
 import '../entities/verification_result.dart';
 
-/// Kontrak verifikasi klaim teks dan gambar — diimplementasikan di data layer.
+/// Kontrak verifikasi klaim teks, gambar, dan link artikel.
 abstract class VerificationRepository {
   Future<VerificationResult> verifyTextClaim(String claim);
 
@@ -9,4 +9,6 @@ abstract class VerificationRepository {
     required ImageAttachment image,
     String caption = '',
   });
+
+  Future<VerificationResult> verifyUrlClaim({required String url});
 }
