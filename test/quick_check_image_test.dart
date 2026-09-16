@@ -54,6 +54,11 @@ class _FakeImageRepository implements VerificationRepository {
       imageFileName: image.fileName,
     );
   }
+
+  @override
+  Future<VerificationResult> verifyUrlClaim({required String url}) {
+    throw UnimplementedError();
+  }
 }
 
 class _FakePicker implements ImagePickerService {

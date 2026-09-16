@@ -48,6 +48,21 @@ class _FakeRepository implements VerificationRepository {
       imageFileName: image.fileName,
     );
   }
+
+  @override
+  Future<VerificationResult> verifyUrlClaim({required String url}) async {
+    if (delay != null) await Future.delayed(delay!);
+    return VerificationResult(
+      claim: url,
+      verdict: Verdict.valid,
+      confidence: 92,
+      explanation: 'Penjelasan uji untuk redesign.',
+      suggestion: 'Saran uji untuk redesign.',
+      checkedAt: DateTime(2026, 9, 11),
+      source: VerificationSource.url,
+      sourceUrl: url,
+    );
+  }
 }
 
 void main() {
