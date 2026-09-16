@@ -60,7 +60,10 @@ void main() {
     expect(find.text('Coba contoh sekali ketuk'), findsOneWidget);
     expect(find.text('Alur yang jelas'), findsNothing);
 
-    await tester.tap(find.text('Cek gambar'));
+    final imageTile = find.text('Cek gambar');
+    await tester.ensureVisible(imageTile);
+    await tester.pumpAndSettle();
+    await tester.tap(imageTile);
     await tester.pumpAndSettle();
     expect(find.byType(QuickCheckSessionScreen), findsOneWidget);
     expect(find.text('Gambar yang diperiksa'), findsOneWidget);

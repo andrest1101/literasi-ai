@@ -1,5 +1,24 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 20 September 2026_
+_Last updated: 21 September 2026_
+
+## Status: Literacy Score Phase 3a — SELESAI
+
+### Yang dikerjakan
+- Domain Score murni Dart: `LiteracyLevel` ambang Standar (0/50/150/300),
+  `LiteracyScore` (+10 verifikasi, +20 modul, +5 kuis), kontrak repository dan
+  3 use case award. Warna/ikon level di presentation extension agar domain
+  bebas Flutter.
+- Data Firestore `users/{uid}/score/summary`: increment atomik, arrayUnion
+  modul idempoten, mapping toleran dokumen korup.
+- Provider stream skor + aksi award; hook best-effort di `QuickCheckController`
+  bersamaan auto-save History tanpa menahan hasil AI.
+- UI: `ScoreRing` gradien animasi 600ms, `ScoreBreakdown` 3 sumber + catatan
+  Phase 3b jujur, `ProfileScreen` fungsional pertama, `ScoreCheckChip` pill di
+  tab Cek menuju Profil.
+- Modul/kuis bernilai 0 jujur sampai Phase 3b; slot award sudah siap colok.
+- Test `score_test.dart` 13 case + selaraskan 2 test lama. Bug cast model
+  korup dan tap tile tertutup chip diperbaiki.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 112 test.
 
 ## Status: Header Chat Gabung + Banner Setup Key — SELESAI
 

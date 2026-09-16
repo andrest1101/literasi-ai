@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../history/presentation/providers/history_providers.dart';
+import '../../../score/presentation/providers/score_providers.dart';
 import '../../data/datasources/gemini_text_datasource.dart';
 import '../../data/datasources/gemini_vision_datasource.dart';
 import '../../data/datasources/image_picker_datasource.dart';
@@ -156,6 +157,7 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
   /// Jika Firestore sedang offline atau rules menolak, riwayat dapat dicoba
   /// lagi pada pemeriksaan berikutnya tanpa mengubah state hasil verifikasi.
   /// UID dibaca via provider agar widget test bisa override tanpa Firebase.
+  /// Skor +10 diberikan best-effort bersamaan dengan auto-save riwayat.
   void _saveHistory(VerificationResult result) {
     String? userId;
     try {
@@ -170,6 +172,13 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
           .read(saveHistoryProvider)(userId: userId, result: result)
           .catchError((Object error, StackTrace stackTrace) {
             debugPrint('Gagal menyimpan riwayat: $error');
+          }),
+    );
+    unawaited(
+      ref
+          .read(awardVerificationProvider)(userId)
+          .catchError((Object error, StackTrace stackTrace) {
+            debugPrint('Gagal menambah skor: $error');
           }),
     );
   }
