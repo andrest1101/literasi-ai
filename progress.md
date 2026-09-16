@@ -1,6 +1,37 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
 _Last updated: 16 September 2026_
 
+## Status: Quick Check URL + Share Hasil — SELESAI
+
+### Yang dikerjakan
+- Mode URL penuh Clean Architecture: `VerifyUrlClaim` (validasi http/https +
+  authority, normalisasi, helper `isParsable` terpusat), `VerificationSource.url`
+  + field `sourceUrl/sourceTitle`, kontrak `verifyUrlClaim`, dan repo impl yang
+  mengorkestrasi `UrlFetcher` (judul + deskripsi truncate 500 char) lalu
+  `GeminiTextDatasource` dengan klaim terstruktur URL/Judul/Deskripsi.
+- Controller: `verifyUrl(url)`, retry prioritas image → url → teks, reset
+  bersihkan `_lastUrl`. `UrlFetcher` yang lama menganggur kini terpakai.
+- UI sesi 3 mode: selector Teks/Gambar/Link, `QuickCheckUrlSection` (field
+  satu baris + tombol Tempel clipboard + pratinjau host hijau + privacy note),
+  analyzing khusus URL (`Memuat link`), badge `Sumber: Link` + baris lampiran
+  URL di result. Tombol aktif selama ada teks agar error lokal menjelaskan.
+- Landing: banner Link full-width aksen hijau di bawah 2 tile, ritme tetap
+  heterogen (hero, tile, banner, carousel). Route lama dukung mode url.
+- Share hasil (PRD §4.1): `ShareCard` portrait off-screen (pita brand gradien,
+  hero verdict + confidence, kutipan klaim, footer ajakan), `ShareService`
+  (`captureFromWidget` → PNG `SharePlus.instance.share`, fallback teks bila
+  capture gagal), tombol `Bagikan Hasil` dengan state loading + snackbar.
+  `VerdictPresentation` dipisah ke file sendiri anti circular import.
+- Fake repository 4 file test lama dilengkapi `verifyUrlClaim` agar kontrak baru
+  tidak merusak regresi. Copy lama "teks atau gambar" diselaraskan jadi
+  "teks, gambar, atau link".
+- Test baru `quick_check_url_share_test.dart` 18 test: validasi URL, controller
+  url + retry, ShareService (teks, file PNG, tolak bytes kosong), landing banner,
+  sesi url analyzing→result, error lokal link invalid, share via injeksi,
+  render ShareCard. Bug tombol-mati-misterius ditemukan dan diperbaiki.
+- Verifikasi: `flutter analyze` bersih (sisa 1 warning lama onboarding tak
+  terkait), `flutter test` lolos 70 test.
+
 ## Status: Header Ramping Tanpa Brand Ganda — SELESAI
 
 ### Yang dikerjakan
