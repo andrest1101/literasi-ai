@@ -1,5 +1,36 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 18 September 2026_
+_Last updated: 20 September 2026_
+
+## Status: Header Chat Gabung + Banner Setup Key — SELESAI
+
+### Yang dikerjakan
+- AppBar Chat digabung: back + avatar shield + nama + status + aksi mulai
+  baru. Teks `Kembali` dan presence bar ganda dihapus, hemat ~76px vertikal.
+- Dot online palsu dihapus; status jujur berupa kesiapan, bukan koneksi.
+- Banner pratinjau sekali-lihat saat key kosong: ikon kunci + tombol salin
+  perintah run. Error Quick Check key hilang dapat tombol salin yang sama.
+- Provider `chatKeyConfiguredProvider` baca key saat compile tanpa request.
+- Test tambah banner + clipboard mock + provider key; selaraskan header lama.
+  Bug tap saran tertutup banner dan snackbar timing diperbaiki.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 99 test.
+
+## Status: AI Chat Assistant P0 — SELESAI
+
+### Yang dikerjakan
+- Domain chat: `ChatMessage` (role user/ai, status sent/failed, verifySeed),
+  kontrak `ChatRepository`, dan `SendChatMessage` (validasi 1-1.000 karakter).
+- Data: `GeminiChatDatasource` (model `gemini-3.5-flash-lite`, prompt literasi
+  santai ID, konteks 10 pesan, timeout 30 detik, error ramah konsisten) dan
+  `ChatRepositoryImpl`.
+- Controller `ChatState/ChatController` (Riverpod Notifier): pesan optimistis,
+  bubble mengetik, retry per pesan gagal, clear, cegah kirim ganda.
+- UI profesional: presence bar ramping, bubble kanan gradien/kiri putih,
+  typing dots, timestamp, tombol `Verifikasi ini` ke sesi Quick Check dengan
+  seed benar, sapaan kosong + 3 saran sekali ketuk, input bar oval + counter.
+- Placeholder lama dihapus; FAB dan route `/chat` tetap sebagai entry point.
+- Test `chat_test.dart` 9 case + selaraskan 2 test lama. Bug timer scroll sisa
+  diperbaiki agar test-safe.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 97 test.
 
 ## Status: History Firestore + Auto-Save — SELESAI
 

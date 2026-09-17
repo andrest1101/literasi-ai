@@ -71,11 +71,14 @@ void main() {
   testWidgets('chat and session have single titles, no appbar doubling', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: ChatScreen()));
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: ChatScreen())),
+    );
     await tester.pumpAndSettle();
-    expect(find.text('Tanya'), findsOneWidget);
-    expect(find.text('apa saja.'), findsOneWidget);
-    expect(find.text('Chat AI'), findsNothing);
+    expect(find.text('Asisten LiterasiAI'), findsOneWidget);
+    expect(find.text('Siap membantu verifikasi'), findsOneWidget);
+    expect(find.text('Mode pratinjau: kunci API belum tersambung'), findsOneWidget);
+    expect(find.text('Salin perintah'), findsOneWidget);
 
     await tester.pumpWidget(
       const ProviderScope(child: MaterialApp(home: QuickCheckSessionScreen())),
