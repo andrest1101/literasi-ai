@@ -42,6 +42,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('LiterasiAI'), findsNothing);
     expect(find.text('Kelola'), findsOneWidget);
+    expect(find.text('Sumber poin'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -64,7 +65,7 @@ void main() {
 
     await tester.tap(find.text('Profil'));
     await tester.pumpAndSettle();
-    expect(find.text('Skor segera hadir'), findsOneWidget);
+    expect(find.text('Sumber poin'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
