@@ -44,7 +44,7 @@ void main() {
     await tester.tap(find.byTooltip('Chat dengan AI Literasi'));
     await tester.pumpAndSettle();
     expect(find.byType(ChatScreen), findsOneWidget);
-    expect(find.text('Chat AI segera hadir'), findsOneWidget);
+    expect(find.text('Halo, aku asisten literasimu.'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
