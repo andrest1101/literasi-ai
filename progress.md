@@ -1,5 +1,32 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 16 September 2026_
+_Last updated: 18 September 2026_
+
+## Status: History Firestore + Auto-Save — SELESAI
+
+### Yang dikerjakan
+- Slice Clean Architecture History penuh: `HistoryEntry`, `HistoryFilter`,
+  kontrak `watch/save/delete`, use case `SaveHistory`/`DeleteHistory`,
+  `HistoryRemoteDatasource` (Firestore `users/{uid}/verifications`,
+  `orderBy checkedAt desc limit 50`), `HistoryDocModel`
+  (fromDocument/fromMap/toDocument UTC ISO8601), dan `HistoryRepositoryImpl`.
+- Provider Riverpod: `historyUserIdProvider` aman-test (tanpa Firebase init
+  tetap jalan), `historyEntriesProvider` StreamProvider, filter StateProvider,
+  `historyActionProvider` AsyncNotifier untuk delete terpantau UI.
+- Auto-save best-effort: `QuickCheckController.verify/verifyImage/verifyUrl`
+  menyimpan setelah AsyncData tanpa menahan hasil; gagal simpan hanya
+  debugPrint, tidak menggagalkan verifikasi.
+- UI tab Riwayat ganti placeholder: header kontekstual, chip filter 4
+  (Semua/Hoaks/Valid/Perlu Dicek), skeleton loading, kartu (badge verdict,
+  confidence tabular, klaim 2 baris, host URL, tanggal relatif), swipe delete
+  + Snackbar Undo 4 detik, detail reuse QuickCheckResultSection + Bagikan,
+  error card + retry. Semua copy terpusat di AppStrings.
+- Test `history_test.dart` 18 case: model round-trip + fallback corrupt,
+  usecase save/delete, provider stream/delete-error, filter, card, empty,
+  filter tap, list filter, empty tanpa login, error retry, swipe + undo,
+  tap detail, auto-save verify. Regresi lama disesuaikan (Riwayat kini
+  fungsional, Belajar/Profil tetap placeholder).
+- Verifikasi: `flutter analyze` bersih (sisa 1 warning lama onboarding tak
+  terkait), `flutter test` lolos 88 test.
 
 ## Status: Quick Check URL + Share Hasil — SELESAI
 
