@@ -7,6 +7,7 @@ import '../features/chat/presentation/screens/chat_screen.dart';
 import '../features/chat/presentation/widgets/chat_fab.dart';
 import '../features/history/presentation/screens/history_list_screen.dart';
 import '../features/quick_check/presentation/screens/quick_check_home_tab.dart';
+import '../features/score/presentation/screens/profile_screen.dart';
 import '../shared/widgets/app_section_header.dart';
 import '../shared/widgets/bottom_nav_bar.dart';
 
@@ -31,6 +32,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     Navigator.of(context).pushNamed(ChatScreen.route);
   }
 
+  void _openTab(int index) {
+    if (index == _index) return;
+    setState(() => _index = index);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,8 +44,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: SafeArea(
         bottom: false,
         child: switch (_index) {
-          0 => const QuickCheckHomeTab(),
+          0 => QuickCheckHomeTab(onOpenProfile: () => _openTab(3)),
           1 => const HistoryListScreen(),
+          3 => const ProfileScreen(),
           _ => _PlaceholderTab(index: _index),
         },
       ),

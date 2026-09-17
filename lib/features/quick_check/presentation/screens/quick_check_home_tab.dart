@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../shared/widgets/app_section_header.dart';
+import '../../../score/presentation/widgets/score_check_chip.dart';
 import 'quick_check_session_screen.dart';
 
 /// Landing tab Quick Check — hero CTA + mode picker + contoh + tips.
@@ -12,7 +13,9 @@ import 'quick_check_session_screen.dart';
 /// carousel horizontal sekali ketuk, dan tips sebagai bullet list ringan.
 /// Tidak ada kartu vertikal bertumpuk yang mengulang pola sama.
 class QuickCheckHomeTab extends StatelessWidget {
-  const QuickCheckHomeTab({super.key});
+  const QuickCheckHomeTab({super.key, this.onOpenProfile});
+
+  final VoidCallback? onOpenProfile;
 
   void _openSession(
     BuildContext context, {
@@ -48,6 +51,8 @@ class QuickCheckHomeTab extends StatelessWidget {
                 titleLine2: AppStrings.homeCheckTitle2,
                 subtitle: AppStrings.homeCheckSubtitle,
               ),
+              const SizedBox(height: 14),
+              ScoreCheckChip(onTap: onOpenProfile),
               const SizedBox(height: 18),
               const _SessionCtaCard(),
               const SizedBox(height: 22),

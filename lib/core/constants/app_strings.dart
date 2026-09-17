@@ -169,6 +169,21 @@ abstract final class AppStrings {
   static const String homeProfilePlaceholderTitle = 'Skor segera hadir';
   static const String homeProfilePlaceholderSubtitle =
       'Setiap verifikasi +10 poin, modul +20, kuis benar +5. Level: Pemula sampai Ahli.';
+  static const String scoreLevelPrefix = 'Level';
+  static const String scorePointsSuffix = 'poin';
+  static const String scoreToNextPrefix = 'poin lagi ke';
+  static const String scoreMaxLevel = 'Level tertinggi tercapai.';
+  static const String scoreBreakdownTitle = 'Sumber poin';
+  static const String scoreVerifyRow = 'Verifikasi';
+  static const String scoreModuleRow = 'Modul selesai';
+  static const String scoreQuizRow = 'Kuis benar';
+  static const String scoreModuleSoon =
+      'Modul edukasi dibuka di Phase 3b. Setiap modul +20 poin, kuis benar +5.';
+  static const String scoreAccountTitle = 'Akun';
+  static const String scoreAnonymousNote =
+      'Kamu masuk tanpa akun. Skor tersimpan lokal sesi ini; masuk untuk sinkron ke semua perangkat.';
+  static const String scoreSyncedNote =
+      'Skor tersinkron ke akunmu dan bertambah otomatis setiap verifikasi.';
   static const String chatEyebrow = 'ASISTEN AI';
   static const String chatTitle1 = 'Tanya';
   static const String chatTitle2 = 'apa saja.';
