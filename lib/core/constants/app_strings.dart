@@ -175,9 +175,33 @@ abstract final class AppStrings {
   static const String chatHeaderSubtitle =
       'Diskusi santai soal hoaks dan literasi digital dalam Bahasa Indonesia.';
   static const String chatFabLabel = 'Chat dengan AI Literasi';
-  static const String chatPlaceholderTitle = 'Chat AI segera hadir';
-  static const String chatPlaceholderSubtitle =
-      'Layanan tanya jawab literasi digital sedang disiapkan. Untuk sekarang, gunakan sesi pemeriksaan untuk verifikasi cepat.';
+  static const String chatPresenceName = 'Asisten LiterasiAI';
+  static const String chatPresenceStatus = 'Siap membantu verifikasi';
+  static const String chatCancel = 'Batal';
+  static const String chatKeyBannerTitle =
+      'Mode pratinjau: kunci API belum tersambung';
+  static const String chatKeyBannerSubtitle =
+      'Jawaban live butuh GEMINI_API_KEY. Salin perintah, jalankan ulang, lalu chat kembali live.';
+  static const String chatKeyCopy = 'Salin perintah';
+  static const String chatKeyCopied =
+      'Perintah disalin. Tempel di terminal lalu jalankan ulang.';
+  static const String chatRunCommand =
+      'flutter run --dart-define=GEMINI_API_KEY=ISI_KUNCI_ANDA';
+  static const String chatGreetingTitle = 'Halo, aku asisten literasimu.';
+  static const String chatGreetingSubtitle =
+      'Tanya soal hoaks, clickbait, atau cara verifikasi sumber. Jawabanku santai tapi tetap kritis.';
+  static const String chatSuggestion1 = 'Apakah vaksin menyebabkan autisme?';
+  static const String chatSuggestion2 = 'Cara kenali judul clickbait?';
+  static const String chatSuggestion3 = 'Cara verifikasi sumber berita?';
+  static const String chatInputHint = 'Tulis pertanyaanmu...';
+  static const String chatTyping = 'AI sedang mengetik...';
+  static const String chatVerifyThis = 'Verifikasi ini';
+  static const String chatRetry = 'Kirim ulang';
+  static const String chatClear = 'Mulai baru';
+  static const String chatClearConfirm = 'Hapus semua pesan?';
+  static const String chatTooLong =
+      'Pertanyaan terlalu panjang. Batasi maksimal 1.000 karakter.';
+  static const String chatSendFailed = 'Pesan gagal dikirim. Coba lagi.';
   static const String quickCheckModeText = 'Teks';
   static const String quickCheckModeImage = 'Gambar';
   static const String quickCheckModeUrl = 'Link';
