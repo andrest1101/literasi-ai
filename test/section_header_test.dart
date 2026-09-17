@@ -45,7 +45,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('placeholders are honest without fake functionality', (
+  testWidgets('history is functional while future tabs remain honest', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -55,7 +55,8 @@ void main() {
 
     await tester.tap(find.text('Riwayat'));
     await tester.pumpAndSettle();
-    expect(find.text('Belum ada riwayat'), findsOneWidget);
+    expect(find.text('Jejak'), findsOneWidget);
+    expect(find.text('Semua'), findsOneWidget);
 
     await tester.tap(find.text('Belajar'));
     await tester.pumpAndSettle();
