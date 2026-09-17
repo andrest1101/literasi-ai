@@ -5,6 +5,7 @@ import '../core/constants/app_colors.dart';
 import '../core/constants/app_strings.dart';
 import '../features/chat/presentation/screens/chat_screen.dart';
 import '../features/chat/presentation/widgets/chat_fab.dart';
+import '../features/history/presentation/screens/history_list_screen.dart';
 import '../features/quick_check/presentation/screens/quick_check_home_tab.dart';
 import '../shared/widgets/app_section_header.dart';
 import '../shared/widgets/bottom_nav_bar.dart';
@@ -32,14 +33,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isQuickCheck = _index == 0;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
-        child: isQuickCheck
-            ? const QuickCheckHomeTab()
-            : _PlaceholderTab(index: _index),
+        child: switch (_index) {
+          0 => const QuickCheckHomeTab(),
+          1 => const HistoryListScreen(),
+          _ => _PlaceholderTab(index: _index),
+        },
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 16),

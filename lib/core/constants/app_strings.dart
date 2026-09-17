@@ -133,7 +133,23 @@ abstract final class AppStrings {
   static const String homeHistoryTitle1 = 'Jejak';
   static const String homeHistoryTitle2 = 'pemeriksaanmu.';
   static const String homeHistorySubtitle =
-      'Hasil setiap sesi tersimpan otomatis setelah Phase 3 aktif.';
+      'Semua hasil yang tersimpan, siap ditinjau kembali.';
+  static const String historyFilterAll = 'Semua';
+  static const String historyFilterHoaks = 'Hoaks';
+  static const String historyFilterValid = 'Valid';
+  static const String historyFilterNeedCheck = 'Perlu Dicek';
+  static const String historyEmptyTitle = 'Belum ada riwayat';
+  static const String historyEmptySubtitle =
+      'Mulai pemeriksaan pertama dari tab Cek. Hasilmu akan tersimpan di sini.';
+  static const String historyEmptyFilteredTitle = 'Belum ada hasil di filter ini';
+  static const String historyEmptyFilteredSubtitle =
+      'Coba pilih filter lain untuk melihat pemeriksaan sebelumnya.';
+  static const String historyDeleted = 'Riwayat dihapus.';
+  static const String historyDeleteFailed =
+      'Riwayat tidak dapat dihapus. Coba lagi.';
+  static const String historyUndo = 'Urungkan';
+  static const String historyRetryTitle = 'Riwayat tidak dapat dimuat';
+  static const String historyDetailTitle = 'Detail Riwayat';
   static const String homeHistoryPlaceholderTitle = 'Belum ada riwayat';
   static const String homeHistoryPlaceholderSubtitle =
       'Mulai pemeriksaan pertama dari tab Cek. Hasilnya akan tersimpan di sini setelah integrasi akun aktif.';

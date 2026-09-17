@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../history/presentation/providers/history_providers.dart';
 import '../../data/datasources/gemini_text_datasource.dart';
 import '../../data/datasources/gemini_vision_datasource.dart';
 import '../../data/datasources/image_picker_datasource.dart';
@@ -79,6 +81,7 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
       final result = await ref.read(verifyClaimProvider).call(rawClaim);
       _lastClaim = result.claim;
       state = AsyncData(result);
+      _saveHistory(result);
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
     }
@@ -100,6 +103,7 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
           .call(image: image, caption: caption);
       _lastClaim = result.claim;
       state = AsyncData(result);
+      _saveHistory(result);
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
     }
@@ -117,6 +121,7 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
       _lastClaim = result.claim;
       _lastUrl = result.sourceUrl ?? rawUrl;
       state = AsyncData(result);
+      _saveHistory(result);
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
     }
@@ -145,5 +150,27 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
     _lastCaption = '';
     _lastUrl = null;
     state = const AsyncData(null);
+  }
+
+  /// Penyimpanan tidak boleh menahan hasil AI yang sudah selesai tampil.
+  /// Jika Firestore sedang offline atau rules menolak, riwayat dapat dicoba
+  /// lagi pada pemeriksaan berikutnya tanpa mengubah state hasil verifikasi.
+  /// UID dibaca via provider agar widget test bisa override tanpa Firebase.
+  void _saveHistory(VerificationResult result) {
+    String? userId;
+    try {
+      userId = ref.read(historyUserIdProvider);
+    } catch (_) {
+      // Firebase sengaja boleh tidak aktif pada mode offline dan widget test.
+      return;
+    }
+    if (userId == null) return;
+    unawaited(
+      ref
+          .read(saveHistoryProvider)(userId: userId, result: result)
+          .catchError((Object error, StackTrace stackTrace) {
+            debugPrint('Gagal menyimpan riwayat: $error');
+          }),
+    );
   }
 }
