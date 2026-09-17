@@ -1,6 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:screenshot/screenshot.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -467,6 +466,9 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
 }
 
 /// Panel error sesi — satu permukaan dengan CTA retry yang jelas.
+///
+/// Bila penyebabnya kunci API hilang, panel menambah tombol salin perintah
+/// run agar pengguna bisa setup tanpa menebak perintah terminal.
 class QuickCheckErrorSection extends StatelessWidget {
   const QuickCheckErrorSection({
     super.key,
@@ -483,6 +485,8 @@ class QuickCheckErrorSection extends StatelessWidget {
     if (error is Failure) return (error as Failure).message;
     return 'Terjadi kesalahan tak terduga. Coba lagi.';
   }
+
+  bool get _isMissingKey => _message.contains('GEMINI_API_KEY');
 
   @override
   Widget build(BuildContext context) {
@@ -520,8 +524,38 @@ class QuickCheckErrorSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
+          if (_isMissingKey) ...[
+            OutlinedButton.icon(
+              onPressed: () async {
+                await Clipboard.setData(
+                  const ClipboardData(text: AppStrings.chatRunCommand),
+                );
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(AppStrings.chatKeyCopied),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              icon: const Icon(Icons.content_copy_rounded, size: 18),
+              label: const Text(AppStrings.chatKeyCopy),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                minimumSize: const Size.fromHeight(48),
+                side: BorderSide(
+                  color: AppColors.primary.withValues(alpha: 0.4),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                textStyle: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
           FilledButton.icon(
-            onPressed: canRetry ? onRetry : null,
+            onPressed: canRetry && !_isMissingKey ? onRetry : null,
             icon: const Icon(Icons.refresh_rounded, size: 20),
             label: const Text(AppStrings.quickCheckRetry),
             style: FilledButton.styleFrom(
