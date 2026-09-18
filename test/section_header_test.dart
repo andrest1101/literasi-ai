@@ -61,7 +61,7 @@ void main() {
 
     await tester.tap(find.text('Belajar'));
     await tester.pumpAndSettle();
-    expect(find.text('Modul segera hadir'), findsOneWidget);
+    expect(find.text('Kenali Judul Clickbait'), findsOneWidget);
 
     await tester.tap(find.text('Profil'));
     await tester.pumpAndSettle();

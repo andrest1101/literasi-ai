@@ -1,5 +1,23 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 24 September 2026_
+_Last updated: 25 September 2026_
+
+## Status: Learn Mini-Course Phase 3b — SELESAI
+
+### Yang dikerjakan
+- Domain Learn murni Dart: `QuizQuestion` + penjelasan, `CourseModule` 3
+  modul, `CourseProgress` best-score anti farming, kontrak repository.
+- Data: `LearnContentDatasource` 3 modul ID (4 seksi + 3 soal), Firestore
+  `users/{uid}/learn/progress` (arrayUnion modul, map best kuis), mapping
+  toleran korup.
+- Provider: konten statis, stream progres + timeout, aksi complete (+20) dan
+  submit kuis (+5 per benar baru) dengan hook Score best-effort. Guest baca
+  dan kuis lokal tanpa login.
+- UI heterogen: 3 varian kartu (hero gradien, split kolom, strip nomor),
+  detail artikel bernomor + klaim idempoten, kuis terkunci per halaman +
+  penjelasan + hasil + klaim best-score. Tab Belajar ganti placeholder.
+- Test `learn_test.dart` 7 case + selaraskan header test. Bug cast, scroll,
+  dan snackbar ganda diperbaiki.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 134 test.
 
 ## Status: Merge remote rewrite email 16 Sep — SELESAI
 
