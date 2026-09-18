@@ -1,6 +1,14 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
 _Last updated: 24 September 2026_
 
+## Status: Merge remote rewrite email 16 Sep — SELESAI
+
+### Yang dikerjakan
+- Remote hanya berisi rewrite author 4 commit 16 Sep ke identitas benar.
+  Konflik diselesaikan dengan mempertahankan sisi lokal (BYOK/demo/shimmer
+  lebih baru); sisi remote tidak membawa perubahan fitur.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos.
+
 ## Status: Entry Pengaturan + Rules + Mailmap — SELESAI
 
 ### Yang dikerjakan
