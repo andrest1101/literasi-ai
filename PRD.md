@@ -36,11 +36,13 @@ LiterasiAI adalah aplikasi mobile berbasis AI yang membantu pengguna memverifika
 
 ### 2.1 MVP Goals
 
-- [ ] User bisa verifikasi teks dalam < 5 detik
-- [ ] User bisa verifikasi gambar (screenshot berita/pesan)
-- [ ] User bisa verifikasi URL artikel
-- [ ] History verifikasi tersimpan lokal
-- [ ] Hasil bisa di-share ke WhatsApp sebagai gambar
+- [x] User bisa verifikasi teks dalam < 5 detik (instrumentasi durasi di kartu hasil)
+- [x] User bisa verifikasi gambar (screenshot berita/pesan via Gemini Vision)
+- [x] User bisa verifikasi URL artikel (fetch metadata + nilai klaim)
+- [x] History verifikasi tersimpan per user — amandemen: Firestore per UID
+  (menggantikan "tersimpan lokal" yang tertulis sebelumnya), guest tanpa
+  login mendapat empty state jujur
+- [x] Hasil bisa di-share ke WhatsApp sebagai gambar (screenshot + share_plus)
 
 ### 2.2 Success Metrics untuk Portfolio
 
@@ -424,19 +426,19 @@ lib/
 
 ### Phase 3 — Supporting Features (Minggu 4)
 
-- [ ] History screen + Firestore integration
-- [ ] AI Chat screen
-- [ ] Home screen dengan Literacy Score
-- [ ] Trending Hoaks section
+- [x] History screen + Firestore integration (filter, swipe+Undo, detail)
+- [x] AI Chat screen (bubble + Verifikasi ini + demo edukatif)
+- [x] Home screen dengan Literacy Score (ring + breakdown + chip Cek)
+- [x] Trending Hoaks section (7 curated offline + badge HOT + detail)
 
 ### Phase 4 — Polish & Portfolio (Minggu 5)
 
-- [ ] Mini-course (3 modul)
+- [x] Mini-course (3 modul + kuis berpenjelasan + badge + hook Score)
 - [ ] UI polish — animasi, micro-interactions
-- [ ] Onboarding screens
+- [x] Onboarding screens (sekali-per-install + press-glow)
 - [ ] Record demo video 60 detik
-- [ ] Tulis dokumentasi portfolio
-- [ ] Upload ke GitHub dengan README
+- [x] Tulis dokumentasi portfolio (README Purpose → Process → Outcome)
+- [ ] Upload ke GitHub dengan README (PR dev→main masih konflik, selesaikan dulu)
 
 ---
 
