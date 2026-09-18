@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/api_key_resolver.dart';
 import '../../../../shared/widgets/app_section_header.dart';
+import '../../../score/presentation/screens/api_key_screen.dart';
 import '../../../score/presentation/widgets/score_check_chip.dart';
 import 'quick_check_session_screen.dart';
 
@@ -12,7 +15,7 @@ import 'quick_check_session_screen.dart';
 /// hero gradien penuh, mode picker 2 tile berdampingan, contoh berupa
 /// carousel horizontal sekali ketuk, dan tips sebagai bullet list ringan.
 /// Tidak ada kartu vertikal bertumpuk yang mengulang pola sama.
-class QuickCheckHomeTab extends StatelessWidget {
+class QuickCheckHomeTab extends ConsumerWidget {
   const QuickCheckHomeTab({super.key, this.onOpenProfile});
 
   final VoidCallback? onOpenProfile;
@@ -32,7 +35,7 @@ class QuickCheckHomeTab extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SingleChildScrollView(
       // Padding bawah 96px memberi ruang bagi FAB Chat 60px + gap 16px agar
       // tips terakhir tidak tertutup tombol mengambang di Home.
@@ -53,6 +56,8 @@ class QuickCheckHomeTab extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               ScoreCheckChip(onTap: onOpenProfile),
+              const SizedBox(height: 10),
+              _ApiKeyStatusChip(ref: ref),
               const SizedBox(height: 18),
               const _SessionCtaCard(),
               const SizedBox(height: 22),
@@ -123,8 +128,123 @@ class QuickCheckHomeTab extends StatelessWidget {
   }
 }
 
-/// CTA sesi ringkas — hero besar dihapus karena judul editorial sudah dipegang
-/// [AppSectionHeader]. Kartu ini fokus satu tugas: masuk sesi pemeriksaan.
+/// Chip status kunci API di tab Cek — satu baris menuju Pengaturan.
+///
+/// Hijau bila live (dart-define/user), kuning bila demo. Guest tanpa login
+/// tetap bisa memakai fitur ini karena kunci disimpan per-perangkat.
+class _ApiKeyStatusChip extends StatelessWidget {
+  const _ApiKeyStatusChip({required this.ref});
+
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    final status = ref.watch(apiKeyControllerProvider);
+    return Semantics(
+      button: true,
+      label: AppStrings.apiKeySettingsTitle,
+      child: Material(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(999),
+        child: InkWell(
+          onTap: () =>
+              Navigator.of(context).pushNamed(ApiKeyScreen.route),
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 11,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: AppColors.neutral.withValues(alpha: 0.22),
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x0D101A33),
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: status.when(
+              loading: () => const _KeyChipContent(
+                icon: Icons.hourglass_empty_rounded,
+                iconColor: AppColors.textSecondary,
+                text: 'Memeriksa kunci...',
+              ),
+              error: (_, _) => const _KeyChipContent(
+                icon: Icons.key_off_outlined,
+                iconColor: AppColors.warning,
+                text: 'Mode demo aktif',
+              ),
+              data: (value) => _KeyChipContent(
+                icon: value.configured
+                    ? Icons.key_outlined
+                    : Icons.key_off_outlined,
+                iconColor: value.configured
+                    ? AppColors.success
+                    : AppColors.warning,
+                text: switch (value.source) {
+                  ApiKeySource.compileDefine => 'AI live via developer',
+                  ApiKeySource.userKey => 'AI live via kunci perangkat',
+                  ApiKeySource.none => 'Mode demo aktif',
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _KeyChipContent extends StatelessWidget {
+  const _KeyChipContent({
+    required this.icon,
+    required this.text,
+    required this.iconColor,
+  });
+
+  final IconData icon;
+  final String text;
+  final Color iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: iconColor),
+        const SizedBox(width: 8),
+        const Expanded(
+          child: Text(
+            'Status AI',
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(width: 4),
+        const Icon(
+          Icons.chevron_right_rounded,
+          size: 20,
+          color: AppColors.textSecondary,
+        ),
+      ],
+    );
+  }
+}
+
 /// Wordmark kecil khusus tab Cek — satu-satunya tempat nama app muncul di
 /// Home. Tab lain memakai judul kontekstualnya sendiri.
 class _Wordmark extends StatelessWidget {

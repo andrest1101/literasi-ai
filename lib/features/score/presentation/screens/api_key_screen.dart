@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/api_key_resolver.dart';
+import '../../../chat/presentation/providers/chat_providers.dart';
+import '../../../quick_check/presentation/providers/verification_provider.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
 
 /// Pengaturan kunci API Gemini (BYOK) — untuk tester tanpa akses terminal.
@@ -47,6 +49,13 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
       setState(() => _localError = error);
       return;
     }
+    // Bangun ulang rantai key → datasource → repository agar banner Chat,
+    // Quick Check, dan request berikutnya langsung memakai kunci baru.
+    ref.invalidate(geminiTextDatasourceProvider);
+    ref.invalidate(geminiVisionDatasourceProvider);
+    ref.invalidate(verificationRepositoryProvider);
+    ref.invalidate(geminiChatDatasourceProvider);
+    ref.invalidate(chatRepositoryProvider);
     _controller.clear();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -76,6 +85,11 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
     );
     if (confirmed == true) {
       await ref.read(apiKeyControllerProvider.notifier).clearUserKey();
+      ref.invalidate(geminiTextDatasourceProvider);
+      ref.invalidate(geminiVisionDatasourceProvider);
+      ref.invalidate(verificationRepositoryProvider);
+      ref.invalidate(geminiChatDatasourceProvider);
+      ref.invalidate(chatRepositoryProvider);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

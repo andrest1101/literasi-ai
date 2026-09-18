@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/api_key_resolver.dart';
 import '../../../../shared/widgets/app_section_header.dart';
 import '../../../history/presentation/providers/history_providers.dart';
 import '../providers/score_providers.dart';
 import '../widgets/score_breakdown.dart';
 import '../widgets/score_ring.dart';
+import 'api_key_screen.dart';
 
 /// Tab Profil fungsional pertama — skor + akun + info.
 ///
@@ -50,6 +52,8 @@ class ProfileScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 14),
               _AccountCard(synced: userId != null),
+              const SizedBox(height: 14),
+              const _ApiKeyCard(),
             ],
           ),
         ),
@@ -227,6 +231,123 @@ class _ScoreShimmerState extends State<_ScoreShimmer>
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Kartu kunci API di Profil — entry point BYOK yang mudah ditemukan.
+///
+/// Menampilkan status (dart-define / kunci perangkat / demo) + tombol ke
+/// layar pengaturan. Guest tanpa login tetap bisa memakai fitur ini karena
+/// kunci disimpan per-perangkat, bukan per-akun.
+class _ApiKeyCard extends ConsumerWidget {
+  const _ApiKeyCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(apiKeyControllerProvider);
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        color: AppColors.surface,
+        border: Border.all(
+          color: AppColors.neutral.withValues(alpha: 0.2),
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0D101A33),
+            blurRadius: 16,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              color: AppColors.primary.withValues(alpha: 0.1),
+            ),
+            child: const Icon(
+              Icons.key_outlined,
+              size: 23,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  AppStrings.apiKeySettingsTitle,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                status.when(
+                  loading: () => const Text(
+                    AppStrings.scoreLoading,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  error: (_, _) => const Text(
+                    AppStrings.apiKeyInactive,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  data: (value) => Text(
+                    switch (value.source) {
+                      ApiKeySource.compileDefine =>
+                        AppStrings.apiKeyActiveCompile,
+                      ApiKeySource.userKey => AppStrings.apiKeyActiveUser,
+                      ApiKeySource.none => AppStrings.apiKeyInactive,
+                    },
+                    style: const TextStyle(
+                      fontSize: 13,
+                      height: 1.6,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 44,
+                  child: OutlinedButton.icon(
+                    onPressed: () => Navigator.of(
+                      context,
+                    ).pushNamed(ApiKeyScreen.route),
+                    icon: const Icon(Icons.settings_outlined, size: 18),
+                    label: const Text(AppStrings.apiKeyOpenSettings),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: BorderSide(
+                        color: AppColors.primary.withValues(alpha: 0.4),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      textStyle: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
