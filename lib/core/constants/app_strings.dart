@@ -161,6 +161,28 @@ abstract final class AppStrings {
   static const String homeLearnPlaceholderTitle = 'Modul segera hadir';
   static const String homeLearnPlaceholderSubtitle =
       'Tiga modul 5 menit: clickbait, gambar manipulasi, dan verifikasi sumber. Dibuka di Phase 4.';
+  static const String learnProgressSuffix = 'modul selesai';
+  static const String learnPointsNote =
+      'Selesaikan modul +20 poin, tiap jawaban kuis benar +5.';
+  static const String learnModuleDone = 'Selesai';
+  static const String learnStartQuiz = 'Mulai kuis';
+  static const String learnReadArticle = 'Baca modul';
+  static const String learnMarkDone = 'Tandai selesai +20';
+  static const String learnMarkedDone = 'Modul selesai. +20 poin diklaim.';
+  static const String learnQuizTitle = 'Kuis pemahaman';
+  static const String learnQuizOf = 'Soal';
+  static const String learnQuizNext = 'Lanjut';
+  static const String learnQuizFinish = 'Lihat hasil';
+  static const String learnQuizCorrect = 'Benar!';
+  static const String learnQuizWrong = 'Kurang tepat.';
+  static const String learnQuizScoreTitle = 'Hasil kuismu';
+  static const String learnQuizClaim = 'Klaim poin';
+  static const String learnQuizClaimed = 'poin kuis diklaim.';
+  static const String learnQuizNoNew = 'Tidak ada poin baru. Skor terbaikmu bertahan.';
+  static const String learnQuizRetry = 'Ulangi kuis';
+  static const String learnQuizBack = 'Kembali ke modul';
+  static const String learnGuestNote =
+      'Masuk untuk menyimpan progres ke semua perangkat. Tanpa login progres hanya sesi ini.';
   static const String homeProfileEyebrow = 'AKUN';
   static const String homeProfileTitle1 = 'Kelola';
   static const String homeProfileTitle2 = 'profilmu.';
