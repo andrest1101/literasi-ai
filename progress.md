@@ -1,5 +1,18 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 25 September 2026_
+_Last updated: 26 September 2026_
+
+## Status: Trending Hoaks Phase 3c — SELESAI
+
+### Yang dikerjakan
+- Domain Trending murni Dart: `TrendingItem` + konversi ke hasil verifikasi,
+  kontrak repository sync lokal.
+- Data curated 7 hoaks ID (kategori, tanggal, rujukan, HOT) + impl offline.
+- Provider sync tanpa Firebase agar guest offline tetap melihat feed.
+- UI heterogen: rail vertikal 228px + badge HOT + detail reuse hasil/share +
+  verifikasi serupa. Wiring di bawah carousel tab Cek.
+- Test `trending_test.dart` 4 case. Bug const DateTime dan assertion ganda
+  diperbaiki.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 138 test.
 
 ## Status: Learn Mini-Course Phase 3b — SELESAI
 
