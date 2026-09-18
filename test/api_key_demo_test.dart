@@ -14,6 +14,7 @@ import 'package:literasi_ai/features/quick_check/data/datasources/gemini_text_da
 import 'package:literasi_ai/features/quick_check/data/repositories/verification_repository_impl.dart';
 import 'package:literasi_ai/features/quick_check/domain/entities/image_attachment.dart';
 import 'package:literasi_ai/features/quick_check/domain/entities/verification_result.dart';
+import 'package:literasi_ai/features/quick_check/presentation/screens/quick_check_home_tab.dart';
 import 'package:literasi_ai/features/quick_check/presentation/widgets/quick_check_result_section.dart';
 import 'package:literasi_ai/features/score/presentation/screens/api_key_screen.dart';
 import 'package:literasi_ai/features/score/presentation/screens/profile_screen.dart';
@@ -253,5 +254,58 @@ void main() {
 
     currentKey = 'AIzaSyContohKunciValid1234567890';
     expect(currentKey.isNotEmpty, isTrue);
+  });
+
+  testWidgets('kartu kunci di profil menuju pengaturan', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore()),
+        ],
+        child: MaterialApp(
+          home: const ProfileScreen(),
+          routes: {ApiKeyScreen.route: (_) => const ApiKeyScreen()},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Kunci API Gemini'), findsOneWidget);
+    expect(find.text('Belum ada kunci. Mode demo aktif.'), findsOneWidget);
+
+    final settingsButton = find.text('Buka Pengaturan');
+    await tester.ensureVisible(settingsButton);
+    await tester.pumpAndSettle();
+    await tester.tap(settingsButton);
+    await tester.pumpAndSettle();
+    expect(find.byType(ApiKeyScreen), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('chip status key di cek menuju pengaturan', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore()),
+        ],
+        child: MaterialApp(
+          home: const QuickCheckHomeTab(),
+          routes: {ApiKeyScreen.route: (_) => const ApiKeyScreen()},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Status AI'), findsOneWidget);
+    expect(find.text('Mode demo aktif'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

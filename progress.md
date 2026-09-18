@@ -1,5 +1,20 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 23 September 2026_
+_Last updated: 24 September 2026_
+
+## Status: Entry Pengaturan + Rules + Mailmap — SELESAI
+
+### Yang dikerjakan
+- `firestore.rules` owner-only `users/{uid}/**` + panduan deploy manual ke
+  console (tanpa Blaze, tanpa kartu). Retry skor gagal terus = rules belum
+  dipasang, bukan soal API key.
+- Kartu kunci API di Profil + chip status di Cek menuju `/api-key`. Guest
+  tanpa login tetap bisa BYOK karena kunci per-perangkat.
+- Invalidate rantai datasource/repository setelah save/hapus agar banner dan
+  request sinkron instan tanpa restart.
+- `.mailmap` samakan typo email 16 Sep tanpa rewrite history yang merusak.
+  Config lokal/global diperbaiki ke identitas benar.
+- Test kartu profil + chip cek + propagasi instan.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 127 test.
 
 ## Status: Propagasi BYOK Instan + Pesan Skor Jujur — SELESAI
 
