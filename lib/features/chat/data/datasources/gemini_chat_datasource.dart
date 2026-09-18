@@ -30,17 +30,18 @@ class GeminiChatDatasource {
   final String modelName;
   final Duration timeout;
 
-  GenerativeModel _resolveModel() {
+  GenerativeModel _resolveModel([String? overrideKey]) {
     if (_model != null) return _model;
-    if (_apiKey.isEmpty) {
+    final key = overrideKey ?? _apiKey;
+    if (key.isEmpty) {
       throw const UnknownFailure(
-        'GEMINI_API_KEY belum dikonfigurasi. '
-        'Jalankan dengan --dart-define=GEMINI_API_KEY=...',
+        'Kunci API belum tersambung. '
+        'Tempel kunci di Pengaturan atau jalankan dengan --dart-define=GEMINI_API_KEY=...',
       );
     }
     return GenerativeModel(
       model: modelName,
-      apiKey: _apiKey,
+      apiKey: key,
       generationConfig: GenerationConfig(
         temperature: 0.7,
         maxOutputTokens: 512,
@@ -52,7 +53,15 @@ class GeminiChatDatasource {
     required List<ChatMessage> history,
     required String message,
   }) async {
-    final model = _resolveModel();
+    return replyWithKey(history: history, message: message, apiKey: _apiKey);
+  }
+
+  Future<String> replyWithKey({
+    required List<ChatMessage> history,
+    required String message,
+    required String apiKey,
+  }) async {
+    final model = _resolveModel(apiKey);
     try {
       final contents = <Content>[
         Content.text(_systemPrompt),

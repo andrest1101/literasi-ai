@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../../../../core/utils/api_key_resolver.dart';
 import '../../data/datasources/gemini_chat_datasource.dart';
 import '../../data/repositories/chat_repository_impl.dart';
 import '../../domain/entities/chat_message.dart';
@@ -8,21 +9,32 @@ import '../../domain/repositories/chat_repository.dart';
 import '../../domain/usecases/send_chat_message.dart';
 
 final geminiChatDatasourceProvider = Provider<GeminiChatDatasource>((ref) {
-  return GeminiChatDatasource();
+  final status = ref.watch(apiKeyStatusProvider).valueOrNull;
+  return GeminiChatDatasource(apiKey: status?.key ?? '');
 });
 
 final chatRepositoryProvider = Provider<ChatRepository>((ref) {
-  return ChatRepositoryImpl(ref.watch(geminiChatDatasourceProvider));
+  // Closure live agar kunci BYOK yang baru disimpan langsung dipakai
+  // request berikutnya tanpa restart layar chat.
+  String resolveKey() =>
+      ref.read(apiKeyStatusProvider).valueOrNull?.key ?? '';
+  bool hasKey() =>
+      ref.read(apiKeyStatusProvider).valueOrNull?.configured ?? false;
+  return ChatRepositoryImpl(
+    ref.watch(geminiChatDatasourceProvider),
+    resolveApiKey: resolveKey,
+    hasApiKey: hasKey,
+  );
 });
 
 final sendChatMessageProvider = Provider<SendChatMessage>((ref) {
   return SendChatMessage(ref.watch(chatRepositoryProvider));
 });
 
-/// True bila kunci API tersedia saat compile — dipakai UI untuk menampilkan
-/// banner pratinjau sekali-lihat, bukan error mentah setelah kirim.
+/// True bila kunci API tersedia (compile atau user) — dipakai UI untuk
+/// menampilkan banner pratinjau sekali-lihat, bukan error mentah setelah kirim.
 final chatKeyConfiguredProvider = Provider<bool>((ref) {
-  return const String.fromEnvironment('GEMINI_API_KEY').isNotEmpty;
+  return ref.watch(apiKeyStatusProvider).valueOrNull?.configured ?? false;
 });
 
 /// State chat: daftar pesan + status kirim.

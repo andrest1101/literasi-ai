@@ -31,17 +31,18 @@ class GeminiVisionDatasource {
   final String modelName;
   final Duration timeout;
 
-  GenerativeModel _resolveModel() {
+  GenerativeModel _resolveModel([String? overrideKey]) {
     if (_model != null) return _model;
-    if (_apiKey.isEmpty) {
+    final key = overrideKey ?? _apiKey;
+    if (key.isEmpty) {
       throw const UnknownFailure(
-        'GEMINI_API_KEY belum dikonfigurasi. '
-        'Jalankan dengan --dart-define=GEMINI_API_KEY=...',
+        'Kunci API belum tersambung. '
+        'Tempel kunci di Pengaturan atau jalankan dengan --dart-define=GEMINI_API_KEY=...',
       );
     }
     return GenerativeModel(
       model: modelName,
-      apiKey: _apiKey,
+      apiKey: key,
       generationConfig: GenerationConfig(
         temperature: 0.2,
         maxOutputTokens: 768,
@@ -54,12 +55,20 @@ class GeminiVisionDatasource {
     required ImageAttachment image,
     String caption = '',
   }) async {
+    return verifyImageWithKey(image: image, caption: caption, apiKey: _apiKey);
+  }
+
+  Future<VerificationResult> verifyImageWithKey({
+    required ImageAttachment image,
+    String caption = '',
+    required String apiKey,
+  }) async {
     if (!image.isValid) {
       throw const UnknownFailure(
         'Gambar tidak terbaca, upload ulang dengan pencahayaan lebih baik.',
       );
     }
-    final model = _resolveModel();
+    final model = _resolveModel(apiKey);
     try {
       final response = await model
           .generateContent([
