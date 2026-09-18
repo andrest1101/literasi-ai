@@ -119,6 +119,12 @@ abstract final class AppStrings {
       'Beredar pesan berantai tentang bantuan tunai yang meminta data rekening. Apakah ini penipuan?';
   static const String quickCheckExample3 =
       'Viral kabar libur nasional tambahan minggu ini. Apakah informasi ini valid?';
+  static const String trendingTitle = 'Trending hoaks';
+  static const String trendingSubtitle =
+      'Hoaks viral yang dikurasi manual. Ketuk untuk detail dan verifikasi serupa.';
+  static const String trendingHot = 'HOT';
+  static const String trendingReference = 'Rujukan';
+  static const String trendingVerifySimilar = 'Verifikasi serupa';
   static const String quickCheckBackToHome = 'Kembali ke Beranda';
   static const String navCheck = 'Cek';
   static const String navHistory = 'Riwayat';

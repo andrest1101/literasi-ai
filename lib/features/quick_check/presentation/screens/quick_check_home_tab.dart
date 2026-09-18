@@ -7,6 +7,10 @@ import '../../../../core/utils/api_key_resolver.dart';
 import '../../../../shared/widgets/app_section_header.dart';
 import '../../../score/presentation/screens/api_key_screen.dart';
 import '../../../score/presentation/widgets/score_check_chip.dart';
+import '../../../trending/domain/entities/trending_item.dart';
+import '../../../trending/presentation/providers/trending_providers.dart';
+import '../../../trending/presentation/screens/trending_detail_screen.dart';
+import '../../../trending/presentation/widgets/trending_rail.dart';
 import 'quick_check_session_screen.dart';
 
 /// Landing tab Quick Check — hero CTA + mode picker + contoh + tips.
@@ -31,6 +35,12 @@ class QuickCheckHomeTab extends ConsumerWidget {
             QuickCheckSessionScreen(initialMode: mode, initialClaim: claim),
         settings: const RouteSettings(name: QuickCheckSessionScreen.route),
       ),
+    );
+  }
+
+  void _openTrending(BuildContext context, TrendingItem item) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => TrendingDetailScreen(item: item)),
     );
   }
 
@@ -105,6 +115,15 @@ class QuickCheckHomeTab extends ConsumerWidget {
                 onPick: (claim) => _openSession(context, claim: claim),
               ),
               const SizedBox(height: 22),
+              const _SectionHeader(
+                title: AppStrings.trendingTitle,
+                subtitle: AppStrings.trendingSubtitle,
+              ),
+              const SizedBox(height: 12),
+              _TrendingSection(
+                onPick: (item) => _openTrending(context, item),
+              ),
+              const SizedBox(height: 22),
               const Text(
                 AppStrings.quickCheckTipsTitle,
                 style: TextStyle(
@@ -125,6 +144,20 @@ class QuickCheckHomeTab extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+/// Section trending di tab Cek — rail horizontal + navigasi detail.
+///
+/// Provider sync lokal sehingga guest offline tetap melihat feed penuh.
+class _TrendingSection extends ConsumerWidget {
+  const _TrendingSection({required this.onPick});
+
+  final ValueChanged<TrendingItem> onPick;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return TrendingRail(items: ref.watch(trendingItemsProvider), onPick: onPick);
   }
 }
 
