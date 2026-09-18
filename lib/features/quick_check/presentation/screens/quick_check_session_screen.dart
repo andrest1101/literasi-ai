@@ -419,6 +419,7 @@ class _QuickCheckSessionScreenState
                           result: result,
                           loading: loading,
                           onNewCheck: _clear,
+                          duration: notifier.lastDuration,
                         );
                       },
                       loading: () => QuickCheckAnalyzingIndicator(
