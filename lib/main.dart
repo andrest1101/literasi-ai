@@ -11,6 +11,7 @@ import 'features/auth/presentation/screens/onboarding_screen.dart';
 import 'features/auth/presentation/screens/register_screen.dart';
 import 'features/auth/presentation/screens/splash_screen.dart';
 import 'features/chat/presentation/screens/chat_screen.dart';
+import 'features/score/presentation/screens/api_key_screen.dart';
 import 'features/quick_check/presentation/screens/quick_check_screen.dart';
 import 'features/quick_check/presentation/screens/quick_check_session_screen.dart';
 import 'firebase_options.dart';
@@ -51,6 +52,7 @@ class LiterasiAIApp extends StatelessWidget {
         QuickCheckScreen.route: (_) => const QuickCheckScreen(),
         QuickCheckSessionScreen.route: (_) => const QuickCheckSessionScreen(),
         ChatScreen.route: (_) => const ChatScreen(),
+        ApiKeyScreen.route: (_) => const ApiKeyScreen(),
         HomeScreen.route: (_) => const HomeScreen(),
       },
     );

@@ -30,11 +30,21 @@ final awardQuizProvider = Provider<AwardQuiz>((ref) {
 });
 
 /// Stream skor pengguna aktif; tanpa login mengembalikan skor nol lokal
-/// agar UI Profil tetap render tanpa error Firebase.
+/// agar UI Profil tetap render tanpa error Firebase. Timeout 10 detik agar
+/// stream yang macet (offline/rules) tampil sebagai error card, bukan
+/// skeleton selamanya.
 final scoreProvider = StreamProvider<LiteracyScore>((ref) {
   final userId = ref.watch(historyUserIdProvider);
   if (userId == null) return Stream.value(const LiteracyScore());
-  return ref.watch(scoreRepositoryProvider).watch(userId);
+  return ref
+      .watch(scoreRepositoryProvider)
+      .watch(userId)
+      .timeout(
+        const Duration(seconds: 10),
+        onTimeout: (sink) => sink.addError(
+          TimeoutException('Skor tidak dapat dimuat. Coba lagi.'),
+        ),
+      );
 });
 
 /// Aksi award terpantau UI — error Firestore tidak merusak state skor.

@@ -161,6 +161,28 @@ abstract final class AppStrings {
   static const String homeLearnPlaceholderTitle = 'Modul segera hadir';
   static const String homeLearnPlaceholderSubtitle =
       'Tiga modul 5 menit: clickbait, gambar manipulasi, dan verifikasi sumber. Dibuka di Phase 4.';
+  static const String learnProgressSuffix = 'modul selesai';
+  static const String learnPointsNote =
+      'Selesaikan modul +20 poin, tiap jawaban kuis benar +5.';
+  static const String learnModuleDone = 'Selesai';
+  static const String learnStartQuiz = 'Mulai kuis';
+  static const String learnReadArticle = 'Baca modul';
+  static const String learnMarkDone = 'Tandai selesai +20';
+  static const String learnMarkedDone = 'Modul selesai. +20 poin diklaim.';
+  static const String learnQuizTitle = 'Kuis pemahaman';
+  static const String learnQuizOf = 'Soal';
+  static const String learnQuizNext = 'Lanjut';
+  static const String learnQuizFinish = 'Lihat hasil';
+  static const String learnQuizCorrect = 'Benar!';
+  static const String learnQuizWrong = 'Kurang tepat.';
+  static const String learnQuizScoreTitle = 'Hasil kuismu';
+  static const String learnQuizClaim = 'Klaim poin';
+  static const String learnQuizClaimed = 'poin kuis diklaim.';
+  static const String learnQuizNoNew = 'Tidak ada poin baru. Skor terbaikmu bertahan.';
+  static const String learnQuizRetry = 'Ulangi kuis';
+  static const String learnQuizBack = 'Kembali ke modul';
+  static const String learnGuestNote =
+      'Masuk untuk menyimpan progres ke semua perangkat. Tanpa login progres hanya sesi ini.';
   static const String homeProfileEyebrow = 'AKUN';
   static const String homeProfileTitle1 = 'Kelola';
   static const String homeProfileTitle2 = 'profilmu.';
@@ -184,6 +206,10 @@ abstract final class AppStrings {
       'Kamu masuk tanpa akun. Skor tersimpan lokal sesi ini; masuk untuk sinkron ke semua perangkat.';
   static const String scoreSyncedNote =
       'Skor tersinkron ke akunmu dan bertambah otomatis setiap verifikasi.';
+  static const String scoreLoading = 'Memuat skor...';
+  static const String scoreLoadFailed = 'Skor tidak dapat dimuat.';
+  static const String scoreLoadFailedSubtitle =
+      'Ini soal penyimpanan skor, bukan kunci API. Periksa koneksi atau aturan Firestore, lalu coba lagi.';
   static const String chatEyebrow = 'ASISTEN AI';
   static const String chatTitle1 = 'Tanya';
   static const String chatTitle2 = 'apa saja.';
@@ -196,12 +222,36 @@ abstract final class AppStrings {
   static const String chatKeyBannerTitle =
       'Mode pratinjau: kunci API belum tersambung';
   static const String chatKeyBannerSubtitle =
-      'Jawaban live butuh GEMINI_API_KEY. Salin perintah, jalankan ulang, lalu chat kembali live.';
+      'Jawaban live butuh kunci Gemini. Tempel kunci di Pengaturan atau salin perintah run untuk mode developer.';
   static const String chatKeyCopy = 'Salin perintah';
   static const String chatKeyCopied =
       'Perintah disalin. Tempel di terminal lalu jalankan ulang.';
   static const String chatRunCommand =
       'flutter run --dart-define=GEMINI_API_KEY=ISI_KUNCI_ANDA';
+  static const String apiKeySettingsTitle = 'Kunci API Gemini';
+  static const String apiKeySettingsSubtitle =
+      'Tempel kunci pribadi untuk hasil live tanpa terminal. Tersimpan aman di perangkat ini saja.';
+  static const String apiKeyFieldLabel = 'Kunci API';
+  static const String apiKeyFieldHint = 'AIza...';
+  static const String apiKeySave = 'Simpan kunci';
+  static const String apiKeySaved = 'Kunci tersimpan. AI kini live.';
+  static const String apiKeyRemoved = 'Kunci dihapus. Kembali ke mode demo.';
+  static const String apiKeyRemove = 'Hapus kunci';
+  static const String apiKeyRemoveConfirm =
+      'Hapus kunci API dari perangkat ini? AI kembali ke mode demo.';
+  static const String apiKeyInvalid =
+      'Kunci API tidak valid. Tempel kunci lengkap tanpa spasi.';
+  static const String apiKeySaveFailed = 'Gagal menyimpan kunci. Coba lagi.';
+  static const String apiKeyActiveCompile = 'Aktif via dart-define developer.';
+  static const String apiKeyActiveUser = 'Aktif via kunci perangkat.';
+  static const String apiKeyInactive = 'Belum ada kunci. Mode demo aktif.';
+  static const String apiKeyOpenSettings = 'Buka Pengaturan';
+  static const String apiKeyHowToTitle = 'Dari mana dapat kunci?';
+  static const String apiKeyHowToBody =
+      'Buat gratis di Google AI Studio, salin kuncinya, lalu tempel di sini. Kunci tidak pernah dikirim ke mana pun selain API Gemini.';
+  static const String demoBadge = 'DEMO';
+  static const String demoResultNote =
+      'Hasil demo offline — bukan penilaian AI live. Sambungkan kunci API untuk verifikasi sungguhan.';
   static const String chatGreetingTitle = 'Halo, aku asisten literasimu.';
   static const String chatGreetingSubtitle =
       'Tanya soal hoaks, clickbait, atau cara verifikasi sumber. Jawabanku santai tapi tetap kritis.';

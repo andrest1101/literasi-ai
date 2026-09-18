@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/api_key_resolver.dart';
 import '../../../history/presentation/providers/history_providers.dart';
 import '../../../score/presentation/providers/score_providers.dart';
+import '../../data/datasources/demo_verification_datasource.dart';
 import '../../data/datasources/gemini_text_datasource.dart';
 import '../../data/datasources/gemini_vision_datasource.dart';
 import '../../data/datasources/image_picker_datasource.dart';
@@ -18,22 +20,40 @@ import '../../domain/usecases/verify_image_claim.dart';
 import '../../domain/usecases/verify_url_claim.dart';
 
 /// Dependensi Quick Check — dapat di-override di test dengan fake.
+///
+/// Kunci API mengikuti prioritas resolver: dart-define (compile) menang atas
+/// kunci user dari secure storage.
 final geminiTextDatasourceProvider = Provider<GeminiTextDatasource>((ref) {
-  return GeminiTextDatasource();
+  final status = ref.watch(apiKeyStatusProvider).valueOrNull;
+  return GeminiTextDatasource(apiKey: status?.key ?? '');
 });
 
 final geminiVisionDatasourceProvider = Provider<GeminiVisionDatasource>((ref) {
-  return GeminiVisionDatasource();
+  final status = ref.watch(apiKeyStatusProvider).valueOrNull;
+  return GeminiVisionDatasource(apiKey: status?.key ?? '');
 });
+
+final demoVerificationDatasourceProvider =
+    Provider<DemoVerificationDatasource>((ref) {
+      return DemoVerificationDatasource();
+    });
 
 final imagePickerServiceProvider = Provider<ImagePickerService>((ref) {
   return ImagePickerDatasource();
 });
 
 final verificationRepositoryProvider = Provider<VerificationRepository>((ref) {
+  // Baca status live setiap request via closure — bukan snapshot sekali —
+  // agar kunci user yang baru disimpan langsung aktif tanpa restart app.
+  String resolveKey() =>
+      ref.read(apiKeyStatusProvider).valueOrNull?.key ?? '';
+  bool hasKey() =>
+      ref.read(apiKeyStatusProvider).valueOrNull?.configured ?? false;
   return VerificationRepositoryImpl(
     ref.watch(geminiTextDatasourceProvider),
     visionDatasource: ref.watch(geminiVisionDatasourceProvider),
+    resolveApiKey: resolveKey,
+    hasApiKey: hasKey,
   );
 });
 

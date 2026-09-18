@@ -35,6 +35,7 @@ class VerificationResult {
     required this.suggestion,
     required this.checkedAt,
     this.source = VerificationSource.text,
+    this.isDemo = false,
     this.imageFileName,
     this.sourceUrl,
     this.sourceTitle,
@@ -49,6 +50,10 @@ class VerificationResult {
   final String suggestion;
   final DateTime checkedAt;
   final VerificationSource source;
+
+  /// True bila hasil berasal dari mode demo offline (tanpa kunci API).
+  /// UI memakai ini untuk badge DEMO, bukan menebak dari teks penjelasan.
+  final bool isDemo;
   final String? imageFileName;
 
   /// Link artikel asli untuk mode URL.
@@ -66,6 +71,7 @@ class VerificationResult {
         'Bandingkan dengan sumber resmi seperti TurnBackHoax atau media arus utama.',
     DateTime? checkedAt,
     VerificationSource source = VerificationSource.text,
+    bool isDemo = false,
     String? imageFileName,
     String? sourceUrl,
     String? sourceTitle,
@@ -78,6 +84,7 @@ class VerificationResult {
       suggestion: suggestion,
       checkedAt: checkedAt ?? DateTime.now(),
       source: source,
+      isDemo: isDemo,
       imageFileName: imageFileName,
       sourceUrl: sourceUrl,
       sourceTitle: sourceTitle,

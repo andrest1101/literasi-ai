@@ -50,6 +50,9 @@ dependencies:
   # AI Engine — Gemini gemini-3.5-flash-lite
   google_generative_ai: ^0.4.7
 
+  # BYOK — kunci API milik user di secure storage OS
+  flutter_secure_storage: ^10.0.0
+
   # Input & sharing (PRD)
   http: ^1.4.0
   image_picker: ^1.1.2
