@@ -156,17 +156,11 @@ abstract final class AppStrings {
   static const String historyUndo = 'Urungkan';
   static const String historyRetryTitle = 'Riwayat tidak dapat dimuat';
   static const String historyDetailTitle = 'Detail Riwayat';
-  static const String homeHistoryPlaceholderTitle = 'Belum ada riwayat';
-  static const String homeHistoryPlaceholderSubtitle =
-      'Mulai pemeriksaan pertama dari tab Cek. Hasilnya akan tersimpan di sini setelah integrasi akun aktif.';
   static const String homeLearnEyebrow = 'EDUKASI';
   static const String homeLearnTitle1 = 'Naikkan';
   static const String homeLearnTitle2 = 'literasimu.';
   static const String homeLearnSubtitle =
       'Tiga modul singkat plus kuis untuk melatih insting cek fakta.';
-  static const String homeLearnPlaceholderTitle = 'Modul segera hadir';
-  static const String homeLearnPlaceholderSubtitle =
-      'Tiga modul 5 menit: clickbait, gambar manipulasi, dan verifikasi sumber. Dibuka di Phase 4.';
   static const String learnProgressSuffix = 'modul selesai';
   static const String learnPointsNote =
       'Selesaikan modul +20 poin, tiap jawaban kuis benar +5.';
@@ -194,9 +188,6 @@ abstract final class AppStrings {
   static const String homeProfileTitle2 = 'profilmu.';
   static const String homeProfileSubtitle =
       'Skor literasi bertambah dari setiap pemeriksaan dan modul yang selesai.';
-  static const String homeProfilePlaceholderTitle = 'Skor segera hadir';
-  static const String homeProfilePlaceholderSubtitle =
-      'Setiap verifikasi +10 poin, modul +20, kuis benar +5. Level: Pemula sampai Ahli.';
   static const String scoreLevelPrefix = 'Level';
   static const String scorePointsSuffix = 'poin';
   static const String scoreToNextPrefix = 'poin lagi ke';
