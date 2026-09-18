@@ -28,11 +28,15 @@ class QuickCheckResultSection extends StatefulWidget {
     required this.onNewCheck,
     this.shareService,
     this.onCaptureImage,
+    this.duration,
   });
 
   final VerificationResult result;
   final bool loading;
   final VoidCallback onNewCheck;
+
+  /// Durasi verify terakhir — bukti klaim <5 detik. Null = tidak tampil.
+  final Duration? duration;
 
   /// Injeksi untuk test — menghindari share sheet asli.
   final ShareService? shareService;
@@ -148,6 +152,18 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
                     letterSpacing: 1,
                     color: Color(0xFF8A5A00),
                   ),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+            if (widget.duration != null) ...[
+              Text(
+                _formatDuration(widget.duration!),
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textSecondary,
+                  fontFeatures: [FontFeature.tabularFigures()],
                 ),
               ),
               const SizedBox(width: 8),
@@ -655,6 +671,12 @@ class _ConfidenceTrack extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Format durasi Indonesia: "2,1 dtk" (koma, bukan titik).
+String _formatDuration(Duration duration) {
+  final seconds = duration.inMilliseconds / 1000;
+  return '${seconds.toStringAsFixed(1).replaceAll('.', ',')} dtk';
 }
 
 class _SectionLabel extends StatelessWidget {
