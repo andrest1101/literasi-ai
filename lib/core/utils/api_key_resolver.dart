@@ -49,6 +49,7 @@ class ApiKeyController extends AsyncNotifier<ApiKeyStatus> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(apiKeyStoreProvider).write(key);
+      // Invalidate di sini saja; consumer lain mendengar perubahan status.
       ref.invalidate(apiKeyStatusProvider);
       return ref.watch(apiKeyStatusProvider.future);
     });
