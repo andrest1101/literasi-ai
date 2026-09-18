@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/share_service.dart';
+import '../../../score/presentation/screens/api_key_screen.dart';
 import '../../domain/entities/verification_result.dart';
 import 'share_card.dart';
 import 'verdict_presentation.dart';
@@ -126,6 +127,31 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
                 ),
               ),
             ),
+            if (widget.result.isDemo) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 9,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(999),
+                  color: AppColors.warning.withValues(alpha: 0.16),
+                  border: Border.all(
+                    color: AppColors.warning.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: const Text(
+                  AppStrings.demoBadge,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1,
+                    color: Color(0xFF8A5A00),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
             TextButton.icon(
               onPressed: _busy ? null : widget.onNewCheck,
               icon: const Icon(Icons.refresh_rounded, size: 18),
@@ -439,6 +465,39 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
           ),
         ),
         const SizedBox(height: 12),
+        if (widget.result.isDemo)
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              color: AppColors.warning.withValues(alpha: 0.1),
+              border: Border.all(
+                color: AppColors.warning.withValues(alpha: 0.35),
+              ),
+            ),
+            child: const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.science_outlined,
+                  size: 16,
+                  color: Color(0xFF8A5A00),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    AppStrings.demoResultNote,
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.55,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         const Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -526,20 +585,10 @@ class QuickCheckErrorSection extends StatelessWidget {
           const SizedBox(height: 14),
           if (_isMissingKey) ...[
             OutlinedButton.icon(
-              onPressed: () async {
-                await Clipboard.setData(
-                  const ClipboardData(text: AppStrings.chatRunCommand),
-                );
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(AppStrings.chatKeyCopied),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
-              icon: const Icon(Icons.content_copy_rounded, size: 18),
-              label: const Text(AppStrings.chatKeyCopy),
+              onPressed: () =>
+                  Navigator.of(context).pushNamed(ApiKeyScreen.route),
+              icon: const Icon(Icons.key_outlined, size: 18),
+              label: const Text(AppStrings.apiKeyOpenSettings),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primary,
                 minimumSize: const Size.fromHeight(48),

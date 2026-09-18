@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
+import '../../../score/presentation/screens/api_key_screen.dart';
 import '../providers/chat_providers.dart';
 import '../widgets/chat_bubble.dart';
 import '../widgets/chat_input_bar.dart';
@@ -332,39 +333,88 @@ class _KeySetupBanner extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Semantics(
-            button: true,
-            label: AppStrings.chatKeyCopy,
-            child: Material(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                onTap: () => _copyCommand(context),
-                borderRadius: BorderRadius.circular(12),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.content_copy_rounded,
-                        size: 15,
-                        color: Colors.white,
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Semantics(
+                button: true,
+                label: AppStrings.apiKeyOpenSettings,
+                child: Material(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    onTap: () => Navigator.of(
+                      context,
+                    ).pushNamed(ApiKeyScreen.route),
+                    borderRadius: BorderRadius.circular(12),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 9,
                       ),
-                      SizedBox(width: 5),
-                      Text(
-                        AppStrings.chatKeyCopy,
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.key_outlined,
+                            size: 15,
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            AppStrings.apiKeyOpenSettings,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
+              const SizedBox(height: 6),
+              Semantics(
+                button: true,
+                label: AppStrings.chatKeyCopy,
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    onTap: () => _copyCommand(context),
+                    borderRadius: BorderRadius.circular(12),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 7,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.content_copy_rounded,
+                            size: 14,
+                            color: AppColors.primary,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            AppStrings.chatKeyCopy,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

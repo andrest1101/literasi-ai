@@ -169,6 +169,25 @@ abstract final class AppStrings {
   static const String homeProfilePlaceholderTitle = 'Skor segera hadir';
   static const String homeProfilePlaceholderSubtitle =
       'Setiap verifikasi +10 poin, modul +20, kuis benar +5. Level: Pemula sampai Ahli.';
+  static const String scoreLevelPrefix = 'Level';
+  static const String scorePointsSuffix = 'poin';
+  static const String scoreToNextPrefix = 'poin lagi ke';
+  static const String scoreMaxLevel = 'Level tertinggi tercapai.';
+  static const String scoreBreakdownTitle = 'Sumber poin';
+  static const String scoreVerifyRow = 'Verifikasi';
+  static const String scoreModuleRow = 'Modul selesai';
+  static const String scoreQuizRow = 'Kuis benar';
+  static const String scoreModuleSoon =
+      'Modul edukasi dibuka di Phase 3b. Setiap modul +20 poin, kuis benar +5.';
+  static const String scoreAccountTitle = 'Akun';
+  static const String scoreAnonymousNote =
+      'Kamu masuk tanpa akun. Skor tersimpan lokal sesi ini; masuk untuk sinkron ke semua perangkat.';
+  static const String scoreSyncedNote =
+      'Skor tersinkron ke akunmu dan bertambah otomatis setiap verifikasi.';
+  static const String scoreLoading = 'Memuat skor...';
+  static const String scoreLoadFailed = 'Skor tidak dapat dimuat.';
+  static const String scoreLoadFailedSubtitle =
+      'Ini soal penyimpanan skor, bukan kunci API. Periksa koneksi atau aturan Firestore, lalu coba lagi.';
   static const String chatEyebrow = 'ASISTEN AI';
   static const String chatTitle1 = 'Tanya';
   static const String chatTitle2 = 'apa saja.';
@@ -181,12 +200,36 @@ abstract final class AppStrings {
   static const String chatKeyBannerTitle =
       'Mode pratinjau: kunci API belum tersambung';
   static const String chatKeyBannerSubtitle =
-      'Jawaban live butuh GEMINI_API_KEY. Salin perintah, jalankan ulang, lalu chat kembali live.';
+      'Jawaban live butuh kunci Gemini. Tempel kunci di Pengaturan atau salin perintah run untuk mode developer.';
   static const String chatKeyCopy = 'Salin perintah';
   static const String chatKeyCopied =
       'Perintah disalin. Tempel di terminal lalu jalankan ulang.';
   static const String chatRunCommand =
       'flutter run --dart-define=GEMINI_API_KEY=ISI_KUNCI_ANDA';
+  static const String apiKeySettingsTitle = 'Kunci API Gemini';
+  static const String apiKeySettingsSubtitle =
+      'Tempel kunci pribadi untuk hasil live tanpa terminal. Tersimpan aman di perangkat ini saja.';
+  static const String apiKeyFieldLabel = 'Kunci API';
+  static const String apiKeyFieldHint = 'AIza...';
+  static const String apiKeySave = 'Simpan kunci';
+  static const String apiKeySaved = 'Kunci tersimpan. AI kini live.';
+  static const String apiKeyRemoved = 'Kunci dihapus. Kembali ke mode demo.';
+  static const String apiKeyRemove = 'Hapus kunci';
+  static const String apiKeyRemoveConfirm =
+      'Hapus kunci API dari perangkat ini? AI kembali ke mode demo.';
+  static const String apiKeyInvalid =
+      'Kunci API tidak valid. Tempel kunci lengkap tanpa spasi.';
+  static const String apiKeySaveFailed = 'Gagal menyimpan kunci. Coba lagi.';
+  static const String apiKeyActiveCompile = 'Aktif via dart-define developer.';
+  static const String apiKeyActiveUser = 'Aktif via kunci perangkat.';
+  static const String apiKeyInactive = 'Belum ada kunci. Mode demo aktif.';
+  static const String apiKeyOpenSettings = 'Buka Pengaturan';
+  static const String apiKeyHowToTitle = 'Dari mana dapat kunci?';
+  static const String apiKeyHowToBody =
+      'Buat gratis di Google AI Studio, salin kuncinya, lalu tempel di sini. Kunci tidak pernah dikirim ke mana pun selain API Gemini.';
+  static const String demoBadge = 'DEMO';
+  static const String demoResultNote =
+      'Hasil demo offline — bukan penilaian AI live. Sambungkan kunci API untuk verifikasi sungguhan.';
   static const String chatGreetingTitle = 'Halo, aku asisten literasimu.';
   static const String chatGreetingSubtitle =
       'Tanya soal hoaks, clickbait, atau cara verifikasi sumber. Jawabanku santai tapi tetap kritis.';
