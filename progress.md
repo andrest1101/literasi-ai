@@ -1,5 +1,20 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 26 September 2026_
+_Last updated: 27 September 2026_
+
+## Status: Phase 4 Readiness P2 — SELESAI
+
+### Yang dikerjakan
+- README rewrite Purpose → Process → Outcome + cara run BYOK/demo +
+  arsitektur + 138 test + demo 60 detik. PRD checklist MVP dicentang +
+  amandemen history Firestore vs lokal.
+- Bukti <5 detik: Stopwatch di controller (teks/gambar/link + debugPrint),
+  teks durasi `2,1 dtk` di kartu hasil, cache klaim identik LRU 20, rate
+  limit 2 detik lapisan repository.
+- Tech debt: hapus `_PlaceholderTab` mati + 6 string kedaluwarsa. Kompres
+  logo ditunda (tanpa Pillow di Windows).
+- Test `verify_performance_test.dart` 6 case. Hook injeksi `verifyTextFn`
+  agar cache teruji tanpa network.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 144 test.
 
 ## Status: Trending Hoaks Phase 3c — SELESAI
 
