@@ -119,6 +119,16 @@ abstract final class AppStrings {
       'Beredar pesan berantai tentang bantuan tunai yang meminta data rekening. Apakah ini penipuan?';
   static const String quickCheckExample3 =
       'Viral kabar libur nasional tambahan minggu ini. Apakah informasi ini valid?';
+  static const String quickCheckExample4 =
+      'Ada broadcast yang mengklaim gempa besar akan terjadi besok di kota tertentu. Apakah informasi ini bisa dipercaya?';
+  static const String quickCheckExample5 =
+      'Beredar kabar lowongan kerja bergaji besar yang meminta biaya pendaftaran di awal. Apakah ini modus penipuan?';
+  static const String trendingTitle = 'Trending hoaks';
+  static const String trendingSubtitle =
+      'Hoaks viral yang dikurasi manual. Ketuk untuk detail dan verifikasi serupa.';
+  static const String trendingHot = 'HOT';
+  static const String trendingReference = 'Rujukan';
+  static const String trendingVerifySimilar = 'Verifikasi serupa';
   static const String quickCheckBackToHome = 'Kembali ke Beranda';
   static const String navCheck = 'Cek';
   static const String navHistory = 'Riwayat';
@@ -149,18 +159,14 @@ abstract final class AppStrings {
       'Riwayat tidak dapat dihapus. Coba lagi.';
   static const String historyUndo = 'Urungkan';
   static const String historyRetryTitle = 'Riwayat tidak dapat dimuat';
+  static const String historySearchHint = 'Cari informasi yang pernah dicek...';
+  static const String historyStatsTitle = 'Ringkasan';
   static const String historyDetailTitle = 'Detail Riwayat';
-  static const String homeHistoryPlaceholderTitle = 'Belum ada riwayat';
-  static const String homeHistoryPlaceholderSubtitle =
-      'Mulai pemeriksaan pertama dari tab Cek. Hasilnya akan tersimpan di sini setelah integrasi akun aktif.';
   static const String homeLearnEyebrow = 'EDUKASI';
   static const String homeLearnTitle1 = 'Naikkan';
   static const String homeLearnTitle2 = 'literasimu.';
   static const String homeLearnSubtitle =
       'Tiga modul singkat plus kuis untuk melatih insting cek fakta.';
-  static const String homeLearnPlaceholderTitle = 'Modul segera hadir';
-  static const String homeLearnPlaceholderSubtitle =
-      'Tiga modul 5 menit: clickbait, gambar manipulasi, dan verifikasi sumber. Dibuka di Phase 4.';
   static const String learnProgressSuffix = 'modul selesai';
   static const String learnPointsNote =
       'Selesaikan modul +20 poin, tiap jawaban kuis benar +5.';
@@ -188,9 +194,6 @@ abstract final class AppStrings {
   static const String homeProfileTitle2 = 'profilmu.';
   static const String homeProfileSubtitle =
       'Skor literasi bertambah dari setiap pemeriksaan dan modul yang selesai.';
-  static const String homeProfilePlaceholderTitle = 'Skor segera hadir';
-  static const String homeProfilePlaceholderSubtitle =
-      'Setiap verifikasi +10 poin, modul +20, kuis benar +5. Level: Pemula sampai Ahli.';
   static const String scoreLevelPrefix = 'Level';
   static const String scorePointsSuffix = 'poin';
   static const String scoreToNextPrefix = 'poin lagi ke';
@@ -334,6 +337,9 @@ abstract final class AppStrings {
   static const String quickCheckNewCheck = 'Periksa informasi lain';
   static const String quickCheckRetry = 'Coba lagi';
   static const String quickCheckShare = 'Bagikan Hasil';
+  static const String quickCheckCopy = 'Salin hasil';
+  static const String quickCheckCopied =
+      'Hasil disalin. Tempel ke WhatsApp atau catatanmu.';
   static const String quickCheckSharing = 'Menyiapkan gambar...';
   static const String quickCheckShareFailed =
       'Gagal menyiapkan gambar. Mencoba bagikan sebagai teks.';

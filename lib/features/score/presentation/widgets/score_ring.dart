@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/literacy_score.dart';
 import 'literacy_level_ui.dart';
 
@@ -25,13 +26,13 @@ class ScoreRing extends StatelessWidget {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF2F80ED), Color(0xFF124A9B)],
+            colors: [AppColors.heroBegin, AppColors.heroEnd],
           ),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color(0x331558B0),
+              color: AppColors.primary.withValues(alpha: 0.32),
               blurRadius: 26,
-              offset: Offset(0, 14),
+              offset: const Offset(0, 14),
             ),
           ],
         ),
@@ -73,7 +74,7 @@ class ScoreRing extends StatelessWidget {
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.8,
-                              color: Color(0xFFD6E5FE),
+                              color: AppColors.heroInkSoft,
                             ),
                           ),
                         ],
@@ -125,7 +126,7 @@ class ScoreRing extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 13,
                       height: 1.55,
-                      color: Color(0xFFD6E5FE),
+                      color: AppColors.heroInkSoft,
                     ),
                   ),
                 ],

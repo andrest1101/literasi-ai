@@ -91,6 +91,12 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
   @override
   FutureOr<VerificationResult?> build() => null;
 
+  /// Durasi verify terakhir — ditampilkan di kartu hasil sebagai bukti
+  /// klaim <5 detik PRD §2.1. Null bila belum ada hasil.
+  Duration? _lastDuration;
+
+  Duration? get lastDuration => _lastDuration;
+
   Future<void> verify(String rawClaim) async {
     if (state.isLoading) return;
     _lastClaim = rawClaim;
@@ -98,13 +104,19 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
     _lastCaption = '';
     _lastUrl = null;
     state = const AsyncLoading();
+    final stopwatch = Stopwatch()..start();
     try {
       final result = await ref.read(verifyClaimProvider).call(rawClaim);
       _lastClaim = result.claim;
+      _lastDuration = stopwatch.elapsed;
+      debugPrint('QuickCheck teks selesai dalam $_lastDuration.');
       state = AsyncData(result);
       _saveHistory(result);
     } catch (error, stackTrace) {
+      _lastDuration = stopwatch.elapsed;
       state = AsyncError(error, stackTrace);
+    } finally {
+      stopwatch.stop();
     }
   }
 
@@ -118,15 +130,21 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
     _lastClaim = caption.isEmpty ? 'Gambar: ${image.fileName}' : caption;
     _lastUrl = null;
     state = const AsyncLoading();
+    final stopwatch = Stopwatch()..start();
     try {
       final result = await ref
           .read(verifyImageClaimProvider)
           .call(image: image, caption: caption);
       _lastClaim = result.claim;
+      _lastDuration = stopwatch.elapsed;
+      debugPrint('QuickCheck gambar selesai dalam $_lastDuration.');
       state = AsyncData(result);
       _saveHistory(result);
     } catch (error, stackTrace) {
+      _lastDuration = stopwatch.elapsed;
       state = AsyncError(error, stackTrace);
+    } finally {
+      stopwatch.stop();
     }
   }
 
@@ -137,14 +155,20 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
     _lastCaption = '';
     _lastClaim = rawUrl;
     state = const AsyncLoading();
+    final stopwatch = Stopwatch()..start();
     try {
       final result = await ref.read(verifyUrlClaimProvider).call(rawUrl);
       _lastClaim = result.claim;
       _lastUrl = result.sourceUrl ?? rawUrl;
+      _lastDuration = stopwatch.elapsed;
+      debugPrint('QuickCheck link selesai dalam $_lastDuration.');
       state = AsyncData(result);
       _saveHistory(result);
     } catch (error, stackTrace) {
+      _lastDuration = stopwatch.elapsed;
       state = AsyncError(error, stackTrace);
+    } finally {
+      stopwatch.stop();
     }
   }
 
@@ -170,6 +194,7 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
     _lastImage = null;
     _lastCaption = '';
     _lastUrl = null;
+    _lastDuration = null;
     state = const AsyncData(null);
   }
 

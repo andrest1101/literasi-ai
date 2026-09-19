@@ -23,6 +23,12 @@ final historyFilterProvider = StateProvider<HistoryFilter>((ref) {
   return HistoryFilter.all;
 });
 
+/// Kata kunci pencarian riwayat — murni state presentasi.
+///
+/// Pencarian jalan lokal di atas stream Firestore (tanpa query baru),
+/// sehingga guest/offline dan filter verdict tetap konsisten.
+final historySearchProvider = StateProvider<String>((ref) => '');
+
 /// UID aman-test: bungkus FirebaseAuth agar widget test tanpa Firebase
 /// init tetap jalan (kembali null), dan test bisa override via provider.
 final historyUserIdProvider = Provider<String?>((ref) {

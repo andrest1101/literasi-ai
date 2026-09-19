@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -5,8 +7,9 @@ import '../../../../core/constants/app_strings.dart';
 
 /// Indikator analisis elegan — timeline tiga tahap, bukan kartu besar.
 ///
-/// Memakai satu permukaan ringan dengan progress linear agar loading terasa
-/// hidup tanpa menyaingi hasil verdict.
+/// Jujur soal progres: bar memakai mode indeterminate (AI tidak melaporkan
+/// persen nyata) dan label kanan menunjukkan detik berjalan, bukan persen
+/// palsu yang mengulang dari 0 setiap 3,6 detik.
 class QuickCheckAnalyzingIndicator extends StatefulWidget {
   const QuickCheckAnalyzingIndicator({
     super.key,
@@ -23,9 +26,10 @@ class QuickCheckAnalyzingIndicator extends StatefulWidget {
 }
 
 class _QuickCheckAnalyzingIndicatorState
-    extends State<QuickCheckAnalyzingIndicator>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+    extends State<QuickCheckAnalyzingIndicator> {
+  late final Stopwatch _stopwatch;
+  Timer? _ticker;
+  int _seconds = 0;
 
   static const _textSteps = [
     'Memahami informasi',
@@ -42,110 +46,111 @@ class _QuickCheckAnalyzingIndicatorState
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 3600),
-    )..repeat();
+    _stopwatch = Stopwatch()..start();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      setState(() => _seconds = _stopwatch.elapsed.inSeconds);
+    });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _ticker?.cancel();
+    _stopwatch.stop();
     super.dispose();
+  }
+
+  /// Tahap monoton naik berdasarkan detik berjalan — tidak pernah mundur
+  /// seperti loop persen sebelumnya. Estimasi kasar yang jujur: AI tidak
+  /// melaporkan progres nyata, jadi tahap hanya ilustrasi alur.
+  int get _activeStep {
+    if (_seconds >= 8) return 2;
+    if (_seconds >= 3) return 1;
+    return 0;
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        final steps = widget.urlMode
-            ? _urlSteps
-            : widget.imageMode
-            ? _imageSteps
-            : _textSteps;
-        final progress = _controller.value;
-        final activeStep = (progress * steps.length).floor().clamp(
-          0,
-          steps.length - 1,
-        );
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    final steps = widget.urlMode
+        ? _urlSteps
+        : widget.imageMode
+        ? _imageSteps
+        : _textSteps;
+    final activeStep = _activeStep;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                const SizedBox(
-                  width: 26,
-                  height: 26,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppStrings.quickCheckAnalyzingTitle,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        AppStrings.quickCheckAnalyzingSubtitle,
-                        style: TextStyle(
-                          fontSize: 12,
-                          height: 1.5,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  '${(progress * 100).round()}%',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    fontFeatures: [FontFeature.tabularFigures()],
-                    color: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 8,
-                backgroundColor: AppColors.primary.withValues(alpha: 0.12),
-                valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+            const SizedBox(
+              width: 26,
+              height: 26,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                color: AppColors.primary,
               ),
             ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                for (var i = 0; i < steps.length; i++) ...[
-                  Expanded(
-                    child: _StepLabel(
-                      label: steps[i],
-                      active: i == activeStep,
-                      done: i < activeStep,
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppStrings.quickCheckAnalyzingTitle,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                  if (i < steps.length - 1) const SizedBox(width: 8),
+                  SizedBox(height: 2),
+                  Text(
+                    AppStrings.quickCheckAnalyzingSubtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.5,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ],
-              ],
+              ),
+            ),
+            Text(
+              '$_seconds dtk',
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                fontFeatures: [FontFeature.tabularFigures()],
+                color: AppColors.primary,
+              ),
             ),
           ],
-        );
-      },
+        ),
+        const SizedBox(height: 14),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: LinearProgressIndicator(
+            minHeight: 8,
+            backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+            valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+          ),
+        ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            for (var i = 0; i < steps.length; i++) ...[
+              Expanded(
+                child: _StepLabel(
+                  label: steps[i],
+                  active: i == activeStep,
+                  done: i < activeStep,
+                ),
+              ),
+              if (i < steps.length - 1) const SizedBox(width: 8),
+            ],
+          ],
+        ),
+      ],
     );
   }
 }

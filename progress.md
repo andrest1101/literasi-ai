@@ -1,5 +1,52 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 25 September 2026_
+_Last updated: 19 September 2026_
+
+## Status: Premium Upgrade (Sistem + UI/UX + Fitur) — SELESAI
+
+### Yang dikerjakan
+- Design tokens: varian warna gelap/hero/disabled/shadow di
+  `app_colors.dart`, `AppRadii` + `AppSpacing` + theme
+  Filled/Outlined/Chip/Divider/Snackbar di `app_styles.dart`.
+- Verdict 1-detik aksesibel: `VerdictPresentation` punya headline aksi
+  per verdict (ikon + teks + warna), confidence bar animasi 650ms,
+  entrance fade+slide 320ms, tombol Salin hasil + snackbar.
+- Analyzing jujur: persen palsu berulang diganti detik berjalan +
+  bar indeterminate + tahap monoton naik.
+- Sistem: sanitasi prompt-injection + blok KLAIM/SELESAI + aturan
+  anti-confidence-100 di prompt teks; `UrlFetcher` dukung og:title/
+  og:description, User-Agent, batas 512 KB, decode entity HTML.
+- Fitur: search riwayat lokal (klaim + URL, gabung filter verdict),
+  ringkasan Hoaks/Valid/Perlu dicek, 2 contoh demo baru (gempa, loker).
+- Test `premium_upgrade_test.dart` 9 case baru.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 153 test.
+
+## Status: Phase 4 Readiness P2 — SELESAI
+
+### Yang dikerjakan
+- README rewrite Purpose → Process → Outcome + cara run BYOK/demo +
+  arsitektur + 138 test + demo 60 detik. PRD checklist MVP dicentang +
+  amandemen history Firestore vs lokal.
+- Bukti <5 detik: Stopwatch di controller (teks/gambar/link + debugPrint),
+  teks durasi `2,1 dtk` di kartu hasil, cache klaim identik LRU 20, rate
+  limit 2 detik lapisan repository.
+- Tech debt: hapus `_PlaceholderTab` mati + 6 string kedaluwarsa. Kompres
+  logo ditunda (tanpa Pillow di Windows).
+- Test `verify_performance_test.dart` 6 case. Hook injeksi `verifyTextFn`
+  agar cache teruji tanpa network.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 144 test.
+
+## Status: Trending Hoaks Phase 3c — SELESAI
+
+### Yang dikerjakan
+- Domain Trending murni Dart: `TrendingItem` + konversi ke hasil verifikasi,
+  kontrak repository sync lokal.
+- Data curated 7 hoaks ID (kategori, tanggal, rujukan, HOT) + impl offline.
+- Provider sync tanpa Firebase agar guest offline tetap melihat feed.
+- UI heterogen: rail vertikal 228px + badge HOT + detail reuse hasil/share +
+  verifikasi serupa. Wiring di bawah carousel tab Cek.
+- Test `trending_test.dart` 4 case. Bug const DateTime dan assertion ganda
+  diperbaiki.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 138 test.
 
 ## Status: Learn Mini-Course Phase 3b — SELESAI
 

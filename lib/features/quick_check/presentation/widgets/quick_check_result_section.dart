@@ -28,11 +28,15 @@ class QuickCheckResultSection extends StatefulWidget {
     required this.onNewCheck,
     this.shareService,
     this.onCaptureImage,
+    this.duration,
   });
 
   final VerificationResult result;
   final bool loading;
   final VoidCallback onNewCheck;
+
+  /// Durasi verify terakhir — bukti klaim <5 detik. Null = tidak tampil.
+  final Duration? duration;
 
   /// Injeksi untuk test — menghindari share sheet asli.
   final ShareService? shareService;
@@ -94,6 +98,20 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
     }
   }
 
+  Future<void> _copy(BuildContext context) async {
+    if (_busy) return;
+    await Clipboard.setData(
+      ClipboardData(text: ShareService.buildShareText(widget.result)),
+    );
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(AppStrings.quickCheckCopied),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final style = VerdictPresentation.of(widget.result.verdict);
@@ -146,8 +164,20 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1,
-                    color: Color(0xFF8A5A00),
+                    color: AppColors.warningDark,
                   ),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+            if (widget.duration != null) ...[
+              Text(
+                _formatDuration(widget.duration!),
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textSecondary,
+                  fontFeatures: [FontFeature.tabularFigures()],
                 ),
               ),
               const SizedBox(width: 8),
@@ -164,22 +194,23 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
           ],
         ),
         const SizedBox(height: 10),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(26),
-            color: AppColors.surface,
-            border: Border.all(
-              color: style.accent.withValues(alpha: 0.26),
-              width: 1.2,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x14101A33),
-                blurRadius: 26,
-                offset: Offset(0, 14),
+        _ResultEntrance(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(26),
+              color: AppColors.surface,
+              border: Border.all(
+                color: style.accent.withValues(alpha: 0.26),
+                width: 1.2,
               ),
-            ],
-          ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadowInk.withValues(alpha: 0.08),
+                  blurRadius: 26,
+                  offset: const Offset(0, 14),
+                ),
+              ],
+            ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -263,6 +294,15 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
                                 ),
                               ),
                             ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            style.headline,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: style.deep,
+                            ),
                           ),
                         ],
                       ),
@@ -425,6 +465,7 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
                 ),
               ),
             ],
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -450,8 +491,8 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              disabledBackgroundColor: const Color(0xFFE8EDF5),
-              disabledForegroundColor: const Color(0xFF5B6B80),
+              disabledBackgroundColor: AppColors.disabledSurface,
+              disabledForegroundColor: AppColors.disabledInk,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -461,6 +502,28 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
               ),
               elevation: _sharing ? 0 : 5,
               shadowColor: AppColors.primary.withValues(alpha: 0.35),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 50,
+          child: OutlinedButton.icon(
+            onPressed: _busy ? null : () => _copy(context),
+            icon: const Icon(Icons.content_copy_rounded, size: 19),
+            label: const Text(AppStrings.quickCheckCopy),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              side: BorderSide(
+                color: AppColors.primary.withValues(alpha: 0.4),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
         ),
@@ -482,7 +545,7 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
                 Icon(
                   Icons.science_outlined,
                   size: 16,
-                  color: Color(0xFF8A5A00),
+                  color: AppColors.warningDark,
                 ),
                 SizedBox(width: 8),
                 Expanded(
@@ -624,6 +687,58 @@ class QuickCheckErrorSection extends StatelessWidget {
 }
 
 
+/// Entrance hasil — fade + slide halus sekali saat kartu muncul.
+///
+/// Durasi 320ms: cukup terasa premium, tidak menghambat baca verdict
+/// 1-detik. Tanpa scale/overshoot agar tetap trustworthy, bukan playful.
+class _ResultEntrance extends StatefulWidget {
+  const _ResultEntrance({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_ResultEntrance> createState() => _ResultEntranceState();
+}
+
+class _ResultEntranceState extends State<_ResultEntrance>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fade;
+  late final Animation<Offset> _slide;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 320),
+    );
+    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+    _slide =
+        Tween<Offset>(
+          begin: const Offset(0, 0.035),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+        );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fade,
+      child: SlideTransition(position: _slide, child: widget.child),
+    );
+  }
+}
+
 class _ConfidenceTrack extends StatelessWidget {
   const _ConfidenceTrack({required this.value, required this.accent});
 
@@ -640,21 +755,34 @@ class _ConfidenceTrack extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.neutral.withValues(alpha: 0.16),
           ),
-          child: FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: value.clamp(0, 100) / 100,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [accent.withValues(alpha: 0.7), accent],
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: value.clamp(0, 100) / 100),
+            duration: const Duration(milliseconds: 650),
+            curve: Curves.easeOutCubic,
+            builder: (context, progress, _) {
+              return FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: progress,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [accent.withValues(alpha: 0.7), accent],
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ),
       ),
     );
   }
+}
+
+/// Format durasi Indonesia: "2,1 dtk" (koma, bukan titik).
+String _formatDuration(Duration duration) {
+  final seconds = duration.inMilliseconds / 1000;
+  return '${seconds.toStringAsFixed(1).replaceAll('.', ',')} dtk';
 }
 
 class _SectionLabel extends StatelessWidget {
