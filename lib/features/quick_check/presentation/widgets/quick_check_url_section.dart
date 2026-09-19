@@ -80,11 +80,11 @@ class QuickCheckUrlSection extends StatelessWidget {
                   : AppColors.success.withValues(alpha: 0.4),
               width: 1.2,
             ),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: Color(0x0F101A33),
+                color: AppColors.shadowInk.withValues(alpha: 0.06),
                 blurRadius: 22,
-                offset: Offset(0, 10),
+                offset: const Offset(0, 10),
               ),
             ],
           ),
@@ -294,8 +294,8 @@ class QuickCheckUrlSection extends StatelessWidget {
                 FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: const Color(0xFFE8EDF5),
-                  disabledForegroundColor: const Color(0xFF5B6B80),
+                  disabledBackgroundColor: AppColors.disabledSurface,
+                  disabledForegroundColor: AppColors.disabledInk,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
                   ),
@@ -309,7 +309,9 @@ class QuickCheckUrlSection extends StatelessWidget {
                   animationDuration: const Duration(milliseconds: 250),
                   side: WidgetStateProperty.resolveWith((states) {
                     if (states.contains(WidgetState.disabled)) {
-                      return const BorderSide(color: Color(0xFFD5DDE9));
+                      return const BorderSide(
+                        color: AppColors.disabledBorder,
+                      );
                     }
                     return BorderSide.none;
                   }),

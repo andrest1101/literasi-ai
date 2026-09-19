@@ -320,13 +320,13 @@ class _SessionCtaCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF2F80ED), Color(0xFF124A9B)],
+          colors: [AppColors.heroBegin, AppColors.heroEnd],
         ),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x331558B0),
+            color: AppColors.primary.withValues(alpha: 0.32),
             blurRadius: 26,
-            offset: Offset(0, 14),
+            offset: const Offset(0, 14),
           ),
         ],
       ),
@@ -629,6 +629,8 @@ class _ExampleRail extends StatelessWidget {
     AppStrings.quickCheckExample1,
     AppStrings.quickCheckExample2,
     AppStrings.quickCheckExample3,
+    AppStrings.quickCheckExample4,
+    AppStrings.quickCheckExample5,
   ];
 
   @override
