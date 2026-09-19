@@ -1,5 +1,24 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 27 September 2026_
+_Last updated: 19 September 2026_
+
+## Status: Premium Upgrade (Sistem + UI/UX + Fitur) — SELESAI
+
+### Yang dikerjakan
+- Design tokens: varian warna gelap/hero/disabled/shadow di
+  `app_colors.dart`, `AppRadii` + `AppSpacing` + theme
+  Filled/Outlined/Chip/Divider/Snackbar di `app_styles.dart`.
+- Verdict 1-detik aksesibel: `VerdictPresentation` punya headline aksi
+  per verdict (ikon + teks + warna), confidence bar animasi 650ms,
+  entrance fade+slide 320ms, tombol Salin hasil + snackbar.
+- Analyzing jujur: persen palsu berulang diganti detik berjalan +
+  bar indeterminate + tahap monoton naik.
+- Sistem: sanitasi prompt-injection + blok KLAIM/SELESAI + aturan
+  anti-confidence-100 di prompt teks; `UrlFetcher` dukung og:title/
+  og:description, User-Agent, batas 512 KB, decode entity HTML.
+- Fitur: search riwayat lokal (klaim + URL, gabung filter verdict),
+  ringkasan Hoaks/Valid/Perlu dicek, 2 contoh demo baru (gempa, loker).
+- Test `premium_upgrade_test.dart` 9 case baru.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 153 test.
 
 ## Status: Phase 4 Readiness P2 — SELESAI
 
