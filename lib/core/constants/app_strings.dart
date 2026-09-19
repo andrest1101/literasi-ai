@@ -119,6 +119,10 @@ abstract final class AppStrings {
       'Beredar pesan berantai tentang bantuan tunai yang meminta data rekening. Apakah ini penipuan?';
   static const String quickCheckExample3 =
       'Viral kabar libur nasional tambahan minggu ini. Apakah informasi ini valid?';
+  static const String quickCheckExample4 =
+      'Ada broadcast yang mengklaim gempa besar akan terjadi besok di kota tertentu. Apakah informasi ini bisa dipercaya?';
+  static const String quickCheckExample5 =
+      'Beredar kabar lowongan kerja bergaji besar yang meminta biaya pendaftaran di awal. Apakah ini modus penipuan?';
   static const String trendingTitle = 'Trending hoaks';
   static const String trendingSubtitle =
       'Hoaks viral yang dikurasi manual. Ketuk untuk detail dan verifikasi serupa.';
@@ -155,6 +159,8 @@ abstract final class AppStrings {
       'Riwayat tidak dapat dihapus. Coba lagi.';
   static const String historyUndo = 'Urungkan';
   static const String historyRetryTitle = 'Riwayat tidak dapat dimuat';
+  static const String historySearchHint = 'Cari informasi yang pernah dicek...';
+  static const String historyStatsTitle = 'Ringkasan';
   static const String historyDetailTitle = 'Detail Riwayat';
   static const String homeLearnEyebrow = 'EDUKASI';
   static const String homeLearnTitle1 = 'Naikkan';
@@ -331,6 +337,9 @@ abstract final class AppStrings {
   static const String quickCheckNewCheck = 'Periksa informasi lain';
   static const String quickCheckRetry = 'Coba lagi';
   static const String quickCheckShare = 'Bagikan Hasil';
+  static const String quickCheckCopy = 'Salin hasil';
+  static const String quickCheckCopied =
+      'Hasil disalin. Tempel ke WhatsApp atau catatanmu.';
   static const String quickCheckSharing = 'Menyiapkan gambar...';
   static const String quickCheckShareFailed =
       'Gagal menyiapkan gambar. Mencoba bagikan sebagai teks.';

@@ -4,6 +4,9 @@ import 'app_colors.dart';
 
 /// Typography & theme — Material 3, font Inter (fallback sistematis).
 /// Google Sans tidak tersedia publik, jadi Inter adalah padanan resmi PRD §7.3.
+///
+/// Token radius/spacing/elevasi terpusat di sini agar widget tidak memakai
+/// angka magic tersebar. Nilai lama tidak diubah, hanya diberi nama.
 abstract final class AppStyles {
   static const String fontFamily = 'Inter';
 
@@ -41,13 +44,94 @@ abstract final class AppStyles {
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w800,
+          color: AppColors.textPrimary,
+        ),
       ),
       cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 2,
-        shadowColor: Colors.black.withValues(alpha: 0.1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shadowColor: AppColors.shadowInk.withValues(alpha: 0.1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(AppRadii.card)),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: AppColors.disabledSurface,
+          disabledForegroundColor: AppColors.disabledInk,
+          textStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadii.button),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          side: BorderSide(
+            color: AppColors.primary.withValues(alpha: 0.4),
+          ),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadii.small),
+          ),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.surface,
+        selectedColor: AppColors.primary.withValues(alpha: 0.14),
+        disabledColor: AppColors.disabledSurface,
+        side: BorderSide(
+          color: AppColors.neutral.withValues(alpha: 0.25),
+        ),
+        labelStyle: const TextStyle(
+          fontWeight: FontWeight.w700,
+          color: AppColors.textSecondary,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.pill),
+        ),
+      ),
+      dividerTheme: DividerThemeData(
+        color: AppColors.neutral.withValues(alpha: 0.18),
+        thickness: 1,
+      ),
+      snackBarTheme: const SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: AppColors.textPrimary,
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: AppColors.primary,
       ),
     );
   }
+}
+
+/// Radius terpusat — satu sumber kebenaran untuk semua kartu/tombol/pill.
+abstract final class AppRadii {
+  static const double card = 22;
+  static const double hero = 26;
+  static const double button = 16;
+  static const double small = 14;
+  static const double pill = 999;
+}
+
+/// Spacing grid 8pt — pakai kelipatan ini untuk ritme vertikal konsisten.
+abstract final class AppSpacing {
+  static const double xs = 4;
+  static const double sm = 8;
+  static const double md = 12;
+  static const double lg = 16;
+  static const double xl = 20;
+  static const double xxl = 24;
 }
