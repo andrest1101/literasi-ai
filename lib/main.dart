@@ -34,7 +34,7 @@ Future<void> main() async {
 }
 
 class LiterasiAIApp extends StatelessWidget {
-  const LiterasiAIApp({super.key});
+  const LiterasiAIApp({super.key}); 
 
   @override
   Widget build(BuildContext context) {
