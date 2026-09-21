@@ -1,0 +1,18 @@
+# Normalisasi line-ending: repo selalu LF.
+# Mencegah 123-file-noise saat pindah OS Windows <-> Linux.
+* text=auto eol=lf
+
+# Binary: jangan disentuh git
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.icns binary
+*.webp binary
+*.ttf binary
+*.otf binary
+*.pdf binary
+*.zip binary
+*.keystore binary
+*.jks binary
