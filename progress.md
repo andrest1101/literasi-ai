@@ -1,5 +1,21 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 19 September 2026_
+_Last updated: 21 September 2026_
+
+## Status: Sapu Tech-Debt Linux + README Profesional — SELESAI
+
+### Yang dikerjakan
+- Warning terakhir hilang: `await repository.isCompleted()` di
+  `onboarding_provider.dart` (unawaited_return_in_try_block). `dart analyze`
+  kini `No issues found!`.
+- Logo Google 3840px/190KB dipangkas ke 96px/6KB (-97%) via PIL LANCZOS +
+  optimize; test `GoogleGLogo renders official asset` tetap lolos.
+- README rewrite: badges stack, daftar isi, tabel fitur, demo 60 detik,
+  quickstart (+ catatan `libsecret-1-dev` Linux), konfigurasi Firebase/BYOK,
+  arsitektur, pengujian (153 test), roadmap, troubleshooting, dokumentasi.
+- Recon UI via screenshot dibatalkan jujur: tidak ada display aktif
+  (sesi di login screen), jadi tidak ada edit visual buta. Perbaikan UI
+  berikutnya butuh screenshot user atau scoping animasi terkurasi.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 153 test.
 
 ## Status: Premium Upgrade (Sistem + UI/UX + Fitur) — SELESAI
 

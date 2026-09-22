@@ -31,7 +31,7 @@ class OnboardingController extends AsyncNotifier<bool> {
   FutureOr<bool> build() async {
     try {
       final repository = await ref.watch(onboardingRepositoryProvider.future);
-      return repository.isCompleted();
+      return await repository.isCompleted();
     } catch (_) {
       return false;
     }
