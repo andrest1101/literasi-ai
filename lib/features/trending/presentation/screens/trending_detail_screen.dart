@@ -6,6 +6,7 @@ import '../../../quick_check/presentation/screens/quick_check_session_screen.dar
 import '../../../quick_check/presentation/widgets/quick_check_result_section.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
 import '../../domain/entities/trending_item.dart';
+import '../widgets/trending_rail.dart';
 
 /// Detail trending — reuse kartu hasil + share, tanpa duplikasi UI verdict.
 ///
@@ -103,6 +104,7 @@ class TrendingDetailScreen extends StatelessWidget {
                   result: result,
                   loading: false,
                   onNewCheck: () => _verifySimilar(context),
+                  heroTag: TrendingRail.heroTagFor(item.id),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(

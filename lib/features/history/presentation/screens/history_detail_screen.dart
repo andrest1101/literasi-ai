@@ -5,6 +5,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../quick_check/presentation/widgets/quick_check_result_section.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
 import '../../domain/entities/history_entry.dart';
+import '../widgets/history_card.dart';
 
 class HistoryDetailScreen extends StatelessWidget {
   const HistoryDetailScreen({super.key, required this.entry});
@@ -44,6 +45,7 @@ class HistoryDetailScreen extends StatelessWidget {
               result: entry.result,
               loading: false,
               onNewCheck: () => Navigator.of(context).maybePop(),
+              heroTag: HistoryCard.heroTagFor(entry.id),
             ),
           ),
         ),

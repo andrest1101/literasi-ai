@@ -15,6 +15,10 @@ class HistoryCard extends StatelessWidget {
   final HistoryEntry entry;
   final VoidCallback onTap;
 
+  /// Tag Hero badge verdict — satu-satunya sumber kebenaran agar kartu
+  /// daftar dan layar detail selalu memakai tag yang sama per entri.
+  static String heroTagFor(String entryId) => 'history-verdict-$entryId';
+
   @override
   Widget build(BuildContext context) {
     final result = entry.result;
@@ -46,14 +50,17 @@ class HistoryCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: style.accent.withValues(alpha: 0.11),
+              Hero(
+                tag: HistoryCard.heroTagFor(entry.id),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: style.accent.withValues(alpha: 0.11),
+                  ),
+                  child: Icon(style.icon, color: style.accent, size: 23),
                 ),
-                child: Icon(style.icon, color: style.accent, size: 23),
               ),
               const SizedBox(width: 12),
               Expanded(
