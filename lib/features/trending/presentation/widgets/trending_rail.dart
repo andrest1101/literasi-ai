@@ -21,6 +21,9 @@ class TrendingRail extends StatelessWidget {
   final List<TrendingItem> items;
   final ValueChanged<TrendingItem> onPick;
 
+  /// Tag Hero ikon verdict — dipakai rail dan layar detail dengan id sama.
+  static String heroTagFor(String itemId) => 'trending-verdict-$itemId';
+
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
@@ -94,7 +97,14 @@ class _TrendingCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(style.icon, size: 16, color: style.accent),
+                      Hero(
+                        tag: TrendingRail.heroTagFor(item.id),
+                        child: Icon(
+                          style.icon,
+                          size: 16,
+                          color: style.accent,
+                        ),
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(

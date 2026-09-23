@@ -1,5 +1,19 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 21 September 2026_
+_Last updated: 22 September 2026_
+
+## Status: Hero Badge Verdict List ke Detail — SELESAI
+
+### Yang dikerjakan
+- `QuickCheckResultSection` terima param opsional `heroTag`; badge ikon
+  verdict 52px dibungkus `Hero` hanya bila tag non-null. Layar sesi tanpa
+  tag = perilaku lama utuh, ShareCard off-screen dikecualikan.
+- Pasangan Hero: `HistoryCard` (badge 44px) ke `HistoryDetailScreen` via
+  `HistoryCard.heroTagFor(entry.id)`, dan pita ikon `TrendingRail` ke
+  `TrendingDetailScreen` via `TrendingRail.heroTagFor(item.id)` — tag unik
+  per id, satu sumber kebenaran, anti crash duplicate-tag.
+- Test `hero_verdict_test.dart` 5 case: tag unik, tap-terbang-balik
+  riwayat, tanpa tag = tanpa Hero (regresi), pasangan trending.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 158 test.
 
 ## Status: Sapu Tech-Debt Linux + README Profesional — SELESAI
 

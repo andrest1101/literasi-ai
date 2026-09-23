@@ -29,11 +29,19 @@ class QuickCheckResultSection extends StatefulWidget {
     this.shareService,
     this.onCaptureImage,
     this.duration,
+    this.heroTag,
   });
 
   final VerificationResult result;
   final bool loading;
   final VoidCallback onNewCheck;
+
+  /// Tag Hero opsional untuk badge ikon verdict.
+  ///
+  /// Diisi saat kartu ini adalah tujuan navigasi dari daftar (riwayat /
+  /// trending) agar badge terbang mulus antar layar. Null berarti tanpa
+  /// Hero — dipakai layar sesi yang dibuka tanpa pasangan asal.
+  final String? heroTag;
 
   /// Durasi verify terakhir — bukti klaim <5 detik. Null = tidak tampil.
   final Duration? duration;
@@ -115,6 +123,19 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
   @override
   Widget build(BuildContext context) {
     final style = VerdictPresentation.of(widget.result.verdict);
+    final verdictBadge = Container(
+      width: 52,
+      height: 52,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.surface,
+        border: Border.all(
+          color: style.accent.withValues(alpha: 0.4),
+          width: 1.4,
+        ),
+      ),
+      child: Icon(style.icon, size: 27, color: style.accent),
+    );
     final sourceBadge = switch (widget.result.source) {
       VerificationSource.image => (
         icon: Icons.image_outlined,
@@ -229,19 +250,10 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.surface,
-                        border: Border.all(
-                          color: style.accent.withValues(alpha: 0.4),
-                          width: 1.4,
-                        ),
-                      ),
-                      child: Icon(style.icon, size: 27, color: style.accent),
-                    ),
+                    if (widget.heroTag == null)
+                      verdictBadge
+                    else
+                      Hero(tag: widget.heroTag!, child: verdictBadge),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
