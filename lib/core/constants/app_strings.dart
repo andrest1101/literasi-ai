@@ -151,6 +151,7 @@ abstract final class AppStrings {
   static const String historyEmptyTitle = 'Belum ada riwayat';
   static const String historyEmptySubtitle =
       'Mulai pemeriksaan pertama dari tab Cek. Hasilmu akan tersimpan di sini.';
+  static const String historyEmptyCta = 'Mulai pemeriksaan';
   static const String historyEmptyFilteredTitle = 'Belum ada hasil di filter ini';
   static const String historyEmptyFilteredSubtitle =
       'Coba pilih filter lain untuk melihat pemeriksaan sebelumnya.';
@@ -159,6 +160,7 @@ abstract final class AppStrings {
       'Riwayat tidak dapat dihapus. Coba lagi.';
   static const String historyUndo = 'Urungkan';
   static const String historyRetryTitle = 'Riwayat tidak dapat dimuat';
+  static const String historyLoading = 'Memuat riwayat...';
   static const String historySearchHint = 'Cari informasi yang pernah dicek...';
   static const String historyStatsTitle = 'Ringkasan';
   static const String historyDetailTitle = 'Detail Riwayat';
@@ -168,9 +170,12 @@ abstract final class AppStrings {
   static const String homeLearnSubtitle =
       'Tiga modul singkat plus kuis untuk melatih insting cek fakta.';
   static const String learnProgressSuffix = 'modul selesai';
+  static const String learnProgressLoading = 'Memuat progres belajar...';
   static const String learnPointsNote =
       'Selesaikan modul +20 poin, tiap jawaban kuis benar +5.';
   static const String learnModuleDone = 'Selesai';
+  static const String learnDetailTitle = 'Modul belajar';
+  static const String learnReadingProgress = 'Progres baca modul';
   static const String learnStartQuiz = 'Mulai kuis';
   static const String learnReadArticle = 'Baca modul';
   static const String learnMarkDone = 'Tandai selesai +20';
