@@ -1,5 +1,31 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 22 September 2026_
+_Last updated: 23 September 2026_
+
+## Status: UI/UX U1 P0 Anti-Polos — SELESAI
+
+### Yang dikerjakan
+- `AppShimmer` bersama di `lib/shared/widgets/app_shimmer.dart`:
+  denyut alpha 1200ms (tanpa dep baru) + `ShimmerBar`/`ShimmerCircle` +
+  semantics label. Satu sumber untuk semua skeleton.
+- Skeleton Riwayat meniru bentuk `HistoryCard` (badge 44 + verdict +
+  confidence + klaim 2 baris + footer sumber-tanggal); skeleton Belajar
+  meniru `_ProgressSummary` (ring 56 + 2 baris). Loading tidak lagi kotak
+  putih polos, transisi tanpa layout shift besar.
+- Empty state Riwayat dapat CTA `Mulai pemeriksaan` (Filled + ikon
+  verified) yang push `QuickCheckSessionScreen`. Varian filtered tetap
+  tanpa CTA (masalahnya filter, bukan data kosong).
+- Detail modul ditulis ulang: hero gradien `heroBegin/heroEnd` (satu
+  keluarga dengan kartu daftar) + bilah progres baca di bawah AppBar
+  via ScrollController (dispose benar) + sticky bottom bar (Kuis Filled
+  54 primer, klaim Outlined 46 sekunder). Seksi 1 featured aksen primer
+  agar 4 kartu tidak identik. Logika `_claim()` + `_openQuiz()` utuh.
+- String baru terpusat di `AppStrings` (`historyLoading`,
+  `historyEmptyCta`, `learnProgressLoading`, `learnDetailTitle`,
+  `learnReadingProgress`) — tanpa hardcode di widget.
+- Test `ui_u1_polish_test.dart` 9 case: denyut shimmer, skeleton riwayat,
+  bentuk skeleton belajar, CTA tampil + navigasi sesi, hero + meta,
+  progres + sticky CTA, klaim idempoten + kuis terbuka.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 167 test.
 
 ## Status: Hero Badge Verdict List ke Detail — SELESAI
 
