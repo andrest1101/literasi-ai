@@ -7,21 +7,28 @@ import '../../../quick_check/presentation/widgets/session_back_button.dart';
 import '../providers/learn_providers.dart';
 import 'quiz_screen.dart';
 
-/// Artikel modul — 4 seksi bernomor + CTA kuis + klaim selesai.
+/// Artikel modul — hero gradien + progres baca + sticky CTA.
 ///
-/// Ilustrasi tiap seksi memakai medallion ikon berbeda (bukan gambar sama)
-/// agar ritme baca tidak monoton. Klaim +20 idempoten via repository.
+/// Hero memakai gradien [AppColors.heroBegin]/[AppColors.heroEnd] yang sama
+/// dengan kartu modul agar detail terasa satu keluarga dengan daftar.
+/// Bilah progres baca di bawah AppBar digerakkan [ScrollController] dan
+/// selalu di-dispose. CTA primer `Mulai kuis` menempel di bawah (sticky)
+/// dengan hierarki jelas: klaim +20 menjadi aksi sekunder di bawahnya.
+/// Logika [_claim]/[_openQuiz] tidak berubah.
 class CourseDetailScreen extends ConsumerStatefulWidget {
   const CourseDetailScreen({super.key, required this.moduleId});
 
   final String moduleId;
 
   @override
-  ConsumerState<CourseDetailScreen> createState() => _CourseDetailScreenState();
+  ConsumerState<CourseDetailScreen> createState() =>
+      _CourseDetailScreenState();
 }
 
 class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
   bool _claiming = false;
+  final _scrollController = ScrollController();
+  double _readProgress = 0.0;
 
   static const _sectionIcons = [
     Icons.visibility_outlined,
@@ -29,6 +36,30 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
     Icons.psychology_outlined,
     Icons.fitness_center_outlined,
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_updateProgress);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_updateProgress);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _updateProgress() {
+    if (!_scrollController.hasClients) return;
+    final max = _scrollController.position.maxScrollExtent;
+    final value = max <= 0
+        ? 1.0
+        : (_scrollController.offset / max).clamp(0.0, 1.0);
+    if ((value - _readProgress).abs() > 0.005) {
+      setState(() => _readProgress = value);
+    }
+  }
 
   Future<void> _claim() async {
     if (_claiming) return;
@@ -72,6 +103,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
     }
     final progress = ref.watch(learnProgressProvider).valueOrNull;
     final done = progress?.isCompleted(module.id) ?? false;
+    final percent = (_readProgress * 100).round();
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -85,7 +117,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
         leading: SessionBackButton(
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: Text(module.title),
+        title: const Text(AppStrings.learnDetailTitle),
         centerTitle: false,
         titleTextStyle: const TextStyle(
           fontSize: 16,
@@ -94,14 +126,23 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
           color: AppColors.textPrimary,
         ),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(
-            height: 1,
-            color: AppColors.neutral.withValues(alpha: 0.2),
+          preferredSize: const Size.fromHeight(3),
+          child: Semantics(
+            label: AppStrings.learnReadingProgress,
+            value: '$percent persen',
+            child: LinearProgressIndicator(
+              value: _readProgress,
+              minHeight: 3,
+              backgroundColor: AppColors.neutral.withValues(alpha: 0.15),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppColors.primary,
+              ),
+            ),
           ),
         ),
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
         child: Center(
           child: ConstrainedBox(
@@ -109,85 +150,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(999),
-                        color: AppColors.primary.withValues(alpha: 0.08),
-                        border: Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.22),
-                        ),
-                      ),
-                      child: Text(
-                        '${module.minutes} mnt baca',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.6,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (done)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(999),
-                          color: AppColors.success.withValues(alpha: 0.1),
-                          border: Border.all(
-                            color: AppColors.success.withValues(alpha: 0.35),
-                          ),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.check_circle_rounded,
-                              size: 13,
-                              color: AppColors.success,
-                            ),
-                            SizedBox(width: 5),
-                            Text(
-                              AppStrings.learnModuleDone,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.success,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  module.title,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  module.subtitle,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    height: 1.6,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
+                _ModuleHero(moduleId: module.id, done: done),
                 const SizedBox(height: 18),
                 for (var i = 0; i < module.sections.length; i++) ...[
                   if (i > 0) const SizedBox(height: 14),
@@ -196,69 +159,84 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                     icon: _sectionIcons[i % _sectionIcons.length],
                     heading: module.sections[i].heading,
                     body: module.sections[i].body,
+                    featured: i == 0,
                   ),
                 ],
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 52,
-                        child: OutlinedButton.icon(
-                          onPressed: _claiming ? null : _claim,
-                          icon: _claiming
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.2,
-                                  ),
-                                )
-                              : const Icon(
-                                  Icons.emoji_events_outlined,
-                                  size: 19,
-                                ),
-                          label: const Text(AppStrings.learnMarkDone),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.primary,
-                            side: BorderSide(
-                              color: AppColors.primary.withValues(alpha: 0.4),
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            textStyle: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: SizedBox(
-                        height: 52,
-                        child: FilledButton.icon(
-                          onPressed: _openQuiz,
-                          icon: const Icon(Icons.quiz_outlined, size: 19),
-                          label: const Text(AppStrings.learnStartQuiz),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            textStyle: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            border: Border(
+              top: BorderSide(
+                color: AppColors.neutral.withValues(alpha: 0.2),
+              ),
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x14101A33),
+                blurRadius: 18,
+                offset: Offset(0, -6),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: 54,
+                child: FilledButton.icon(
+                  onPressed: _openQuiz,
+                  icon: const Icon(Icons.quiz_outlined, size: 20),
+                  label: const Text(AppStrings.learnStartQuiz),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 46,
+                child: OutlinedButton.icon(
+                  onPressed: _claiming ? null : _claim,
+                  icon: _claiming
+                      ? const SizedBox(
+                          width: 17,
+                          height: 17,
+                          child: CircularProgressIndicator(strokeWidth: 2.2),
+                        )
+                      : const Icon(
+                          Icons.emoji_events_outlined,
+                          size: 18,
+                        ),
+                  label: const Text(AppStrings.learnMarkDone),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: BorderSide(
+                      color: AppColors.primary.withValues(alpha: 0.4),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    textStyle: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -266,18 +244,170 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
   }
 }
 
+/// Hero gradien pembuka modul — satu keluarga dengan kartu daftar.
+///
+/// Medallion ikon + pill durasi/soal/selesai + judul putih + subtitle
+/// terang, sehingga judul tidak lagi menempel polos di background.
+class _ModuleHero extends ConsumerWidget {
+  const _ModuleHero({required this.moduleId, required this.done});
+
+  final String moduleId;
+  final bool done;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final module = ref
+        .watch(learnContentProvider)
+        .where((m) => m.id == moduleId)
+        .firstOrNull;
+    if (module == null) return const SizedBox.shrink();
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(26),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.heroBegin, AppColors.heroEnd],
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x331A73E8),
+            blurRadius: 24,
+            offset: Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: Colors.white.withValues(alpha: 0.16),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: const Icon(
+                  Icons.menu_book_outlined,
+                  size: 24,
+                  color: Colors.white,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(999),
+                  color: Colors.white.withValues(alpha: 0.16),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  '${module.minutes} mnt baca',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6,
+                    color: Colors.white,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
+              if (done) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(999),
+                    color: AppColors.success,
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_rounded,
+                        size: 13,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        AppStrings.learnModuleDone,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            module.title,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            module.subtitle,
+            style: const TextStyle(
+              fontSize: 13.5,
+              height: 1.6,
+              color: AppColors.heroInkSoft,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '${module.sections.length} bagian • ${module.quizCount} soal',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white.withValues(alpha: 0.85),
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Satu seksi artikel — seksi pertama ([featured]) diberi aksen primer
+/// agar ritme baca panjang tidak monoton empat kartu identik.
 class _ArticleSection extends StatelessWidget {
   const _ArticleSection({
     required this.number,
     required this.icon,
     required this.heading,
     required this.body,
+    this.featured = false,
   });
 
   final int number;
   final IconData icon;
   final String heading;
   final String body;
+  final bool featured;
 
   @override
   Widget build(BuildContext context) {
@@ -287,13 +417,17 @@ class _ArticleSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         color: AppColors.surface,
         border: Border.all(
-          color: AppColors.neutral.withValues(alpha: 0.2),
+          color: featured
+              ? AppColors.primary.withValues(alpha: 0.35)
+              : AppColors.neutral.withValues(alpha: 0.2),
         ),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x0D101A33),
+            color: featured
+                ? AppColors.primary.withValues(alpha: 0.1)
+                : const Color(0x0D101A33),
             blurRadius: 16,
-            offset: Offset(0, 6),
+            offset: const Offset(0, 6),
           ),
         ],
       ),
