@@ -1,5 +1,84 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 23 September 2026_
+_Last updated: 24 September 2026_
+
+## Status: Navbar Pill Putih + Badge Kompak — SELESAI
+
+### Yang dikerjakan
+- Keputusan final user: lekukan (notch) DIBATALKAN total. Card kembali
+  putih polos (radius 26, hairline netral, shadow netral, tanpa tint/rim
+  biru di tepi) — `NavNotchPainter` + `CustomPaint` dihapus dari
+  `bottom_nav_bar.dart`.
+- Badge kompak dipertahankan: 48px (44px di layar <380px), ikon 23px,
+  ring putih 2.5 — ukuran final sesuai permintaan user.
+- Animasi tetap: badge meluncur 480ms `easeInOutCubicEmphasized` via
+  satu controller + pop scale + haptic + label aksen per tab.
+- Test `nav_pill_test.dart` diselaraskan (case geometri notch dihapus,
+  9 case tersisa). Backup reverse tanpa-notch di `%TEMP%\opencode\`
+  sudah tidak relevan karena notch memang dibatalkan.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 184 test.
+
+## Status: Navbar Notch Animasi — DIBATALKAN (diganti pill putih polos)
+
+### Yang dikerjakan
+- `AppBottomNavBar` jadi `StatefulWidget`: badge + notch digerakkan SATU
+  `AnimationController` 480ms `easeInOutCubicEmphasized` sehingga selalu
+  sinkron tanpa jank. Tap cepat tengah jalan menganimasikan dari posisi
+  saat ini (bukan slot lama) — tidak melompat.
+- `NavNotchPainter` (`CustomPainter`): pill radius 26 + cekungan simetris
+  (half-width proporsional badge, depth 18, kubik cermin tanpa sudut
+  tajam) di tepi atas, tint biru + rim biru mengikuti kontur lekukan.
+  Helper statis `slotCenter`/`badgeLeftFor` + `pillPath` publik agar
+  geometri teruji.
+- Perbaikan bentuk (24 Sep, sesi 3): lekukan-S + dasar datar diganti
+  segitiga tumpul simetris — dua kurva kubik cermin dari tepi atas ke
+  satu puncak membulat di bawah pusat badge (tanpa dasar datar, tanpa
+  lekuk-S, tanpa sudut tajam). Saat dekat tepi (tab Cek/Profil),
+  setengah-lebar menyempit simetris di sekitar pusat badge (bukan
+  pusat bergeser) sehingga puncak selalu tepat di bawah badge dan
+  potongan putih rapi. Test geometri diperketat: puncak di pusat slot
+  (toleransi 8px) di 4 tab.
+- Perbaikan visibilitas (24 Sep, sesi 4): badge dikecilkan 56px → 48px
+  (44px di layar <380px) + ikon 26 → 23 + ring 3 → 2.5 agar lekukan
+  muat penuh di tab ujung; lekukan diisi tint biru 0.07 + rim biru 0.3
+  (ganti hairline netral samar) sehingga cekungan terbaca jelas di atas
+  bar putih; lebar notch proporsional badge (half = badge/2 + 10).
+- Bug nyata ditemukan test: controller lazy dibuat saat `dispose` →
+  crash Ticker; diperbaiki via `initState` eager.
+- Bug 9 (sesi 4): tombol Tempel di mode URL kini validasi clipboard
+  sebelum mengisi field — bukan link / terlalu pendek / panjang /
+  skema non-http(s) langsung ditolak via snackbar informatif memakai
+  pesan yang sama dengan use case, bukan diam lalu gagal saat
+  Verifikasi ditekan.
+- Test `nav_pill_test.dart` 11 case: geometri segitiga tumpul (bounds
+  rapi + puncak di pusat slot + simetri cermin tab 0/3), notch kompak
+  badge baru (dalam 18 + muat tab ujung + simetris sempit), math slot,
+  geser badge, no-op tab aktif, aksen tiap tab, 360px badge di dalam
+  bar, tap cepat tengah jalan, geser 3 slot, geometri badge +
+  no-overlap FAB, pindah 4 tab. Backup reverse tanpa-notch di
+  `%TEMP%\opencode\` bila tidak cocok.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 186 test.
+
+## Status: Navbar Pill + Badge Naik — SELESAI (digantikan versi notch)
+
+### Yang dikerjakan
+- Rewrite `AppBottomNavBar` (tanpa `NavigationBar`/`NavigationDestination`
+  default): pill putih mengambang (radius 26, shadow biru lembut) dengan
+  badge lingkaran 56px (52px di layar <380px) gradien `heroBegin/heroEnd`
+  + ring putih yang menempel di atas bar, setengah keluar. Ikon putih 26px.
+- Animasi 300ms `easeOutCubic` (`AnimatedPositioned` antar slot + pop
+  scale 0.85→1.0 + `AnimatedDefaultTextStyle` label) plus haptic
+  `selectionClick`. Label aktif tetap di dalam bar dengan aksen identitas
+  per tab (selaras `SectionAccent` U2.1); slot aktif sisakan ruang ikon
+  kosong agar label tidak melompat. Tap tab aktif = no-op.
+- Notch/lekukan referensi SENGAJA tidak dipakai: butuh CustomPainter
+  posisi presisi + risiko overflow 360px + jank animasi. Versi badge
+  tempel tetap premium, satu bahasa dengan ChatFab dan hero modul.
+- `home_screen.dart`: FAB Chat diangkat bottom 96 (di atas pill, tidak
+  menimpa). Padding bawah 4 tab 96 → 148 (pill + badge + FAB).
+- Test `nav_pill_test.dart` 6 case + selaraskan `home_nav_chat_test.dart`
+  (finder kustom, jarak FAB-pill). Aksen label dibaca dari
+  `AnimatedDefaultTextStyle` (Text.style null karena animasi).
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 181 test.
 
 ## Status: UI/UX U2 P1 Identitas + Hierarki — SELESAI
 
