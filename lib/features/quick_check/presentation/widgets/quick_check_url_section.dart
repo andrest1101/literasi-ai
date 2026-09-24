@@ -346,15 +346,45 @@ class _PasteButton extends StatelessWidget {
             : () async {
                 final data = await Clipboard.getData(Clipboard.kTextPlain);
                 final text = data?.text?.trim() ?? '';
+                if (!context.mounted) return;
                 if (text.isEmpty) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(AppStrings.quickCheckUrlPasteEmpty),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(AppStrings.quickCheckUrlPasteEmpty),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  return;
+                }
+                // Clipboard bukan link http(s): tolak langsung dengan alasan
+                // yang sama seperti use case, bukan diam lalu gagal saat
+                // tombol Verifikasi ditekan.
+                final url = VerifyUrlClaim.normalize(text);
+                if (url.length < VerifyUrlClaim.minLength) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(AppStrings.quickCheckUrlTooShort),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  return;
+                }
+                if (url.length > VerifyUrlClaim.maxLength) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(AppStrings.quickCheckUrlTooLong),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  return;
+                }
+                if (!VerifyUrlClaim.isParsable(text)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(AppStrings.quickCheckUrlInvalid),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
                   return;
                 }
                 controller.text = text;
