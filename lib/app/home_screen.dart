@@ -14,7 +14,8 @@ import '../shared/widgets/bottom_nav_bar.dart';
 ///
 /// Tiap tab memegang judulnya sendiri di body (kontekstual: Cek, Riwayat,
 /// Belajar, Profil) sehingga tidak ada brand ganda di semua halaman.
-/// Wordmark kecil hanya ada di tab Cek.
+/// Wordmark kecil hanya ada di tab Cek. Navbar pill mengambang
+/// ([AppBottomNavBar]); FAB Chat diangkat di atas pill agar tidak menimpa.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -50,7 +51,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         },
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 16),
+        // Bar pill: tinggi 68 + margin bawah 12 = 80; FAB 60px diangkat
+        // 16px di atasnya (bottom 96) agar tidak menimpa pill.
+        padding: const EdgeInsets.only(bottom: 96),
         child: ChatFab(onTap: _openChat),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

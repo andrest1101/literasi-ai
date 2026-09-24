@@ -22,7 +22,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(AppBottomNavBar), findsOneWidget);
     expect(find.text('Cek'), findsOneWidget);
     expect(find.text('Riwayat'), findsOneWidget);
     expect(find.text('Belajar'), findsOneWidget);
@@ -35,7 +35,7 @@ void main() {
     expect(find.byIcon(Icons.auto_awesome_rounded), findsOneWidget);
     expect(find.byIcon(Icons.smart_toy_outlined), findsNothing);
 
-    // FAB melayang penuh di atas navbar: tidak ada irisan rect dengan nav.
+    // FAB melayang di atas pill navbar: tidak ada irisan rect dengan nav.
     final fabRect = tester.getRect(find.byType(ChatFab));
     final navRect = tester.getRect(find.byType(AppBottomNavBar));
     expect(fabRect.overlaps(navRect), isFalse);
@@ -132,8 +132,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(NavigationDestination), findsNWidgets(4));
-    await tester.tap(find.text('Riwayat'));
+    expect(find.byType(AppBottomNavBar), findsOneWidget);
+    // Tap via key slot tab agar tidak ambigu dengan label lain.
+    await tester.tap(find.byKey(const ValueKey('nav-tab-1')));
     await tester.pumpAndSettle();
     expect(current, 1);
     expect(tester.takeException(), isNull);

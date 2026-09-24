@@ -47,9 +47,9 @@ class QuickCheckHomeTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SingleChildScrollView(
-      // Padding bawah 96px memberi ruang bagi FAB Chat 60px + gap 16px agar
-      // tips terakhir tidak tertutup tombol mengambang di Home.
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
+      // Padding bawah 148px: pill navbar (68 + margin 12 + badge 28) +
+      // FAB Chat di atasnya agar tips terakhir tidak tertutup.
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 148),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),

@@ -29,7 +29,8 @@ class HistoryListScreen extends ConsumerWidget {
       onRefresh: () async => ref.invalidate(historyEntriesProvider),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+        // 148px: ruang pill navbar mengambang + FAB Chat di atasnya.
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 148),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),

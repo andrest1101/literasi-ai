@@ -22,7 +22,8 @@ class CourseListScreen extends ConsumerWidget {
     final modules = ref.watch(learnContentProvider);
     final progress = ref.watch(learnProgressProvider);
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+      // 148px: ruang pill navbar mengambang + FAB Chat di atasnya.
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 148),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),
