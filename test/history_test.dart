@@ -287,7 +287,13 @@ void main() {
 
     expect(find.byType(HistoryCard), findsNWidgets(2));
 
-    await tester.tap(find.text(AppStrings.historyFilterHoaks));
+    // Label 'Hoaks' muncul dua kali (pill filter + kolom ringkasan),
+    // jadi ketuk pill di dalam HistoryFilterBar secara eksplisit.
+    final hoaksPill = find.descendant(
+      of: find.byType(HistoryFilterBar),
+      matching: find.text(AppStrings.historyFilterHoaks),
+    );
+    await tester.tap(hoaksPill);
     await tester.pumpAndSettle();
 
     expect(find.byType(HistoryCard), findsOneWidget);

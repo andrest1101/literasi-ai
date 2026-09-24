@@ -175,7 +175,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(AppStrings.historySearchHint), findsOneWidget);
-    expect(find.text(AppStrings.historyStatsTitle), findsOneWidget);
+    // Ringkasan U2.3: 3 kolom angka besar (1 Hoaks, 1 Valid, 0 Perlu dicek)
+    // + pill filter U2.2 berhitung (Semua=2). Label verdict muncul dua kali
+    // (pill + kolom ringkasan); angka '2' dan '0' unik.
+    expect(find.text('Semua'), findsOneWidget);
+    expect(find.text('Hoaks'), findsNWidgets(2));
+    expect(find.text('Valid'), findsNWidgets(2));
+    expect(find.text('Perlu Dicek'), findsNWidgets(2));
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('0'), findsOneWidget);
     expect(find.byType(HistoryCard), findsNWidgets(2));
 
     await tester.enterText(
