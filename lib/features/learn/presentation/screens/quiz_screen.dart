@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
+import '../../domain/entities/quiz_question.dart';
 import '../providers/learn_providers.dart';
 
 /// Kuis 3 soal — 1 soal per halaman, terkunci berurutan.
@@ -142,6 +143,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   total: module.quiz.length,
                   claimed: _claimed,
                   claiming: _claiming,
+                  answers: List.of(_answers),
+                  questions: module.quiz,
                   onClaim: () => _claim(correct),
                   onRetry: () => setState(() {
                     _index = 0;
@@ -438,12 +441,125 @@ class _ProgressDots extends StatelessWidget {
   }
 }
 
+/// Daftar review jawaban — soal mana benar/salah + kunci jawabannya.
+///
+/// Menjawab keluhan "result hanya lingkaran skor": user kini tahu persis
+/// soal mana yang salah dan apa jawaban benarnya, tanpa mengulang kuis.
+class _ReviewList extends StatelessWidget {
+  const _ReviewList({required this.answers, required this.questions});
+
+  final List<int> answers;
+  final List<QuizQuestion> questions;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: AppColors.surface,
+        border: Border.all(
+          color: AppColors.neutral.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            AppStrings.learnQuizReviewTitle,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.4,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 10),
+          for (var i = 0; i < questions.length; i++) ...[
+            if (i > 0) const SizedBox(height: 8),
+            _ReviewRow(
+              number: i + 1,
+              right: i < answers.length &&
+                  questions[i].isCorrect(answers[i]),
+              correctAnswer: questions[i].options[questions[i].correctIndex],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ReviewRow extends StatelessWidget {
+  const _ReviewRow({
+    required this.number,
+    required this.right,
+    required this.correctAnswer,
+  });
+
+  final int number;
+  final bool right;
+  final String correctAnswer;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = right ? AppColors.success : AppColors.danger;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 26,
+          height: 26,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color.withValues(alpha: 0.12),
+          ),
+          child: Icon(
+            right ? Icons.check_rounded : Icons.close_rounded,
+            size: 15,
+            color: color,
+          ),
+        ),
+        const SizedBox(width: 9),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${AppStrings.learnQuizOf} $number',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
+              ),
+              Text(
+                correctAnswer,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  height: 1.5,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ResultPanel extends StatelessWidget {
   const _ResultPanel({
     required this.correct,
     required this.total,
     required this.claimed,
     required this.claiming,
+    required this.answers,
+    required this.questions,
     required this.onClaim,
     required this.onRetry,
     required this.onBack,
@@ -453,6 +569,12 @@ class _ResultPanel extends StatelessWidget {
   final int total;
   final int claimed;
   final bool claiming;
+
+  /// Jawaban user per soal (indeks opsi terpilih) — dipakai daftar review.
+  final List<int> answers;
+
+  /// Soal modul — dipakai kunci jawaban + teks opsi benar di review.
+  final List<QuizQuestion> questions;
   final VoidCallback onClaim;
   final VoidCallback onRetry;
   final VoidCallback onBack;
@@ -503,6 +625,8 @@ class _ResultPanel extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
+          const SizedBox(height: 14),
+          _ReviewList(answers: answers, questions: questions),
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,

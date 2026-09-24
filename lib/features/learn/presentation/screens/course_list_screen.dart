@@ -34,6 +34,7 @@ class CourseListScreen extends ConsumerWidget {
                 titleLine1: AppStrings.homeLearnTitle1,
                 titleLine2: AppStrings.homeLearnTitle2,
                 subtitle: AppStrings.homeLearnSubtitle,
+                accent: SectionAccent.learn,
               ),
               const SizedBox(height: 18),
               progress.when(
