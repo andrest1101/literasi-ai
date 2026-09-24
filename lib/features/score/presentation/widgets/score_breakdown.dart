@@ -49,6 +49,7 @@ class ScoreBreakdown extends StatelessWidget {
             label: AppStrings.scoreVerifyRow,
             detail: '${score.verifications} x 10',
             total: score.verificationTotal,
+            accent: AppColors.primary,
           ),
           const SizedBox(height: 10),
           _SourceRow(
@@ -56,6 +57,7 @@ class ScoreBreakdown extends StatelessWidget {
             label: AppStrings.scoreModuleRow,
             detail: '${score.modulesDone.length} x 20',
             total: score.moduleTotal,
+            accent: AppColors.success,
           ),
           const SizedBox(height: 10),
           _SourceRow(
@@ -63,6 +65,7 @@ class ScoreBreakdown extends StatelessWidget {
             label: AppStrings.scoreQuizRow,
             detail: '${score.quizCorrect} x 5',
             total: score.quizTotal,
+            accent: AppColors.verdictAmber,
           ),
           const SizedBox(height: 12),
           Container(
@@ -108,12 +111,16 @@ class _SourceRow extends StatelessWidget {
     required this.label,
     required this.detail,
     required this.total,
+    required this.accent,
   });
 
   final IconData icon;
   final String label;
   final String detail;
   final int total;
+
+  /// Aksen identitas sumber poin: verifikasi biru, modul hijau, kuis amber.
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
@@ -124,9 +131,9 @@ class _SourceRow extends StatelessWidget {
           height: 38,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(13),
-            color: AppColors.primary.withValues(alpha: 0.08),
+            color: accent.withValues(alpha: 0.1),
           ),
-          child: Icon(icon, size: 19, color: AppColors.primary),
+          child: Icon(icon, size: 19, color: accent),
         ),
         const SizedBox(width: 11),
         Expanded(
@@ -154,11 +161,11 @@ class _SourceRow extends StatelessWidget {
         ),
         Text(
           '+$total',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w800,
-            color: AppColors.primary,
-            fontFeatures: [FontFeature.tabularFigures()],
+            color: accent,
+            fontFeatures: const [FontFeature.tabularFigures()],
           ),
         ),
       ],

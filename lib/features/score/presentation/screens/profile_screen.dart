@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/api_key_resolver.dart';
 import '../../../../shared/widgets/app_section_header.dart';
+import '../../../auth/presentation/screens/auth_screen.dart';
 import '../../../history/presentation/providers/history_providers.dart';
 import '../providers/score_providers.dart';
 import '../widgets/score_breakdown.dart';
@@ -35,6 +37,7 @@ class ProfileScreen extends ConsumerWidget {
                 titleLine1: AppStrings.homeProfileTitle1,
                 titleLine2: AppStrings.homeProfileTitle2,
                 subtitle: AppStrings.homeProfileSubtitle,
+                accent: SectionAccent.profile,
               ),
               const SizedBox(height: 18),
               score.when(
@@ -62,20 +65,43 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
-class _AccountCard extends StatelessWidget {
+/// User aman-test: tanpa Firebase init tetap null seperti
+/// [historyUserIdProvider], agar widget test tidak crash.
+User? _safeUser() {
+  try {
+    return FirebaseAuth.instance.currentUser;
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Kartu akun — avatar + status jujur + CTA masuk bagi tamu.
+///
+/// Anonim/tanpa login mendapat avatar "T" + tombol Masuk (route `/auth`
+/// yang sudah ada, tanpa flow baru). Tersinkron mendapat avatar inisial
+/// email bila tersedia. Tidak ada klaim nama yang tidak dimiliki data.
+class _AccountCard extends ConsumerWidget {
   const _AccountCard({required this.synced});
 
   final bool synced;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(historyUserIdProvider) != null
+        ? _safeUser()
+        : null;
+    final email = user?.email;
+    final initial = email != null && email.isNotEmpty
+        ? email.trim()[0].toUpperCase()
+        : 'T';
+    final accent = synced ? AppColors.success : AppColors.primary;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
         color: AppColors.surface,
         border: Border.all(
-          color: AppColors.neutral.withValues(alpha: 0.2),
+          color: accent.withValues(alpha: 0.3),
         ),
         boxShadow: const [
           BoxShadow(
@@ -89,17 +115,25 @@ class _AccountCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              color: (synced ? AppColors.success : AppColors.primary)
-                  .withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [accent, accent.withValues(alpha: 0.65)],
+              ),
             ),
-            child: Icon(
-              synced ? Icons.cloud_done_outlined : Icons.person_outline,
-              size: 23,
-              color: synced ? AppColors.success : AppColors.primary,
+            child: Center(
+              child: Text(
+                initial,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -107,9 +141,9 @@ class _AccountCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  AppStrings.scoreAccountTitle,
-                  style: TextStyle(
+                Text(
+                  email ?? AppStrings.scoreGuestLabel,
+                  style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.2,
@@ -127,6 +161,31 @@ class _AccountCard extends StatelessWidget {
                     color: AppColors.textSecondary,
                   ),
                 ),
+                if (!synced) ...[
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 42,
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.of(
+                        context,
+                      ).pushNamed(AuthScreen.route),
+                      icon: const Icon(Icons.login_rounded, size: 18),
+                      label: const Text(AppStrings.scoreLoginCta),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: BorderSide(
+                          color: AppColors.primary.withValues(alpha: 0.4),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
