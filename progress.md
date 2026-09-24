@@ -1,5 +1,60 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 22 September 2026_
+_Last updated: 23 September 2026_
+
+## Status: UI/UX U2 P1 Identitas + Hierarki — SELESAI
+
+### Yang dikerjakan
+- Header per-tab beraksen (`SectionAccent`: Cek biru brand, Riwayat biru
+  tua arsip, Belajar hijau tumbuh, Profil biru sedang) di
+  `app_section_header.dart` — param opsional, kompatibel mundur. Eyebrow
+  + baris judul kedua mengikuti aksen; tipografi + hairline tetap.
+- Filter Riwayat jadi pill animasi (`AnimatedContainer` 200ms) dengan
+  aksen per verdict + suffix hitung per filter dari daftar yang sama
+  (tanpa query baru) + semantics `selected`. Bukan ChoiceChip default.
+- Strip ringkasan jadi 3 kolom angka 20px tabular + label + top-bar aksen
+  + divider hairline + semantics gabungan. Selaras dengan angka pill.
+- Detail trending: `Verifikasi serupa` naik jadi Filled primer 54,
+  box rujukan tegas (medallion + label eyebrow + shadow), seksi `Konteks
+  terkait` 2 item se-kategori (reuse `VerdictPresentation`, sembunyi bila
+  <2 item). `TrendingDetailScreen` jadi `ConsumerWidget`.
+- Hasil kuis dapat `Tinjau jawabanmu`: 3 baris review (lingkar
+  benar/salah + kunci jawaban) dari `_answers` + `module.quiz` yang ada.
+- Profil: baris sumber poin beraksen (biru/hijau/amber), kartu akun
+  avatar gradien inisial + CTA `Masuk untuk sinkron` bagi tamu (route
+  `/auth` yang ada), catatan skor best-score yang jujur (ganti copy
+  Phase-3b kedaluwarsa). String baru terpusat (`scoreGuestLabel`,
+  `scoreLoginCta`, `trendingRelatedTitle`, `learnQuizReviewTitle`,
+  `learnDetailTitle` sudah U1).
+- Test `ui_u2_identity_test.dart` 8 case + selaraskan 3 test lama
+  (premium ringkasan baru, score akun baru, hero detail butuh
+  ProviderScope di luar MaterialApp).
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 175 test.
+
+## Status: UI/UX U1 P0 Anti-Polos — SELESAI
+
+### Yang dikerjakan
+- `AppShimmer` bersama di `lib/shared/widgets/app_shimmer.dart`:
+  denyut alpha 1200ms (tanpa dep baru) + `ShimmerBar`/`ShimmerCircle` +
+  semantics label. Satu sumber untuk semua skeleton.
+- Skeleton Riwayat meniru bentuk `HistoryCard` (badge 44 + verdict +
+  confidence + klaim 2 baris + footer sumber-tanggal); skeleton Belajar
+  meniru `_ProgressSummary` (ring 56 + 2 baris). Loading tidak lagi kotak
+  putih polos, transisi tanpa layout shift besar.
+- Empty state Riwayat dapat CTA `Mulai pemeriksaan` (Filled + ikon
+  verified) yang push `QuickCheckSessionScreen`. Varian filtered tetap
+  tanpa CTA (masalahnya filter, bukan data kosong).
+- Detail modul ditulis ulang: hero gradien `heroBegin/heroEnd` (satu
+  keluarga dengan kartu daftar) + bilah progres baca di bawah AppBar
+  via ScrollController (dispose benar) + sticky bottom bar (Kuis Filled
+  54 primer, klaim Outlined 46 sekunder). Seksi 1 featured aksen primer
+  agar 4 kartu tidak identik. Logika `_claim()` + `_openQuiz()` utuh.
+- String baru terpusat di `AppStrings` (`historyLoading`,
+  `historyEmptyCta`, `learnProgressLoading`, `learnDetailTitle`,
+  `learnReadingProgress`) — tanpa hardcode di widget.
+- Test `ui_u1_polish_test.dart` 9 case: denyut shimmer, skeleton riwayat,
+  bentuk skeleton belajar, CTA tampil + navigasi sesi, hero + meta,
+  progres + sticky CTA, klaim idempoten + kuis terbuka.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 167 test.
 
 ## Status: Hero Badge Verdict List ke Detail — SELESAI
 

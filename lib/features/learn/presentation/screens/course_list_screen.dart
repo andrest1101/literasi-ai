@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../shared/widgets/app_section_header.dart';
+import '../../../../shared/widgets/app_shimmer.dart';
 import '../../domain/entities/course_progress.dart';
 import '../providers/learn_providers.dart';
 import '../widgets/course_card.dart';
@@ -33,6 +34,7 @@ class CourseListScreen extends ConsumerWidget {
                 titleLine1: AppStrings.homeLearnTitle1,
                 titleLine2: AppStrings.homeLearnTitle2,
                 subtitle: AppStrings.homeLearnSubtitle,
+                accent: SectionAccent.learn,
               ),
               const SizedBox(height: 18),
               progress.when(
@@ -222,18 +224,44 @@ class _MiniRing extends CustomPainter {
   bool shouldRepaint(_MiniRing old) => old.progress != progress;
 }
 
+/// Skeleton bernyawa saat progres dimuat — meniru [_ProgressSummary].
+///
+/// Ring + dua baris teks berdenyut via [AppShimmer] bersama agar transisi
+/// loading → data tidak melompat jauh.
 class _ProgressSkeleton extends StatelessWidget {
   const _ProgressSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 88,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: AppColors.surface,
-        border: Border.all(
-          color: AppColors.neutral.withValues(alpha: 0.18),
+    return AppShimmer(
+      semanticsLabel: AppStrings.learnProgressLoading,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: AppColors.surface,
+          border: Border.all(
+            color: AppColors.neutral.withValues(alpha: 0.18),
+          ),
+        ),
+        child: const Row(
+          children: [
+            ShimmerCircle(size: 56),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ShimmerBar(width: 130, height: 15),
+                  SizedBox(height: 8),
+                  ShimmerBar(height: 12),
+                  SizedBox(height: 5),
+                  ShimmerBar(width: 170, height: 12),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

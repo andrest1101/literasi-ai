@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:literasi_ai/features/history/domain/entities/history_entry.dart';
 import 'package:literasi_ai/features/history/presentation/screens/history_detail_screen.dart';
@@ -153,15 +154,19 @@ void main() {
   testWidgets('trending rail heroes are unique and open detail',
       (tester) async {
     final items = [_item(id: 'trend-1'), _item(id: 'trend-2')];
+    // ProviderScope di luar MaterialApp agar route detail yang di-push
+    // (TrendingDetailScreen kini ConsumerWidget) tetap di dalam scope.
     await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: TrendingRail(
-              items: items,
-              onPick: (item) => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => TrendingDetailScreen(item: item),
+      ProviderScope(
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TrendingRail(
+                items: items,
+                onPick: (item) => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => TrendingDetailScreen(item: item),
+                  ),
                 ),
               ),
             ),

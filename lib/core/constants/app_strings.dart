@@ -129,6 +129,7 @@ abstract final class AppStrings {
   static const String trendingHot = 'HOT';
   static const String trendingReference = 'Rujukan';
   static const String trendingVerifySimilar = 'Verifikasi serupa';
+  static const String trendingRelatedTitle = 'Konteks terkait';
   static const String quickCheckBackToHome = 'Kembali ke Beranda';
   static const String navCheck = 'Cek';
   static const String navHistory = 'Riwayat';
@@ -151,6 +152,7 @@ abstract final class AppStrings {
   static const String historyEmptyTitle = 'Belum ada riwayat';
   static const String historyEmptySubtitle =
       'Mulai pemeriksaan pertama dari tab Cek. Hasilmu akan tersimpan di sini.';
+  static const String historyEmptyCta = 'Mulai pemeriksaan';
   static const String historyEmptyFilteredTitle = 'Belum ada hasil di filter ini';
   static const String historyEmptyFilteredSubtitle =
       'Coba pilih filter lain untuk melihat pemeriksaan sebelumnya.';
@@ -159,6 +161,7 @@ abstract final class AppStrings {
       'Riwayat tidak dapat dihapus. Coba lagi.';
   static const String historyUndo = 'Urungkan';
   static const String historyRetryTitle = 'Riwayat tidak dapat dimuat';
+  static const String historyLoading = 'Memuat riwayat...';
   static const String historySearchHint = 'Cari informasi yang pernah dicek...';
   static const String historyStatsTitle = 'Ringkasan';
   static const String historyDetailTitle = 'Detail Riwayat';
@@ -168,9 +171,12 @@ abstract final class AppStrings {
   static const String homeLearnSubtitle =
       'Tiga modul singkat plus kuis untuk melatih insting cek fakta.';
   static const String learnProgressSuffix = 'modul selesai';
+  static const String learnProgressLoading = 'Memuat progres belajar...';
   static const String learnPointsNote =
       'Selesaikan modul +20 poin, tiap jawaban kuis benar +5.';
   static const String learnModuleDone = 'Selesai';
+  static const String learnDetailTitle = 'Modul belajar';
+  static const String learnReadingProgress = 'Progres baca modul';
   static const String learnStartQuiz = 'Mulai kuis';
   static const String learnReadArticle = 'Baca modul';
   static const String learnMarkDone = 'Tandai selesai +20';
@@ -182,6 +188,7 @@ abstract final class AppStrings {
   static const String learnQuizCorrect = 'Benar!';
   static const String learnQuizWrong = 'Kurang tepat.';
   static const String learnQuizScoreTitle = 'Hasil kuismu';
+  static const String learnQuizReviewTitle = 'Tinjau jawabanmu';
   static const String learnQuizClaim = 'Klaim poin';
   static const String learnQuizClaimed = 'poin kuis diklaim.';
   static const String learnQuizNoNew = 'Tidak ada poin baru. Skor terbaikmu bertahan.';
@@ -203,8 +210,9 @@ abstract final class AppStrings {
   static const String scoreModuleRow = 'Modul selesai';
   static const String scoreQuizRow = 'Kuis benar';
   static const String scoreModuleSoon =
-      'Modul edukasi dibuka di Phase 3b. Setiap modul +20 poin, kuis benar +5.';
-  static const String scoreAccountTitle = 'Akun';
+      'Poin dihitung dari skor terbaik: modul +20 sekali klaim, kuis +5 per jawaban benar baru.';
+  static const String scoreGuestLabel = 'Tamu LiterasiAI';
+  static const String scoreLoginCta = 'Masuk untuk sinkron';
   static const String scoreAnonymousNote =
       'Kamu masuk tanpa akun. Skor tersimpan lokal sesi ini; masuk untuk sinkron ke semua perangkat.';
   static const String scoreSyncedNote =

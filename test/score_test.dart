@@ -193,7 +193,8 @@ void main() {
     expect(find.text('Kelola'), findsOneWidget);
     expect(find.text('Pemula'), findsOneWidget);
     expect(find.text('Sumber poin'), findsOneWidget);
-    expect(find.text('Akun'), findsOneWidget);
+    expect(find.text('Tamu LiterasiAI'), findsOneWidget);
+    expect(find.text('Masuk untuk sinkron'), findsOneWidget);
     expect(find.textContaining('tanpa akun'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

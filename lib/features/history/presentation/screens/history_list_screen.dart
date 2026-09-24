@@ -5,7 +5,9 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../shared/widgets/app_section_header.dart';
+import '../../../../shared/widgets/app_shimmer.dart';
 import '../../../quick_check/domain/entities/verification_result.dart';
+import '../../../quick_check/presentation/screens/quick_check_session_screen.dart';
 import '../../../quick_check/presentation/widgets/quick_check_result_section.dart';
 import '../../domain/entities/history_entry.dart';
 import '../../domain/entities/history_filter.dart';
@@ -39,6 +41,7 @@ class HistoryListScreen extends ConsumerWidget {
                   titleLine1: AppStrings.homeHistoryTitle1,
                   titleLine2: AppStrings.homeHistoryTitle2,
                   subtitle: AppStrings.homeHistorySubtitle,
+                  accent: SectionAccent.history,
                 ),
                 const SizedBox(height: 20),
                 _HistorySearchField(
@@ -46,10 +49,18 @@ class HistoryListScreen extends ConsumerWidget {
                       ref.read(historySearchProvider.notifier).state = value,
                 ),
                 const SizedBox(height: 12),
-                HistoryFilterBar(
-                  selected: filter,
-                  onSelected: (value) =>
-                      ref.read(historyFilterProvider.notifier).state = value,
+                entries.maybeWhen(
+                  data: (items) => HistoryFilterBar(
+                    selected: filter,
+                    counts: _filterCounts(items),
+                    onSelected: (value) =>
+                        ref.read(historyFilterProvider.notifier).state = value,
+                  ),
+                  orElse: () => HistoryFilterBar(
+                    selected: filter,
+                    onSelected: (value) =>
+                        ref.read(historyFilterProvider.notifier).state = value,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 entries.when(
@@ -74,6 +85,11 @@ class HistoryListScreen extends ConsumerWidget {
                       return HistoryEmptyState(
                         filtered:
                             filter != HistoryFilter.all || query.isNotEmpty,
+                        onStartCheck: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const QuickCheckSessionScreen(),
+                          ),
+                        ),
                       );
                     }
                     return Column(
@@ -186,10 +202,41 @@ class _HistorySearchState extends ConsumerState<_HistorySearchField> {
   }
 }
 
-/// Ringkasan verdict — strip 3 angka agar tab Riwayat terasa hidup.
+/// Hitung isi tiap filter dari daftar yang sama — tanpa query baru.
+///
+/// `perluDicek` mencakup verdict kuning + abu (konsisten dengan strip
+/// [_HistoryStats]) agar angka pill dan ringkasan selalu selaras.
+Map<HistoryFilter, int> _filterCounts(List<HistoryEntry> items) {
+  var hoaks = 0;
+  var valid = 0;
+  var perlu = 0;
+  for (final entry in items) {
+    switch (entry.result.verdict) {
+      case Verdict.hoaks:
+        hoaks++;
+        break;
+      case Verdict.valid:
+        valid++;
+        break;
+      case Verdict.perluDicek:
+      case Verdict.tidakDapatDipastikan:
+        perlu++;
+        break;
+    }
+  }
+  return {
+    HistoryFilter.all: items.length,
+    HistoryFilter.hoaks: hoaks,
+    HistoryFilter.valid: valid,
+    HistoryFilter.perluDicek: perlu,
+  };
+}
+
+/// Ringkasan verdict — 3 kolom angka besar agar tab Riwayat terasa hidup.
 ///
 /// Dihitung dari seluruh riwayat (bukan hasil filter), sehingga angka
-/// tetap jadi konteks walau user menyaring satu verdict.
+/// tetap jadi konteks walau user menyaring satu verdict. Selaras dengan
+/// angka pill filter ([_filterCounts]).
 class _HistoryStats extends StatelessWidget {
   const _HistoryStats({required this.items});
 
@@ -214,75 +261,98 @@ class _HistoryStats extends StatelessWidget {
           break;
       }
     }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.18)),
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.insights_outlined,
-            size: 18,
-            color: AppColors.textSecondary,
-          ),
-          const SizedBox(width: 8),
-          const Text(
-            AppStrings.historyStatsTitle,
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+    return Semantics(
+      label:
+          '${AppStrings.historyStatsTitle}: $hoaks Hoaks, $valid Valid, $perlu Perlu dicek',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          color: AppColors.surface,
+          border: Border.all(color: AppColors.neutral.withValues(alpha: 0.18)),
+        ),
+        child: Row(
+          children: [
+            _StatColumn(
+              value: hoaks,
+              label: AppStrings.historyFilterHoaks,
+              accent: AppColors.danger,
             ),
-          ),
-          const SizedBox(width: 14),
-          _StatDot(
-            color: AppColors.danger,
-            label: '$hoaks Hoaks',
-          ),
-          const SizedBox(width: 12),
-          _StatDot(color: AppColors.success, label: '$valid Valid'),
-          const SizedBox(width: 12),
-          _StatDot(
-            color: AppColors.verdictAmber,
-            label: '$perlu Perlu dicek',
-          ),
-        ],
+            _StatsDivider(),
+            _StatColumn(
+              value: valid,
+              label: AppStrings.historyFilterValid,
+              accent: AppColors.success,
+            ),
+            _StatsDivider(),
+            _StatColumn(
+              value: perlu,
+              label: AppStrings.historyFilterNeedCheck,
+              accent: AppColors.verdictAmber,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _StatDot extends StatelessWidget {
-  const _StatDot({required this.color, required this.label});
+class _StatsDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 34,
+      color: AppColors.neutral.withValues(alpha: 0.2),
+    );
+  }
+}
 
-  final Color color;
+class _StatColumn extends StatelessWidget {
+  const _StatColumn({
+    required this.value,
+    required this.label,
+    required this.accent,
+  });
+
+  final int value;
   final String label;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+            height: 3,
+            width: 28,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(999),
+              color: accent,
+            ),
           ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textSecondary,
-                fontFeatures: [FontFeature.tabularFigures()],
-              ),
+          const SizedBox(height: 6),
+          Text(
+            '$value',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
+              color: AppColors.textPrimary,
+              fontFeatures: [FontFeature.tabularFigures()],
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -363,22 +433,65 @@ class _HistoryList extends ConsumerWidget {
   }
 }
 
+/// Skeleton bernyawa saat riwayat dimuat — meniru bentuk [HistoryCard].
+///
+/// Baris badge + klaim + footer berdenyut via [AppShimmer] bersama, bukan
+/// kotak putih polos. Bentuk meniru kartu asli agar transisi loading → data
+/// tidak melompat jauh (layout shift kecil).
 class _HistoryLoading extends StatelessWidget {
   const _HistoryLoading();
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(
-        3,
-        (_) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Container(
-            height: 102,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: AppColors.neutral.withValues(alpha: 0.18)),
+    return AppShimmer(
+      semanticsLabel: AppStrings.historyLoading,
+      child: Column(
+        children: List.generate(
+          3,
+          (_) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: AppColors.neutral.withValues(alpha: 0.18),
+                ),
+              ),
+              child: const Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ShimmerCircle(size: 44),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            ShimmerBar(width: 64, height: 12),
+                            Spacer(),
+                            ShimmerBar(width: 40, height: 14),
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        ShimmerBar(height: 14),
+                        SizedBox(height: 6),
+                        ShimmerBar(width: 180, height: 14),
+                        SizedBox(height: 10),
+                        Row(
+                          children: [
+                            ShimmerBar(width: 84, height: 11),
+                            Spacer(),
+                            ShimmerBar(width: 56, height: 11),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
