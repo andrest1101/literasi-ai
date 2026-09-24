@@ -2,12 +2,29 @@ import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
 
-/// Header editorial per tab — murni tipografi, tanpa dekorasi.
+/// Aksen identitas per tab — satu keluarga palet resmi, tanpa warna asing.
+///
+/// Cek tetap biru brand ([AppColors.primary]); Riwayat biru tua arsip;
+/// Belajar hijau tumbuh; Profil biru sedang personal. Aksen hanya mewarnai
+/// eyebrow pill + baris judul kedua; tipografi dan hairline tidak berubah
+/// sehingga keempat tab tetap terbaca satu keluarga.
+enum SectionAccent {
+  check(AppColors.primary),
+  history(AppColors.primaryDeep),
+  learn(AppColors.successDark),
+  profile(AppColors.primaryDark);
+
+  const SectionAccent(this.color);
+
+  final Color color;
+}
+
+/// Header editorial per tab — tipografi + aksen identitas, tanpa dekorasi.
 ///
 /// Komposisi: eyebrow pill kecil + judul two-tone (baris 1 gelap, baris 2
-/// biru italic) + subtitle + hairline pemisah. Emblem gradien sengaja
-/// dihapus: lima layar memakai dekorasi identik terbukti menumpuk dan
-/// monoton. Pembeda tiap tab datang dari konten fungsional di bawahnya.
+/// warna aksen italic) + subtitle + hairline pemisah. Emblem gradien sengaja
+/// tidak ada: lima layar memakai dekorasi identik terbukti menumpuk dan
+/// monoton. Pembeda tiap tab datang dari aksen + konten fungsional.
 class AppSectionHeader extends StatelessWidget {
   const AppSectionHeader({
     super.key,
@@ -15,15 +32,18 @@ class AppSectionHeader extends StatelessWidget {
     required this.titleLine1,
     required this.titleLine2,
     required this.subtitle,
+    this.accent = SectionAccent.check,
   });
 
   final String eyebrow;
   final String titleLine1;
   final String titleLine2;
   final String subtitle;
+  final SectionAccent accent;
 
   @override
   Widget build(BuildContext context) {
+    final accentColor = accent.color;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -31,18 +51,18 @@ class AppSectionHeader extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
-            color: AppColors.primary.withValues(alpha: 0.08),
+            color: accentColor.withValues(alpha: 0.08),
             border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.22),
+              color: accentColor.withValues(alpha: 0.22),
             ),
           ),
           child: Text(
             eyebrow,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10.5,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.2,
-              color: AppColors.primary,
+              color: accentColor,
             ),
           ),
         ),
@@ -59,13 +79,13 @@ class AppSectionHeader extends StatelessWidget {
         ),
         Text(
           titleLine2,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 26,
             height: 1.14,
             fontWeight: FontWeight.w800,
             fontStyle: FontStyle.italic,
             letterSpacing: -0.5,
-            color: AppColors.primary,
+            color: accentColor,
           ),
         ),
         const SizedBox(height: 8),

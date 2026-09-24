@@ -129,6 +129,7 @@ abstract final class AppStrings {
   static const String trendingHot = 'HOT';
   static const String trendingReference = 'Rujukan';
   static const String trendingVerifySimilar = 'Verifikasi serupa';
+  static const String trendingRelatedTitle = 'Konteks terkait';
   static const String quickCheckBackToHome = 'Kembali ke Beranda';
   static const String navCheck = 'Cek';
   static const String navHistory = 'Riwayat';
@@ -187,6 +188,7 @@ abstract final class AppStrings {
   static const String learnQuizCorrect = 'Benar!';
   static const String learnQuizWrong = 'Kurang tepat.';
   static const String learnQuizScoreTitle = 'Hasil kuismu';
+  static const String learnQuizReviewTitle = 'Tinjau jawabanmu';
   static const String learnQuizClaim = 'Klaim poin';
   static const String learnQuizClaimed = 'poin kuis diklaim.';
   static const String learnQuizNoNew = 'Tidak ada poin baru. Skor terbaikmu bertahan.';
@@ -208,8 +210,9 @@ abstract final class AppStrings {
   static const String scoreModuleRow = 'Modul selesai';
   static const String scoreQuizRow = 'Kuis benar';
   static const String scoreModuleSoon =
-      'Modul edukasi dibuka di Phase 3b. Setiap modul +20 poin, kuis benar +5.';
-  static const String scoreAccountTitle = 'Akun';
+      'Poin dihitung dari skor terbaik: modul +20 sekali klaim, kuis +5 per jawaban benar baru.';
+  static const String scoreGuestLabel = 'Tamu LiterasiAI';
+  static const String scoreLoginCta = 'Masuk untuk sinkron';
   static const String scoreAnonymousNote =
       'Kamu masuk tanpa akun. Skor tersimpan lokal sesi ini; masuk untuk sinkron ke semua perangkat.';
   static const String scoreSyncedNote =
