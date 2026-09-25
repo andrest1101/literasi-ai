@@ -1,0 +1,35 @@
+{
+  // Config Run/Debug LiterasiAI — mode DEV (hot reload tetap hidup).
+  //
+  // Latar: "Run Without Debugging" (Ctrl+F5) tetap build DEBUG/JIT sehingga
+  // wajar ada spike merah sesaat tiap interaksi pertama (kompilasi JIT +
+  // kompilasi shader visual baru). Config ini memangkas overhead yang bisa
+  // dipangkas tanpa menyentuh mode release:
+  // - --no-track-widget-creation: matikan pelacakan lokasi widget
+  //   (thread UI lebih ringan; hot reload utuh).
+  // - --wasm (Chrome saja): debug web default pakai DDC yang berat untuk
+  //   UI animasi; WASM jauh lebih enteng saat runtime.
+  // Untuk angka FPS final yang jujur, ukur dengan:
+  //   flutter run --profile -d linux   (cepat, tanpa hot reload)
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "LiterasiAI (Linux, dev-cepat)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "linux",
+      "flutterMode": "debug",
+      "args": ["--no-track-widget-creation"]
+    },
+    {
+      "name": "LiterasiAI (Chrome, dev-cepat)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "chrome",
+      "flutterMode": "debug",
+      "args": ["--no-track-widget-creation", "--wasm"]
+    }
+  ]
+}

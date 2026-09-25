@@ -1,4 +1,9 @@
+import 'dart:async';
+import 'dart:io' as io;
+import 'dart:ui' show FramePhase;
+
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,6 +28,7 @@ import 'firebase_options.dart';
 /// (mis. google-services belum lengkap), app tetap jalan mode offline.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _startFrameProbe();
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -31,6 +37,35 @@ Future<void> main() async {
     debugPrint('Firebase init gagal, lanjut mode offline.');
   }
   runApp(const ProviderScope(child: LiterasiAIApp()));
+}
+
+/// Probe diagnostik performa — HANYA aktif saat env `FRAME_PROBE` diset
+/// dan mode debug. Menulis timing tiap frame (build/raster/total/vsync)
+/// ke file untuk analisis jank. Tidak mempengaruhi run normal.
+void _startFrameProbe() {
+  if (!kDebugMode) return;
+  final path = io.Platform.environment['FRAME_PROBE'];
+  if (path == null) return;
+  final out = io.File(path).openWrite();
+  final sw = Stopwatch()..start();
+  var n = 0;
+  out.writeln('elapsedMs,vsyncStartMs,buildMs,rasterMs,totalMs,vsyncOverheadMs');
+  WidgetsBinding.instance.addTimingsCallback((timings) {
+    for (final t in timings) {
+      n++;
+      out.writeln([
+        sw.elapsedMilliseconds,
+        (t.timestampInMicroseconds(FramePhase.vsyncStart) / 1000)
+            .toStringAsFixed(2),
+        (t.buildDuration.inMicroseconds / 1000).toStringAsFixed(2),
+        (t.rasterDuration.inMicroseconds / 1000).toStringAsFixed(2),
+        (t.totalSpan.inMicroseconds / 1000).toStringAsFixed(2),
+        (t.vsyncOverhead.inMicroseconds / 1000).toStringAsFixed(2),
+      ].join(','));
+    }
+    if (n % 30 == 0) unawaited(out.flush());
+  });
+  debugPrint('[frame-probe] logging ke $path');
 }
 
 class LiterasiAIApp extends StatelessWidget {

@@ -247,9 +247,11 @@ void main() {  group('U2.1 aksen header per tab', () {
       await tester.pumpAndSettle();
       expect(ctaText, findsOneWidget);
       final ctaElement = ctaText.evaluate().single;
+      // Rantai aktual FilledButton.icon ± level 40 (Material + Ink +
+      // Focus + ...) — batas 60 agar longgar terhadap perubahan internal.
       var ancestor = _parentOf(ctaElement);
       var foundFilled = false;
-      for (var i = 0; i < 40 && ancestor != null; i++) {
+      for (var i = 0; i < 60 && ancestor != null; i++) {
         if (ancestor.widget is FilledButton) {
           foundFilled = true;
           break;
