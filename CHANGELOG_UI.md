@@ -86,9 +86,32 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
 - **Scale-down global / animasi loop:** bertentangan InkWell+Semantics
   yang ada; animasi dibatasi entrance 1x + haptic aksi primer.
 
+## P1 — Heading compact (26 Sep 2026)
+
+- **Masalah:** header tab Cek (wordmark + pill `VERIFIKASI AI` + judul 26px
+  + subtitle 3 baris) memakan ±230px (±30% viewport 360×800) sebelum
+  konten. Pill redundan ganda dengan label "AI live" di kartu status.
+- **Perubahan:** hapus `_Wordmark` + pill eyebrow; judul two-tone 24px +
+  subtitle padat 2 baris + hairline (±110px). Kartu status 60→52px
+  (padding 10→8, ring 40→36). String yatim
+  (`quickCheckLandingBadge/Title/Subtitle`, `homeCheckEyebrow`) dihapus
+  dari `AppStrings`.
+- **File:** `quick_check_home_tab.dart`, `app_strings.dart`,
+  `score_check_chip.dart`, `test/check_heading_test.dart` (4 test:
+  tanpa wordmark/pill, tinggi heading <150px, hero masuk lipatan 360px,
+  CTA buka sesi), update `section_header_test` + `widget_test`.
+- **Bonus fix:** test lipatan menemukan overflow laten Row hero 29px di
+  360px (tombol CTA fixed-width mendorong teks) → hero responsif via
+  `LayoutBuilder`: <380px tombol full-width di bawah teks, normal tetap
+  berdampingan. Teks tombol `Flexible` agar tak terjepit font lebar.
+- **Rationale:** konten fungsional naik ±120px; judul gelap-di-terang
+  dipertahankan (hierarki benar); subtitle dipertahankan 1 kalimat
+  orientasi untuk user baru.
+
 ## Verifikasi
 
 - `flutter analyze --no-pub`: bersih.
-- `flutter test`: 251 lulus (235 lama + 16 baru), nol gagal.
-- Render manual 360×800 & 412×915 via test (spine + header + home).
-- Commit manual oleh user (kebijakan repo): pecah per U1..U5 bila perlu.
+- `flutter test`: 255 lulus, nol gagal.
+- Render 360×800 & 412×915 via test (spine + header + home + hero).
+- `flutter build windows --debug`: sukses.
+- Commit manual oleh user (kebijakan repo): pecah per tema bila perlu.
