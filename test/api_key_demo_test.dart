@@ -18,6 +18,7 @@ import 'package:literasi_ai/features/quick_check/presentation/screens/quick_chec
 import 'package:literasi_ai/features/quick_check/presentation/widgets/quick_check_result_section.dart';
 import 'package:literasi_ai/features/score/presentation/screens/api_key_screen.dart';
 import 'package:literasi_ai/features/score/presentation/screens/profile_screen.dart';
+import 'package:literasi_ai/features/score/presentation/widgets/score_check_chip.dart';
 
 class _MemoryKeyStore implements ApiKeyStore {
   String? value;
@@ -350,8 +351,9 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Status AI'), findsOneWidget);
-    expect(find.text('Mode demo aktif'), findsOneWidget);
+    // Header compact U2: zona kunci menampilkan dot + label ringkas.
+    expect(find.text('Demo'), findsOneWidget);
+    expect(find.byType(ScoreCheckChip), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

@@ -207,7 +207,9 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byType(ScoreCheckChip), findsOneWidget);
-    expect(find.text('Pemula - 0 poin'), findsOneWidget);
+    // Header compact U2: label level + poin terpisah, bukan satu string.
+    expect(find.text('Pemula'), findsOneWidget);
+    expect(find.textContaining('0 poin'), findsOneWidget);
 
     await tester.tap(find.byType(ScoreCheckChip));
     await tester.pumpAndSettle();
