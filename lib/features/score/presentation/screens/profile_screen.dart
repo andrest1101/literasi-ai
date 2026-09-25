@@ -25,8 +25,8 @@ class ProfileScreen extends ConsumerWidget {
     final score = ref.watch(scoreProvider);
     final userId = ref.watch(historyUserIdProvider);
     return SingleChildScrollView(
-      // 148px: ruang pill navbar mengambang + FAB Chat di atasnya.
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 148),
+      // 120px: ruang pill navbar mengambang + FAB Chat 60px di atasnya.
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),

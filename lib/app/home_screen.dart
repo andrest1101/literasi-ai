@@ -50,10 +50,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           _ => const ProfileScreen(),
         },
       ),
-      floatingActionButton: Padding(
-        // Bar pill: tinggi 68 + margin bawah 12 = 80; FAB 60px diangkat
-        // 16px di atasnya (bottom 96) agar tidak menimpa pill.
-        padding: const EdgeInsets.only(bottom: 96),
+      floatingActionButton: Transform.translate(
+        // Turun 8px dari margin bawaan Scaffold (16px): FAB duduk rapat
+        // 8px di atas zona badge navbar. Tidak lebih rendah — badge tab
+        // Profil butuh zona itu (test no-overlap mengunci gap >= 8px).
+        offset: const Offset(0, 8),
         child: ChatFab(onTap: _openChat),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

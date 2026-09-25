@@ -48,6 +48,38 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('FAB chat: tekan menyusut lalu kembali + tap buka chat', (
+    WidgetTester tester,
+  ) async {
+    var tapped = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: const SizedBox.expand(),
+          floatingActionButton: ChatFab(onTap: () => tapped++),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Identitas shield dipertahankan (bukan robot generik).
+    expect(find.byIcon(Icons.verified_user_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.smart_toy_outlined), findsNothing);
+
+    // Tekan-tahan-tanpa-lepas tidak crash (press controller jalan).
+    // gesture.up() melengkapi satu tap (tapped=1), tap berikutnya = 2.
+    final fabCenter = tester.getCenter(find.byType(ChatFab));
+    final gesture = await tester.startGesture(fabCenter);
+    await tester.pump(const Duration(milliseconds: 60));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(tapped, 1);
+    await tester.tap(find.byType(ChatFab));
+    await tester.pumpAndSettle();
+    expect(tapped, 2);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('landing tiles and examples open matching session', (
     WidgetTester tester,
   ) async {
