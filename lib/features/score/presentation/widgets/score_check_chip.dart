@@ -109,7 +109,7 @@ class _ScoreZone extends StatelessWidget {
           left: Radius.circular(20),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: content,
         ),
       ),
@@ -138,21 +138,21 @@ class _ScoreContent extends StatelessWidget {
       children: [
         ExcludeSemantics(
           child: SizedBox(
-            width: 40,
-            height: 40,
+            width: 36,
+            height: 36,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 SizedBox.expand(
                   child: CircularProgressIndicator(
                     value: progress,
-                    strokeWidth: 4,
+                    strokeWidth: 3.5,
                     color: color,
                     backgroundColor: color.withValues(alpha: 0.14),
                     strokeCap: StrokeCap.round,
                   ),
                 ),
-                Icon(icon, size: 18, color: color),
+                Icon(icon, size: 17, color: color),
               ],
             ),
           ),
@@ -230,7 +230,7 @@ class _KeyZone extends StatelessWidget {
           right: Radius.circular(20),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: content,
         ),
       ),

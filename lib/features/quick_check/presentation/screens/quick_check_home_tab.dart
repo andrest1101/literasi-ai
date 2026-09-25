@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
-import '../../../../shared/widgets/app_section_header.dart';
 import '../../../score/presentation/screens/api_key_screen.dart';
 import '../../../score/presentation/widgets/score_check_chip.dart';
 import '../../../trending/domain/entities/trending_item.dart';
@@ -63,15 +62,8 @@ class QuickCheckHomeTab extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const _Wordmark(),
-              const SizedBox(height: 14),
-              const AppSectionHeader(
-                eyebrow: AppStrings.homeCheckEyebrow,
-                titleLine1: AppStrings.homeCheckTitle1,
-                titleLine2: AppStrings.homeCheckTitle2,
-                subtitle: AppStrings.homeCheckSubtitle,
-              ),
-              const SizedBox(height: 14),
+              const _CheckHeading(),
+              const SizedBox(height: 12),
               ScoreCheckChip(
                 onOpenProfile: onOpenProfile,
                 onOpenKeySettings: () => _openKeySettings(context),
@@ -172,30 +164,56 @@ class _TrendingSection extends ConsumerWidget {
   }
 }
 
-/// Wordmark kecil khusus tab Cek — satu-satunya tempat nama app muncul di
-/// Home. Tab lain memakai judul kontekstualnya sendiri.
-class _Wordmark extends StatelessWidget {
-  const _Wordmark();
+/// Heading compact tab Cek — judul two-tone + subtitle 2 baris + hairline.
+///
+/// Menggantikan header editorial penuh (wordmark + pill eyebrow + judul
+/// 26px + subtitle 3 baris) yang memakan ±230px sebelum konten. Pill
+/// "VERIFIKASI AI" dihapus karena redundan dengan label "AI live" di
+/// kartu status; wordmark dihapus karena brand sudah ada di navbar.
+/// Judul 24px tetap two-tone sebagai identitas; hairline dipertahankan
+/// sebagai jangkar visual.
+class _CheckHeading extends StatelessWidget {
+  const _CheckHeading();
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
-      mainAxisSize: MainAxisSize.min,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          Icons.verified_user_rounded,
-          size: 18,
-          color: AppColors.textSecondary,
-        ),
-        SizedBox(width: 7),
         Text(
-          AppStrings.appName,
+          AppStrings.homeCheckTitle1,
+          style: const TextStyle(
+            fontSize: 24,
+            height: 1.15,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const Text(
+          AppStrings.homeCheckTitle2,
+          style: TextStyle(
+            fontSize: 24,
+            height: 1.15,
+            fontWeight: FontWeight.w800,
+            fontStyle: FontStyle.italic,
+            letterSpacing: -0.5,
+            color: AppColors.primary,
+          ),
+        ),
+        const SizedBox(height: 6),
+        const Text(
+          AppStrings.homeCheckSubtitle,
           style: TextStyle(
             fontSize: 13,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.2,
+            height: 1.55,
             color: AppColors.textSecondary,
           ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          height: 1,
+          color: AppColors.neutral.withValues(alpha: 0.18),
         ),
       ],
     );
@@ -280,36 +298,35 @@ class _SessionCtaCard extends StatelessWidget {
       child: Stack(
         children: [
           const Positioned.fill(child: ExcludeSemantics(child: _HeroPattern())),
-          Row(
-            children: [
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppStrings.quickCheckCtaTitle,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.3,
-                        color: Colors.white,
-                      ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final narrow = constraints.maxWidth < 380;
+              final copy = const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppStrings.quickCheckCtaTitle,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.3,
+                      color: Colors.white,
                     ),
-                    SizedBox(height: 6),
-                    Text(
-                      AppStrings.quickCheckCtaSubtitle,
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        height: 1.6,
-                        color: Color(0xFFD6E5FE),
-                      ),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    AppStrings.quickCheckCtaSubtitle,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      height: 1.6,
+                      color: Color(0xFFD6E5FE),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 14),
-              SizedBox(
+                  ),
+                ],
+              );
+              final cta = SizedBox(
                 height: 52,
+                width: narrow ? double.infinity : null,
                 child: FilledButton(
                   onPressed: () => Navigator.of(
                     context,
@@ -329,15 +346,37 @@ class _SessionCtaCard extends StatelessWidget {
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(AppStrings.quickCheckStartSession),
+                      Flexible(
+                        child: Text(
+                          AppStrings.quickCheckStartSession,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                       SizedBox(width: 6),
                       Icon(Icons.arrow_forward_rounded, size: 19),
                     ],
                   ),
                 ),
-              ),
-            ],
+              );
+              // Layar sempit (<380px): tombol full-width di bawah teks agar
+              // kata terpanjang tidak terjepit hingga overflow; layar normal
+              // tetap Row berdampingan.
+              if (narrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [copy, const SizedBox(height: 12), cta],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: copy),
+                  const SizedBox(width: 14),
+                  cta,
+                ],
+              );
+            },
           ),
         ],
       ),

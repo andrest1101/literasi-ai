@@ -90,10 +90,6 @@ abstract final class AppStrings {
   static const String quickCheckTitle = 'Quick Check';
   static const String quickCheckSubtitle =
       'Periksa satu informasi dalam satu sesi yang fokus. Hasilnya tersusun rapi dan mudah dibaca.';
-  static const String quickCheckLandingBadge = 'VERIFIKASI AI';
-  static const String quickCheckLandingTitle = 'Cek kebenaran sebelum sebar';
-  static const String quickCheckLandingSubtitle =
-      'Tempel teks atau lampirkan tangkapan layar. AI memberikan hasil pemeriksaan, tingkat keyakinan, dan langkah lanjutan.';
   static const String quickCheckStartSession = 'Mulai Pemeriksaan';
   static const String quickCheckCtaTitle = 'Siap memeriksa informasi?';
   static const String quickCheckCtaSubtitle =
@@ -137,11 +133,10 @@ abstract final class AppStrings {
   static const String navHistory = 'Riwayat';
   static const String navLearn = 'Belajar';
   static const String navProfile = 'Profil';
-  static const String homeCheckEyebrow = 'VERIFIKASI AI';
   static const String homeCheckTitle1 = 'Cek kebenaran';
   static const String homeCheckTitle2 = 'sebelum sebar.';
   static const String homeCheckSubtitle =
-      'Satu sesi fokus untuk teks, gambar, atau link. Hasil, keyakinan, dan saran tersusun rapi.';
+      'Satu sesi fokus untuk teks, gambar, atau link — hasil dan saran verifikasi langsung keluar.';
   static const String homeHistoryEyebrow = 'AKTIVITAS';
   static const String homeHistoryTitle1 = 'Jejak';
   static const String homeHistoryTitle2 = 'pemeriksaanmu.';
