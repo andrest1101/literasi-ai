@@ -1,5 +1,283 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 23 September 2026_
+_Last updated: 25 September 2026_
+
+## Status: Failover Model AI + Budget Token Thinking — SELESAI (akar masalah final)
+
+### Yang dikerjakan
+- Diagnosa langsung ke server Gemini (bukan tebakan) menemukan **DUA**
+  akar masalah yang selama ini membuat cek teks/gambar & chatbot mati:
+  1. **Kuota per-model**: `429 RESOURCE_EXHAUSTED — quota ... limit: 20,
+     model: gemini-3.6-flash`. Kuota ditandai PER MODEL, jadi menunggu
+     berjam-jam tidak menolong selama app menempel pada satu model yang
+     habis. Bukti: saat 3.6-flash 429, model lain (3.5/3.7-flash,
+     flash-latest, flash-lite-latest) membalas **200 OK**. Model lama
+     2.x sekalian terbukti 404 "no longer available".
+  2. **Budget token habis oleh thinking**: `maxOutputTokens: 512` lama
+     dimakan hampir seluruhnya oleh thinking model (490–671 token per
+     request) → `finishReason=MAX_TOKENS` → JSON verifikasi terpotong
+     di `{"verdict":` → selalu gagal parsing. Bukti: dengan 2048,
+     finishReason `STOP` + JSON verdict lengkap & valid.
+- `GeminiModelPool` (baru, `core/utils`): request mencoba kandiden
+  berurutan `gemini-3.6-flash → 3.5-flash → 3.7-flash → flash-latest →
+  flash-lite-latest`. Penalti otomatis: kuota 10 mnt, sibuk/timeout 45
+  dtk, model ditarik 12 jam; model terakhir berhasil jadi favorit; semua
+  model kena penalti → tetap dicoba (server sumber kebenaran); retry
+  putaran ke-2 hanya bila semua gagal transient. Error independen model
+  (kunci/wilayah) langsung diteruskan — tidak dibuang ke model lain.
+- `maxOutputTokens` 512/768 → **2048** di teks, chat, dan vision
+  (regresi test mengunci angka ini). Respons kosong karena MAX_TOKENS
+  kini dapat pesan "terpotong", bukan generik.
+- `GeminiErrorMapper`: `kindOf()` (klasifikasi 8 jenis error → keputusan
+  failover), `finalFailure()` (pilih kegagalan paling informatif; semua
+  kuota → pesan kuota + konteks "model cadangan juga dicoba"),
+  `emptyResponseMessage()`. `isTransient` kini ikut true untuk timeout.
+- Tes Koneksi (probe) tahap 4 ikut lewat pool → hasil tes = jalur asli
+  aplikasi (dulu probe sukses padahal verifikasi 429 → user bingung).
+- Verifikasi: `flutter analyze` bersih, `flutter test` **235 test** lolos
+  (22 test baru: failover/penalti/klassifikasi/prioritas pesan/regresi
+  config), `flutter build windows --debug` sukses.
+- **Bukti E2E live** (jalur kode asli + kunci asli, sementara lalu
+  dihapus): verify teks → `429 → 3.5-flash` → verdict hoaks 95; chat →
+  652 karakter; verify gambar → `429 → 3 model sibuk → flash-lite-latest`
+  → OK. Failover terbukti menyelamatkan kasus 3 model sibuk beruntun.
+
+## Status: Pesan Error Tak Pernah Generik + Tolak Kunci Contoh — SELESAI
+
+### Yang dikerjakan
+- Fakta dari user (9 jam tunggu + ganti kunci tetap "tidak merespons"):
+  pesan generik masih mungkin dari 3 jalur: `catch (_)` 3 datasource,
+  `ServerFailure()` default, dan kunci contoh `KODE_API_KEY...` yang
+  lolos validasi lalu ditolak server selamanya (slot dart-define
+  menimpa kunci asli). Semuanya ditutup.
+- `GeminiErrorMapper.mapAny`: error APAPUN (termasuk non-SDK seperti
+  `GenerativeAISdkException`/`FormatException` saat parsing respons
+  error 4xx) jadi Failure spesifik + cuplikan raw + debugPrint tipe
+  penuh. 3 datasource refactor `catch (_)` → `mapAny`.
+- `isPlaceholderKey` + tolak saat save ("Itu kunci contoh...") +
+  resolver abaikan dart-define placeholder → jatuh ke kunci user asli.
+  Pola utuh saja (anti false positive: "CONTOH" dalam kunci valid OK).
+  Resolver log fingerprint aman (4 char + panjang, bukan kunci penuh).
+- Default `ServerFailure()` generik dipensiunkan via dokumentasi agar
+  tidak dipakai untuk error AI baru.
+- Red-text `KeyDownEvent Alt Left` = bug Flutter Windows, bukan kode
+  app — tanpa perubahan kode.
+- Test: 3 `mapAny` + 2 placeholder (save + pola). Test menemukan
+  false positive detektor → pola diperketat, hijau.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 213 test,
+  `flutter build windows --debug` sukses.
+
+## Status: Matcher Kuota Presisi + Tanpa Retry Kuota — SELESAI
+
+### Yang dikerjakan
+- Bug mapper: `contains('rate')` cocok di dalam kata `generate`/
+  `separate`/`regenerate` sehingga error apapun (termasuk 500) terlabel
+  "Batas pemakaian". Diganti regex word-aware: `quota`, `rate-limit`,
+  `rate exceeded`, `too many requests`, `\b429\b`, `resource-exhausted`,
+  `daily/per-minute limit`. Probe live: `gemini-3.6-flash` dikenali
+  server (error key-dummy, bukan model).
+- Kuota dikeluarkan dari retry otomatis: retry 3 detik tidak mengisi
+  ulang kuota (perlu menit), hanya buang request + tambah tunggu.
+  `isTransient` kini hanya sibuk/5xx. Pesan kuota actionable: tunggu
+  1–2 menit + buat kunci baru (kuota per kunci, bukan per aplikasi).
+- Test: 1 case kuota actionable + 1 case false-positive + selaraskan
+  `isTransient` kuota → false.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 208 test,
+  `flutter build windows --debug` sukses.
+
+## Status: Server Sibuk 503 + Retry Otomatis — SELESAI
+
+### Yang dikerjakan
+- Fakta dari user: Tes Koneksi OK 12.5 dtk (DNS/TCP/HTTPS/API semua OK),
+  tapi verifikasi teks gagal `Server Error [503]: high demand`. Artinya
+  kunci + jaringan + model beres — server Google yang kebanjiran sesaat.
+- Mapper: branch overloaded (503/502/500, high demand, try again later)
+  → "Server AI sedang sibuk... tunggu 1 menit". Pola ini dicek SEBELUM
+  branch 400 generik agar tidak tertelan. Tambah `isTransient()`:
+  sibuk/kuota/5xx = true; kunci/permission/billing = false.
+- Retry otomatis 1x (jeda 3 detik) di teks/vision/chat datasource untuk
+  error transient saja — 503 sesaat kerap lolos di percobaan kedua.
+- Tes Koneksi: verdict `busy` baru (sibuk ≠ macet; kunci dinyatakan
+  beres agar user tidak mengutak-atik kunci valid).
+- Red-text terminal `KeyDownEvent Alt Left` = bug Flutter Windows
+  (bukan kode app): assertion keyboard saat Alt ditekan, tidak memengaruhi
+  hasil verifikasi. Tidak ada perubahan kode untuk ini.
+- Test: 2 case mapper sibuk + 4 `isTransient` + 1 advice `busy`.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 207 test,
+  `flutter build windows --debug` sukses.
+
+## Status: Diagnostik Bertahap Tes Koneksi (DNS→TCP→HTTPS→API) — SELESAI
+
+### Yang dikerjakan
+- Masalah user: chat AI + teks + link tetap "tidak menjawab 30 detik"
+  padahal Tes Koneksi lama gagal generik. Timeout 30 detik tidak tahu
+  macet di mana — maka dipasang probe bertahap dalam proses app.
+- `GeminiConnectivityProbe` baru: DNS (8 dtk) → TCP 443 (8 dtk) →
+  HTTPS GET models (12 dtk) → generate 1 kata (30 dtk). Tiap tahap
+  timeout sendiri + verdict: healthy/dnsFailed/tcpBlocked/tlsFailed/
+  keyRejected/apiStalled. Tes Koneksi menampilkan saran + rincian
+  per tahap dengan durasi detik.
+- Hasil yang ditunggu user: bila TCP gagal sementara curl/browser bisa =
+  firewall/antivirus/VPN memblokir PROSES app (bukti langsung, bukan
+  tebakan). Bila HTTPS gagal = TLS/proxy. Bila API macet = model/kuota.
+- Test `gemini_probe_test.dart` 8 case (saran tiap verdict + struktur).
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 204 test,
+  `flutter build windows --debug` sukses.
+
+## Status: Model gemini-3.6-flash (2.0 Ditarik Server) — SELESAI
+
+### Yang dikerjakan
+- Pesan server dari Tes Koneksi user: `models/gemini-2.0-flash is no
+  longer available, use models/gemini-3.6-flash`. Mapper yang baru
+  dipasang terbukti bekerja — pesan asli sampai ke user, bukan generik.
+- Model diganti ke `gemini-3.6-flash` di teks, vision, chat datasource
+  + dokumen (`pubspec.yaml`, `agents.md`, `PRD.md`, `README.md`).
+- Mapper diperkuat: pola `no longer available/supported`, `deprecated`,
+  `retired`, `has been removed` langsung dikenali sebagai masalah model.
+  Test mapper + test nama model diselaraskan.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 196 test,
+  `flutter build windows --debug` sukses.
+
+## Status: Error Gemini Spesifik + Tes Koneksi Presisi — SELESAI
+
+### Yang dikerjakan
+- Masalah user: Tes Koneksi gagal dengan "Server AI tidak merespons"
+  untuk teks/link/chat padahal kunci terpasang. Diagnosa: bukan timeout
+  (request sampai + dijawab), bukan kunci ditolak — melainkan pesan asli
+  server DITELAN jadi generik oleh 3 `_friendlyMessage` duplikat yang
+  fallback-nya buta.
+- `GeminiErrorMapper` baru (`lib/core/utils/gemini_error_mapper.dart`):
+  satu sumber kebenaran untuk teks/vision/chat. Prioritas: tipe SDK
+  (`InvalidApiKey` → kunci ditolak + cara salin ulang; lokasi tak
+  didukung → ganti jaringan/VPN) → pindai teks (kuota/rate/429, safety,
+  model 404, permission/403 + cara aktifkan API, billing, API disabled +
+  cara aktifkan) → tak dikenal: sertakan cuplikan raw 160 char (bukan
+  generik buta) + `debugPrint` penuh berkonteks untuk log.
+- Ketiga datasource refactor memakai mapper (duplikasi dihapus).
+  Tes Koneksi diperluas: tiap kategori (ditolak/wilayah/belum
+  aktif/izin-billing/lainnya) punya pesan sendiri.
+- Test `gemini_error_mapper_test.dart` 10 case.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 196 test,
+  `flutter build windows --debug` sukses.
+
+## Status: Perbaiki Verifikasi Gagal padahal Kunci Terpasang — SELESAI
+
+### Yang dikerjakan
+- Akar masalah: model `gemini-3.5-flash-lite` tidak terkonfirmasi sebagai
+  model publik untuk kunci AI Studio gratis. Probe jaringan membuktikan
+  mesin ke Google sehat (DNS 16ms, TCP 14-25ms, HTTPS via stack Dart
+  148ms) — jadi bukan internet mati. Bedah SDK 0.4.7: respons 4xx
+  didekode sebagai JSON lalu gagal parsing, sehingga error model
+  tidak pernah berbunyi "model tidak ditemukan".
+- Model diganti ke `gemini-2.0-flash` (terkonfirmasi publik) di teks,
+  vision, dan chat datasource + dokumen (`pubspec.yaml`, `agents.md`,
+  `PRD.md`, `README.md`). Tanpa upgrade package (SDK teruskan string).
+- Tombol `Tes koneksi AI` di layar Pengaturan: kirim prompt 1 kata
+  dengan kunci aktif, timeout 30 detik sama seperti verifikasi.
+  Hasil: OK + durasi detik / kunci ditolak / timeout (VPN, ad-block,
+  firewall/antivirus) — bukti langsung di device tanpa menebak.
+- Pesan timeout dibuat actionable di `NetworkFailure` (satu sumber
+  kebenaran via `defaultMessage`): sebut 30 detik + VPN/ad-block +
+  firewall/antivirus. `AppStrings.connectionSlow` reuse konstanta itu.
+- Test: selaraskan model + pesan, tambah case tombol tes koneksi.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 186 test,
+  `flutter build windows --debug` sukses.
+
+## Status: FAB Chat Turun Dekat Navbar — SELESAI
+
+### Yang dikerjakan
+- `home_screen.dart`: FAB dari ganjal 96px (melayang jauh) menjadi rapat
+  8px di atas zona badge navbar via `Transform.translate(0, 8)` — batas
+  bawah yang aman karena badge tab Profil butuh zona itu (test no-overlap
+  mengunci gap >= 8px, tetap hijau).
+- Padding bawah 4 tab 148px → 120px mengikuti posisi FAB baru agar
+  konten terbawah tidak tertutup.
+- `chat_fab.dart`: micro-interaction profesional — entrance pop 0.85→1.0
+  sekali (`easeOutBack` 280ms), tekan menyusut 0.92 (120ms, forward/
+  reverse/cancel), kilau diagonal statis. Tanpa ikon robot (identitas
+  shield dipertahankan sesuai keputusan), tanpa loop `repeat()` sehingga
+  `pumpAndSettle` deterministik. Test tekan-tahan-lepas + tap ditambah.
+- Test no-overlap FAB-vs-navbar dan badge-vs-FAB tetap hijau. App dibuka
+  di Windows: hidup responsif.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 185 test.
+
+## Status: Navbar Pill Putih + Badge Kompak — SELESAI
+
+### Yang dikerjakan
+- Keputusan final user: lekukan (notch) DIBATALKAN total. Card kembali
+  putih polos (radius 26, hairline netral, shadow netral, tanpa tint/rim
+  biru di tepi) — `NavNotchPainter` + `CustomPaint` dihapus dari
+  `bottom_nav_bar.dart`.
+- Badge kompak dipertahankan: 48px (44px di layar <380px), ikon 23px,
+  ring putih 2.5 — ukuran final sesuai permintaan user.
+- Animasi tetap: badge meluncur 480ms `easeInOutCubicEmphasized` via
+  satu controller + pop scale + haptic + label aksen per tab.
+- Test `nav_pill_test.dart` diselaraskan (case geometri notch dihapus,
+  9 case tersisa). Backup reverse tanpa-notch di `%TEMP%\opencode\`
+  sudah tidak relevan karena notch memang dibatalkan.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 184 test.
+
+## Status: Navbar Notch Animasi — DIBATALKAN (diganti pill putih polos)
+
+### Yang dikerjakan
+- `AppBottomNavBar` jadi `StatefulWidget`: badge + notch digerakkan SATU
+  `AnimationController` 480ms `easeInOutCubicEmphasized` sehingga selalu
+  sinkron tanpa jank. Tap cepat tengah jalan menganimasikan dari posisi
+  saat ini (bukan slot lama) — tidak melompat.
+- `NavNotchPainter` (`CustomPainter`): pill radius 26 + cekungan simetris
+  (half-width proporsional badge, depth 18, kubik cermin tanpa sudut
+  tajam) di tepi atas, tint biru + rim biru mengikuti kontur lekukan.
+  Helper statis `slotCenter`/`badgeLeftFor` + `pillPath` publik agar
+  geometri teruji.
+- Perbaikan bentuk (24 Sep, sesi 3): lekukan-S + dasar datar diganti
+  segitiga tumpul simetris — dua kurva kubik cermin dari tepi atas ke
+  satu puncak membulat di bawah pusat badge (tanpa dasar datar, tanpa
+  lekuk-S, tanpa sudut tajam). Saat dekat tepi (tab Cek/Profil),
+  setengah-lebar menyempit simetris di sekitar pusat badge (bukan
+  pusat bergeser) sehingga puncak selalu tepat di bawah badge dan
+  potongan putih rapi. Test geometri diperketat: puncak di pusat slot
+  (toleransi 8px) di 4 tab.
+- Perbaikan visibilitas (24 Sep, sesi 4): badge dikecilkan 56px → 48px
+  (44px di layar <380px) + ikon 26 → 23 + ring 3 → 2.5 agar lekukan
+  muat penuh di tab ujung; lekukan diisi tint biru 0.07 + rim biru 0.3
+  (ganti hairline netral samar) sehingga cekungan terbaca jelas di atas
+  bar putih; lebar notch proporsional badge (half = badge/2 + 10).
+- Bug nyata ditemukan test: controller lazy dibuat saat `dispose` →
+  crash Ticker; diperbaiki via `initState` eager.
+- Bug 9 (sesi 4): tombol Tempel di mode URL kini validasi clipboard
+  sebelum mengisi field — bukan link / terlalu pendek / panjang /
+  skema non-http(s) langsung ditolak via snackbar informatif memakai
+  pesan yang sama dengan use case, bukan diam lalu gagal saat
+  Verifikasi ditekan.
+- Test `nav_pill_test.dart` 11 case: geometri segitiga tumpul (bounds
+  rapi + puncak di pusat slot + simetri cermin tab 0/3), notch kompak
+  badge baru (dalam 18 + muat tab ujung + simetris sempit), math slot,
+  geser badge, no-op tab aktif, aksen tiap tab, 360px badge di dalam
+  bar, tap cepat tengah jalan, geser 3 slot, geometri badge +
+  no-overlap FAB, pindah 4 tab. Backup reverse tanpa-notch di
+  `%TEMP%\opencode\` bila tidak cocok.
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 186 test.
+
+## Status: Navbar Pill + Badge Naik — SELESAI (digantikan versi notch)
+
+### Yang dikerjakan
+- Rewrite `AppBottomNavBar` (tanpa `NavigationBar`/`NavigationDestination`
+  default): pill putih mengambang (radius 26, shadow biru lembut) dengan
+  badge lingkaran 56px (52px di layar <380px) gradien `heroBegin/heroEnd`
+  + ring putih yang menempel di atas bar, setengah keluar. Ikon putih 26px.
+- Animasi 300ms `easeOutCubic` (`AnimatedPositioned` antar slot + pop
+  scale 0.85→1.0 + `AnimatedDefaultTextStyle` label) plus haptic
+  `selectionClick`. Label aktif tetap di dalam bar dengan aksen identitas
+  per tab (selaras `SectionAccent` U2.1); slot aktif sisakan ruang ikon
+  kosong agar label tidak melompat. Tap tab aktif = no-op.
+- Notch/lekukan referensi SENGAJA tidak dipakai: butuh CustomPainter
+  posisi presisi + risiko overflow 360px + jank animasi. Versi badge
+  tempel tetap premium, satu bahasa dengan ChatFab dan hero modul.
+- `home_screen.dart`: FAB Chat diangkat bottom 96 (di atas pill, tidak
+  menimpa). Padding bawah 4 tab 96 → 148 (pill + badge + FAB).
+- Test `nav_pill_test.dart` 6 case + selaraskan `home_nav_chat_test.dart`
+  (finder kustom, jarak FAB-pill). Aksen label dibaca dari
+  `AnimatedDefaultTextStyle` (Text.style null karena animasi).
+- Verifikasi: `flutter analyze` bersih, `flutter test` lolos 181 test.
 
 ## Status: UI/UX U2 P1 Identitas + Hierarki — SELESAI
 

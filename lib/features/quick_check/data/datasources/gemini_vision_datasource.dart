@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../../../../core/utils/gemini_error_mapper.dart';
+import '../../../../core/utils/gemini_model_pool.dart';
 import '../../domain/entities/image_attachment.dart';
 import '../../domain/entities/verification_result.dart';
 import '../models/verification_result_model.dart';
@@ -12,44 +14,41 @@ import '../models/verification_result_model.dart';
 /// Mengirim `TextPart` instruksi + `DataPart` bytes gambar dalam satu
 /// `Content.multi`. Model membaca teks visual terlebih dahulu, lalu
 /// memberikan verdict JSON terstruktur yang sama seperti mode teks.
+/// Failover antar model ditangani [GeminiModelPool] (kuota 429/404/503
+/// berpindah otomatis ke model cadangan).
 ///
 /// API key TIDAK PERNAH di-hardcode: diambil dari
-/// `--dart-define=GEMINI_API_KEY=...`.
+/// `--dart-define=GEMINI_API_KEY=...` atau penyimpanan aman pengguna.
 class GeminiVisionDatasource {
   GeminiVisionDatasource({
     GenerativeModel? model,
     String? apiKey,
     this.modelName = defaultModelName,
     this.timeout = const Duration(seconds: 45),
+    GeminiModelPool? pool,
   }) : _model = model,
-       _apiKey = apiKey ?? const String.fromEnvironment('GEMINI_API_KEY');
+       _apiKey = apiKey ?? const String.fromEnvironment('GEMINI_API_KEY'),
+       _pool = pool ?? GeminiModelPool.shared;
 
-  static const String defaultModelName = 'gemini-3.5-flash-lite';
+  static const String defaultModelName = GeminiModelPool.primaryModel;
+
+  /// Batas token keluaran — ruang untuk thinking model + verdict JSON.
+  /// Lihat penjelasan lengkap di [GeminiTextDatasource.maxOutputTokens]:
+  /// 512 lama membuat jawaban terpotong di tengah JSON (MAX_TOKENS).
+  static const int maxOutputTokens = 2048;
 
   final GenerativeModel? _model;
+  final GeminiModelPool _pool;
   final String _apiKey;
   final String modelName;
   final Duration timeout;
 
-  GenerativeModel _resolveModel([String? overrideKey]) {
-    if (_model != null) return _model;
-    final key = overrideKey ?? _apiKey;
-    if (key.isEmpty) {
-      throw const UnknownFailure(
-        'Kunci API belum tersambung. '
-        'Tempel kunci di Pengaturan atau jalankan dengan --dart-define=GEMINI_API_KEY=...',
-      );
-    }
-    return GenerativeModel(
-      model: modelName,
-      apiKey: key,
-      generationConfig: GenerationConfig(
-        temperature: 0.2,
-        maxOutputTokens: 768,
-        responseMimeType: 'application/json',
-      ),
-    );
-  }
+  /// Konfigurasi generasi yang dipakai request verifikasi gambar.
+  GenerationConfig get generationConfig => GenerationConfig(
+    temperature: 0.2,
+    maxOutputTokens: maxOutputTokens,
+    responseMimeType: 'application/json',
+  );
 
   Future<VerificationResult> verifyImage({
     required ImageAttachment image,
@@ -68,20 +67,12 @@ class GeminiVisionDatasource {
         'Gambar tidak terbaca, upload ulang dengan pencahayaan lebih baik.',
       );
     }
-    final model = _resolveModel(apiKey);
     try {
-      final response = await model
-          .generateContent([
-            Content.multi([
-              TextPart(_buildPrompt(caption)),
-              DataPart(image.mimeType, image.bytes),
-            ]),
-          ])
-          .timeout(timeout);
+      final response = await _generate(image, caption, apiKey);
       final text = response.text?.trim() ?? '';
       if (text.isEmpty) {
-        throw const ServerFailure(
-          'Server AI tidak mengembalikan hasil. Coba lagi.',
+        throw ServerFailure(
+          GeminiErrorMapper.emptyResponseMessage(response),
         );
       }
       final claim = caption.isEmpty ? 'Gambar: ${image.fileName}' : caption;
@@ -101,29 +92,42 @@ class GeminiVisionDatasource {
     } on Failure {
       rethrow;
     } on GenerativeAIException catch (e) {
-      throw ServerFailure(_friendlyMessage(e.message));
-    } catch (_) {
-      throw const ServerFailure();
+      throw GeminiErrorMapper.map(e, context: 'verify-image');
+    } catch (e) {
+      throw GeminiErrorMapper.mapAny(e, context: 'verify-image');
     }
   }
 
-  String _friendlyMessage(String message) {
-    final lower = message.toLowerCase();
-    if (lower.contains('api key') || lower.contains('api_key')) {
-      return 'API key Gemini tidak valid. Periksa konfigurasi kunci API Anda.';
+  /// Kirim request: lewat [GeminiModelPool] (failover) untuk kunci
+  /// pengguna, atau langsung ke model yang disuntikkan untuk test.
+  Future<GenerateContentResponse> _generate(
+    ImageAttachment image,
+    String caption,
+    String apiKey,
+  ) {
+    final contents = [
+      Content.multi([
+        TextPart(_buildPrompt(caption)),
+        DataPart(image.mimeType, image.bytes),
+      ]),
+    ];
+    final injected = _model;
+    if (injected != null) {
+      return injected.generateContent(contents).timeout(timeout);
     }
-    if (lower.contains('quota') ||
-        lower.contains('rate') ||
-        lower.contains('429')) {
-      return 'Batas pemakaian AI tercapai. Tunggu sebentar lalu coba lagi.';
+    if (apiKey.trim().isEmpty) {
+      throw const UnknownFailure(
+        'Kunci API belum tersambung. '
+        'Tempel kunci di Pengaturan atau jalankan dengan --dart-define=GEMINI_API_KEY=...',
+      );
     }
-    if (lower.contains('blocked') || lower.contains('safety')) {
-      return 'Gambar tidak dapat diproses filter keamanan. Coba gambar lain.';
-    }
-    if (lower.contains('not found') || lower.contains('404')) {
-      return 'Model AI tidak ditemukan. Periksa nama model yang dipakai.';
-    }
-    return 'Server AI tidak merespons, coba lagi.';
+    return _pool.generate(
+      apiKey: apiKey,
+      generationConfig: generationConfig,
+      contents: contents,
+      context: 'verify-image',
+      timeout: timeout,
+    );
   }
 
   String _buildPrompt(String caption) {

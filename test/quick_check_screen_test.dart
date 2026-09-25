@@ -202,6 +202,12 @@ void main() {
   testWidgets('shows retryable error card on network failure', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
     await _pumpQuickCheck(
       tester,
       _FakeRepository(failure: const NetworkFailure()),
@@ -216,7 +222,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Verifikasi gagal'), findsOneWidget);
-    expect(find.text('Koneksi lambat, coba lagi.'), findsOneWidget);
+    // Pesan actionable multi-baris: cari per fragmen agar tahan wrap.
+    expect(find.textContaining('tidak menjawab dalam 30 detik'), findsOneWidget);
+    expect(find.textContaining('firewall/antivirus'), findsOneWidget);
     expect(find.text('Coba lagi'), findsOneWidget);
   });
 

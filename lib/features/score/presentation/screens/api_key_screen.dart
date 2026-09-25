@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/api_key_resolver.dart';
+import '../../../../core/utils/gemini_connectivity_probe.dart';
 import '../../../chat/presentation/providers/chat_providers.dart';
+import '../../../quick_check/data/datasources/gemini_text_datasource.dart';
 import '../../../quick_check/presentation/providers/verification_provider.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
 
@@ -27,11 +29,63 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
   bool _obscure = true;
   String? _localError;
   bool _saving = false;
+  bool _testing = false;
+  String? _testResult;
+  bool? _testOk;
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  /// Tes koneksi end-to-end via probe bertahap: DNS → TCP 443 → HTTPS →
+  /// generate 1 kata. Hasil menunjuk tahap yang gagal (jaringan lokal,
+  /// firewall proses, TLS/proxy, kunci, atau model) — bukan sekadar
+  /// "gagal" tanpa arah.
+  Future<void> _testConnection() async {
+    if (_testing) return;
+    setState(() {
+      _testing = true;
+      _testResult = null;
+      _testOk = null;
+    });
+    final key =
+        ref.read(apiKeyStatusProvider).valueOrNull?.key.trim() ?? '';
+    if (key.isEmpty) {
+      if (!mounted) return;
+      setState(() {
+        _testing = false;
+        _testOk = false;
+        _testResult = AppStrings.apiKeyInactive;
+      });
+      return;
+    }
+    final report = await GeminiConnectivityProbe.run(
+      apiKey: key,
+      modelName: GeminiTextDatasource.defaultModelName,
+    );
+    if (!mounted) return;
+    final slowest = report.steps.fold<GeminiProbeStep?>(null, (a, b) {
+      if (a == null) return b;
+      return b.elapsed > a.elapsed ? b : a;
+    });
+    final detail = report.steps
+        .map(
+          (s) =>
+              '${s.name}: ${s.ok ? 'OK' : 'GAGAL'} '
+              '${(s.elapsed.inMilliseconds / 1000).toStringAsFixed(1)} dtk',
+        )
+        .join(' • ');
+    final total = slowest == null
+        ? ''
+        : ' (${(slowest.elapsed.inMilliseconds / 1000).toStringAsFixed(1)} dtk tahap terlama).';
+    setState(() {
+      _testing = false;
+      _testOk = report.verdict == GeminiProbeVerdict.healthy;
+      _testResult =
+          '${GeminiConnectivityProbe.adviceFor(report.verdict)}$total Rincian: $detail.';
+    });
   }
 
   Future<void> _save() async {
@@ -173,6 +227,101 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
                     accent: value.configured
                         ? AppColors.success
                         : AppColors.warning,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(22),
+                    color: AppColors.surface,
+                    border: Border.all(
+                      color: AppColors.neutral.withValues(alpha: 0.2),
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x0D101A33),
+                        blurRadius: 16,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        AppStrings.connectionTestTitle,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.2,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: 50,
+                        child: FilledButton.icon(
+                          onPressed: _testing ? null : _testConnection,
+                          icon: _testing
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.network_check_outlined,
+                                  size: 19,
+                                ),
+                          label: Text(
+                            _testing
+                                ? AppStrings.connectionTestRunning
+                                : AppStrings.connectionTestRun,
+                          ),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            textStyle: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (_testResult != null) ...[
+                        const SizedBox(height: 10),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              _testOk == true
+                                  ? Icons.check_circle_rounded
+                                  : Icons.error_outline_rounded,
+                              size: 18,
+                              color: _testOk == true
+                                  ? AppColors.success
+                                  : AppColors.danger,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _testResult!,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  height: 1.6,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),

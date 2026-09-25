@@ -5,10 +5,20 @@ sealed class Failure {
 }
 
 class NetworkFailure extends Failure {
-  const NetworkFailure([super.message = 'Koneksi lambat, coba lagi.']);
+  static const String defaultMessage =
+      'Server AI tidak menjawab dalam 30 detik. Periksa koneksi, matikan VPN/ad-block, '
+      'atau izinkan aplikasi ini di firewall/antivirus, lalu coba lagi.';
+
+  const NetworkFailure([super.message = defaultMessage]);
 }
 
 class ServerFailure extends Failure {
+  /// Pesan default generik — DIPENSIUNKAN untuk error Gemini baru.
+  ///
+  /// Jangan pakai konstruktor default ini untuk error hasil request AI;
+  /// pakai [GeminiErrorMapper.map]/`mapAny` agar pesan asli server sampai
+  /// ke user + tercatat di log. Default ini dipertahankan hanya untuk
+  /// kompatibilitas test lama dan jalur non-AI.
   const ServerFailure([
     super.message = 'Server AI tidak merespons, coba lagi.',
   ]);

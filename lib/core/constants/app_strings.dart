@@ -1,4 +1,6 @@
-/// String terpusat — Bahasa Indonesia (PRD: AI response santai tapi informatif).
+import '../errors/failures.dart';
+
+// String terpusat — Bahasa Indonesia (PRD: AI response santai tapi informatif).
 abstract final class AppStrings {
   static const String appName = 'LiterasiAI';
   static const String tagline =
@@ -361,7 +363,18 @@ abstract final class AppStrings {
   static const String quickCheckDisclaimer =
       'Hasil ini adalah bantuan literasi AI, bukan kebenaran mutlak. Bandingkan dengan sumber resmi sebelum menyebarkan informasi.';
 
-  static const String connectionSlow = 'Koneksi lambat, coba lagi.';
+  static const String connectionSlow = NetworkFailure.defaultMessage;
+  static const String connectionTestTitle = 'Tes koneksi AI';
+  static const String connectionTestRun = 'Tes koneksi sekarang';
+  static const String connectionTestRunning = 'Menghubungi server AI...';
+  static const String connectionTestOk =
+      'Koneksi AI OK. Server menjawab dalam hitungan detik — kunci dan jaringan beres.';
+  static const String connectionTestSlow =
+      'Server tidak menjawab. Periksa koneksi, matikan VPN/ad-block, atau izinkan aplikasi di firewall/antivirus.';
+  static const String connectionTestKeyInvalid =
+      'Kunci API ditolak server. Salin ulang kunci dari Google AI Studio tanpa spasi.';
+  static const String connectionTestFail =
+      'Tes gagal. Coba lagi atau ganti jaringan (Wi-Fi/data seluler).';
   static const String imageUnreadable =
       'Gambar tidak terbaca, upload ulang dengan pencahayaan lebih baik.';
 
