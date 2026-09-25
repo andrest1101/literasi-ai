@@ -114,7 +114,7 @@ Clean Architecture berbasis fitur plus Riverpod (`Notifier` /
 `AsyncNotifier` / `ConsumerWidget`):
 
 - **Domain** — entity Dart murni, interface repository, use case. Tanpa dependensi Flutter.
-- **Data** — model JSON, datasource (Gemini `gemini-3.5-flash-lite`, Firestore), implementasi repository.
+- **Data** — model JSON, datasource (Gemini `gemini-3.6-flash`, Firestore), implementasi repository.
 - **Presentation** — screen, widget reusable, dan provider Riverpod untuk state UI.
 
 ```

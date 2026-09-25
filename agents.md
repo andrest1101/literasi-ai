@@ -16,7 +16,7 @@ You MUST strictly adhere to Clean Architecture and feature-based directory struc
 
 - **Framework:** Flutter (Dart) using null-safe, clean coding standards.
 - **State Management:** STRICTLY use **Riverpod** (`Notifier`, `AsyncNotifier`, and `ConsumerWidget`). Do not use GetX, Provider, or BLoC.
-- **AI Integration:** Google Gemini API (`gemini-3.5-flash-lite`) with structured JSON response parsing for verification results (Verdict, Confidence, Explanation, Suggestion).
+- **AI Integration:** Google Gemini API (`gemini-3.6-flash`) with structured JSON response parsing for verification results (Verdict, Confidence, Explanation, Suggestion).
 - **Backend & Auth:** Firebase Auth (Google Sign-In & Anonymous) and Firestore for saving verification history.
 - **Local Storage / Utils:** `share_plus` for social sharing sheets, `image_picker` for OCR/image claims, and `http` for URL metadata fetching.
 - **UI/UX Guidelines:** Material 3 design system, trustworthy and clean aesthetic (Google Blue `#1A73E8`, strict status colors for verdicts: Red for Hoax, Green for Valid, Yellow for Needs Check, Grey for Unknown).

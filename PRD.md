@@ -25,7 +25,7 @@ LiterasiAI adalah aplikasi mobile berbasis AI yang membantu pengguna memverifika
 ### 1.4 Tech Stack
 
 - **Framework:** Flutter (Dart)
-- **AI Engine:** Google Gemini API (gemini-3.5-flash-lite)
+- **AI Engine:** Google Gemini API (gemini-3.6-flash)
 - **Backend & Auth:** Firebase (Firestore, Authentication, Storage)
 - **State Management:** Riverpod
 - **Architecture:** Clean Architecture (Feature-based)
