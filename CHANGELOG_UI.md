@@ -129,10 +129,47 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   + kalimat) — aksesibilitas buta warna tetap terjaga; satu callsite
   render, risiko nol.
 
+## R1–R3 — Header compact Riwayat/Belajar/Profil (26 Sep 2026)
+
+- **Masalah:** header editorial penuh (±190px: pill + judul 26px 2 baris
+  + subtitle + hairline) di 3 tab mendorong konten fungsional ke bawah
+  lipatan: Riwayat ±320px (search+filter ikut menumpuk), Belajar ±300px
+  (modul 1 kepotong), Profil ±410px (ring + akun jauh di bawah).
+- **Perubahan per tab (UI-only, provider/domain tidak tersentuh):**
+  - Riwayat: judul toolbar 20px two-tone "Jejak pemeriksaanmu." +
+    search + filter menyatu (±150px). Subtitle generik dihapus.
+  - Belajar: judul 20px "Naikkan literasimu." menempel ringkasan
+    progres (±170px). Info modul/poin tetap dari daftar + catatan.
+  - Profil: judul 20px "Kelola profilmu." + 1 baris cara skor bertambah;
+    ScoreRing + Breakdown + Akun + Kunci TIDAK disentuh (±280px).
+  - Aksen identitas per tab dipertahankan pada kata kedua judul
+    (riwayat biru-tua, belajar hijau, profil biru-personal).
+  - 5 string yatim dihapus dari `AppStrings` (eyebrow ×3, subtitle ×2);
+    subtitle Profil dipadatkan.
+- **File:** `history_list_screen.dart`, `course_list_screen.dart`,
+  `profile_screen.dart`, `app_strings.dart`,
+  `test/tab_headers_test.dart` (3 test: tanpa editorial, aksen per tab,
+  konten masuk lipatan 360px), update sadar 6 file test lama
+  (`section_header`, `nav_pill`, `learn`, `score`, `api_key_demo`,
+  `ui_u2_identity` — judul rich cocok via `textContaining`, warna aksen
+  dibaca dari span italic).
+- **Rationale:** komponen `AppSectionHeader` TIDAK dihapus (masih dipakai
+  pola generik + test aksen); yang diubah hanya callsite 3 tab.
+
+## Sapuan em-dash (26 Sep 2026)
+
+- Seluruh `—` (U+2014) dihapus dari `lib/` + `test/`: 206 kemunculan
+  ` — ` → `: ` via script terkontrol + 2 kasus tepi ditulis ulang
+  manual + 4 string user-facing diganti kalimat setara tanpa dash.
+- Nol em-dash tersisa (terverifikasi via grep). Markdown docs memang
+  sudah nol. Aturan: pakai titik dua, koma, atau kurung — bukan dash
+  panjang yang menjadi ciri khas tulisan AI.
+
 ## Verifikasi
 
 - `flutter analyze --no-pub`: bersih.
-- `flutter test`: 256 lulus, nol gagal.
-- Render 360×800 & 412×915 via test (spine + header + home + hero).
+- `flutter test`: 259 lulus, nol gagal.
+- Render 360×800 & 412×915 via test (spine + header + home + hero +
+  3 tab compact).
 - `flutter build windows --debug`: sukses.
 - Commit manual oleh user (kebijakan repo): pecah per tema bila perlu.
