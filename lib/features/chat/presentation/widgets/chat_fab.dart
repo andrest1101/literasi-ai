@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 
-/// Tombol Chat AI mengambang — opsi A: shield verified + badge sparkle.
+/// Tombol Chat AI mengambang: opsi A: shield verified + badge sparkle.
 ///
 /// Ikon robot generik (`smart_toy`) diganti `verified_user` agar selaras
 /// dengan identitas cek-fakta (medallion auth, hero Quick Check). Badge
@@ -13,7 +13,7 @@ import '../../../../core/constants/app_strings.dart';
 /// Micro-interaction profesional (tanpa robot, tanpa loop animasi):
 /// entrance pop 0.85→1.0 sekali saat muncul, tekan menyusut ke 0.92
 /// via [GestureDetector.onTapDown/Up/Cancel], dan kilau diagonal statis
-/// di lapisan gradien. Tidak ada `repeat()` — test widget tetap
+/// di lapisan gradien. Tidak ada `repeat()`: test widget tetap
 /// deterministik (`pumpAndSettle` tidak menggantung).
 class ChatFab extends StatefulWidget {
   const ChatFab({super.key, required this.onTap});
@@ -92,7 +92,7 @@ class _ChatFabState extends State<ChatFab>
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    // Kilau diagonal statis — kesan kaca premium tanpa
+                    // Kilau diagonal statis: kesan kaca premium tanpa
                     // animasi loop yang menguras baterai.
                     Positioned.fill(
                       child: ClipOval(

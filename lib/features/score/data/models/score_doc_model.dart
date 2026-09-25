@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/entities/literacy_score.dart';
 
-/// Mapping dokumen skor — toleran terhadap dokumen hilang/korup.
+/// Mapping dokumen skor: toleran terhadap dokumen hilang/korup.
 ///
 /// Field non-angka atau negatif dinormalisasi ke 0; `modulesDone` non-list
 /// diabaikan. Versi map-murni tersedia agar unit test tidak perlu mock

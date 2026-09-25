@@ -3,14 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
-import '../../../../shared/widgets/app_section_header.dart';
 import '../../../../shared/widgets/app_shimmer.dart';
 import '../../domain/entities/course_progress.dart';
 import '../providers/learn_providers.dart';
 import '../widgets/course_card.dart';
 import 'course_detail_screen.dart';
 
-/// Daftar 3 modul — tab Belajar fungsional pertama.
+/// Daftar 3 modul: tab Belajar fungsional pertama.
 ///
 /// Header editorial + ringkasan progres global + 3 kartu heterogen + catatan
 /// poin. Guest bisa membaca semua modul; progres sync menunggu login.
@@ -30,14 +29,8 @@ class CourseListScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const AppSectionHeader(
-                eyebrow: AppStrings.homeLearnEyebrow,
-                titleLine1: AppStrings.homeLearnTitle1,
-                titleLine2: AppStrings.homeLearnTitle2,
-                subtitle: AppStrings.homeLearnSubtitle,
-                accent: SectionAccent.learn,
-              ),
-              const SizedBox(height: 18),
+              const _LearnToolbarTitle(),
+              const SizedBox(height: 12),
               progress.when(
                 loading: () => const _ProgressSkeleton(),
                 error: (_, _) => const SizedBox.shrink(),
@@ -110,6 +103,46 @@ class CourseListScreen extends ConsumerWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => CourseDetailScreen(moduleId: moduleId),
+      ),
+    );
+  }
+}
+
+/// Judul toolbar compact tab Belajar: satu baris 20px menempel dengan
+/// ringkasan progres tepat di bawahnya sebagai satu blok.
+///
+/// Menggantikan header editorial penuh. Subtitle lama ("Tiga modul
+/// singkat…") dihapus karena jumlah modul langsung terlihat dari daftar
+/// kartu di bawahnya; info poin tetap ada di `learnPointsNote`. Aksen
+/// hijau-tumbuh dipertahankan pada kata kedua agar identitas tab utuh.
+class _LearnToolbarTitle extends StatelessWidget {
+  const _LearnToolbarTitle();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: AppStrings.homeLearnTitle1,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          TextSpan(
+            text: ' ${AppStrings.homeLearnTitle2}',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              fontStyle: FontStyle.italic,
+              letterSpacing: -0.4,
+              color: AppColors.successDark,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -225,7 +258,7 @@ class _MiniRing extends CustomPainter {
   bool shouldRepaint(_MiniRing old) => old.progress != progress;
 }
 
-/// Skeleton bernyawa saat progres dimuat — meniru [_ProgressSummary].
+/// Skeleton bernyawa saat progres dimuat: meniru [_ProgressSummary].
 ///
 /// Ring + dua baris teks berdenyut via [AppShimmer] bersama agar transisi
 /// loading → data tidak melompat jauh.

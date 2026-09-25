@@ -7,7 +7,7 @@ import '../../../quick_check/presentation/widgets/session_back_button.dart';
 import '../../domain/entities/quiz_question.dart';
 import '../providers/learn_providers.dart';
 
-/// Kuis 3 soal — 1 soal per halaman, terkunci berurutan.
+/// Kuis 3 soal: 1 soal per halaman, terkunci berurutan.
 ///
 /// Pola heterogen vs kartu modul: progress dots atas, kartu soal putih,
 /// opsi sebagai radio card berwarna saat dikunci (hijau benar / merah salah
@@ -441,7 +441,7 @@ class _ProgressDots extends StatelessWidget {
   }
 }
 
-/// Daftar review jawaban — soal mana benar/salah + kunci jawabannya.
+/// Daftar review jawaban: soal mana benar/salah + kunci jawabannya.
 ///
 /// Menjawab keluhan "result hanya lingkaran skor": user kini tahu persis
 /// soal mana yang salah dan apa jawaban benarnya, tanpa mengulang kuis.
@@ -570,10 +570,10 @@ class _ResultPanel extends StatelessWidget {
   final int claimed;
   final bool claiming;
 
-  /// Jawaban user per soal (indeks opsi terpilih) — dipakai daftar review.
+  /// Jawaban user per soal (indeks opsi terpilih): dipakai daftar review.
   final List<int> answers;
 
-  /// Soal modul — dipakai kunci jawaban + teks opsi benar di review.
+  /// Soal modul: dipakai kunci jawaban + teks opsi benar di review.
   final List<QuizQuestion> questions;
   final VoidCallback onClaim;
   final VoidCallback onRetry;

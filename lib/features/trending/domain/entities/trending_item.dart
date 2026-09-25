@@ -1,6 +1,6 @@
 import '../../../quick_check/domain/entities/verification_result.dart';
 
-/// Satu hoaks trending — konten curated lokal, murni Dart.
+/// Satu hoaks trending: konten curated lokal, murni Dart.
 ///
 /// Ditulis manual Bahasa Indonesia natural + rujukan TurnBackHoax agar tidak
 /// terasa template generik. API Kominfo menyusul; fase ini offline-first agar

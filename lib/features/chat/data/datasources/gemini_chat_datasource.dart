@@ -7,7 +7,7 @@ import '../../../../core/utils/gemini_error_mapper.dart';
 import '../../../../core/utils/gemini_model_pool.dart';
 import '../../domain/entities/chat_message.dart';
 
-/// Datasource chat literasi via Gemini — teks santai, bukan JSON verdict.
+/// Datasource chat literasi via Gemini: teks santai, bukan JSON verdict.
 ///
 /// Pola konstruktor, timeout 30 detik, pesan error ramah, dan failover
 /// antar model ([GeminiModelPool]) disamakan dengan [GeminiTextDatasource]
@@ -30,7 +30,7 @@ class GeminiChatDatasource {
   /// Batas konteks agar prompt tetap hemat kuota free tier.
   static const int maxHistory = 10;
 
-  /// Batas token keluaran — 512 lama membuat jawaban terpotong di tengah
+  /// Batas token keluaran: 512 lama membuat jawaban terpotong di tengah
   /// (finishReason MAX_TOKENS) karena thinking model memakai ratusan token
   /// untuk berpikir lebih dulu (diagnosa: 671 token thinking). 2048 cukup
   /// untuk thinking + jawaban maksimal 5 kalimat. Rincian:

@@ -6,7 +6,7 @@ import '../providers/onboarding_provider.dart';
 import 'auth_screen.dart';
 import 'onboarding_screen.dart';
 
-/// Splash — tampil singkat lalu routing sesuai flag onboarding.
+/// Splash: tampil singkat lalu routing sesuai flag onboarding.
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 

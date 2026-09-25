@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'api_key_store.dart';
 
-/// Sumber kunci API yang aktif — prioritas jelas, tanpa tebakan.
+/// Sumber kunci API yang aktif: prioritas jelas, tanpa tebakan.
 enum ApiKeySource { compileDefine, userKey, none }
 
 /// Status kunci gabungan untuk UI: sumber + apakah tersedia.
@@ -22,12 +22,12 @@ final apiKeyStoreProvider = Provider<ApiKeyStore>((ref) => ApiKeyStore());
 /// True bila kunci tampak seperti contoh/placeholder (mis. disalin dari
 /// perintah contoh README tanpa diganti kunci asli).
 ///
-/// Hanya pola utuh yang ditandai — substring umum seperti "CONTOH" di
+/// Hanya pola utuh yang ditandai: substring umum seperti "CONTOH" di
 /// dalam kunci valid TIDAK ditolak agar tidak false positive. Pola yang
 /// ditolak: `KODE`, `ISI_KUNCI`, `YOUR_KEY`, `PLACEHOLDER`, `EXAMPLE`,
 /// `CHANGEME`, `XXXX` beruntun, `KUNCI_ANDA/KAMU`, `GANTI`, `MASUKKAN`,
 /// `TEMPEL`. Placeholder lolos validasi panjang sehingga tanpa saringan
-/// ini ia dipakai request dan server selalu menolak — user mengganti
+/// ini ia dipakai request dan server selalu menolak: user mengganti
 /// kunci berkali-kali tetap gagal karena slot compile-define menimpa
 /// kunci asli.
 bool isPlaceholderKey(String rawKey) {
@@ -61,7 +61,7 @@ bool isPlaceholderKey(String rawKey) {
 /// Kunci user dari secure storage dibaca async sekali saat provider dibuat.
 ///
 /// Pengecualian: dart-define yang berupa placeholder (contoh README yang
-/// tidak diganti) DIABAIKAN agar jatuh ke kunci user asli — bukan dipakai
+/// tidak diganti) DIABAIKAN agar jatuh ke kunci user asli: bukan dipakai
 /// request lalu ditolak server selamanya.
 final apiKeyStatusProvider = FutureProvider<ApiKeyStatus>((ref) async {
   const compiled = String.fromEnvironment('GEMINI_API_KEY');
@@ -92,7 +92,7 @@ final apiKeyStatusProvider = FutureProvider<ApiKeyStatus>((ref) async {
   return const ApiKeyStatus(source: ApiKeySource.none, key: '');
 });
 
-/// Sidik kunci untuk log — 4 char awal + panjang saja, TIDAK PERNAH
+/// Sidik kunci untuk log: 4 char awal + panjang saja, TIDAK PERNAH
 /// kunci penuh. Cukup untuk tahu kunci mana yang dipakai tanpa bocor.
 String _keyFingerprint(String key) {
   final head = key.length >= 4 ? key.substring(0, 4) : '??';

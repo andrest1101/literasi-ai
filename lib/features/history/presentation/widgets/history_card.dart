@@ -15,7 +15,7 @@ class HistoryCard extends StatelessWidget {
   final HistoryEntry entry;
   final VoidCallback onTap;
 
-  /// Tag Hero badge verdict — satu-satunya sumber kebenaran agar kartu
+  /// Tag Hero badge verdict: satu-satunya sumber kebenaran agar kartu
   /// daftar dan layar detail selalu memakai tag yang sama per entri.
   static String heroTagFor(String entryId) => 'history-verdict-$entryId';
 

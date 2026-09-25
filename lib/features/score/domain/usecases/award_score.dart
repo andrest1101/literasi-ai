@@ -1,6 +1,6 @@
 import '../repositories/score_repository.dart';
 
-/// Use case tipis per sumber poin — validasi userId lalu teruskan ke repo.
+/// Use case tipis per sumber poin: validasi userId lalu teruskan ke repo.
 class AwardVerification {
   AwardVerification(this._repository);
 

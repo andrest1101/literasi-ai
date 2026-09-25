@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/api_key_resolver.dart';
-import '../../../../shared/widgets/app_section_header.dart';
 import '../../../auth/presentation/screens/auth_screen.dart';
 import '../../../history/presentation/providers/history_providers.dart';
 import '../providers/score_providers.dart';
@@ -13,7 +12,7 @@ import '../widgets/score_breakdown.dart';
 import '../widgets/score_ring.dart';
 import 'api_key_screen.dart';
 
-/// Tab Profil fungsional pertama — skor + akun + info.
+/// Tab Profil fungsional pertama: skor + akun + info.
 ///
 /// Header kontekstual, cincin skor animasi, rincian sumber poin, dan kartu
 /// akun yang jujur membedakan mode anonim vs tersinkron.
@@ -33,14 +32,8 @@ class ProfileScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const AppSectionHeader(
-                eyebrow: AppStrings.homeProfileEyebrow,
-                titleLine1: AppStrings.homeProfileTitle1,
-                titleLine2: AppStrings.homeProfileTitle2,
-                subtitle: AppStrings.homeProfileSubtitle,
-                accent: SectionAccent.profile,
-              ),
-              const SizedBox(height: 18),
+              const _ProfileHeading(),
+              const SizedBox(height: 14),
               score.when(
                 loading: () => const _ScoreShimmer(),
                 error: (_, _) => _ScoreError(
@@ -76,7 +69,60 @@ User? _safeUser() {
   }
 }
 
-/// Kartu akun — avatar + status jujur + CTA masuk bagi tamu.
+/// Heading compact tab Profil: judul two-tone 20px + 1 baris cara skor
+/// bertambah. ScoreRing di bawahnya TIDAK disentuh: ring adalah konten
+/// utama tab ini, bukan dekorasi. Menggantikan header editorial penuh;
+/// aksen biru-personal dipertahankan pada kata kedua.
+class _ProfileHeading extends StatelessWidget {
+  const _ProfileHeading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: AppStrings.homeProfileTitle1,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.4,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              TextSpan(
+                text: ' ${AppStrings.homeProfileTitle2}',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  fontStyle: FontStyle.italic,
+                  letterSpacing: -0.4,
+                  color: AppColors.primaryDark,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 4),
+        Text(
+          AppStrings.homeProfileSubtitle,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 12.5,
+            height: 1.55,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Kartu akun: avatar + status jujur + CTA masuk bagi tamu.
 ///
 /// Anonim/tanpa login mendapat avatar "T" + tombol Masuk (route `/auth`
 /// yang sudah ada, tanpa flow baru). Tersinkron mendapat avatar inisial
@@ -196,7 +242,7 @@ class _AccountCard extends ConsumerWidget {
   }
 }
 
-/// Skeleton bernyawa saat skor dimuat — bukan kotak putih polos.
+/// Skeleton bernyawa saat skor dimuat: bukan kotak putih polos.
 class _ScoreShimmer extends StatefulWidget {
   const _ScoreShimmer();
 
@@ -296,7 +342,7 @@ class _ScoreShimmerState extends State<_ScoreShimmer>
   }
 }
 
-/// Kartu kunci API di Profil — entry point BYOK yang mudah ditemukan.
+/// Kartu kunci API di Profil: entry point BYOK yang mudah ditemukan.
 ///
 /// Menampilkan status (dart-define / kunci perangkat / demo) + tombol ke
 /// layar pengaturan. Guest tanpa login tetap bisa memakai fitur ini karena
@@ -413,7 +459,7 @@ class _ApiKeyCard extends ConsumerWidget {
   }
 }
 
-/// Error card informatif bila stream skor gagal — dengan tombol coba lagi.
+/// Error card informatif bila stream skor gagal: dengan tombol coba lagi.
 /// Pesan menegaskan ini soal penyimpanan skor (Firestore), bukan kunci API,
 /// agar tidak tertukar dengan error Gemini.
 class _ScoreError extends StatelessWidget {

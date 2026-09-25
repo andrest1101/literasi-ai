@@ -57,7 +57,7 @@ class _FakeScoreRepository implements ScoreRepository {
   Future<void> awardQuiz(String userId, {required bool correct}) async {}
 }
 
-/// Ancestor terdekat sebuah elemen — dipakai memverifikasi tipe tombol
+/// Ancestor terdekat sebuah elemen: dipakai memverifikasi tipe tombol
 /// CTA lewat rantai widget (FilledButton.icon merender child internal
 /// sehingga finder byType langsung tidak cocok).
 Element? _parentOf(Element element) {
@@ -125,20 +125,35 @@ void main() {  group('U2.1 aksen header per tab', () {
       );
       await tester.pumpAndSettle();
 
-      Text line2(String text) => tester.widget<Text>(find.text(text));
-      expect(line2('sebelum sebar.').style?.color, AppColors.primary);
+      // Judul toolbar compact memakai Text.rich: warna aksen ada di
+      // span kedua (kata kedua italic). Baca dari span, bukan Text.style.
+      Color? accentOf(String contains) {
+        final text = tester.widget<Text>(find.textContaining(contains));
+        final span = text.textSpan;
+        if (span is TextSpan && span.children != null) {
+          for (final child in span.children!) {
+            if (child is TextSpan &&
+                child.style?.fontStyle == FontStyle.italic) {
+              return child.style?.color;
+            }
+          }
+        }
+        return text.style?.color;
+      }
+
+      expect(accentOf('sebelum sebar.'), AppColors.primary);
 
       await tester.tap(find.text('Riwayat'));
       await tester.pumpAndSettle();
-      expect(line2('pemeriksaanmu.').style?.color, AppColors.primaryDeep);
+      expect(accentOf('pemeriksaanmu.'), AppColors.primaryDeep);
 
       await tester.tap(find.text('Belajar'));
       await tester.pumpAndSettle();
-      expect(line2('literasimu.').style?.color, AppColors.successDark);
+      expect(accentOf('literasimu.'), AppColors.successDark);
 
       await tester.tap(find.text('Profil'));
       await tester.pumpAndSettle();
-      expect(line2('profilmu.').style?.color, AppColors.primaryDark);
+      expect(accentOf('profilmu.'), AppColors.primaryDark);
       expect(tester.takeException(), isNull);
     });
   });

@@ -92,8 +92,10 @@ void main() {
     await tester.tap(find.text('Lanjut tanpa akun'));
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
-    // Tab Quick Check sekarang header editorial + CTA sesi dedicated.
-    expect(find.text('LiterasiAI'), findsOneWidget);
+    // Tab Quick Check sekarang heading compact (tanpa wordmark + pill)
+    // + CTA sesi dedicated.
+    expect(find.text('LiterasiAI'), findsNothing);
+    expect(find.text('VERIFIKASI AI'), findsNothing);
     expect(find.text('Cek kebenaran'), findsOneWidget);
     expect(find.text('sebelum sebar.'), findsOneWidget);
     expect(find.text('Mulai Pemeriksaan'), findsOneWidget);

@@ -2,7 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Penyimpanan kunci Gemini milik pengguna (BYOK) di secure storage OS.
 ///
-/// Keychain iOS / Keystore Android / Credential Locker Windows — tidak pernah
+/// Keychain iOS / Keystore Android / Credential Locker Windows: tidak pernah
 /// di SharedPreferences, tidak pernah di-hardcode, tidak pernah masuk repo.
 class ApiKeyStore {
   ApiKeyStore({FlutterSecureStorage? storage})

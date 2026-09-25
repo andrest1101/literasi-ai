@@ -1,6 +1,6 @@
 import 'quiz_question.dart';
 
-/// Satu seksi artikel dalam modul — heading + 2-3 paragraf ringkas.
+/// Satu seksi artikel dalam modul: heading + 2-3 paragraf ringkas.
 class CourseSection {
   const CourseSection({required this.heading, required this.body});
 
@@ -8,7 +8,7 @@ class CourseSection {
   final String body;
 }
 
-/// Modul edukasi — konten statis lokal, tanpa network/AI.
+/// Modul edukasi: konten statis lokal, tanpa network/AI.
 ///
 /// [accentSeed] membedakan identitas visual tiap kartu modul agar tidak
 /// monoton: dipakai UI untuk memilih varian gradien/ikon, bukan warna acak.

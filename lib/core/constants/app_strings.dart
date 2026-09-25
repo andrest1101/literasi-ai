@@ -1,6 +1,6 @@
 import '../errors/failures.dart';
 
-// String terpusat — Bahasa Indonesia (PRD: AI response santai tapi informatif).
+// String terpusat: Bahasa Indonesia (PRD: AI response santai tapi informatif).
 abstract final class AppStrings {
   static const String appName = 'LiterasiAI';
   static const String tagline =
@@ -90,10 +90,6 @@ abstract final class AppStrings {
   static const String quickCheckTitle = 'Quick Check';
   static const String quickCheckSubtitle =
       'Periksa satu informasi dalam satu sesi yang fokus. Hasilnya tersusun rapi dan mudah dibaca.';
-  static const String quickCheckLandingBadge = 'VERIFIKASI AI';
-  static const String quickCheckLandingTitle = 'Cek kebenaran sebelum sebar';
-  static const String quickCheckLandingSubtitle =
-      'Tempel teks atau lampirkan tangkapan layar. AI memberikan hasil pemeriksaan, tingkat keyakinan, dan langkah lanjutan.';
   static const String quickCheckStartSession = 'Mulai Pemeriksaan';
   static const String quickCheckCtaTitle = 'Siap memeriksa informasi?';
   static const String quickCheckCtaSubtitle =
@@ -137,16 +133,12 @@ abstract final class AppStrings {
   static const String navHistory = 'Riwayat';
   static const String navLearn = 'Belajar';
   static const String navProfile = 'Profil';
-  static const String homeCheckEyebrow = 'VERIFIKASI AI';
   static const String homeCheckTitle1 = 'Cek kebenaran';
   static const String homeCheckTitle2 = 'sebelum sebar.';
   static const String homeCheckSubtitle =
-      'Satu sesi fokus untuk teks, gambar, atau link. Hasil, keyakinan, dan saran tersusun rapi.';
-  static const String homeHistoryEyebrow = 'AKTIVITAS';
+      'Satu sesi fokus untuk teks, gambar, atau link. Hasil dan saran verifikasi langsung keluar.';
   static const String homeHistoryTitle1 = 'Jejak';
   static const String homeHistoryTitle2 = 'pemeriksaanmu.';
-  static const String homeHistorySubtitle =
-      'Semua hasil yang tersimpan, siap ditinjau kembali.';
   static const String historyFilterAll = 'Semua';
   static const String historyFilterHoaks = 'Hoaks';
   static const String historyFilterValid = 'Valid';
@@ -167,11 +159,8 @@ abstract final class AppStrings {
   static const String historySearchHint = 'Cari informasi yang pernah dicek...';
   static const String historyStatsTitle = 'Ringkasan';
   static const String historyDetailTitle = 'Detail Riwayat';
-  static const String homeLearnEyebrow = 'EDUKASI';
   static const String homeLearnTitle1 = 'Naikkan';
   static const String homeLearnTitle2 = 'literasimu.';
-  static const String homeLearnSubtitle =
-      'Tiga modul singkat plus kuis untuk melatih insting cek fakta.';
   static const String learnProgressSuffix = 'modul selesai';
   static const String learnProgressLoading = 'Memuat progres belajar...';
   static const String learnPointsNote =
@@ -198,11 +187,10 @@ abstract final class AppStrings {
   static const String learnQuizBack = 'Kembali ke modul';
   static const String learnGuestNote =
       'Masuk untuk menyimpan progres ke semua perangkat. Tanpa login progres hanya sesi ini.';
-  static const String homeProfileEyebrow = 'AKUN';
   static const String homeProfileTitle1 = 'Kelola';
   static const String homeProfileTitle2 = 'profilmu.';
   static const String homeProfileSubtitle =
-      'Skor literasi bertambah dari setiap pemeriksaan dan modul yang selesai.';
+      'Setiap pemeriksaan dan modul menambah skormu.';
   static const String scoreLevelPrefix = 'Level';
   static const String scorePointsSuffix = 'poin';
   static const String scoreToNextPrefix = 'poin lagi ke';
@@ -264,7 +252,7 @@ abstract final class AppStrings {
       'Buat gratis di Google AI Studio, salin kuncinya, lalu tempel di sini. Kunci tidak pernah dikirim ke mana pun selain API Gemini.';
   static const String demoBadge = 'DEMO';
   static const String demoResultNote =
-      'Hasil demo offline — bukan penilaian AI live. Sambungkan kunci API untuk verifikasi sungguhan.';
+      'Hasil demo offline, bukan penilaian AI live. Sambungkan kunci API untuk verifikasi sungguhan.';
   static const String chatGreetingTitle = 'Halo, aku asisten literasimu.';
   static const String chatGreetingSubtitle =
       'Tanya soal hoaks, clickbait, atau cara verifikasi sumber. Jawabanku santai tapi tetap kritis.';
@@ -344,6 +332,16 @@ abstract final class AppStrings {
   static const String quickCheckExplanationLabel = 'Penjelasan hasil';
   static const String quickCheckSuggestionLabel = 'Saran tindak lanjut';
   static const String quickCheckConfidenceLabel = 'Tingkat keyakinan AI';
+
+  /// Kalimat kesimpulan satu-baris per verdict: status definitif atas
+  /// informasi yang diperiksa ("apa kesimpulan AI"), BUKAN perintah
+  /// perilaku. Perilaku spesifik ("jangan teruskan pesan aslinya")
+  /// ditangani "Saran tindak lanjut" per kasus, sehingga tidak
+  /// kontradiktif dengan tombol Bagikan hasil pemeriksaan.
+  static const String verdictHeadlineHoaks = 'Informasi ini tidak benar';
+  static const String verdictHeadlineValid = 'Informasi ini benar';
+  static const String verdictHeadlinePerluDicek = 'Kebenarannya belum pasti';
+  static const String verdictHeadlineTidakPasti = 'Belum bisa dipastikan';
   static const String quickCheckNewCheck = 'Periksa informasi lain';
   static const String quickCheckRetry = 'Coba lagi';
   static const String quickCheckShare = 'Bagikan Hasil';
@@ -368,7 +366,7 @@ abstract final class AppStrings {
   static const String connectionTestRun = 'Tes koneksi sekarang';
   static const String connectionTestRunning = 'Menghubungi server AI...';
   static const String connectionTestOk =
-      'Koneksi AI OK. Server menjawab dalam hitungan detik — kunci dan jaringan beres.';
+      'Koneksi AI OK. Server menjawab dalam hitungan detik. Kunci dan jaringan beres.';
   static const String connectionTestSlow =
       'Server tidak menjawab. Periksa koneksi, matikan VPN/ad-block, atau izinkan aplikasi di firewall/antivirus.';
   static const String connectionTestKeyInvalid =

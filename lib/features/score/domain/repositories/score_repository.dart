@@ -1,6 +1,6 @@
 import '../entities/literacy_score.dart';
 
-/// Kontrak skor — stream untuk UI, award untuk tiap sumber poin.
+/// Kontrak skor: stream untuk UI, award untuk tiap sumber poin.
 ///
 /// `awardModule` idempoten per `moduleId`: modul yang sama diklaim dua kali
 /// hanya dihitung sekali.

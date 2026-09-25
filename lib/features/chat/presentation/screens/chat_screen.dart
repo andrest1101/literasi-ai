@@ -10,7 +10,7 @@ import '../providers/chat_providers.dart';
 import '../widgets/chat_bubble.dart';
 import '../widgets/chat_input_bar.dart';
 
-/// Layar Chat AI — percakapan literasi digital dengan Gemini.
+/// Layar Chat AI: percakapan literasi digital dengan Gemini.
 ///
 /// Identitas asisten digabung ke AppBar (back + avatar + nama + status +
 /// aksi mulai baru) sehingga tidak ada presence bar kedua yang makan tempat.

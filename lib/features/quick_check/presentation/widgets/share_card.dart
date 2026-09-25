@@ -8,7 +8,7 @@ import 'verdict_presentation.dart';
 /// Kartu gambar siap-share hasil verifikasi (PRD §4.1 Feature 4).
 ///
 /// Layout portrait mandiri yang di-render off-screen via `screenshot`
-/// `captureFromWidget` — bukan bagian dari scroll sesi. Komposisi: pita
+/// `captureFromWidget`: bukan bagian dari scroll sesi. Komposisi: pita
 /// header brand, hero verdict (badge + confidence besar), kutipan klaim,
 /// lalu footer ajakan. Warna verdict konsisten dengan
 /// [VerdictPresentation] agar identitas hasil terjaga di gambar share.
@@ -17,7 +17,7 @@ class ShareCard extends StatelessWidget {
 
   final VerificationResult result;
 
-  /// Lebar render off-screen — cukup untuk teks tajam saat di-share.
+  /// Lebar render off-screen: cukup untuk teks tajam saat di-share.
   static const double renderWidth = 640;
 
   @override
@@ -160,7 +160,7 @@ class ShareCard extends StatelessWidget {
   }
 }
 
-/// Pita brand atas — gradien biru dengan wordmark + label hasil.
+/// Pita brand atas: gradien biru dengan wordmark + label hasil.
 class _BrandStrip extends StatelessWidget {
   const _BrandStrip({required this.accent});
 
@@ -233,7 +233,7 @@ class _BrandStrip extends StatelessWidget {
   }
 }
 
-/// Footer ajakan — CTA + disclaimer satu baris.
+/// Footer ajakan: CTA + disclaimer satu baris.
 class _FooterStrip extends StatelessWidget {
   const _FooterStrip({required this.accent});
 

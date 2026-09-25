@@ -145,7 +145,7 @@ void main() {
           child: const MaterialApp(home: Scaffold(body: CourseListScreen())),
         ),
       );
-      // Stream progres dummy butuh satu frame sebelum data — skeleton
+      // Stream progres dummy butuh satu frame sebelum data: skeleton
       // sempat tampil bila provider masih loading pada pump pertama.
       await tester.pump(const Duration(milliseconds: 10));
 

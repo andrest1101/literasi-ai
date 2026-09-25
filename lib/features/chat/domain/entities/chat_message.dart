@@ -1,4 +1,4 @@
-/// Pesan chat — entity murni Dart, tanpa dependensi Flutter/Firebase.
+/// Pesan chat: entity murni Dart, tanpa dependensi Flutter/Firebase.
 ///
 /// [verifySeed] hanya diisi pada pesan AI: teks klaim pengguna yang memicu
 /// respons tersebut, dipakai tombol "Verifikasi ini" untuk membuka sesi

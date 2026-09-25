@@ -1,4 +1,4 @@
-/// Hasil verifikasi klaim teks — domain murni, tanpa dependensi Flutter.
+/// Hasil verifikasi klaim teks: domain murni, tanpa dependensi Flutter.
 enum Verdict {
   hoaks,
   valid,
@@ -62,7 +62,7 @@ class VerificationResult {
   /// Judul artikel hasil fetch untuk mode URL.
   final String? sourceTitle;
 
-  /// Hasil aman saat model tidak dapat memastikan — tetap sukses, bukan error.
+  /// Hasil aman saat model tidak dapat memastikan: tetap sukses, bukan error.
   factory VerificationResult.uncertain(
     String claim, {
     String explanation =

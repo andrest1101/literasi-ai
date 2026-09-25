@@ -190,7 +190,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Kelola'), findsOneWidget);
+    expect(find.textContaining('Kelola'), findsOneWidget);
     expect(find.text('Pemula'), findsOneWidget);
     expect(find.text('Sumber poin'), findsOneWidget);
     expect(find.text('Tamu LiterasiAI'), findsOneWidget);
@@ -207,11 +207,13 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byType(ScoreCheckChip), findsOneWidget);
-    expect(find.text('Pemula - 0 poin'), findsOneWidget);
+    // Header compact U2: label level + poin terpisah, bukan satu string.
+    expect(find.text('Pemula'), findsOneWidget);
+    expect(find.textContaining('0 poin'), findsOneWidget);
 
     await tester.tap(find.byType(ScoreCheckChip));
     await tester.pumpAndSettle();
-    expect(find.text('Kelola'), findsOneWidget);
+    expect(find.textContaining('Kelola'), findsOneWidget);
     expect(find.text('Sumber poin'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

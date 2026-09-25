@@ -13,7 +13,7 @@ class NetworkFailure extends Failure {
 }
 
 class ServerFailure extends Failure {
-  /// Pesan default generik — DIPENSIUNKAN untuk error Gemini baru.
+  /// Pesan default generik: DIPENSIUNKAN untuk error Gemini baru.
   ///
   /// Jangan pakai konstruktor default ini untuk error hasil request AI;
   /// pakai [GeminiErrorMapper.map]/`mapAny` agar pesan asli server sampai

@@ -4,7 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/history_filter.dart';
 
-/// Bar filter riwayat — pill animasi beridentitas verdict.
+/// Bar filter riwayat: pill animasi beridentitas verdict.
 ///
 /// Bukan [ChoiceChip] default Material: seleksi bertransisi 200ms via
 /// [AnimatedContainer], tiap filter punya aksen warnanya sendiri (Semua

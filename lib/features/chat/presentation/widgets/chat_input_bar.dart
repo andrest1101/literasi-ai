@@ -4,7 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../domain/usecases/send_chat_message.dart';
 
-/// Bilah input chat — field oval + tombol kirim gradien.
+/// Bilah input chat: field oval + tombol kirim gradien.
 ///
 /// Counter kecil muncul setelah 800 karakter sebagai pengingat batas 1.000.
 /// Tombol kirim disabled saat kosong atau AI sedang menjawab.

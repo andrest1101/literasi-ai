@@ -8,7 +8,7 @@ import 'package:literasi_ai/features/quick_check/presentation/screens/quick_chec
 import 'package:literasi_ai/shared/widgets/app_section_header.dart';
 
 void main() {
-  testWidgets('check tab owns wordmark, others use contextual titles', (
+  testWidgets('check tab uses compact heading, others contextual titles', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -16,10 +16,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('LiterasiAI'), findsOneWidget);
+    // Heading compact P1: tanpa wordmark, tanpa pill eyebrow, tanpa
+    // AppSectionHeader editorial: judul two-tone + hairline saja.
+    expect(find.text('LiterasiAI'), findsNothing);
     expect(find.text('AI Aktif'), findsNothing);
+    expect(find.text('VERIFIKASI AI'), findsNothing);
     expect(find.byType(AppBar), findsNothing);
-    expect(find.byType(AppSectionHeader), findsOneWidget);
+    expect(find.byType(AppSectionHeader), findsNothing);
     expect(find.text('Cek kebenaran'), findsOneWidget);
     expect(find.text('sebelum sebar.'), findsOneWidget);
 
@@ -30,18 +33,19 @@ void main() {
     await tester.tap(find.text('Riwayat'));
     await tester.pumpAndSettle();
     expect(find.text('LiterasiAI'), findsNothing);
-    expect(find.text('Jejak'), findsOneWidget);
-    expect(find.text('pemeriksaanmu.'), findsOneWidget);
+    // Judul toolbar compact memakai Text.rich dua span: cocokkan substring.
+    expect(find.textContaining('Jejak'), findsOneWidget);
+    expect(find.textContaining('pemeriksaanmu.'), findsOneWidget);
 
     await tester.tap(find.text('Belajar'));
     await tester.pumpAndSettle();
     expect(find.text('LiterasiAI'), findsNothing);
-    expect(find.text('Naikkan'), findsOneWidget);
+    expect(find.textContaining('Naikkan'), findsOneWidget);
 
     await tester.tap(find.text('Profil'));
     await tester.pumpAndSettle();
     expect(find.text('LiterasiAI'), findsNothing);
-    expect(find.text('Kelola'), findsOneWidget);
+    expect(find.textContaining('Kelola'), findsOneWidget);
     expect(find.text('Sumber poin'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -56,7 +60,7 @@ void main() {
 
     await tester.tap(find.text('Riwayat'));
     await tester.pumpAndSettle();
-    expect(find.text('Jejak'), findsOneWidget);
+    expect(find.textContaining('Jejak'), findsOneWidget);
     expect(find.text('Semua'), findsOneWidget);
 
     await tester.tap(find.text('Belajar'));

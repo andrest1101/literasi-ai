@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
 
-/// Kilau loading bersama — denyut alpha halus mengikuti pola shimmer
+/// Kilau loading bersama: denyut alpha halus mengikuti pola shimmer
 /// bernyawa di tab Profil.
 ///
 /// Dipakai skeleton Riwayat dan Belajar agar loading terasa hidup, bukan

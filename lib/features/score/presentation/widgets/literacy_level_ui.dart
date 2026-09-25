@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/literacy_level.dart';
 
-/// Pemetaan level ke gaya visual — tinggal di presentation, bukan domain.
+/// Pemetaan level ke gaya visual: tinggal di presentation, bukan domain.
 extension LiteracyLevelUi on LiteracyLevel {
   Color get accent => switch (this) {
     LiteracyLevel.pemula => AppColors.neutral,

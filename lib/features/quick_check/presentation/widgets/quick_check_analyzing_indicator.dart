@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 
-/// Indikator analisis elegan — timeline tiga tahap, bukan kartu besar.
+/// Indikator analisis elegan: timeline tiga tahap, bukan kartu besar.
 ///
 /// Jujur soal progres: bar memakai mode indeterminate (AI tidak melaporkan
 /// persen nyata) dan label kanan menunjukkan detik berjalan, bukan persen
@@ -60,7 +60,7 @@ class _QuickCheckAnalyzingIndicatorState
     super.dispose();
   }
 
-  /// Tahap monoton naik berdasarkan detik berjalan — tidak pernah mundur
+  /// Tahap monoton naik berdasarkan detik berjalan: tidak pernah mundur
   /// seperti loop persen sebelumnya. Estimasi kasar yang jujur: AI tidak
   /// melaporkan progres nyata, jadi tahap hanya ilustrasi alur.
   int get _activeStep {

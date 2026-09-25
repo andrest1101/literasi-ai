@@ -11,7 +11,7 @@ import '../../domain/entities/verification_result.dart';
 import 'share_card.dart';
 import 'verdict_presentation.dart';
 
-/// Bagian hasil sesi — satu alur vertikal, bukan kartu bertumpuk.
+/// Bagian hasil sesi: satu alur vertikal, bukan kartu bertumpuk.
 ///
 /// Struktur: header verdict → confidence → klaim → analisis → saran → aksi.
 /// Warna status hanya sebagai aksen pada pita dan badge; teks tetap gelap
@@ -40,16 +40,16 @@ class QuickCheckResultSection extends StatefulWidget {
   ///
   /// Diisi saat kartu ini adalah tujuan navigasi dari daftar (riwayat /
   /// trending) agar badge terbang mulus antar layar. Null berarti tanpa
-  /// Hero — dipakai layar sesi yang dibuka tanpa pasangan asal.
+  /// Hero: dipakai layar sesi yang dibuka tanpa pasangan asal.
   final String? heroTag;
 
-  /// Durasi verify terakhir — bukti klaim <5 detik. Null = tidak tampil.
+  /// Durasi verify terakhir: bukti klaim <5 detik. Null = tidak tampil.
   final Duration? duration;
 
-  /// Injeksi untuk test — menghindari share sheet asli.
+  /// Injeksi untuk test: menghindari share sheet asli.
   final ShareService? shareService;
 
-  /// Injeksi capture untuk test — menggantikan `screenshot` asli.
+  /// Injeksi capture untuk test: menggantikan `screenshot` asli.
   final Future<Uint8List> Function()? onCaptureImage;
 
   @override
@@ -203,35 +203,43 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
               ),
               const SizedBox(width: 8),
             ],
-            TextButton.icon(
-              onPressed: _busy ? null : widget.onNewCheck,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text(AppStrings.quickCheckNewCheck),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                textStyle: const TextStyle(fontWeight: FontWeight.w700),
+            Flexible(
+              child: TextButton.icon(
+                onPressed: _busy ? null : widget.onNewCheck,
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: const Text(
+                  AppStrings.quickCheckNewCheck,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  textStyle: const TextStyle(fontWeight: FontWeight.w700),
+                ),
               ),
             ),
           ],
         ),
         const SizedBox(height: 10),
         _ResultEntrance(
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(26),
-              color: AppColors.surface,
-              border: Border.all(
-                color: style.accent.withValues(alpha: 0.26),
-                width: 1.2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.shadowInk.withValues(alpha: 0.08),
-                  blurRadius: 26,
-                  offset: const Offset(0, 14),
+          child: _VerdictSpine(
+            accent: style.accent,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(26),
+                color: AppColors.surface,
+                border: Border.all(
+                  color: AppColors.neutral.withValues(alpha: 0.2),
+                  width: 1,
                 ),
-              ],
-            ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.shadowInk.withValues(alpha: 0.08),
+                    blurRadius: 26,
+                    offset: const Offset(0, 14),
+                  ),
+                ],
+              ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -294,14 +302,18 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              const Padding(
-                                padding: EdgeInsets.only(bottom: 3),
-                                child: Text(
-                                  AppStrings.quickCheckConfidenceLabel,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textSecondary,
+                              const Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(bottom: 3),
+                                  child: Text(
+                                    AppStrings.quickCheckConfidenceLabel,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textSecondary,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -355,13 +367,17 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
                               color: AppColors.textSecondary,
                             ),
                             const SizedBox(width: 5),
-                            Text(
-                              sourceBadge.label,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.8,
-                                color: AppColors.textSecondary,
+                            Flexible(
+                              child: Text(
+                                sourceBadge.label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ),
                           ],
@@ -477,6 +493,7 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
                 ),
               ),
             ],
+            ),
             ),
           ),
         ),
@@ -599,7 +616,7 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
   }
 }
 
-/// Panel error sesi — satu permukaan dengan CTA retry yang jelas.
+/// Panel error sesi: satu permukaan dengan CTA retry yang jelas.
 ///
 /// Bila penyebabnya kunci API hilang, panel menambah tombol salin perintah
 /// run agar pengguna bisa setup tanpa menebak perintah terminal.
@@ -699,7 +716,7 @@ class QuickCheckErrorSection extends StatelessWidget {
 }
 
 
-/// Entrance hasil — fade + slide halus sekali saat kartu muncul.
+/// Entrance hasil: fade + slide halus sekali saat kartu muncul.
 ///
 /// Durasi 320ms: cukup terasa premium, tidak menghambat baca verdict
 /// 1-detik. Tanpa scale/overshoot agar tetap trustworthy, bukan playful.
@@ -747,6 +764,39 @@ class _ResultEntranceState extends State<_ResultEntrance>
     return FadeTransition(
       opacity: _fade,
       child: SlideTransition(position: _slide, child: widget.child),
+    );
+  }
+}
+
+/// Spine aksen verdict: garis warna penuh di tepi kiri kartu hasil.
+///
+/// Elemen signature LiterasiAI: satu garis 6px mengikuti warna verdict
+/// (merah HOAKS / hijau VALID / kuning PERLU DICEK / abu TIDAK PASTI),
+/// konsisten dengan spine [ShareCard]. Diimplementasi sebagai lapisan
+/// di belakang isi (bukan `Border.left`) agar sudut membulat tetap rapi
+/// dan tidak ada garis miring di tikungan.
+class _VerdictSpine extends StatelessWidget {
+  const _VerdictSpine({required this.accent, required this.child});
+
+  final Color accent;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: ExcludeSemantics(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(26),
+                color: accent,
+              ),
+            ),
+          ),
+        ),
+        Padding(padding: const EdgeInsets.only(left: 6), child: child),
+      ],
     );
   }
 }

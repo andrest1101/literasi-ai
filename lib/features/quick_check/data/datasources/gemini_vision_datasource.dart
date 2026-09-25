@@ -32,7 +32,7 @@ class GeminiVisionDatasource {
 
   static const String defaultModelName = GeminiModelPool.primaryModel;
 
-  /// Batas token keluaran — ruang untuk thinking model + verdict JSON.
+  /// Batas token keluaran: ruang untuk thinking model + verdict JSON.
   /// Lihat penjelasan lengkap di [GeminiTextDatasource.maxOutputTokens]:
   /// 512 lama membuat jawaban terpotong di tengah JSON (MAX_TOKENS).
   static const int maxOutputTokens = 2048;

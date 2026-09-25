@@ -31,7 +31,7 @@ final sendChatMessageProvider = Provider<SendChatMessage>((ref) {
   return SendChatMessage(ref.watch(chatRepositoryProvider));
 });
 
-/// True bila kunci API tersedia (compile atau user) — dipakai UI untuk
+/// True bila kunci API tersedia (compile atau user): dipakai UI untuk
 /// menampilkan banner pratinjau sekali-lihat, bukan error mentah setelah kirim.
 final chatKeyConfiguredProvider = Provider<bool>((ref) {
   return ref.watch(apiKeyStatusProvider).valueOrNull?.configured ?? false;

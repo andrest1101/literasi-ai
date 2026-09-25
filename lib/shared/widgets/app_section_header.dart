@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
 
-/// Aksen identitas per tab — satu keluarga palet resmi, tanpa warna asing.
+/// Aksen identitas per tab: satu keluarga palet resmi, tanpa warna asing.
 ///
 /// Cek tetap biru brand ([AppColors.primary]); Riwayat biru tua arsip;
 /// Belajar hijau tumbuh; Profil biru sedang personal. Aksen hanya mewarnai
@@ -19,7 +19,7 @@ enum SectionAccent {
   final Color color;
 }
 
-/// Header editorial per tab — tipografi + aksen identitas, tanpa dekorasi.
+/// Header editorial per tab: tipografi + aksen identitas, tanpa dekorasi.
 ///
 /// Komposisi: eyebrow pill kecil + judul two-tone (baris 1 gelap, baris 2
 /// warna aksen italic) + subtitle + hairline pemisah. Emblem gradien sengaja

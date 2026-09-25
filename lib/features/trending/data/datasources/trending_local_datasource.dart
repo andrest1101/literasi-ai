@@ -1,11 +1,11 @@
 import '../../../quick_check/domain/entities/verification_result.dart';
 import '../../domain/entities/trending_item.dart';
 
-/// Feed curated 7 hoaks Indonesia — statis lokal, tanpa network.
+/// Feed curated 7 hoaks Indonesia: statis lokal, tanpa network.
 ///
 /// Ditulis sebagai ringkasan jurnalistik nyata: judul natural, kategori,
 /// tanggal cek, dan rujukan verifikasi. Tanpa login, tanpa API key, tanpa
-/// Firebase — guest offline tetap melihat feed penuh.
+/// Firebase: guest offline tetap melihat feed penuh.
 class TrendingLocalDatasource {
   // Non-const karena DateTime bukan constant expression.
   List<TrendingItem> items() => [

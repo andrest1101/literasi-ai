@@ -2,7 +2,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../errors/failures.dart';
 
-/// Wrapper `image_picker` untuk mode Gambar (PRD §4.1 — screenshot WA/medsos).
+/// Wrapper `image_picker` untuk mode Gambar (PRD §4.1: screenshot WA/medsos).
 class ImageProcessor {
   ImageProcessor({ImagePicker? picker}) : _picker = picker ?? ImagePicker();
 

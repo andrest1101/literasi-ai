@@ -11,7 +11,7 @@ import '../../domain/entities/trending_item.dart';
 import '../providers/trending_providers.dart';
 import '../widgets/trending_rail.dart';
 
-/// Detail trending — reuse kartu hasil + share, tanpa duplikasi UI verdict.
+/// Detail trending: reuse kartu hasil + share, tanpa duplikasi UI verdict.
 ///
 /// Hierarki aksi tegas: `Verifikasi serupa` adalah CTA primer halaman ini
 /// (Filled), sedangkan Bagikan di dalam result section adalah sekunder.
@@ -205,7 +205,7 @@ class TrendingDetailScreen extends ConsumerWidget {
   }
 }
 
-/// Kartu konteks terkait — ringkas: badge verdict + judul 2 baris.
+/// Kartu konteks terkait: ringkas: badge verdict + judul 2 baris.
 class _RelatedCard extends StatelessWidget {
   const _RelatedCard({required this.item, required this.onTap});
 

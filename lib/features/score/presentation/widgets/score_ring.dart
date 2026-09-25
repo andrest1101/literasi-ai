@@ -4,7 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/literacy_score.dart';
 import 'literacy_level_ui.dart';
 
-/// Cincin progres skor 120px — hero visual tab Profil.
+/// Cincin progres skor 120px: hero visual tab Profil.
 ///
 /// Total poin di tengah, arc mengikuti progres dalam level, warna dan ikon
 /// mengikuti level aktif. Animasi implisit 600ms membuat kenaikan poin

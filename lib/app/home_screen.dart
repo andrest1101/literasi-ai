@@ -10,7 +10,7 @@ import '../features/quick_check/presentation/screens/quick_check_home_tab.dart';
 import '../features/score/presentation/screens/profile_screen.dart';
 import '../shared/widgets/bottom_nav_bar.dart';
 
-/// Home shell — 4 tab tanpa AppBar + FAB Chat AI melayang di atas konten.
+/// Home shell: 4 tab tanpa AppBar + FAB Chat AI melayang di atas konten.
 ///
 /// Tiap tab memegang judulnya sendiri di body (kontekstual: Cek, Riwayat,
 /// Belajar, Profil) sehingga tidak ada brand ganda di semua halaman.
@@ -52,7 +52,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       floatingActionButton: Transform.translate(
         // Turun 8px dari margin bawaan Scaffold (16px): FAB duduk rapat
-        // 8px di atas zona badge navbar. Tidak lebih rendah — badge tab
+        // 8px di atas zona badge navbar. Tidak lebih rendah: badge tab
         // Profil butuh zona itu (test no-overlap mengunci gap >= 8px).
         offset: const Offset(0, 8),
         child: ChatFab(onTap: _openChat),

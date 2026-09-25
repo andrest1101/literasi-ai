@@ -9,7 +9,7 @@ import '../widgets/onboarding_slide.dart';
 import '../widgets/pill_page_indicator.dart';
 import 'auth_screen.dart';
 
-/// Onboarding 3 slide — tampil saat pertama install (PRD §5).
+/// Onboarding 3 slide: tampil saat pertama install (PRD §5).
 ///
 /// Gaya modern & clean: header brand + Lewati, kartu visual floating
 /// interaktif (press-glow), eyebrow + judul tebal + deskripsi,

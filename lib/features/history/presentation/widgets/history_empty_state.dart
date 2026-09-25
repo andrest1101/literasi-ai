@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 
-/// Empty state riwayat — ikon + copy + CTA mulai memeriksa.
+/// Empty state riwayat: ikon + copy + CTA mulai memeriksa.
 ///
 /// [onStartCheck] opsional agar widget tetap decoupled: layar pengisi
 /// memutuskan navigasinya (push sesi Quick Check). Varian [filtered]
 /// (hasil filter kosong) tidak menampilkan CTA karena masalahnya filter,
-/// bukan belum ada data — CTA di sana hanya menambah noise.
+/// bukan belum ada data: CTA di sana hanya menambah noise.
 class HistoryEmptyState extends StatelessWidget {
   const HistoryEmptyState({super.key, required this.filtered, this.onStartCheck});
 

@@ -12,7 +12,7 @@ import '../datasources/gemini_vision_datasource.dart';
 /// Lapisan ini tipis: validasi ada di use case, parsing ada di datasource.
 /// Mapping failure dilakukan di datasource agar pesan error tetap akurat.
 /// Untuk mode URL, repository mengorkestrasi [UrlFetcher] (ambil judul dan
-/// deskripsi artikel) lalu [GeminiTextDatasource] (nilai klaimnya) — dua
+/// deskripsi artikel) lalu [GeminiTextDatasource] (nilai klaimnya): dua
 /// langkah berurutan, bukan satu request gabungan.
 class VerificationRepositoryImpl implements VerificationRepository {
   VerificationRepositoryImpl(
@@ -43,14 +43,14 @@ class VerificationRepositoryImpl implements VerificationRepository {
   final String Function() _resolveApiKey;
   final bool Function() _hasApiKey;
 
-  /// Hook injeksi untuk test — menggantikan panggilan Gemini asli.
+  /// Hook injeksi untuk test: menggantikan panggilan Gemini asli.
   final Future<VerificationResult> Function(String claim, String apiKey)?
   _verifyTextFn;
 
   /// Batas deskripsi yang dikirim ke AI agar prompt hemat kuota free tier.
   static const int maxDescriptionChars = 500;
 
-  /// Cache klaim identik (LRU sederhana, maks 20) — klaim yang sama tidak
+  /// Cache klaim identik (LRU sederhana, maks 20): klaim yang sama tidak
   /// memanggil Gemini ulang. Hemat kuota free tier + respons instan.
   static const int maxCacheEntries = 20;
   final _cache = <String, VerificationResult>{};

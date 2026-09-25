@@ -5,7 +5,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../domain/usecases/verify_claim.dart';
 import 'char_counter_text.dart';
 
-/// Area input sesi Quick Check — bukan kartu bertumpuk.
+/// Area input sesi Quick Check: bukan kartu bertumpuk.
 ///
 /// Panel input memakai satu permukaan filled kontras dengan radius besar,
 /// sehingga whitespace lega tetapi hierarki tetap jelas.

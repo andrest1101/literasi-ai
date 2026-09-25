@@ -10,7 +10,7 @@ import '../../../quick_check/data/datasources/gemini_text_datasource.dart';
 import '../../../quick_check/presentation/providers/verification_provider.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
 
-/// Pengaturan kunci API Gemini (BYOK) — untuk tester tanpa akses terminal.
+/// Pengaturan kunci API Gemini (BYOK): untuk tester tanpa akses terminal.
 ///
 /// Kunci user tersimpan di secure storage OS, tidak pernah di repo/build.
 /// Prioritas: dart-define (developer) menang atas kunci user; layar ini
@@ -41,7 +41,7 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
 
   /// Tes koneksi end-to-end via probe bertahap: DNS → TCP 443 → HTTPS →
   /// generate 1 kata. Hasil menunjuk tahap yang gagal (jaringan lokal,
-  /// firewall proses, TLS/proxy, kunci, atau model) — bukan sekadar
+  /// firewall proses, TLS/proxy, kunci, atau model): bukan sekadar
   /// "gagal" tanpa arah.
   Future<void> _testConnection() async {
     if (_testing) return;

@@ -30,7 +30,7 @@ class VerificationResultModel {
     );
   }
 
-  /// Parsing dari teks mentah Gemini — membersihkan ```json fence bila ada.
+  /// Parsing dari teks mentah Gemini: membersihkan ```json fence bila ada.
   static VerificationResult fromRawText(
     String rawText,
     String claim, {

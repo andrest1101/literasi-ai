@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
-import '../../../../core/utils/api_key_resolver.dart';
-import '../../../../shared/widgets/app_section_header.dart';
 import '../../../score/presentation/screens/api_key_screen.dart';
 import '../../../score/presentation/widgets/score_check_chip.dart';
 import '../../../trending/domain/entities/trending_item.dart';
@@ -13,7 +12,7 @@ import '../../../trending/presentation/screens/trending_detail_screen.dart';
 import '../../../trending/presentation/widgets/trending_rail.dart';
 import 'quick_check_session_screen.dart';
 
-/// Landing tab Quick Check — hero CTA + mode picker + contoh + tips.
+/// Landing tab Quick Check: hero CTA + mode picker + contoh + tips.
 ///
 /// Komposisi sengaja dibuat heterogen agar tidak monoton:
 /// hero gradien penuh, mode picker 2 tile berdampingan, contoh berupa
@@ -29,6 +28,9 @@ class QuickCheckHomeTab extends ConsumerWidget {
     QuickCheckInitialMode mode = QuickCheckInitialMode.text,
     String? claim,
   }) {
+    // Umpan balik taktil ringan pada aksi primer: pola sama dengan
+    // onboarding & navbar (HapticFeedback bawaan, tanpa plugin).
+    HapticFeedback.lightImpact();
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) =>
@@ -38,10 +40,14 @@ class QuickCheckHomeTab extends ConsumerWidget {
     );
   }
 
+  void _openKeySettings(BuildContext context) {
+    Navigator.of(context).pushNamed(ApiKeyScreen.route);
+  }
+
   void _openTrending(BuildContext context, TrendingItem item) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => TrendingDetailScreen(item: item)),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => TrendingDetailScreen(item: item)));
   }
 
   @override
@@ -56,20 +62,14 @@ class QuickCheckHomeTab extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const _Wordmark(),
-              const SizedBox(height: 14),
-              const AppSectionHeader(
-                eyebrow: AppStrings.homeCheckEyebrow,
-                titleLine1: AppStrings.homeCheckTitle1,
-                titleLine2: AppStrings.homeCheckTitle2,
-                subtitle: AppStrings.homeCheckSubtitle,
+              const _CheckHeading(),
+              const SizedBox(height: 12),
+              ScoreCheckChip(
+                onOpenProfile: onOpenProfile,
+                onOpenKeySettings: () => _openKeySettings(context),
               ),
-              const SizedBox(height: 14),
-              ScoreCheckChip(onTap: onOpenProfile),
-              const SizedBox(height: 10),
-              _ApiKeyStatusChip(ref: ref),
               const SizedBox(height: 18),
-              const _SessionCtaCard(),
+              const _HeroEntrance(child: _SessionCtaCard()),
               const SizedBox(height: 22),
               const _SectionHeader(
                 title: AppStrings.quickCheckModePickerTitle,
@@ -83,6 +83,7 @@ class QuickCheckHomeTab extends ConsumerWidget {
                       icon: Icons.text_snippet_outlined,
                       title: AppStrings.quickCheckTileTextTitle,
                       subtitle: AppStrings.quickCheckTileTextSubtitle,
+                      tint: AppColors.primary,
                       onTap: () => _openSession(context),
                     ),
                   ),
@@ -92,6 +93,7 @@ class QuickCheckHomeTab extends ConsumerWidget {
                       icon: Icons.image_outlined,
                       title: AppStrings.quickCheckTileImageTitle,
                       subtitle: AppStrings.quickCheckTileImageSubtitle,
+                      tint: AppColors.primaryDeep,
                       onTap: () => _openSession(
                         context,
                         mode: QuickCheckInitialMode.image,
@@ -120,9 +122,7 @@ class QuickCheckHomeTab extends ConsumerWidget {
                 subtitle: AppStrings.trendingSubtitle,
               ),
               const SizedBox(height: 12),
-              _TrendingSection(
-                onPick: (item) => _openTrending(context, item),
-              ),
+              _TrendingSection(onPick: (item) => _openTrending(context, item)),
               const SizedBox(height: 22),
               const Text(
                 AppStrings.quickCheckTipsTitle,
@@ -147,7 +147,7 @@ class QuickCheckHomeTab extends ConsumerWidget {
   }
 }
 
-/// Section trending di tab Cek — rail horizontal + navigasi detail.
+/// Section trending di tab Cek: rail horizontal + navigasi detail.
 ///
 /// Provider sync lokal sehingga guest offline tetap melihat feed penuh.
 class _TrendingSection extends ConsumerWidget {
@@ -157,153 +157,118 @@ class _TrendingSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return TrendingRail(items: ref.watch(trendingItemsProvider), onPick: onPick);
-  }
-}
-
-/// Chip status kunci API di tab Cek — satu baris menuju Pengaturan.
-///
-/// Hijau bila live (dart-define/user), kuning bila demo. Guest tanpa login
-/// tetap bisa memakai fitur ini karena kunci disimpan per-perangkat.
-class _ApiKeyStatusChip extends StatelessWidget {
-  const _ApiKeyStatusChip({required this.ref});
-
-  final WidgetRef ref;
-
-  @override
-  Widget build(BuildContext context) {
-    final status = ref.watch(apiKeyControllerProvider);
-    return Semantics(
-      button: true,
-      label: AppStrings.apiKeySettingsTitle,
-      child: Material(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(999),
-        child: InkWell(
-          onTap: () =>
-              Navigator.of(context).pushNamed(ApiKeyScreen.route),
-          borderRadius: BorderRadius.circular(999),
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 11,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: AppColors.neutral.withValues(alpha: 0.22),
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x0D101A33),
-                  blurRadius: 12,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: status.when(
-              loading: () => const _KeyChipContent(
-                icon: Icons.hourglass_empty_rounded,
-                iconColor: AppColors.textSecondary,
-                text: 'Memeriksa kunci...',
-              ),
-              error: (_, _) => const _KeyChipContent(
-                icon: Icons.key_off_outlined,
-                iconColor: AppColors.warning,
-                text: 'Mode demo aktif',
-              ),
-              data: (value) => _KeyChipContent(
-                icon: value.configured
-                    ? Icons.key_outlined
-                    : Icons.key_off_outlined,
-                iconColor: value.configured
-                    ? AppColors.success
-                    : AppColors.warning,
-                text: switch (value.source) {
-                  ApiKeySource.compileDefine => 'AI live via developer',
-                  ApiKeySource.userKey => 'AI live via kunci perangkat',
-                  ApiKeySource.none => 'Mode demo aktif',
-                },
-              ),
-            ),
-          ),
-        ),
-      ),
+    return TrendingRail(
+      items: ref.watch(trendingItemsProvider),
+      onPick: onPick,
     );
   }
 }
 
-class _KeyChipContent extends StatelessWidget {
-  const _KeyChipContent({
-    required this.icon,
-    required this.text,
-    required this.iconColor,
-  });
-
-  final IconData icon;
-  final String text;
-  final Color iconColor;
+/// Heading compact tab Cek: judul two-tone + subtitle 2 baris + hairline.
+///
+/// Menggantikan header editorial penuh (wordmark + pill eyebrow + judul
+/// 26px + subtitle 3 baris) yang memakan ±230px sebelum konten. Pill
+/// "VERIFIKASI AI" dihapus karena redundan dengan label "AI live" di
+/// kartu status; wordmark dihapus karena brand sudah ada di navbar.
+/// Judul 24px tetap two-tone sebagai identitas; hairline dipertahankan
+/// sebagai jangkar visual.
+class _CheckHeading extends StatelessWidget {
+  const _CheckHeading();
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: iconColor),
-        const SizedBox(width: 8),
-        const Expanded(
-          child: Text(
-            'Status AI',
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ),
         Text(
-          text,
+          AppStrings.homeCheckTitle1,
           style: const TextStyle(
-            fontSize: 13,
+            fontSize: 24,
+            height: 1.15,
             fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(width: 4),
-        const Icon(
-          Icons.chevron_right_rounded,
-          size: 20,
-          color: AppColors.textSecondary,
+        const Text(
+          AppStrings.homeCheckTitle2,
+          style: TextStyle(
+            fontSize: 24,
+            height: 1.15,
+            fontWeight: FontWeight.w800,
+            fontStyle: FontStyle.italic,
+            letterSpacing: -0.5,
+            color: AppColors.primary,
+          ),
+        ),
+        const SizedBox(height: 6),
+        const Text(
+          AppStrings.homeCheckSubtitle,
+          style: TextStyle(
+            fontSize: 13,
+            height: 1.55,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          height: 1,
+          color: AppColors.neutral.withValues(alpha: 0.18),
         ),
       ],
     );
   }
 }
 
-/// Wordmark kecil khusus tab Cek — satu-satunya tempat nama app muncul di
-/// Home. Tab lain memakai judul kontekstualnya sendiri.
-class _Wordmark extends StatelessWidget {
-  const _Wordmark();
+/// Entrance hero: fade + slide halus sekali saat tab pertama dibuka.
+///
+/// Terisolasi di widget sendiri agar animasi tidak me-rebuild seluruh tab.
+/// Durasi 380ms ease-out: terasa hidup tanpa mengganggu. Tanpa loop agar
+/// calm sesuai aturan anti-AI-slop.
+class _HeroEntrance extends StatefulWidget {
+  const _HeroEntrance({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_HeroEntrance> createState() => _HeroEntranceState();
+}
+
+class _HeroEntranceState extends State<_HeroEntrance>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 380),
+  );
+  late final Animation<double> _fade = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutCubic,
+  );
+  late final Animation<Offset> _slide =
+      Tween<Offset>(
+        begin: const Offset(0, 0.06),
+        end: Offset.zero,
+      ).animate(
+        CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+      );
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          Icons.verified_user_rounded,
-          size: 18,
-          color: AppColors.textSecondary,
-        ),
-        SizedBox(width: 7),
-        Text(
-          AppStrings.appName,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.2,
-            color: AppColors.textSecondary,
-          ),
-        ),
-      ],
+    return FadeTransition(
+      opacity: _fade,
+      child: SlideTransition(position: _slide, child: widget.child),
     );
   }
 }
@@ -330,67 +295,172 @@ class _SessionCtaCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Stack(
         children: [
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppStrings.quickCheckCtaTitle,
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 6),
-                Text(
-                  AppStrings.quickCheckCtaSubtitle,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    height: 1.6,
-                    color: Color(0xFFD6E5FE),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 14),
-          SizedBox(
-            height: 52,
-            child: FilledButton(
-              onPressed: () => Navigator.of(
-                context,
-              ).pushNamed(QuickCheckSessionScreen.route),
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(17),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                textStyle: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                ),
-                elevation: 0,
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
+          const Positioned.fill(child: ExcludeSemantics(child: _HeroPattern())),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final narrow = constraints.maxWidth < 380;
+              final copy = const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(AppStrings.quickCheckStartSession),
-                  SizedBox(width: 6),
-                  Icon(Icons.arrow_forward_rounded, size: 19),
+                  Text(
+                    AppStrings.quickCheckCtaTitle,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.3,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    AppStrings.quickCheckCtaSubtitle,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      height: 1.6,
+                      color: Color(0xFFD6E5FE),
+                    ),
+                  ),
                 ],
-              ),
-            ),
+              );
+              final cta = SizedBox(
+                height: 52,
+                width: narrow ? double.infinity : null,
+                child: FilledButton(
+                  onPressed: () => Navigator.of(
+                    context,
+                  ).pushNamed(QuickCheckSessionScreen.route),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(17),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    textStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          AppStrings.quickCheckStartSession,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      SizedBox(width: 6),
+                      Icon(Icons.arrow_forward_rounded, size: 19),
+                    ],
+                  ),
+                ),
+              );
+              // Layar sempit (<380px): tombol full-width di bawah teks agar
+              // kata terpanjang tidak terjepit hingga overflow; layar normal
+              // tetap Row berdampingan.
+              if (narrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [copy, const SizedBox(height: 12), cta],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: copy),
+                  const SizedBox(width: 14),
+                  cta,
+                ],
+              );
+            },
           ),
         ],
       ),
     );
   }
+}
+
+/// Tekstur pola hero: garis diagonal + outline perisai raksasa.
+///
+/// Digambar via CustomPainter murni (tanpa aset gambar/emoji) dengan putih
+/// alpha 6-8% di atas gradient hero, sehingga memberi kedalaman tanpa
+/// mengganggu keterbacaan teks. `ExcludeSemantics` di callsite karena
+/// murni dekoratif.
+class _HeroPattern extends StatelessWidget {
+  const _HeroPattern();
+
+  @override
+  Widget build(BuildContext context) {
+    return const CustomPaint(painter: _HeroPatternPainter());
+  }
+}
+
+class _HeroPatternPainter extends CustomPainter {
+  const _HeroPatternPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+    // Garis diagonal halus dari kiri-bawah ke kanan-atas.
+    final linePaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.07)
+      ..strokeWidth = 1.2;
+    const step = 26.0;
+    for (var x = -size.height; x < size.width + size.height; x += step) {
+      canvas.drawLine(
+        Offset(x, size.height + 4),
+        Offset(x + size.height + 8, -4),
+        linePaint,
+      );
+    }
+    // Outline perisai raksasa di kanan: echo ikon verified brand.
+    final shieldPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.08)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+    final center = Offset(size.width - 34, size.height / 2);
+    const radius = 64.0;
+    final shield = Path()
+      ..moveTo(center.dx, center.dy - radius)
+      ..lineTo(center.dx + radius * 0.78, center.dy - radius * 0.42)
+      ..lineTo(center.dx + radius * 0.78, center.dy + radius * 0.18)
+      ..quadraticBezierTo(
+        center.dx + radius * 0.78,
+        center.dy + radius * 0.72,
+        center.dx,
+        center.dy + radius,
+      )
+      ..quadraticBezierTo(
+        center.dx - radius * 0.78,
+        center.dy + radius * 0.72,
+        center.dx - radius * 0.78,
+        center.dy + radius * 0.18,
+      )
+      ..lineTo(center.dx - radius * 0.78, center.dy - radius * 0.42)
+      ..close();
+    canvas.drawPath(shield, shieldPaint);
+    // Kilau pusat perisai: check samar sebagai penegas makna.
+    final checkPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.08)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    canvas.drawPath(
+      Path()
+        ..moveTo(center.dx - 22, center.dy + 2)
+        ..lineTo(center.dx - 6, center.dy + 18)
+        ..lineTo(center.dx + 24, center.dy - 18),
+      checkPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -427,7 +497,7 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-/// Tile mode persegi — medallion ikon di atas, judul, sub, chevron.
+/// Tile mode persegi: medallion ikon di atas, judul, sub, chevron.
 ///
 /// Proporsi tile (setengah lebar layar) sengaja berbeda dari hero penuh dan
 /// carousel horizontal agar ritme landing tidak monoton.
@@ -437,12 +507,18 @@ class _ModeTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.tint = AppColors.primary,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+
+  /// Warna identitas mode: teks biru brand, gambar biru-tua, agar tiap
+  /// mode punya karakter tanpa warna asing. Default biru untuk kompatibel
+  /// mundur.
+  final Color tint;
 
   @override
   Widget build(BuildContext context) {
@@ -480,13 +556,9 @@ class _ModeTile extends StatelessWidget {
                       height: 44,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
-                        color: AppColors.primary.withValues(alpha: 0.1),
+                        color: tint.withValues(alpha: 0.1),
                       ),
-                      child: Icon(
-                        icon,
-                        size: 23,
-                        color: AppColors.primary,
-                      ),
+                      child: Icon(icon, size: 23, color: tint),
                     ),
                     const Spacer(),
                     const Icon(
@@ -524,7 +596,7 @@ class _ModeTile extends StatelessWidget {
   }
 }
 
-/// Banner mode link — full-width horizontal di bawah 2 tile berdampingan.
+/// Banner mode link: full-width horizontal di bawah 2 tile berdampingan.
 ///
 /// Ritme landing tetap heterogen: hero CTA penuh, 2 tile persegi, banner
 /// link horizontal, lalu carousel contoh. Ikon link + aksen hijau
@@ -616,7 +688,7 @@ class _UrlModeBanner extends StatelessWidget {
   }
 }
 
-/// Carousel contoh klaim — kartu compact horizontal sekali ketuk.
+/// Carousel contoh klaim: kartu compact horizontal sekali ketuk.
 ///
 /// Format rail (bukan list vertikal) memberi jeda visual dari hero dan tile,
 /// sekaligus mempercepat demo 60 detik: ketuk contoh langsung mengisi sesi.
@@ -645,10 +717,7 @@ class _ExampleRail extends StatelessWidget {
           final claim = _examples[index];
           return SizedBox(
             width: 248,
-            child: _ExampleCard(
-              claim: claim,
-              onTap: () => onPick(claim),
-            ),
+            child: _ExampleCard(claim: claim, onTap: () => onPick(claim)),
           );
         },
       ),
