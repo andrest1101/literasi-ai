@@ -3,52 +3,53 @@ import 'dart:async';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../../../../core/utils/gemini_error_mapper.dart';
+import '../../../../core/utils/gemini_model_pool.dart';
 import '../../domain/entities/verification_result.dart';
 import '../models/verification_result_model.dart';
 
 /// Datasource verifikasi klaim teks via Gemini.
 ///
-/// Model final: `gemini-3.5-flash-lite`. SDK 0.4.7 tidak memvalidasi nama
-/// model di sisi client — string diteruskan ke endpoint — sehingga tidak
-/// perlu upgrade package untuk model ini.
+/// Model utama: `gemini-3.6-flash`, dengan failover otomatis ke model
+/// cadangan lewat [GeminiModelPool] bila kehabisan kuota (429), ditarik
+/// (404), atau sedang sibuk (503) — kuota free tier ditandai per model,
+/// jadi pindah model langsung menyembuhkan tanpa menunggu reset harian.
 ///
 /// API key TIDAK PERNAH di-hardcode: diambil dari
-/// `--dart-define=GEMINI_API_KEY=...`.
+/// `--dart-define=GEMINI_API_KEY=...` atau penyimpanan aman pengguna.
 class GeminiTextDatasource {
   GeminiTextDatasource({
     GenerativeModel? model,
     String? apiKey,
     this.modelName = defaultModelName,
     this.timeout = const Duration(seconds: 30),
+    GeminiModelPool? pool,
   }) : _model = model,
-       _apiKey = apiKey ?? const String.fromEnvironment('GEMINI_API_KEY');
+       _apiKey = apiKey ?? const String.fromEnvironment('GEMINI_API_KEY'),
+       _pool = pool ?? GeminiModelPool.shared;
 
-  static const String defaultModelName = 'gemini-3.5-flash-lite';
+  static const String defaultModelName = GeminiModelPool.primaryModel;
+
+  /// Batas token keluaran — JANGAN dinaikkan seenaknya, JANGAN diturunkan
+  /// ke 512 seperti dulu. Model thinking (Gemini 3.x) memakai ratusan token
+  /// untuk berpikir SEBELUM menjawab (diagnosa: thinking 490–671 token per
+  /// request); dengan 512 jawaban terpotong di tengah JSON
+  /// (finishReason MAX_TOKENS) sehingga verifikasi selalu gagal parsing.
+  /// 2048 memberi ruang thinking + verdict JSON lengkap.
+  static const int maxOutputTokens = 2048;
 
   final GenerativeModel? _model;
+  final GeminiModelPool _pool;
   final String _apiKey;
   final String modelName;
   final Duration timeout;
 
-  GenerativeModel _resolveModel([String? overrideKey]) {
-    if (_model != null) return _model;
-    final key = overrideKey ?? _apiKey;
-    if (key.isEmpty) {
-      throw const UnknownFailure(
-        'Kunci API belum tersambung. '
-        'Tempel kunci di Pengaturan atau jalankan dengan --dart-define=GEMINI_API_KEY=...',
-      );
-    }
-    return GenerativeModel(
-      model: modelName,
-      apiKey: key,
-      generationConfig: GenerationConfig(
-        temperature: 0.2,
-        maxOutputTokens: 512,
-        responseMimeType: 'application/json',
-      ),
-    );
-  }
+  /// Konfigurasi generasi yang dipakai request verifikasi teks.
+  GenerationConfig get generationConfig => GenerationConfig(
+    temperature: 0.2,
+    maxOutputTokens: maxOutputTokens,
+    responseMimeType: 'application/json',
+  );
 
   Future<VerificationResult> verifyText(String claim) async {
     return verifyTextWithKey(claim, _apiKey);
@@ -58,15 +59,12 @@ class GeminiTextDatasource {
     String claim,
     String apiKey,
   ) async {
-    final model = _resolveModel(apiKey);
     try {
-      final response = await model
-          .generateContent([Content.text(_buildPrompt(_sanitize(claim)))])
-          .timeout(timeout);
+      final response = await _generate(claim, apiKey);
       final text = response.text?.trim() ?? '';
       if (text.isEmpty) {
-        throw const ServerFailure(
-          'Server AI tidak mengembalikan hasil. Coba lagi.',
+        throw ServerFailure(
+          GeminiErrorMapper.emptyResponseMessage(response),
         );
       }
       return VerificationResultModel.fromRawText(text, claim);
@@ -75,29 +73,34 @@ class GeminiTextDatasource {
     } on Failure {
       rethrow;
     } on GenerativeAIException catch (e) {
-      throw ServerFailure(_friendlyMessage(e.message));
-    } catch (_) {
-      throw const ServerFailure();
+      throw GeminiErrorMapper.map(e, context: 'verify-text');
+    } catch (e) {
+      throw GeminiErrorMapper.mapAny(e, context: 'verify-text');
     }
   }
 
-  String _friendlyMessage(String message) {
-    final lower = message.toLowerCase();
-    if (lower.contains('api key') || lower.contains('api_key')) {
-      return 'API key Gemini tidak valid. Periksa konfigurasi kunci API Anda.';
+  /// Kirim request: lewat [GeminiModelPool] (failover antar model) untuk
+  /// kunci pengguna, atau langsung ke model yang disuntikkan untuk test.
+  Future<GenerateContentResponse> _generate(String claim, String apiKey) {
+    final injected = _model;
+    if (injected != null) {
+      return injected
+          .generateContent([Content.text(_buildPrompt(_sanitize(claim)))])
+          .timeout(timeout);
     }
-    if (lower.contains('quota') ||
-        lower.contains('rate') ||
-        lower.contains('429')) {
-      return 'Batas pemakaian AI tercapai. Tunggu sebentar lalu coba lagi.';
+    if (apiKey.trim().isEmpty) {
+      throw const UnknownFailure(
+        'Kunci API belum tersambung. '
+        'Tempel kunci di Pengaturan atau jalankan dengan --dart-define=GEMINI_API_KEY=...',
+      );
     }
-    if (lower.contains('blocked') || lower.contains('safety')) {
-      return 'Informasi tidak dapat diproses filter keamanan. Coba ubah redaksinya.';
-    }
-    if (lower.contains('not found') || lower.contains('404')) {
-      return 'Model AI tidak ditemukan. Periksa nama model yang dipakai.';
-    }
-    return 'Server AI tidak merespons, coba lagi.';
+    return _pool.generate(
+      apiKey: apiKey,
+      generationConfig: generationConfig,
+      contents: [Content.text(_buildPrompt(_sanitize(claim)))],
+      context: 'verify-text',
+      timeout: timeout,
+    );
   }
 
   /// Sanitasi prompt-injection ringan: user tidak bisa menutup blok klaim

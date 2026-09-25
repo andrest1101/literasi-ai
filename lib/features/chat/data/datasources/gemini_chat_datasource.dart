@@ -3,51 +3,49 @@ import 'dart:async';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 import '../../../../core/errors/failures.dart';
+import '../../../../core/utils/gemini_error_mapper.dart';
+import '../../../../core/utils/gemini_model_pool.dart';
 import '../../domain/entities/chat_message.dart';
 
 /// Datasource chat literasi via Gemini — teks santai, bukan JSON verdict.
 ///
-/// Pola konstruktor, timeout 30 detik, dan pesan error ramah disamakan dengan
-/// `GeminiTextDatasource` agar perilaku key hilang/kuota/safety konsisten.
+/// Pola konstruktor, timeout 30 detik, pesan error ramah, dan failover
+/// antar model ([GeminiModelPool]) disamakan dengan [GeminiTextDatasource]
+/// agar perilaku key hilang/kuota/safety konsisten di semua fitur AI.
 /// API key TIDAK PERNAH di-hardcode: diambil dari
-/// `--dart-define=GEMINI_API_KEY=...`.
+/// `--dart-define=GEMINI_API_KEY=...` atau penyimpanan aman pengguna.
 class GeminiChatDatasource {
   GeminiChatDatasource({
     GenerativeModel? model,
     String? apiKey,
     this.modelName = defaultModelName,
     this.timeout = const Duration(seconds: 30),
+    GeminiModelPool? pool,
   }) : _model = model,
-       _apiKey = apiKey ?? const String.fromEnvironment('GEMINI_API_KEY');
+       _apiKey = apiKey ?? const String.fromEnvironment('GEMINI_API_KEY'),
+       _pool = pool ?? GeminiModelPool.shared;
 
-  static const String defaultModelName = 'gemini-3.5-flash-lite';
+  static const String defaultModelName = GeminiModelPool.primaryModel;
 
   /// Batas konteks agar prompt tetap hemat kuota free tier.
   static const int maxHistory = 10;
 
+  /// Batas token keluaran — 512 lama membuat jawaban terpotong di tengah
+  /// (finishReason MAX_TOKENS) karena thinking model memakai ratusan token
+  /// untuk berpikir lebih dulu (diagnosa: 671 token thinking). 2048 cukup
+  /// untuk thinking + jawaban maksimal 5 kalimat. Rincian:
+  /// [GeminiTextDatasource.maxOutputTokens].
+  static const int maxOutputTokens = 2048;
+
   final GenerativeModel? _model;
+  final GeminiModelPool _pool;
   final String _apiKey;
   final String modelName;
   final Duration timeout;
 
-  GenerativeModel _resolveModel([String? overrideKey]) {
-    if (_model != null) return _model;
-    final key = overrideKey ?? _apiKey;
-    if (key.isEmpty) {
-      throw const UnknownFailure(
-        'Kunci API belum tersambung. '
-        'Tempel kunci di Pengaturan atau jalankan dengan --dart-define=GEMINI_API_KEY=...',
-      );
-    }
-    return GenerativeModel(
-      model: modelName,
-      apiKey: key,
-      generationConfig: GenerationConfig(
-        temperature: 0.7,
-        maxOutputTokens: 512,
-      ),
-    );
-  }
+  /// Konfigurasi generasi yang dipakai request chat.
+  GenerationConfig get generationConfig =>
+      GenerationConfig(temperature: 0.7, maxOutputTokens: maxOutputTokens);
 
   Future<String> reply({
     required List<ChatMessage> history,
@@ -61,22 +59,24 @@ class GeminiChatDatasource {
     required String message,
     required String apiKey,
   }) async {
-    final model = _resolveModel(apiKey);
+    final contents = <Content>[
+      Content.text(_systemPrompt),
+      for (final item in history.take(maxHistory))
+        if (item.isUser)
+          Content.text('Pengguna: ${item.text}')
+        else
+          Content.model([TextPart('Asisten: ${item.text}')]),
+      Content.text('Pengguna: $message'),
+    ];
     try {
-      final contents = <Content>[
-        Content.text(_systemPrompt),
-        for (final item in history.take(maxHistory))
-          if (item.isUser)
-            Content.text('Pengguna: ${item.text}')
-          else
-            Content.model([TextPart('Asisten: ${item.text}')]),
-        Content.text('Pengguna: $message'),
-      ];
-      final response = await model.generateContent(contents).timeout(timeout);
+      final response = await _generate(contents, apiKey);
       final text = response.text?.trim() ?? '';
       if (text.isEmpty) {
-        throw const ServerFailure(
-          'Server AI tidak mengembalikan jawaban. Coba lagi.',
+        throw ServerFailure(
+          GeminiErrorMapper.emptyResponseMessage(
+            response,
+            emptyMessage: 'Server AI tidak mengembalikan jawaban. Coba lagi.',
+          ),
         );
       }
       return text;
@@ -85,29 +85,35 @@ class GeminiChatDatasource {
     } on Failure {
       rethrow;
     } on GenerativeAIException catch (e) {
-      throw ServerFailure(_friendlyMessage(e.message));
-    } catch (_) {
-      throw const ServerFailure();
+      throw GeminiErrorMapper.map(e, context: 'chat-reply');
+    } catch (e) {
+      throw GeminiErrorMapper.mapAny(e, context: 'chat-reply');
     }
   }
 
-  String _friendlyMessage(String message) {
-    final lower = message.toLowerCase();
-    if (lower.contains('api key') || lower.contains('api_key')) {
-      return 'API key Gemini tidak valid. Periksa konfigurasi kunci API Anda.';
+  /// Kirim request: lewat [GeminiModelPool] (failover) untuk kunci
+  /// pengguna, atau langsung ke model yang disuntikkan untuk test.
+  Future<GenerateContentResponse> _generate(
+    List<Content> contents,
+    String apiKey,
+  ) {
+    final injected = _model;
+    if (injected != null) {
+      return injected.generateContent(contents).timeout(timeout);
     }
-    if (lower.contains('quota') ||
-        lower.contains('rate') ||
-        lower.contains('429')) {
-      return 'Batas pemakaian AI tercapai. Tunggu sebentar lalu coba lagi.';
+    if (apiKey.trim().isEmpty) {
+      throw const UnknownFailure(
+        'Kunci API belum tersambung. '
+        'Tempel kunci di Pengaturan atau jalankan dengan --dart-define=GEMINI_API_KEY=...',
+      );
     }
-    if (lower.contains('blocked') || lower.contains('safety')) {
-      return 'Pertanyaan tidak dapat diproses filter keamanan. Coba ubah redaksinya.';
-    }
-    if (lower.contains('not found') || lower.contains('404')) {
-      return 'Model AI tidak ditemukan. Periksa nama model yang dipakai.';
-    }
-    return 'Server AI tidak merespons, coba lagi.';
+    return _pool.generate(
+      apiKey: apiKey,
+      generationConfig: generationConfig,
+      contents: contents,
+      context: 'chat-reply',
+      timeout: timeout,
+    );
   }
 
   static const String _systemPrompt =

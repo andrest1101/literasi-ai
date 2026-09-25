@@ -69,11 +69,8 @@ void main() {
   });
 
   group('GeminiTextDatasource sanitasi + OG fetcher', () {
-    test('datasource dibuat untuk model flash-lite', () {
-      expect(
-        GeminiTextDatasource.defaultModelName,
-        'gemini-3.5-flash-lite',
-      );
+    test('datasource dibuat untuk model flash publik', () {
+      expect(GeminiTextDatasource.defaultModelName, 'gemini-3.6-flash');
     });
 
     test('fetcher memakai og:title bila title kosong', () async {
