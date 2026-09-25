@@ -266,7 +266,7 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('Kelola'), findsOneWidget);
+    expect(find.textContaining('Kelola'), findsOneWidget);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });

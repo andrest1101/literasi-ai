@@ -17,7 +17,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Heading compact P1: tanpa wordmark, tanpa pill eyebrow, tanpa
-    // AppSectionHeader editorial — judul two-tone + hairline saja.
+    // AppSectionHeader editorial: judul two-tone + hairline saja.
     expect(find.text('LiterasiAI'), findsNothing);
     expect(find.text('AI Aktif'), findsNothing);
     expect(find.text('VERIFIKASI AI'), findsNothing);
@@ -33,18 +33,19 @@ void main() {
     await tester.tap(find.text('Riwayat'));
     await tester.pumpAndSettle();
     expect(find.text('LiterasiAI'), findsNothing);
-    expect(find.text('Jejak'), findsOneWidget);
-    expect(find.text('pemeriksaanmu.'), findsOneWidget);
+    // Judul toolbar compact memakai Text.rich dua span: cocokkan substring.
+    expect(find.textContaining('Jejak'), findsOneWidget);
+    expect(find.textContaining('pemeriksaanmu.'), findsOneWidget);
 
     await tester.tap(find.text('Belajar'));
     await tester.pumpAndSettle();
     expect(find.text('LiterasiAI'), findsNothing);
-    expect(find.text('Naikkan'), findsOneWidget);
+    expect(find.textContaining('Naikkan'), findsOneWidget);
 
     await tester.tap(find.text('Profil'));
     await tester.pumpAndSettle();
     expect(find.text('LiterasiAI'), findsNothing);
-    expect(find.text('Kelola'), findsOneWidget);
+    expect(find.textContaining('Kelola'), findsOneWidget);
     expect(find.text('Sumber poin'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -59,7 +60,7 @@ void main() {
 
     await tester.tap(find.text('Riwayat'));
     await tester.pumpAndSettle();
-    expect(find.text('Jejak'), findsOneWidget);
+    expect(find.textContaining('Jejak'), findsOneWidget);
     expect(find.text('Semua'), findsOneWidget);
 
     await tester.tap(find.text('Belajar'));

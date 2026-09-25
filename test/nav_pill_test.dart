@@ -7,7 +7,7 @@ import 'package:literasi_ai/features/chat/presentation/screens/chat_screen.dart'
 import 'package:literasi_ai/features/chat/presentation/widgets/chat_fab.dart';
 import 'package:literasi_ai/shared/widgets/bottom_nav_bar.dart';
 
-/// Style label slot tab — dibaca dari [AnimatedDefaultTextStyle] di dalam
+/// Style label slot tab: dibaca dari [AnimatedDefaultTextStyle] di dalam
 /// slot (Text.style sendiri null karena diwariskan animasi).
 TextStyle _slotLabelStyle(WidgetTester tester, int index) {
   final animated = find.descendant(
@@ -17,7 +17,7 @@ TextStyle _slotLabelStyle(WidgetTester tester, int index) {
   return tester.widget<AnimatedDefaultTextStyle>(animated).style;
 }
 
-/// Kiri badge aktif — dibaca dari [Positioned] ancestor karena badge
+/// Kiri badge aktif: dibaca dari [Positioned] ancestor karena badge
 /// kini digerakkan nilai animasi + notch sinkron (bukan AnimatedPositioned).
 double _badgeLeft(WidgetTester tester) {
   final positioned = find.ancestor(
@@ -56,7 +56,7 @@ void main() {
           AppBottomNavBar.slotCenter(width, i, count),
       ];
       expect(centers, [50.0, 150.0, 250.0, 350.0]);
-      // Geser antar slot seragam 100px — gerakan mulus bisa ditempuh
+      // Geser antar slot seragam 100px: gerakan mulus bisa ditempuh
       // tween linear.
       for (var i = 1; i < centers.length; i++) {
         expect(centers[i] - centers[i - 1], 100.0);
@@ -79,7 +79,7 @@ void main() {
       expect(find.byIcon(Icons.history_outlined), findsOneWidget);
       expect(find.byIcon(Icons.school_outlined), findsOneWidget);
       expect(find.byIcon(Icons.person_outline), findsOneWidget);
-      // Widget bawaan tidak dipakai lagi — bukan tampilan standar.
+      // Widget bawaan tidak dipakai lagi: bukan tampilan standar.
       expect(find.byType(NavigationBar), findsNothing);
       expect(find.byType(NavigationDestination), findsNothing);
       expect(tester.takeException(), isNull);
@@ -276,15 +276,15 @@ void main() {
 
       await tester.tap(find.byKey(const ValueKey('nav-tab-1')));
       await tester.pumpAndSettle();
-      expect(find.text('Jejak'), findsOneWidget);
+      expect(find.textContaining('Jejak'), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('nav-tab-2')));
       await tester.pumpAndSettle();
-      expect(find.text('Naikkan'), findsOneWidget);
+      expect(find.textContaining('Naikkan'), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('nav-tab-3')));
       await tester.pumpAndSettle();
-      expect(find.text('Kelola'), findsOneWidget);
+      expect(find.textContaining('Kelola'), findsOneWidget);
 
       await tester.tap(find.byKey(const ValueKey('nav-tab-0')));
       await tester.pumpAndSettle();

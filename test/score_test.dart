@@ -190,7 +190,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Kelola'), findsOneWidget);
+    expect(find.textContaining('Kelola'), findsOneWidget);
     expect(find.text('Pemula'), findsOneWidget);
     expect(find.text('Sumber poin'), findsOneWidget);
     expect(find.text('Tamu LiterasiAI'), findsOneWidget);
@@ -213,7 +213,7 @@ void main() {
 
     await tester.tap(find.byType(ScoreCheckChip));
     await tester.pumpAndSettle();
-    expect(find.text('Kelola'), findsOneWidget);
+    expect(find.textContaining('Kelola'), findsOneWidget);
     expect(find.text('Sumber poin'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

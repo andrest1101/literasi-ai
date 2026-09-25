@@ -143,7 +143,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Belajar'));
     await tester.pumpAndSettle();
-    expect(find.text('Naikkan'), findsOneWidget);
+    expect(find.textContaining('Naikkan'), findsOneWidget);
     expect(find.text('Kenali Judul Clickbait'), findsOneWidget);
     expect(find.text('Ciri Gambar Manipulasi'), findsOneWidget);
     expect(find.text('Verifikasi Sumber Berita'), findsOneWidget);

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/errors/failures.dart';
-import '../../../../shared/widgets/app_section_header.dart';
 import '../../../../shared/widgets/app_shimmer.dart';
 import '../../../quick_check/domain/entities/verification_result.dart';
 import '../../../quick_check/presentation/screens/quick_check_session_screen.dart';
@@ -36,15 +35,9 @@ class HistoryListScreen extends ConsumerWidget {
             constraints: const BoxConstraints(maxWidth: 640),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const AppSectionHeader(
-                  eyebrow: AppStrings.homeHistoryEyebrow,
-                  titleLine1: AppStrings.homeHistoryTitle1,
-                  titleLine2: AppStrings.homeHistoryTitle2,
-                  subtitle: AppStrings.homeHistorySubtitle,
-                  accent: SectionAccent.history,
-                ),
-                const SizedBox(height: 20),
+            children: [
+              const _HistoryToolbarTitle(),
+              const SizedBox(height: 12),
                 _HistorySearchField(
                   onChanged: (value) =>
                       ref.read(historySearchProvider.notifier).state = value,
@@ -112,11 +105,52 @@ class HistoryListScreen extends ConsumerWidget {
   }
 }
 
-/// Kolom pencarian riwayat — filter lokal di atas stream yang sama.
+/// Kolom pencarian riwayat: filter lokal di atas stream yang sama.
 ///
 /// Tidak menambah query Firestore: pencarian hanya menyaring klaim + URL
 /// yang sudah dimuat, sehingga tetap cepat dan konsisten dengan filter
 /// verdict di atasnya.
+/// Judul toolbar compact tab Riwayat: satu baris 20px sebagai jangkar
+/// toolbar fungsional (search + filter) tepat di bawahnya.
+///
+/// Menggantikan header editorial penuh (±190px: pill + judul 26px 2 baris
+/// + subtitle + hairline). Subtitle lama ("Semua hasil yang tersimpan…")
+/// dihapus karena tidak menambah info bagi user yang sudah membuka tab
+/// Riwayat. Aksen arsip biru-tua dipertahankan pada kata kedua agar
+/// identitas tab tidak hilang.
+class _HistoryToolbarTitle extends StatelessWidget {
+  const _HistoryToolbarTitle();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: AppStrings.homeHistoryTitle1,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.4,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          TextSpan(
+            text: ' ${AppStrings.homeHistoryTitle2}',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              fontStyle: FontStyle.italic,
+              letterSpacing: -0.4,
+              color: AppColors.primaryDeep,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _HistorySearchField extends ConsumerStatefulWidget {
   const _HistorySearchField({required this.onChanged});
 
@@ -203,7 +237,7 @@ class _HistorySearchState extends ConsumerState<_HistorySearchField> {
   }
 }
 
-/// Hitung isi tiap filter dari daftar yang sama — tanpa query baru.
+/// Hitung isi tiap filter dari daftar yang sama: tanpa query baru.
 ///
 /// `perluDicek` mencakup verdict kuning + abu (konsisten dengan strip
 /// [_HistoryStats]) agar angka pill dan ringkasan selalu selaras.
@@ -233,7 +267,7 @@ Map<HistoryFilter, int> _filterCounts(List<HistoryEntry> items) {
   };
 }
 
-/// Ringkasan verdict — 3 kolom angka besar agar tab Riwayat terasa hidup.
+/// Ringkasan verdict: 3 kolom angka besar agar tab Riwayat terasa hidup.
 ///
 /// Dihitung dari seluruh riwayat (bukan hasil filter), sehingga angka
 /// tetap jadi konteks walau user menyaring satu verdict. Selaras dengan
@@ -434,7 +468,7 @@ class _HistoryList extends ConsumerWidget {
   }
 }
 
-/// Skeleton bernyawa saat riwayat dimuat — meniru bentuk [HistoryCard].
+/// Skeleton bernyawa saat riwayat dimuat: meniru bentuk [HistoryCard].
 ///
 /// Baris badge + klaim + footer berdenyut via [AppShimmer] bersama, bukan
 /// kotak putih polos. Bentuk meniru kartu asli agar transisi loading → data
