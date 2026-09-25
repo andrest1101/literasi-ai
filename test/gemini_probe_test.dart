@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:literasi_ai/core/utils/gemini_connectivity_probe.dart';
 
 void main() {
-  group('GeminiConnectivityProbe.adviceFor — saran per tahap gagal', () {
+  group('GeminiConnectivityProbe.adviceFor: saran per tahap gagal', () {
     test('healthy → koneksi OK', () {
       expect(
         GeminiConnectivityProbe.adviceFor(GeminiProbeVerdict.healthy),
@@ -57,7 +57,7 @@ void main() {
     });
   });
 
-  group('GeminiProbeStep/Report — struktur data', () {
+  group('GeminiProbeStep/Report: struktur data', () {
     test('step menyimpan nama, status, durasi, detail', () {
       const step = GeminiProbeStep(
         name: 'DNS',

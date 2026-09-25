@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../errors/failures.dart';
 
-/// Metadata minimal hasil fetch URL (PRD §6.1 — Quick Check mode URL).
+/// Metadata minimal hasil fetch URL (PRD §6.1: Quick Check mode URL).
 class UrlMetadata {
   const UrlMetadata({required this.title, required this.description});
 
@@ -49,7 +49,7 @@ class UrlFetcher {
     caseSensitive: false,
   );
 
-  /// Batas body HTML yang diproses — cegah halaman raksasa memakan memori
+  /// Batas body HTML yang diproses: cegah halaman raksasa memakan memori
   /// sebelum regex berjalan (potong 512 KB dari awal dokumen).
   static const int maxBodyChars = 512 * 1024;
 

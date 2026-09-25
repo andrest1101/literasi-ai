@@ -19,7 +19,7 @@ import '../../domain/usecases/verify_claim.dart';
 import '../../domain/usecases/verify_image_claim.dart';
 import '../../domain/usecases/verify_url_claim.dart';
 
-/// Dependensi Quick Check — dapat di-override di test dengan fake.
+/// Dependensi Quick Check: dapat di-override di test dengan fake.
 ///
 /// Kunci API mengikuti prioritas resolver: dart-define (compile) menang atas
 /// kunci user dari secure storage.
@@ -43,7 +43,7 @@ final imagePickerServiceProvider = Provider<ImagePickerService>((ref) {
 });
 
 final verificationRepositoryProvider = Provider<VerificationRepository>((ref) {
-  // Baca status live setiap request via closure — bukan snapshot sekali —
+  // Baca status live setiap request via closure (bukan snapshot sekali),
   // agar kunci user yang baru disimpan langsung aktif tanpa restart app.
   String resolveKey() =>
       ref.read(apiKeyStatusProvider).valueOrNull?.key ?? '';
@@ -91,7 +91,7 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
   @override
   FutureOr<VerificationResult?> build() => null;
 
-  /// Durasi verify terakhir — ditampilkan di kartu hasil sebagai bukti
+  /// Durasi verify terakhir: ditampilkan di kartu hasil sebagai bukti
   /// klaim <5 detik PRD §2.1. Null bila belum ada hasil.
   Duration? _lastDuration;
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 
-/// Ilustrasi tiap slide onboarding — murni Flutter (tanpa aset gambar).
+/// Ilustrasi tiap slide onboarding: murni Flutter (tanpa aset gambar).
 ///
 /// Interaktif (press-glow): saat visual ditekan ia mengecil 0.96x dan
 /// glow + border aksen menyala; saat dilepas kembali normal (~180ms).
@@ -370,7 +370,7 @@ class _Avatar extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 1 — verifikasi teks instan (multi-sumber: chat, medsos, portal berita)
+// Slide 1: verifikasi teks instan (multi-sumber: chat, medsos, portal berita)
 // ---------------------------------------------------------------------------
 
 class _TextVerifyVisual extends StatelessWidget {
@@ -637,7 +637,7 @@ class _TextVerifyVisual extends StatelessWidget {
   }
 }
 
-/// Titik sumber teks (chat / medsos / berita) — bukti multi-sumber.
+/// Titik sumber teks (chat / medsos / berita): bukti multi-sumber.
 class _SourceDot extends StatelessWidget {
   const _SourceDot({required this.icon, required this.label});
 
@@ -679,7 +679,7 @@ class _SourceDot extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 2 — analisis gambar & URL
+// Slide 2: analisis gambar & URL
 // ---------------------------------------------------------------------------
 
 class _MediaVisual extends StatelessWidget {
@@ -963,7 +963,7 @@ class _OrbitDot extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Slide 3 — riwayat terpercaya
+// Slide 3: riwayat terpercaya
 // ---------------------------------------------------------------------------
 
 class _HistoryVisual extends StatelessWidget {

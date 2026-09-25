@@ -13,7 +13,7 @@ final trendingRepositoryProvider = Provider<TrendingRepository>((ref) {
   return TrendingRepositoryImpl(ref.watch(trendingDatasourceProvider));
 });
 
-/// Feed trending — sync lokal, tanpa loading/error state.
+/// Feed trending: sync lokal, tanpa loading/error state.
 /// Guest offline tetap melihat feed penuh tanpa login maupun API key.
 final trendingItemsProvider = Provider<List<TrendingItem>>((ref) {
   return ref.watch(trendingRepositoryProvider).items();

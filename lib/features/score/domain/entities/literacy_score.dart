@@ -1,6 +1,6 @@
 import 'literacy_level.dart';
 
-/// Snapshot skor literasi — entity murni Dart.
+/// Snapshot skor literasi: entity murni Dart.
 ///
 /// `modulePoints/quizPoints` bernilai 0 sampai Phase 3b Learn dibangun.
 /// Slot award modul/kuis sudah disiapkan agar 3b tinggal memanggil kontrak

@@ -1,4 +1,4 @@
-/// Level literasi — ambang Standar sesuai keputusan Phase 3a.
+/// Level literasi: ambang Standar sesuai keputusan Phase 3a.
 ///
 /// Entity murni Dart: tanpa import Flutter agar domain tetap testable dan
 /// patuh Clean Architecture. Warna/ikon tiap level disediakan extension di
@@ -27,7 +27,7 @@ enum LiteracyLevel {
     LiteracyLevel.ahli => 'Ahli',
   };
 
-  /// Poin awal level ini — dipakai menghitung sisa ke level berikut.
+  /// Poin awal level ini: dipakai menghitung sisa ke level berikut.
   int get floor => switch (this) {
     LiteracyLevel.pemula => 0,
     LiteracyLevel.waspada => 50,

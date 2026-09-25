@@ -12,7 +12,7 @@ import '../../../trending/presentation/screens/trending_detail_screen.dart';
 import '../../../trending/presentation/widgets/trending_rail.dart';
 import 'quick_check_session_screen.dart';
 
-/// Landing tab Quick Check — hero CTA + mode picker + contoh + tips.
+/// Landing tab Quick Check: hero CTA + mode picker + contoh + tips.
 ///
 /// Komposisi sengaja dibuat heterogen agar tidak monoton:
 /// hero gradien penuh, mode picker 2 tile berdampingan, contoh berupa
@@ -28,7 +28,7 @@ class QuickCheckHomeTab extends ConsumerWidget {
     QuickCheckInitialMode mode = QuickCheckInitialMode.text,
     String? claim,
   }) {
-    // Umpan balik taktil ringan pada aksi primer — pola sama dengan
+    // Umpan balik taktil ringan pada aksi primer: pola sama dengan
     // onboarding & navbar (HapticFeedback bawaan, tanpa plugin).
     HapticFeedback.lightImpact();
     Navigator.of(context).push(
@@ -147,7 +147,7 @@ class QuickCheckHomeTab extends ConsumerWidget {
   }
 }
 
-/// Section trending di tab Cek — rail horizontal + navigasi detail.
+/// Section trending di tab Cek: rail horizontal + navigasi detail.
 ///
 /// Provider sync lokal sehingga guest offline tetap melihat feed penuh.
 class _TrendingSection extends ConsumerWidget {
@@ -164,7 +164,7 @@ class _TrendingSection extends ConsumerWidget {
   }
 }
 
-/// Heading compact tab Cek — judul two-tone + subtitle 2 baris + hairline.
+/// Heading compact tab Cek: judul two-tone + subtitle 2 baris + hairline.
 ///
 /// Menggantikan header editorial penuh (wordmark + pill eyebrow + judul
 /// 26px + subtitle 3 baris) yang memakan ±230px sebelum konten. Pill
@@ -220,7 +220,7 @@ class _CheckHeading extends StatelessWidget {
   }
 }
 
-/// Entrance hero — fade + slide halus sekali saat tab pertama dibuka.
+/// Entrance hero: fade + slide halus sekali saat tab pertama dibuka.
 ///
 /// Terisolasi di widget sendiri agar animasi tidak me-rebuild seluruh tab.
 /// Durasi 380ms ease-out: terasa hidup tanpa mengganggu. Tanpa loop agar
@@ -384,7 +384,7 @@ class _SessionCtaCard extends StatelessWidget {
   }
 }
 
-/// Tekstur pola hero — garis diagonal + outline perisai raksasa.
+/// Tekstur pola hero: garis diagonal + outline perisai raksasa.
 ///
 /// Digambar via CustomPainter murni (tanpa aset gambar/emoji) dengan putih
 /// alpha 6-8% di atas gradient hero, sehingga memberi kedalaman tanpa
@@ -417,7 +417,7 @@ class _HeroPatternPainter extends CustomPainter {
         linePaint,
       );
     }
-    // Outline perisai raksasa di kanan — echo ikon verified brand.
+    // Outline perisai raksasa di kanan: echo ikon verified brand.
     final shieldPaint = Paint()
       ..color = Colors.white.withValues(alpha: 0.08)
       ..style = PaintingStyle.stroke
@@ -497,7 +497,7 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-/// Tile mode persegi — medallion ikon di atas, judul, sub, chevron.
+/// Tile mode persegi: medallion ikon di atas, judul, sub, chevron.
 ///
 /// Proporsi tile (setengah lebar layar) sengaja berbeda dari hero penuh dan
 /// carousel horizontal agar ritme landing tidak monoton.
@@ -515,7 +515,7 @@ class _ModeTile extends StatelessWidget {
   final String subtitle;
   final VoidCallback onTap;
 
-  /// Warna identitas mode — teks biru brand, gambar biru-tua, agar tiap
+  /// Warna identitas mode: teks biru brand, gambar biru-tua, agar tiap
   /// mode punya karakter tanpa warna asing. Default biru untuk kompatibel
   /// mundur.
   final Color tint;
@@ -596,7 +596,7 @@ class _ModeTile extends StatelessWidget {
   }
 }
 
-/// Banner mode link — full-width horizontal di bawah 2 tile berdampingan.
+/// Banner mode link: full-width horizontal di bawah 2 tile berdampingan.
 ///
 /// Ritme landing tetap heterogen: hero CTA penuh, 2 tile persegi, banner
 /// link horizontal, lalu carousel contoh. Ikon link + aksen hijau
@@ -688,7 +688,7 @@ class _UrlModeBanner extends StatelessWidget {
   }
 }
 
-/// Carousel contoh klaim — kartu compact horizontal sekali ketuk.
+/// Carousel contoh klaim: kartu compact horizontal sekali ketuk.
 ///
 /// Format rail (bukan list vertikal) memberi jeda visual dari hero dan tile,
 /// sekaligus mempercepat demo 60 detik: ketuk contoh langsung mengisi sesi.

@@ -5,7 +5,7 @@ import 'package:literasi_ai/core/constants/app_styles.dart';
 /// Regresi U1: font Inter HARUS terbundel sebagai file TTF lokal.
 ///
 /// Sebelumnya `AppStyles.fontFamily = 'Inter'` dideklarasikan tanpa file
-/// biner sehingga Flutter diam-diam fallback ke font sistem — layar
+/// biner sehingga Flutter diam-diam fallback ke font sistem: layar
 /// terlihat "default". Test ini gagal keras bila salah satu weight
 /// hilang atau bukan TTF valid.
 void main() {
@@ -28,7 +28,7 @@ void main() {
         expect(
           data.lengthInBytes,
           greaterThan(10000),
-          reason: 'Inter-$weight.ttf terlalu kecil — file rusak?',
+          reason: 'Inter-$weight.ttf terlalu kecil: file rusak?',
         );
         final magic = data.buffer.asUint8List(0, 4);
         expect(

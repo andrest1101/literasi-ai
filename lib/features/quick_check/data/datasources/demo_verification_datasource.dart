@@ -1,6 +1,6 @@
 import '../../domain/entities/verification_result.dart';
 
-/// Datasource demo offline — heuristik transparan, bukan AI.
+/// Datasource demo offline: heuristik transparan, bukan AI.
 ///
 /// Dipakai saat tidak ada kunci API sama sekali. Hasil SELALU verdict
 /// `TIDAK_DAPAT_DIPASTIKAN` dengan confidence 0 dan penjelasan yang jujur

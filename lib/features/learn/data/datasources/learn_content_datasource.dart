@@ -1,7 +1,7 @@
 import '../../domain/entities/course_module.dart';
 import '../../domain/entities/quiz_question.dart';
 
-/// Konten 3 modul PRD §4.2 — statis lokal Bahasa Indonesia.
+/// Konten 3 modul PRD §4.2: statis lokal Bahasa Indonesia.
 ///
 /// Ditulis sebagai materi edukasi nyata (bukan lorem ipsum): tiap modul 4
 /// seksi artikel + 3 soal kuis dengan penjelasan. Tanpa network agar bisa

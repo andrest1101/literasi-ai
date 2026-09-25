@@ -22,7 +22,7 @@ class VerifyUrlClaim {
     return raw.trim().replaceAll(RegExp(r'\s+'), '');
   }
 
-  /// Validasi cepat untuk UI (tombol aktif + pratinjau host) — tanpa throw.
+  /// Validasi cepat untuk UI (tombol aktif + pratinjau host): tanpa throw.
   /// Validasi penuh dengan pesan error tetap di [call].
   static bool isParsable(String raw) {
     final url = normalize(raw);

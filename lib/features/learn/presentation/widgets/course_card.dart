@@ -4,7 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/course_module.dart';
 
-/// Kartu modul heterogen — 3 varian ritme berbeda, bukan 3 persegi sama.
+/// Kartu modul heterogen: 3 varian ritme berbeda, bukan 3 persegi sama.
 ///
 /// Varian dipilih dari `accentSeed`: 0 = hero horizontal gradien penuh,
 /// 1 = split dua kolom (teks kiri, medallion kanan), 2 = strip vertikal
@@ -175,7 +175,7 @@ class _Pill extends StatelessWidget {
   }
 }
 
-/// Varian 0 — hero gradien penuh untuk modul pertama.
+/// Varian 0: hero gradien penuh untuk modul pertama.
 class _HeroCard extends StatelessWidget {
   const _HeroCard({
     required this.module,
@@ -272,7 +272,7 @@ class _HeroCard extends StatelessWidget {
   }
 }
 
-/// Varian 1 — split dua kolom untuk modul kedua.
+/// Varian 1: split dua kolom untuk modul kedua.
 class _SplitCard extends StatelessWidget {
   const _SplitCard({
     required this.module,
@@ -364,7 +364,7 @@ class _SplitCard extends StatelessWidget {
   }
 }
 
-/// Varian 2 — strip nomor besar untuk modul ketiga.
+/// Varian 2: strip nomor besar untuk modul ketiga.
 class _NumberedCard extends StatelessWidget {
   const _NumberedCard({
     required this.module,

@@ -47,7 +47,7 @@ final scoreProvider = StreamProvider<LiteracyScore>((ref) {
       );
 });
 
-/// Aksi award terpantau UI — error Firestore tidak merusak state skor.
+/// Aksi award terpantau UI: error Firestore tidak merusak state skor.
 final scoreActionProvider =
     AsyncNotifierProvider<ScoreActionController, void>(
       ScoreActionController.new,

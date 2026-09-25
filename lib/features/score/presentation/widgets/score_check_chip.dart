@@ -7,12 +7,12 @@ import '../../domain/entities/literacy_score.dart';
 import '../providers/score_providers.dart';
 import 'literacy_level_ui.dart';
 
-/// Header status compact tab Cek — skor + status AI dalam satu baris.
+/// Header status compact tab Cek: skor + status AI dalam satu baris.
 ///
 /// Menggantikan dua pil full-width bertumpuk (skor, status kunci) yang
 /// memboroskan ~100px vertikal. Kiri: progress ring level + label/poin
 /// (ketuk → Profil). Kanan: dot status AI + label ringkas (ketuk →
-/// Pengaturan kunci). Data murni dari provider yang sudah ada — tanpa
+/// Pengaturan kunci). Data murni dari provider yang sudah ada: tanpa
 /// logic bisnis baru, tanpa angka palsu (guest tetap jujur Pemula 0).
 class ScoreCheckChip extends ConsumerWidget {
   const ScoreCheckChip({super.key, this.onOpenProfile, this.onOpenKeySettings});

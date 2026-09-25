@@ -7,18 +7,18 @@ import '../errors/failures.dart';
 
 /// Klasifikasi error Gemini untuk keputusan failover [GeminiModelPool].
 enum GeminiErrorKind {
-  /// Kunci/permission/billing/API mati — masalah proyek, hasilnya sama di
+  /// Kunci/permission/billing/API mati: masalah proyek, hasilnya sama di
   /// model mana pun → tidak perlu coba model lain.
   config,
 
-  /// Wilayah pengguna dibatasi Google — juga independen model.
+  /// Wilayah pengguna dibatasi Google: juga independen model.
   location,
 
-  /// Kuota free tier (429) — ditandai PER MODEL di server → pindah model
+  /// Kuota free tier (429): ditandai PER MODEL di server → pindah model
   /// dengan kuota terpisah langsung menyelesaikan.
   quota,
 
-  /// Server sibuk (503/5xx/overloaded) — sementara, layak ulang.
+  /// Server sibuk (503/5xx/overloaded): sementara, layak ulang.
   busy,
 
   /// Model ditarik/tidak dikenal (404/no longer available) → pindah model.
@@ -27,7 +27,7 @@ enum GeminiErrorKind {
   /// Tidak ada jawaban dalam batas waktu → coba model lain.
   timeout,
 
-  /// Isi permintaan ditolak (safety/400) — bukan salah model, tapi tetap
+  /// Isi permintaan ditolak (safety/400): bukan salah model, tapi tetap
   /// layak dicoba sekali di model lain karena batas tiap model berbeda.
   content,
 
@@ -39,7 +39,7 @@ enum GeminiErrorKind {
 /// Pemetaan error Gemini → Failure terpusat (satu sumber kebenaran).
 ///
 /// Dipakai ketiga datasource AI (teks, vision, chat) agar pesan yang sampai
-/// ke user konsisten dan spesifik — bukan generik "tidak merespons".
+/// ke user konsisten dan spesifik: bukan generik "tidak merespons".
 /// Aturan prioritas (dari paling spesifik):
 /// 1. Tipe SDK: [InvalidApiKey] → kunci ditolak; [UnsupportedUserLocation]
 ///    → region dibatasi; [ServerException] dipindai lagi isinya.
@@ -95,7 +95,7 @@ abstract final class GeminiErrorMapper {
 
   /// True bila error bersifat sementara dan layak dicoba ulang otomatis
   /// sekali: server sibuk (503/overloaded), respons 5xx, atau timeout
-  /// jaringan. Kuota 429 SENGAJA dikecualikan — retry 3 detik tidak akan
+  /// jaringan. Kuota 429 SENGAJA dikecualikan: retry 3 detik tidak akan
   /// mengisi ulang kuota (perlu menit/jam), hanya membuang 1 request +
   /// menambah waktu tunggu. Kunci salah, permission, dan billing TIDAK
   /// transient.
@@ -230,9 +230,9 @@ abstract final class GeminiErrorMapper {
 
   /// Pesan untuk respons sukses HTTP tetapi tanpa isi teks.
   ///
-  /// Membedakan "terpotong di batas token" (finishReason MAX_TOKENS —
-  /// model thinking memakai ratusan token untuk berpikir) dari respons
-  /// kosong biasa, agar user tahu akar masalahnya.
+  /// Membedakan "terpotong di batas token" (finishReason MAX_TOKENS,
+  /// karena model thinking memakai ratusan token untuk berpikir) dari
+  /// respons kosong biasa, agar user tahu akar masalahnya.
   static String emptyResponseMessage(
     GenerateContentResponse response, {
     String emptyMessage = 'Server AI tidak mengembalikan hasil. Coba lagi.',
@@ -247,7 +247,7 @@ abstract final class GeminiErrorMapper {
     return emptyMessage;
   }
 
-  /// Cuplikan pesan mentah untuk pesan tak dikenal — tanpa membocorkan
+  /// Cuplikan pesan mentah untuk pesan tak dikenal: tanpa membocorkan
   /// kunci (kunci tidak pernah ada di pesan error server).
   static String _preview(String raw) {
     final cleaned = raw.trim().replaceAll(RegExp(r'\s+'), ' ');

@@ -4,12 +4,12 @@ import 'package:flutter/services.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 
-/// Bottom nav 4 destinasi — pill putih mengambang + badge naik.
+/// Bottom nav 4 destinasi: pill putih mengambang + badge naik.
 ///
 /// Card putih polos (radius 26, hairline netral, tanpa lekukan, tanpa
-/// aksen biru di tepi) — badge lingkaran 48px (44px di layar <380px)
+/// aksen biru di tepi): badge lingkaran 48px (44px di layar <380px)
 /// gradien biru brand [AppColors.heroBegin] → [AppColors.heroEnd] + ring
-/// putih menempel di atas bar, setengah keluar — bahasa visual yang sama
+/// putih menempel di atas bar, setengah keluar: bahasa visual yang sama
 /// dengan [ChatFab] dan hero modul. Badge dan label digerakkan SATU nilai
 /// animasi sehingga selalu sinkron tanpa jank. Label aktif tetap di dalam
 /// bar dengan warna aksen identitas tiap tab (selaras [SectionAccent]):
@@ -58,7 +58,7 @@ class AppBottomNavBar extends StatefulWidget {
     Icons.person_rounded,
   ];
 
-  /// Aksen label aktif per tab — selaras SectionAccent U2.1.
+  /// Aksen label aktif per tab: selaras SectionAccent U2.1.
   static const _labelAccents = [
     AppColors.primary,
     AppColors.primaryDeep,
@@ -68,7 +68,7 @@ class AppBottomNavBar extends StatefulWidget {
 
   static const double _barHeight = 68;
 
-  /// Ruang vertikal badge di atas bar — badge 48px menumpang 28px di atas
+  /// Ruang vertikal badge di atas bar: badge 48px menumpang 28px di atas
   /// tepi bar sehingga duduk pas menempel, bukan melayang. Tinggi total
   /// widget = 68 + 28 = 96.
   static const double _badgeOverhang = 28;
@@ -302,7 +302,7 @@ class _AppBottomNavBarState extends State<AppBottomNavBar>
   }
 }
 
-/// Satu slot tab — ikon + label di dalam bar.
+/// Satu slot tab: ikon + label di dalam bar.
 ///
 /// Slot aktif menyisakan ruang ikon kosong (ikonnya naik ke badge) agar
 /// label tetap sejajar vertikal dengan slot lain, bukan melompat.

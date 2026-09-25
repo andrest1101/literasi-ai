@@ -1,4 +1,4 @@
-/// Satu soal kuis — murni Dart, tanpa dependensi Flutter.
+/// Satu soal kuis: murni Dart, tanpa dependensi Flutter.
 ///
 /// [explanation] adalah nilai edukasi utama: ditampilkan setelah user
 /// menjawab agar salah pun tetap belajar, bukan sekadar skor.

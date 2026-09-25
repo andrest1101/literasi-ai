@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 
-/// Typography & theme — Material 3, font Inter (fallback sistematis).
+/// Typography & theme: Material 3, font Inter (fallback sistematis).
 /// Google Sans tidak tersedia publik, jadi Inter adalah padanan resmi PRD §7.3.
 ///
 /// Token radius/spacing/elevasi terpusat di sini agar widget tidak memakai
@@ -117,7 +117,7 @@ abstract final class AppStyles {
   }
 }
 
-/// Radius terpusat — satu sumber kebenaran untuk semua kartu/tombol/pill.
+/// Radius terpusat: satu sumber kebenaran untuk semua kartu/tombol/pill.
 abstract final class AppRadii {
   static const double card = 22;
   static const double hero = 26;
@@ -126,7 +126,7 @@ abstract final class AppRadii {
   static const double pill = 999;
 }
 
-/// Spacing grid 8pt — pakai kelipatan ini untuk ritme vertikal konsisten.
+/// Spacing grid 8pt: pakai kelipatan ini untuk ritme vertikal konsisten.
 abstract final class AppSpacing {
   static const double xs = 4;
   static const double sm = 8;

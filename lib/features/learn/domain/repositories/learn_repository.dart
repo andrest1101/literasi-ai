@@ -1,9 +1,9 @@
 import '../entities/course_module.dart';
 import '../entities/course_progress.dart';
 
-/// Kontrak Learn — konten statis lokal, progres per user di Firestore.
+/// Kontrak Learn: konten statis lokal, progres per user di Firestore.
 abstract class LearnRepository {
-  /// Tiga modul PRD — selalu tersedia offline, tanpa login.
+  /// Tiga modul PRD: selalu tersedia offline, tanpa login.
   List<CourseModule> modules();
 
   CourseModule? moduleById(String id);

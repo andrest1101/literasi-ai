@@ -23,7 +23,7 @@ final historyFilterProvider = StateProvider<HistoryFilter>((ref) {
   return HistoryFilter.all;
 });
 
-/// Kata kunci pencarian riwayat — murni state presentasi.
+/// Kata kunci pencarian riwayat: murni state presentasi.
 ///
 /// Pencarian jalan lokal di atas stream Firestore (tanpa query baru),
 /// sehingga guest/offline dan filter verdict tetap konsisten.

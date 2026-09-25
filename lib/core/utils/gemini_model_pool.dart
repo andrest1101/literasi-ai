@@ -31,7 +31,7 @@ typedef GeminiTransport = Future<GenerateContentResponse> Function({
 /// model terakhir berhasil agar request berikutnya langsung ke tujuan.
 ///
 /// Error yang bersifat independen model (kunci ditolak, wilayah dibatasi)
-/// TIDAK di-failover — hasilnya sama di model mana pun, jadi langsung
+/// TIDAK di-failover: hasilnya sama di model mana pun, jadi langsung
 /// diteruskan ke caller agar pesannya tetap akurat.
 class GeminiModelPool {
   GeminiModelPool({
@@ -44,7 +44,7 @@ class GeminiModelPool {
        _retryDelay = retryDelay,
        _clock = clock ?? DateTime.now;
 
-  /// Model utama — sama dengan nama yang dipakai seluruh datasource.
+  /// Model utama: sama dengan nama yang dipakai seluruh datasource.
   static const String primaryModel = 'gemini-3.6-flash';
 
   /// Urutan kandidat: model utama dulu, lalu model cadangan yang terbukti
@@ -137,7 +137,7 @@ class GeminiModelPool {
       }
       // Ulang sekali hanya bila SEMUA kegagalan bersifat sementara
       // (server sibuk/timeout). Kuota, model ditarik, atau error isi tidak
-      // akan berubah dalam hitungan detik — tidak perlu membuang request.
+      // akan berubah dalam hitungan detik: tidak perlu membuang request.
       if (round == 1 || !errors.every(GeminiErrorMapper.isTransient)) break;
       await Future<void>.delayed(_retryDelay);
     }
@@ -170,7 +170,7 @@ class GeminiModelPool {
   }
 
   /// Urutan kandidat: model favorit dulu, model kena penalti dikeluarkan.
-  /// Bila SEMUA kena penalti, tetap kirim (server sumber kebenaran — bisa
+  /// Bila SEMUA kena penalti, tetap kirim (server sumber kebenaran: bisa
   /// saja jendela kuota baru saja terbuka).
   List<String> _order({required bool ignorePenalty}) {
     final names = [..._candidates];

@@ -11,7 +11,7 @@ import '../../domain/usecases/verify_url_claim.dart';
 /// [QuickCheckImageSection]: judul + subtitle, permukaan kerja, catatan
 /// privasi, lalu CTA 56px. Identitas mode ini: ikon link, field satu baris
 /// dengan tombol tempel, dan kartu ringkas pratinjau domain setelah URL
-/// valid — tanpa kartu bertumpuk yang mengulang pola sama.
+/// valid: tanpa kartu bertumpuk yang mengulang pola sama.
 class QuickCheckUrlSection extends StatelessWidget {
   const QuickCheckUrlSection({
     super.key,
@@ -28,11 +28,11 @@ class QuickCheckUrlSection extends StatelessWidget {
   final VoidCallback onVerify;
   final VoidCallback onClear;
 
-  /// Tombol aktif selama ada teks — validasi skema/host jalan saat ditekan
+  /// Tombol aktif selama ada teks: validasi skema/host jalan saat ditekan
   /// agar user dapat pesan error yang menjelaskan, bukan tombol mati misterius.
   bool get _canAttempt => controller.text.trim().isNotEmpty && !loading;
 
-  /// Pratinjau host tampil hanya bila URL lolos validasi penuh — konsisten
+  /// Pratinjau host tampil hanya bila URL lolos validasi penuh: konsisten
   /// dengan aturan yang dipakai use case, bukan tebakan regex di UI.
   String get _host {
     if (!VerifyUrlClaim.isParsable(controller.text)) return '';
@@ -329,7 +329,7 @@ class QuickCheckUrlSection extends StatelessWidget {
   }
 }
 
-/// Tombol tempel dari clipboard — menghemat ketik link panjang di HP.
+/// Tombol tempel dari clipboard: menghemat ketik link panjang di HP.
 class _PasteButton extends StatelessWidget {
   const _PasteButton({required this.loading, required this.controller});
 

@@ -21,7 +21,7 @@ import '../widgets/session_back_button.dart';
 /// Dibuka via push dari landing tab agar pemeriksaan punya ruang penuh.
 /// State verifikasi tetap AsyncNotifier; session menambah segmented mode dan
 /// state attachment lokal agar UX terasa seperti aplikasi profesional.
-/// Mode awal sesi — dipakai landing agar kartu Teks/Gambar/Link langsung
+/// Mode awal sesi: dipakai landing agar kartu Teks/Gambar/Link langsung
 /// membuka sesi yang sesuai tanpa toggle tambahan.
 enum QuickCheckInitialMode { text, image, url }
 
@@ -453,7 +453,7 @@ class _QuickCheckSessionScreenState
   }
 }
 
-/// Header editorial compact sesi — two-tone kecil + eyebrow.
+/// Header editorial compact sesi: two-tone kecil + eyebrow.
 ///
 /// Versi ramping dari [AppSectionHeader]: judul 22px dengan kata kedua biru
 /// italic, tanpa emblem besar agar stepper dan form tetap jadi fokus utama.

@@ -7,7 +7,7 @@ import '../../data/datasources/onboarding_local_datasource.dart';
 import '../../data/repositories/onboarding_repository_impl.dart';
 import '../../domain/repositories/onboarding_repository.dart';
 
-/// Dependensi onboarding — dapat di-override di test dengan fake.
+/// Dependensi onboarding: dapat di-override di test dengan fake.
 final sharedPreferencesProvider = FutureProvider<SharedPreferences>((ref) {
   return SharedPreferences.getInstance();
 });

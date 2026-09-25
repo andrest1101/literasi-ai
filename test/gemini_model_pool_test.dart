@@ -44,7 +44,7 @@ _Transport _transport({
 }
 
 void main() {
-  group('GeminiModelPool — failover antar model (inti perbaikan 429)', () {
+  group('GeminiModelPool: failover antar model (inti perbaikan 429)', () {
     test('kuota di model utama → otomatis pindah ke cadangan', () async {
       final calls = <String>[];
       final pool = GeminiModelPool(
@@ -300,7 +300,7 @@ void main() {
     });
   });
 
-  group('kindOf — klasifikasi error menentukan jalur failover', () {
+  group('kindOf: klasifikasi error menentukan jalur failover', () {
     test('kuota asli server (429) → quota', () {
       expect(
         GeminiErrorMapper.kindOf(ServerException(_quotaError)),
@@ -361,7 +361,7 @@ void main() {
     });
   });
 
-  group('finalFailure — pilih kegagalan paling informatif', () {
+  group('finalFailure: pilih kegagalan paling informatif', () {
     test('isi ditolak menang atas kuota (bukan salah model)', () {
       final failure = GeminiErrorMapper.finalFailure([
         ServerException(_quotaError),
@@ -395,7 +395,7 @@ void main() {
     });
   });
 
-  group('Regresi konfigurasi — akar masalah jawaban terpotong', () {
+  group('Regresi konfigurasi: akar masalah jawaban terpotong', () {
     test('teks: maxOutputTokens 2048 (512 lama mematikan JSON thinking)',
         () {
       final datasource = GeminiTextDatasource(apiKey: 'kunci-uji');

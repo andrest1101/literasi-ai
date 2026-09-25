@@ -22,7 +22,7 @@ class GeminiProbeStep {
   final String detail;
 }
 
-/// Kesimpulan diagnostik — tahap mana yang gagal + saran perbaikan.
+/// Kesimpulan diagnostik: tahap mana yang gagal + saran perbaikan.
 class GeminiProbeReport {
   const GeminiProbeReport({required this.steps, required this.verdict});
 
@@ -31,27 +31,27 @@ class GeminiProbeReport {
 }
 
 enum GeminiProbeVerdict {
-  /// Semua tahap OK — jaringan beres, masalah di kunci/model/kuota.
+  /// Semua tahap OK: jaringan beres, masalah di kunci/model/kuota.
   healthy,
 
-  /// DNS gagal — masalah jaringan lokal.
+  /// DNS gagal: masalah jaringan lokal.
   dnsFailed,
 
-  /// TCP 443 gagal — firewall/antivirus/VPN memblokir proses app.
+  /// TCP 443 gagal: firewall/antivirus/VPN memblokir proses app.
   tcpBlocked,
 
-  /// HTTPS gagal — TLS/proxy bermasalah.
+  /// HTTPS gagal: TLS/proxy bermasalah.
   tlsFailed,
 
-  /// API menolak kunci — kunci salah/dinonaktifkan.
+  /// API menolak kunci: kunci salah/dinonaktifkan.
   keyRejected,
 
-  /// Server sibuk sementara (503/overloaded) — kunci dan jaringan beres,
+  /// Server sibuk sementara (503/overloaded): kunci dan jaringan beres,
   /// tinggal tunggu 1 menit. Bedakan dari apiStalled agar user tidak
   /// mengutak-atik kunci yang sebenarnya valid.
   busy,
 
-  /// API menjawab tapi generate macet — model/kuota/safety.
+  /// API menjawab tapi generate macet: model/kuota/safety.
   apiStalled,
 }
 
@@ -81,7 +81,7 @@ abstract final class GeminiConnectivityProbe {
     assert(GeminiModelPool.defaultCandidates.contains(modelName));
     final steps = <GeminiProbeStep>[];
 
-    // Tahap 1: DNS — gagal = Wi-Fi/data mati atau DNS dibajak.
+    // Tahap 1: DNS: gagal = Wi-Fi/data mati atau DNS dibajak.
     final dnsWatch = Stopwatch()..start();
     List<InternetAddress> addresses;
     try {
@@ -112,7 +112,7 @@ abstract final class GeminiConnectivityProbe {
       );
     }
 
-    // Tahap 2: TCP 443 ke alamat pertama — gagal = firewall/antivirus/VPN
+    // Tahap 2: TCP 443 ke alamat pertama: gagal = firewall/antivirus/VPN
     // memblokir PROSES app (bukan jaringan umum, karena browser bisa jalan).
     final tcpWatch = Stopwatch()..start();
     try {
@@ -147,7 +147,7 @@ abstract final class GeminiConnectivityProbe {
       );
     }
 
-    // Tahap 3: HTTPS GET daftar model — gagal = TLS/proxy intercept bermasalah.
+    // Tahap 3: HTTPS GET daftar model: gagal = TLS/proxy intercept bermasalah.
     final httpsWatch = Stopwatch()..start();
     try {
       final client = HttpClient();
@@ -212,7 +212,7 @@ abstract final class GeminiConnectivityProbe {
     }
 
     // Tahap 4: generate 1 kata lewat pool (ikut failover antar model, sama
-    // persis dengan jalur aplikasi) — gagal = kunci/kuota yang menyangkut
+    // persis dengan jalur aplikasi): gagal = kunci/kuota yang menyangkut
     // semua model cadangan.
     final apiWatch = Stopwatch()..start();
     try {
@@ -279,7 +279,7 @@ abstract final class GeminiConnectivityProbe {
                 : GeminiProbeVerdict.apiStalled,
       );
     } on Failure catch (e) {
-      // Pool sudah mencoba seluruh kandidat model — pesan mapper memuat
+      // Pool sudah mencoba seluruh kandidat model: pesan mapper memuat
       // kesimpulan akhirnya (semua model kena kuota, sibuk, timeout, dst).
       apiWatch.stop();
       final message = e.message;
@@ -340,7 +340,7 @@ abstract final class GeminiConnectivityProbe {
       GeminiProbeVerdict.keyRejected =>
         'Kunci API ditolak server. Salin ulang kunci dari Google AI Studio tanpa spasi, lalu simpan ulang.',
       GeminiProbeVerdict.busy =>
-        'Server AI sedang sibuk (lonjakan pemakaian, biasanya sementara). Kunci dan jaringan beres — tunggu sekitar 1 menit lalu tes lagi.',
+        'Server AI sedang sibuk (lonjakan pemakaian, biasanya sementara). Kunci dan jaringan beres. Tunggu sekitar 1 menit lalu tes lagi.',
       GeminiProbeVerdict.apiStalled =>
         'Server menjawab tapi generate macet (model/kuota/filter). Tunggu sebentar lalu tes lagi; bila tetap, ganti kunci atau laporkan pesan ini.',
     };

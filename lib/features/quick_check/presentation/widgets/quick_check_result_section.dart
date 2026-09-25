@@ -11,7 +11,7 @@ import '../../domain/entities/verification_result.dart';
 import 'share_card.dart';
 import 'verdict_presentation.dart';
 
-/// Bagian hasil sesi — satu alur vertikal, bukan kartu bertumpuk.
+/// Bagian hasil sesi: satu alur vertikal, bukan kartu bertumpuk.
 ///
 /// Struktur: header verdict → confidence → klaim → analisis → saran → aksi.
 /// Warna status hanya sebagai aksen pada pita dan badge; teks tetap gelap
@@ -40,16 +40,16 @@ class QuickCheckResultSection extends StatefulWidget {
   ///
   /// Diisi saat kartu ini adalah tujuan navigasi dari daftar (riwayat /
   /// trending) agar badge terbang mulus antar layar. Null berarti tanpa
-  /// Hero — dipakai layar sesi yang dibuka tanpa pasangan asal.
+  /// Hero: dipakai layar sesi yang dibuka tanpa pasangan asal.
   final String? heroTag;
 
-  /// Durasi verify terakhir — bukti klaim <5 detik. Null = tidak tampil.
+  /// Durasi verify terakhir: bukti klaim <5 detik. Null = tidak tampil.
   final Duration? duration;
 
-  /// Injeksi untuk test — menghindari share sheet asli.
+  /// Injeksi untuk test: menghindari share sheet asli.
   final ShareService? shareService;
 
-  /// Injeksi capture untuk test — menggantikan `screenshot` asli.
+  /// Injeksi capture untuk test: menggantikan `screenshot` asli.
   final Future<Uint8List> Function()? onCaptureImage;
 
   @override
@@ -616,7 +616,7 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
   }
 }
 
-/// Panel error sesi — satu permukaan dengan CTA retry yang jelas.
+/// Panel error sesi: satu permukaan dengan CTA retry yang jelas.
 ///
 /// Bila penyebabnya kunci API hilang, panel menambah tombol salin perintah
 /// run agar pengguna bisa setup tanpa menebak perintah terminal.
@@ -716,7 +716,7 @@ class QuickCheckErrorSection extends StatelessWidget {
 }
 
 
-/// Entrance hasil — fade + slide halus sekali saat kartu muncul.
+/// Entrance hasil: fade + slide halus sekali saat kartu muncul.
 ///
 /// Durasi 320ms: cukup terasa premium, tidak menghambat baca verdict
 /// 1-detik. Tanpa scale/overshoot agar tetap trustworthy, bukan playful.
@@ -768,7 +768,7 @@ class _ResultEntranceState extends State<_ResultEntrance>
   }
 }
 
-/// Spine aksen verdict — garis warna penuh di tepi kiri kartu hasil.
+/// Spine aksen verdict: garis warna penuh di tepi kiri kartu hasil.
 ///
 /// Elemen signature LiterasiAI: satu garis 6px mengikuti warna verdict
 /// (merah HOAKS / hijau VALID / kuning PERLU DICEK / abu TIDAK PASTI),

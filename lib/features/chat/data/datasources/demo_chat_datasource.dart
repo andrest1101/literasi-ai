@@ -1,4 +1,4 @@
-/// Jawaban demo offline Chat — edukatif dan jujur, bukan AI.
+/// Jawaban demo offline Chat: edukatif dan jujur, bukan AI.
 ///
 /// Dipakai saat tidak ada kunci API. Tidak menjawab isi pertanyaan secara
 /// spesifik (agar tidak mengarang), melainkan memberi kerangka berpikir

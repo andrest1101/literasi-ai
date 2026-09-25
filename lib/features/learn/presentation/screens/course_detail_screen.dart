@@ -7,7 +7,7 @@ import '../../../quick_check/presentation/widgets/session_back_button.dart';
 import '../providers/learn_providers.dart';
 import 'quiz_screen.dart';
 
-/// Artikel modul — hero gradien + progres baca + sticky CTA.
+/// Artikel modul: hero gradien + progres baca + sticky CTA.
 ///
 /// Hero memakai gradien [AppColors.heroBegin]/[AppColors.heroEnd] yang sama
 /// dengan kartu modul agar detail terasa satu keluarga dengan daftar.
@@ -244,7 +244,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
   }
 }
 
-/// Hero gradien pembuka modul — satu keluarga dengan kartu daftar.
+/// Hero gradien pembuka modul: satu keluarga dengan kartu daftar.
 ///
 /// Medallion ikon + pill durasi/soal/selesai + judul putih + subtitle
 /// terang, sehingga judul tidak lagi menempel polos di background.
@@ -392,7 +392,7 @@ class _ModuleHero extends ConsumerWidget {
   }
 }
 
-/// Satu seksi artikel — seksi pertama ([featured]) diberi aksen primer
+/// Satu seksi artikel: seksi pertama ([featured]) diberi aksen primer
 /// agar ritme baca panjang tidak monoton empat kartu identik.
 class _ArticleSection extends StatelessWidget {
   const _ArticleSection({

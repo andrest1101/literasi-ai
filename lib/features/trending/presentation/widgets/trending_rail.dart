@@ -5,7 +5,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../quick_check/presentation/widgets/verdict_presentation.dart';
 import '../../domain/entities/trending_item.dart';
 
-/// Rail horizontal trending — ritme vertikal berbeda dari semua blok Cek.
+/// Rail horizontal trending: ritme vertikal berbeda dari semua blok Cek.
 ///
 /// Tile 2-kolom, banner link, dan carousel contoh semuanya horizontal-pendek
 /// atau grid; rail ini kartu vertikal 228px: pita verdict atas, judul 3
@@ -21,7 +21,7 @@ class TrendingRail extends StatelessWidget {
   final List<TrendingItem> items;
   final ValueChanged<TrendingItem> onPick;
 
-  /// Tag Hero ikon verdict — dipakai rail dan layar detail dengan id sama.
+  /// Tag Hero ikon verdict: dipakai rail dan layar detail dengan id sama.
   static String heroTagFor(String itemId) => 'trending-verdict-$itemId';
 
   @override

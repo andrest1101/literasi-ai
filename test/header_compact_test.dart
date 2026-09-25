@@ -49,7 +49,7 @@ class _FixedScoreRepository implements ScoreRepository {
 /// progres level + label/poin di kiri, dot status AI di kanan, dengan
 /// divider pemisah dan dua zona tap terpisah (Profil vs Pengaturan).
 void main() {
-  /// Pump dengan kunci kosong (mode demo) + skor lokal nol — tanpa
+  /// Pump dengan kunci kosong (mode demo) + skor lokal nol: tanpa
   /// Firebase maupun secure storage asli.
   Future<void> pumpChip(WidgetTester tester, {Widget? child}) async {
     await tester.pumpWidget(
@@ -69,7 +69,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  group('Header compact U2 — satu baris skor + status AI', () {
+  group('Header compact U2: satu baris skor + status AI', () {
     testWidgets('ring progres + label level + poin tampil', (
       WidgetTester tester,
     ) async {

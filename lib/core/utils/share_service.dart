@@ -19,7 +19,7 @@ class ShareService {
   static const String fileName = 'literasi-ai-hasil.png';
   static const String mimeType = 'image/png';
 
-  /// Susun teks ringkas pendamping gambar — murni Dart agar unit-testable.
+  /// Susun teks ringkas pendamping gambar: murni Dart agar unit-testable.
   static String buildShareText(VerificationResult result) {
     final buffer = StringBuffer()
       ..writeln('Hasil cek LiterasiAI: ${result.verdict.label}')

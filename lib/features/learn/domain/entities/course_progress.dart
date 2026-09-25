@@ -1,4 +1,4 @@
-/// Progres belajar per pengguna — murni Dart.
+/// Progres belajar per pengguna: murni Dart.
 ///
 /// `quizBest` menyimpan skor TERBAIK per modul (bukan tiap attempt) agar
 /// poin Score (+5 per benar) tidak bisa di-farming dengan mengulang kuis.

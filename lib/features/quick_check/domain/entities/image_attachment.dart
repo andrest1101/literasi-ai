@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-/// Lampiran gambar untuk verifikasi visual — domain murni, tanpa Flutter.
+/// Lampiran gambar untuk verifikasi visual: domain murni, tanpa Flutter.
 ///
 /// Batas disepakati tahap 1: JPG/PNG/WebP, maksimal 5 MB, satu gambar per sesi.
 class ImageAttachment {

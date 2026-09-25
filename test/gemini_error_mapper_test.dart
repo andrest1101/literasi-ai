@@ -4,7 +4,7 @@ import 'package:literasi_ai/core/errors/failures.dart';
 import 'package:literasi_ai/core/utils/gemini_error_mapper.dart';
 
 void main() {
-  group('GeminiErrorMapper — pesan spesifik, bukan generik', () {
+  group('GeminiErrorMapper: pesan spesifik, bukan generik', () {
     test('tipe SDK InvalidApiKey → kunci ditolak', () {
       final failure = GeminiErrorMapper.map(
         InvalidApiKey('API key not valid.'),

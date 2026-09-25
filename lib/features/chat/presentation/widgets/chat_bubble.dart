@@ -5,7 +5,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../quick_check/presentation/screens/quick_check_session_screen.dart';
 import '../../domain/entities/chat_message.dart';
 
-/// Bubble chat — kanan biru untuk pengguna, kiri putih untuk AI.
+/// Bubble chat: kanan biru untuk pengguna, kiri putih untuk AI.
 ///
 /// Bubble AI gagal memakai border merah + tombol kirim ulang. Bubble AI yang
 /// berhasil membawa tombol "Verifikasi ini" menuju sesi Quick Check dengan

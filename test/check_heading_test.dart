@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:literasi_ai/features/quick_check/presentation/screens/quick_check_home_tab.dart';
 import 'package:literasi_ai/features/quick_check/presentation/screens/quick_check_session_screen.dart';
 
-/// Regresi P1: heading tab Cek ramping — tanpa wordmark, tanpa pill
+/// Regresi P1: heading tab Cek ramping: tanpa wordmark, tanpa pill
 /// eyebrow. Judul two-tone + subtitle padat + hairline; hero naik ke
 /// lipatan layar 360×800.
 void main() {

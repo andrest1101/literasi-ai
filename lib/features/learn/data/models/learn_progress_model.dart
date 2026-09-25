@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/entities/course_progress.dart';
 
-/// Mapping progres belajar — toleran dokumen hilang/korup.
+/// Mapping progres belajar: toleran dokumen hilang/korup.
 class LearnProgressModel {
   const LearnProgressModel._();
 

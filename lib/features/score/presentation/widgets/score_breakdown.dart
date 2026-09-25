@@ -4,7 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/literacy_score.dart';
 
-/// Rincian sumber poin — transparansi cara naik level.
+/// Rincian sumber poin: transparansi cara naik level.
 ///
 /// Tiga baris (Verifikasi/Modul/Kuis) dengan hitungan dan subtotal masing
 /// masing, plus catatan jujur bahwa modul dibuka di Phase 3b.

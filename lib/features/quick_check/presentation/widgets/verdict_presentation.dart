@@ -4,7 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/verification_result.dart';
 
-/// Gaya presentasi tiap verdict — hanya memakai palet resmi LiterasiAI.
+/// Gaya presentasi tiap verdict: hanya memakai palet resmi LiterasiAI.
 ///
 /// Dipisah ke file sendiri agar dipakai bersama oleh
 /// [QuickCheckResultSection] (layar sesi) dan [ShareCard] (gambar share)
@@ -23,7 +23,7 @@ class VerdictPresentation {
   final Color soft;
   final IconData icon;
 
-  /// Kesimpulan satu-baris yang terbaca dalam 1 detik — status definitif
+  /// Kesimpulan satu-baris yang terbaca dalam 1 detik: status definitif
   /// atas informasi yang diperiksa, bukan perintah perilaku. Teks + ikon +
   /// warna sehingga aman untuk pengguna buta warna.
   final String headline;
