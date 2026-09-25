@@ -108,10 +108,31 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   dipertahankan (hierarki benar); subtitle dipertahankan 1 kalimat
   orientasi untuk user baru.
 
+## Headline status definitif (26 Sep 2026)
+
+- **Masalah:** headline HOAKS "Jangan disebar" adalah perintah perilaku
+  yang campur aduk dengan tiga headline status lainnya ("Aman dengan
+  konteks", "Cek sumber lain dulu", "Belum bisa dipastikan") — dan
+  kontradiktif dengan tombol Bagikan hasil pemeriksaan di layar yang
+  sama. User benar: edukasi tentang hoaks justru boleh (dan perlu)
+  disebarkan; yang tidak boleh adalah meneruskan pesan hoaks mentahnya.
+- **Perubahan:** keempat headline diseragamkan menjadi kalimat status
+  definitif — HOAKS "Informasi ini tidak benar", VALID "Informasi ini
+  benar", PERLU DICEK "Kebenarannya belum pasti", TIDAK PASTI tetap.
+  Perilaku spesifik tetap ditangani "Saran tindak lanjut" per kasus
+  (ditulis AI, mis. jangan beri data rekening). Keempat string pindah
+  ke `AppStrings` (`verdictHeadline*`) sesuai aturan copy-terpusat.
+- **File:** `app_strings.dart`, `verdict_presentation.dart`,
+  `test/verdict_spine_test.dart` (assert keempat headline + pastikan
+  frasa perintah lama hilang total).
+- **Rationale:** status kini dinyatakan tiga kali (badge warna + angka
+  + kalimat) — aksesibilitas buta warna tetap terjaga; satu callsite
+  render, risiko nol.
+
 ## Verifikasi
 
 - `flutter analyze --no-pub`: bersih.
-- `flutter test`: 255 lulus, nol gagal.
+- `flutter test`: 256 lulus, nol gagal.
 - Render 360×800 & 412×915 via test (spine + header + home + hero).
 - `flutter build windows --debug`: sukses.
 - Commit manual oleh user (kebijakan repo): pecah per tema bila perlu.

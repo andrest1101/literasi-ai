@@ -339,6 +339,16 @@ abstract final class AppStrings {
   static const String quickCheckExplanationLabel = 'Penjelasan hasil';
   static const String quickCheckSuggestionLabel = 'Saran tindak lanjut';
   static const String quickCheckConfidenceLabel = 'Tingkat keyakinan AI';
+
+  /// Kalimat kesimpulan satu-baris per verdict — status definitif atas
+  /// informasi yang diperiksa ("apa kesimpulan AI"), BUKAN perintah
+  /// perilaku. Perilaku spesifik ("jangan teruskan pesan aslinya")
+  /// ditangani "Saran tindak lanjut" per kasus, sehingga tidak
+  /// kontradiktif dengan tombol Bagikan hasil pemeriksaan.
+  static const String verdictHeadlineHoaks = 'Informasi ini tidak benar';
+  static const String verdictHeadlineValid = 'Informasi ini benar';
+  static const String verdictHeadlinePerluDicek = 'Kebenarannya belum pasti';
+  static const String verdictHeadlineTidakPasti = 'Belum bisa dipastikan';
   static const String quickCheckNewCheck = 'Periksa informasi lain';
   static const String quickCheckRetry = 'Coba lagi';
   static const String quickCheckShare = 'Bagikan Hasil';

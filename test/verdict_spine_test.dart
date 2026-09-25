@@ -94,13 +94,35 @@ void main() {
         tester.view.physicalSize = Size(width, 915);
         tester.view.devicePixelRatio = 1.0;
         await pumpResult(tester, Verdict.hoaks);
-        expect(find.text('Jangan disebar'), findsOneWidget);
+        expect(find.text('Informasi ini tidak benar'), findsOneWidget);
         expect(find.text('88%'), findsOneWidget);
       }
       addTearDown(() {
         tester.view.resetPhysicalSize();
         tester.view.resetDevicePixelRatio();
       });
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('headline status definitif, bukan perintah perilaku', (
+      WidgetTester tester,
+    ) async {
+      await pumpResult(tester, Verdict.hoaks);
+      expect(find.text('Informasi ini tidak benar'), findsOneWidget);
+
+      await pumpResult(tester, Verdict.valid);
+      expect(find.text('Informasi ini benar'), findsOneWidget);
+
+      await pumpResult(tester, Verdict.perluDicek);
+      expect(find.text('Kebenarannya belum pasti'), findsOneWidget);
+
+      await pumpResult(tester, Verdict.tidakDapatDipastikan);
+      expect(find.text('Belum bisa dipastikan'), findsOneWidget);
+
+      // Frasa perintah lama tidak boleh muncul di mana pun.
+      expect(find.text('Jangan disebar'), findsNothing);
+      expect(find.text('Aman dengan konteks'), findsNothing);
+      expect(find.text('Cek sumber lain dulu'), findsNothing);
       expect(tester.takeException(), isNull);
     });
   });
