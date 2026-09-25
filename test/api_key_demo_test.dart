@@ -63,6 +63,35 @@ void main() {
       await notifier.clearUserKey();
       expect(store.value, isNull);
     });
+
+    test('controller menolak kunci contoh/placeholder', () async {
+      final store = _MemoryKeyStore();
+      final container = ProviderContainer(
+        overrides: [apiKeyStoreProvider.overrideWithValue(store)],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(apiKeyControllerProvider.notifier);
+      for (final placeholder in [
+        'KODE_API_KEY_GEMINI_KAMU',
+        'AIzaSyPLACEHOLDER-XXXX-1234567890',
+        'ISI_KUNCI_ANDA_DISINI_1234567890',
+      ]) {
+        expect(
+          await notifier.save(placeholder),
+          contains('contoh'),
+          reason: placeholder,
+        );
+      }
+      expect(store.value, isNull);
+    });
+
+    test('isPlaceholderKey kenali pola contoh umum', () {
+      expect(isPlaceholderKey('KODE_API_KEY_GEMINI_KAMU'), isTrue);
+      expect(isPlaceholderKey('ISI_KUNCI_ANDA'), isTrue);
+      // Substring umum dalam kunci valid TIDAK ditolak (anti false positive).
+      expect(isPlaceholderKey('AIzaSyContohKunciValid1234567890'), isFalse);
+      expect(isPlaceholderKey(''), isFalse);
+    });
   });
 
   group('Mode demo Quick Check jujur', () {
@@ -180,6 +209,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ApiKeyScreen), findsOneWidget);
     expect(find.text('Kunci API Gemini'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('pengaturan punya tombol tes koneksi AI', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore()),
+        ],
+        child: const MaterialApp(home: ApiKeyScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Tes koneksi AI'), findsOneWidget);
+    expect(find.text('Tes koneksi sekarang'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
