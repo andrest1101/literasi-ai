@@ -155,10 +155,14 @@ abstract final class AppStrings {
   static const String historyDeleteFailed =
       'Riwayat tidak dapat dihapus. Coba lagi.';
   static const String historyUndo = 'Urungkan';
+  static const String historyDeleteTitle = 'Hapus riwayat ini?';
+  static const String historyDeleteBody =
+      'Entri ini hilang dari semua perangkat. Kamu bisa mengurungkan sesaat setelah menghapus.';
+  static const String historyDeleteConfirm = 'Hapus';
+  static const String historyDeleteCancel = 'Batal';
   static const String historyRetryTitle = 'Riwayat tidak dapat dimuat';
   static const String historyLoading = 'Memuat riwayat...';
   static const String historySearchHint = 'Cari informasi yang pernah dicek...';
-  static const String historyStatsTitle = 'Ringkasan';
   static const String historyDetailTitle = 'Detail Riwayat';
   static const String homeLearnTitle1 = 'Naikkan';
   static const String homeLearnTitle2 = 'literasimu.';

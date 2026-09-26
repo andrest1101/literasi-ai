@@ -99,13 +99,9 @@ class HistoryListScreen extends ConsumerWidget {
                         filter == HistoryFilter.all &&
                         query.isEmpty &&
                         visible.length > 1;
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _HistoryStats(items: items),
-                        const SizedBox(height: 14),
-                        _HistoryList(entries: visible, markLatest: markLatest),
-                      ],
+                    return _HistoryList(
+                      entries: visible,
+                      markLatest: markLatest,
                     );
                   },
                 ),
@@ -299,8 +295,8 @@ class _HistorySearchState extends ConsumerState<_HistorySearchField> {
 
 /// Hitung isi tiap filter dari daftar yang sama: tanpa query baru.
 ///
-/// `perluDicek` mencakup verdict kuning + abu (konsisten dengan strip
-/// [_HistoryStats]) agar angka pill dan ringkasan selalu selaras.
+/// `perluDicek` mencakup verdict kuning + abu. Pill filter adalah
+/// satu-satunya representasi angka komposisi verdict di tab ini.
 Map<HistoryFilter, int> _filterCounts(List<HistoryEntry> items) {
   var hoaks = 0;
   var valid = 0;
@@ -327,145 +323,6 @@ Map<HistoryFilter, int> _filterCounts(List<HistoryEntry> items) {
   };
 }
 
-/// Ringkasan verdict: 3 kolom angka besar agar tab Riwayat terasa hidup.
-///
-/// Dihitung dari seluruh riwayat (bukan hasil filter), sehingga angka
-/// tetap jadi konteks walau user menyaring satu verdict. Selaras dengan
-/// angka pill filter ([_filterCounts]).
-class _HistoryStats extends StatelessWidget {
-  const _HistoryStats({required this.items});
-
-  final List<HistoryEntry> items;
-
-  @override
-  Widget build(BuildContext context) {
-    var hoaks = 0;
-    var valid = 0;
-    var perlu = 0;
-    for (final entry in items) {
-      switch (entry.result.verdict) {
-        case Verdict.hoaks:
-          hoaks++;
-          break;
-        case Verdict.valid:
-          valid++;
-          break;
-        case Verdict.perluDicek:
-        case Verdict.tidakDapatDipastikan:
-          perlu++;
-          break;
-      }
-    }
-    return Semantics(
-      label:
-          '${AppStrings.historyStatsTitle}: $hoaks Hoaks, $valid Valid, $perlu Perlu dicek',
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          color: AppColors.surface,
-          border: Border.all(color: AppColors.neutral.withValues(alpha: 0.18)),
-        ),
-        child: Row(
-          children: [
-            _StatColumn(
-              value: hoaks,
-              label: AppStrings.historyFilterHoaks,
-              accent: AppColors.danger,
-            ),
-            _StatsDivider(),
-            _StatColumn(
-              value: valid,
-              label: AppStrings.historyFilterValid,
-              accent: AppColors.success,
-            ),
-            _StatsDivider(),
-            _StatColumn(
-              value: perlu,
-              label: AppStrings.historyFilterNeedCheck,
-              accent: AppColors.verdictAmber,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StatsDivider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 34,
-      color: AppColors.neutral.withValues(alpha: 0.2),
-    );
-  }
-}
-
-class _StatColumn extends StatelessWidget {
-  const _StatColumn({
-    required this.value,
-    required this.label,
-    required this.accent,
-  });
-
-  final int value;
-  final String label;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    // Tint latar per verdict: tiga kolom terbaca sebagai tiga zona
-    // (bukan satu papan putih seperti tabel), strip aksen tetap sebagai
-    // penegas di atas angka.
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          color: accent.withValues(alpha: 0.07),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              height: 3,
-              width: 28,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                color: accent,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              '$value',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.4,
-                color: AppColors.textPrimary,
-                fontFeatures: [FontFeature.tabularFigures()],
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _HistoryList extends ConsumerWidget {
   const _HistoryList({required this.entries, this.markLatest = false});
 
@@ -482,9 +339,12 @@ class _HistoryList extends ConsumerWidget {
             builder: (context) {
               final entry = entries[i];
               final latest = markLatest && i == 0;
+              // Dua arah horizontal: pengguna kidal maupun kanan-dominan
+              // sama-sama menemukan hapus; kedua arah memakai jalur hapus
+              // dan Urungkan yang sama persis.
               return Dismissible(
                 key: ValueKey(entry.id),
-                direction: DismissDirection.endToStart,
+                direction: DismissDirection.horizontal,
                 onDismissed: (_) async {
                   await ref
                       .read(historyActionProvider.notifier)
@@ -524,6 +384,18 @@ class _HistoryList extends ConsumerWidget {
                 background: Container(
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: 22),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(22),
+                    color: AppColors.danger,
+                  ),
+                  child: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: Colors.white,
+                  ),
+                ),
+                secondaryBackground: Container(
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(left: 22),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(22),
                     color: AppColors.danger,

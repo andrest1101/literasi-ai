@@ -287,8 +287,8 @@ void main() {
 
     expect(find.byType(HistoryCard), findsNWidgets(2));
 
-    // Label 'Hoaks' muncul dua kali (pill filter + kolom ringkasan),
-    // jadi ketuk pill di dalam HistoryFilterBar secara eksplisit.
+    // Label 'Hoaks' hanya ada di pill filter (kartu statistik terpisah
+    // dihapus agar angka tidak ganda); ketuk pill secara eksplisit.
     final hoaksPill = find.descendant(
       of: find.byType(HistoryFilterBar),
       matching: find.text(AppStrings.historyFilterHoaks),
