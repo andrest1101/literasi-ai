@@ -156,6 +156,23 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
 - **Rationale:** komponen `AppSectionHeader` TIDAK dihapus (masih dipakai
   pola generik + test aksen); yang diubah hanya callsite 3 tab.
 
+## Token skala judul tab (26 Sep 2026)
+
+- **Masalah:** judul Cek 24px vs tiga tab 20px terlihat seperti kebetulan,
+  bukan keputusan: angka duplikat manual di 4 file, gap judul-konten
+  12/14 campur, hairline hanya di Cek tanpa rationale tertulis.
+- **Perubahan:** token `AppTabTitles` di `app_styles.dart` sebagai satu
+  sumber kebenaran (Display 24 two-tone 2 baris + subtitle + hairline
+  khusus landing Cek; Compact 20 two-tone 1 baris untuk tab utilitas;
+  gap 12 konsisten; hairline didokumentasikan milik Display). Keempat
+  screen di-refactor ke token dengan **nol piksel berubah**.
+- **File:** `app_styles.dart`, 4 screen tab, `test/tab_headers_test.dart`
+  (test kunci nilai token anti-drift).
+- **Rationale:** beda ukuran per peran dipertahankan (landing boleh
+  lebih besar), tapi kini sistematis dan tidak akan drift lagi.
+  Opsi menyamakan rata ditolak: landing kehilangan presence, atau tiga
+  tab boros vertikal kembali.
+
 ## Sapuan em-dash (26 Sep 2026)
 
 - Seluruh `—` (U+2014) dihapus dari `lib/` + `test/`: 206 kemunculan
@@ -168,7 +185,7 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
 ## Verifikasi
 
 - `flutter analyze --no-pub`: bersih.
-- `flutter test`: 259 lulus, nol gagal.
+- `flutter test`: 260 lulus, nol gagal.
 - Render 360×800 & 412×915 via test (spine + header + home + hero +
   3 tab compact).
 - `flutter build windows --debug`: sukses.

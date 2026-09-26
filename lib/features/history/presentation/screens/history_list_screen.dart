@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/constants/app_styles.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../shared/widgets/app_shimmer.dart';
 import '../../../quick_check/domain/entities/verification_result.dart';
@@ -37,7 +38,7 @@ class HistoryListScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const _HistoryToolbarTitle(),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppTabTitles.titleToContentGap),
                 _HistorySearchField(
                   onChanged: (value) =>
                       ref.read(historySearchProvider.notifier).state = value,
@@ -123,27 +124,16 @@ class _HistoryToolbarTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Text.rich(
+    return Text.rich(
       TextSpan(
         children: [
-          TextSpan(
+          const TextSpan(
             text: AppStrings.homeHistoryTitle1,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.4,
-              color: AppColors.textPrimary,
-            ),
+            style: AppTabTitles.compactLine1,
           ),
           TextSpan(
             text: ' ${AppStrings.homeHistoryTitle2}',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              fontStyle: FontStyle.italic,
-              letterSpacing: -0.4,
-              color: AppColors.primaryDeep,
-            ),
+            style: AppTabTitles.compactLine2(AppColors.primaryDeep),
           ),
         ],
       ),

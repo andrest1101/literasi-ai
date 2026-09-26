@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/constants/app_styles.dart';
 import '../../../../shared/widgets/app_shimmer.dart';
 import '../../domain/entities/course_progress.dart';
 import '../providers/learn_providers.dart';
@@ -30,7 +31,7 @@ class CourseListScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const _LearnToolbarTitle(),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppTabTitles.titleToContentGap),
               progress.when(
                 loading: () => const _ProgressSkeleton(),
                 error: (_, _) => const SizedBox.shrink(),
@@ -120,27 +121,16 @@ class _LearnToolbarTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Text.rich(
+    return Text.rich(
       TextSpan(
         children: [
-          TextSpan(
+          const TextSpan(
             text: AppStrings.homeLearnTitle1,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.4,
-              color: AppColors.textPrimary,
-            ),
+            style: AppTabTitles.compactLine1,
           ),
           TextSpan(
             text: ' ${AppStrings.homeLearnTitle2}',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              fontStyle: FontStyle.italic,
-              letterSpacing: -0.4,
-              color: AppColors.successDark,
-            ),
+            style: AppTabTitles.compactLine2(AppColors.successDark),
           ),
         ],
       ),
