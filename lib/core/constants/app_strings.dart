@@ -139,6 +139,7 @@ abstract final class AppStrings {
       'Satu sesi fokus untuk teks, gambar, atau link. Hasil dan saran verifikasi langsung keluar.';
   static const String homeHistoryTitle1 = 'Jejak';
   static const String homeHistoryTitle2 = 'pemeriksaanmu.';
+  static const String historySubEmpty = 'Belum ada yang tersimpan.';
   static const String historyFilterAll = 'Semua';
   static const String historyFilterHoaks = 'Hoaks';
   static const String historyFilterValid = 'Valid';
