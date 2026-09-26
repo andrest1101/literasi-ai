@@ -182,11 +182,35 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   sudah nol. Aturan: pakai titik dua, koma, atau kurung — bukan dash
   panjang yang menjadi ciri khas tulisan AI.
 
+## Refined Riwayat H1-H5 (26 Sep 2026)
+
+- **Masalah:** toolbar gundul tanpa konteks; search generik; stat bar
+  seperti tabel putih; kartu 100% seragam tanpa signature; tidak ada
+  titik orientasi di daftar panjang.
+- **Perubahan (UI-only, provider/domain tidak tersentuh):**
+  - Sub-konteks data-driven: "N pemeriksaan · terakhir X" dari stream
+    yang sama (tanpa query baru), konsisten dengan statistik.
+  - Search: focus ring + ikon tint biru-arsip saat dipakai; hint kiri
+    dan tombol clear yang sudah benar tidak diubah (dua klaim saran
+    luar terbukti salah setelah verifikasi kode, tidak dieksekusi).
+  - Stat bar: tint latar per kolom verdict (strip aksen tetap).
+  - Kartu: spine verdict 6px kiri (signature kartu hasil, border
+    dinetralkan) + badge TERBARU hanya entri pertama saat daftar utuh
+    (>1, tanpa filter/search). Hero badge ke detail tidak disentuh.
+  - Helper `historyTimeAgo` bersama (kartu + sub-konteks, anti-drift).
+- **Ditolak:** variasi ukuran kartu per verdict (merusak scanability +
+  mengeditorialisasi keliru), thumbnail placeholder, chart statistik,
+  entrance staggered (risiko jank + Dismissible).
+- **File:** `history_list_screen.dart`, `history_card.dart`,
+  `history_time_ago.dart` (baru), `app_strings.dart`
+  (`historySubEmpty`), `test/history_refined_test.dart` (8 test).
+- **Rationale:** hierarki tanpa merusak keseragaman baris daftar.
+
 ## Verifikasi
 
 - `flutter analyze --no-pub`: bersih.
-- `flutter test`: 260 lulus, nol gagal.
+- `flutter test`: 268 lulus, nol gagal.
 - Render 360×800 & 412×915 via test (spine + header + home + hero +
-  3 tab compact).
+  3 tab compact + riwayat refined).
 - `flutter build windows --debug`: sukses.
 - Commit manual oleh user (kebijakan repo): pecah per tema bila perlu.
