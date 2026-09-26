@@ -93,13 +93,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         toolbarHeight: 68,
-        leadingWidth: 52,
+        leadingWidth: 56,
+        // Lingkaran tonal SessionBackButton (dipakai bersama layar sesi
+        // Quick Check): tanpa avatar header, komposisi kini seimbang
+        // (lingkaran kiri + squircle aksi kanan membingkai teks), dan
+        // lingkaran 40px memberi jarak napas alami ke teks di sampingnya.
         leading: SessionBackButton(
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         titleSpacing: 0,
         centerTitle: false,
-        title: const _IdentityTitle(),
+        title: _IdentityTitle(keyConfigured: keyConfigured),
         actions: [
           _NewChatAction(onClear: _confirmClear),
           const SizedBox(width: 12),
@@ -125,8 +129,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         controller: _scrollController,
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                         itemCount: chat.messages.length,
-                        separatorBuilder: (_, _) =>
-                            const SizedBox(height: 14),
+                        separatorBuilder: (_, _) => const SizedBox(height: 14),
                         itemBuilder: (context, index) {
                           final message = chat.messages[index];
                           return ChatBubble(
@@ -151,76 +154,51 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 }
 
-/// Identitas asisten di AppBar: avatar shield + nama + status kesiapan.
+/// Identitas asisten di AppBar: nama + status kesiapan, tanpa avatar.
 ///
-/// Menggantikan kombinasi teks "Kembali" + presence bar terpisah sehingga
-/// header hemat ~76px vertikal. Dot hijau sengaja tidak dipakai: status
-/// online palsu selama kunci API belum tentu tersambung.
+/// Avatar shield sengaja tidak dipasang di header: setiap bubble AI sudah
+/// membawa avatar yang sama, sehingga shield ketiga di header hanya
+/// menjadi pengulangan (pola chat profesional: nama + status saja).
+/// Identitas visual tetap hidup di hero empty-state, FAB, dan bubble AI.
+/// Subtitle kontekstual dari status kunci yang sudah ada (tanpa dot hijau
+/// palsu, tanpa angka kuota yang tidak bisa diketahui client): live bila
+/// tersambung, pratinjau bila belum.
 class _IdentityTitle extends StatelessWidget {
-  const _IdentityTitle();
+  const _IdentityTitle({required this.keyConfigured});
+
+  final bool keyConfigured;
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        _IdentityAvatar(),
-        SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                AppStrings.chatPresenceName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.2,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              SizedBox(height: 1),
-              Text(
-                AppStrings.chatPresenceStatus,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
+        Text(
+          AppStrings.chatPresenceName,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.2,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        SizedBox(height: 1),
+        Text(
+          keyConfigured
+              ? AppStrings.chatPresenceLive
+              : AppStrings.chatPresencePreview,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textSecondary,
           ),
         ),
       ],
-    );
-  }
-}
-
-class _IdentityAvatar extends StatelessWidget {
-  const _IdentityAvatar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 38,
-      height: 38,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(13),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF2F80ED), Color(0xFF124A9B)],
-        ),
-      ),
-      child: const Icon(
-        Icons.verified_user_rounded,
-        size: 20,
-        color: Colors.white,
-      ),
     );
   }
 }
@@ -287,28 +265,11 @@ class _KeySetupBanner extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         color: AppColors.primary.withValues(alpha: 0.06),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.25),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: AppColors.primary.withValues(alpha: 0.12),
-            ),
-            child: const Icon(
-              Icons.key_outlined,
-              size: 19,
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(width: 11),
-          const Expanded(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final copy = const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -331,93 +292,135 @@ class _KeySetupBanner extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 8),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
+          );
+          final actions = _KeyBannerActions(
+            onCopy: () => _copyCommand(context),
+          );
+          final icon = Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: AppColors.primary.withValues(alpha: 0.12),
+            ),
+            child: const Icon(
+              Icons.key_outlined,
+              size: 19,
+              color: AppColors.primary,
+            ),
+          );
+          // Banner sempit (<340px, mis. layar 360px): aksi full-width
+          // di bawah teks agar kolom tombol tidak menjepit teks hingga
+          // overflow; normal tetap satu baris (pola responsif yang sama
+          // dengan hero Cek).
+          if (constraints.maxWidth < 340) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [icon, const SizedBox(width: 11), copy],
+                ),
+                const SizedBox(height: 10),
+                actions,
+              ],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Semantics(
-                button: true,
-                label: AppStrings.apiKeyOpenSettings,
-                child: Material(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(12),
-                  child: InkWell(
-                    onTap: () => Navigator.of(
-                      context,
-                    ).pushNamed(ApiKeyScreen.route),
-                    borderRadius: BorderRadius.circular(12),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 9,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.key_outlined,
-                            size: 15,
-                            color: Colors.white,
-                          ),
-                          SizedBox(width: 5),
-                          Text(
-                            AppStrings.apiKeyOpenSettings,
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Semantics(
-                button: true,
-                label: AppStrings.chatKeyCopy,
-                child: Material(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                  child: InkWell(
-                    onTap: () => _copyCommand(context),
-                    borderRadius: BorderRadius.circular(12),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 7,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.content_copy_rounded,
-                            size: 14,
-                            color: AppColors.primary,
-                          ),
-                          SizedBox(width: 5),
-                          Text(
-                            AppStrings.chatKeyCopy,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              icon,
+              const SizedBox(width: 11),
+              copy,
+              const SizedBox(width: 8),
+              actions,
             ],
-          ),
-        ],
+          );
+        },
       ),
+    );
+  }
+}
+
+/// Kolom aksi banner kunci (Buka Pengaturan + Salin perintah), dipakai
+/// susunan baris maupun kolom oleh [_KeySetupBanner].
+class _KeyBannerActions extends StatelessWidget {
+  const _KeyBannerActions({required this.onCopy});
+
+  final VoidCallback onCopy;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Semantics(
+          button: true,
+          label: AppStrings.apiKeyOpenSettings,
+          child: Material(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: () => Navigator.of(context).pushNamed(ApiKeyScreen.route),
+              borderRadius: BorderRadius.circular(12),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.key_outlined, size: 15, color: Colors.white),
+                    SizedBox(width: 5),
+                    Text(
+                      AppStrings.apiKeyOpenSettings,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Semantics(
+          button: true,
+          label: AppStrings.chatKeyCopy,
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: onCopy,
+              borderRadius: BorderRadius.circular(12),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.content_copy_rounded,
+                      size: 14,
+                      color: AppColors.primary,
+                    ),
+                    SizedBox(width: 5),
+                    Text(
+                      AppStrings.chatKeyCopy,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -437,14 +440,14 @@ class _EmptyGreeting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 20),
+      padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
       child: Column(
         children: [
           Container(
-            width: 68,
-            height: 68,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(23),
+              borderRadius: BorderRadius.circular(27),
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -460,11 +463,11 @@ class _EmptyGreeting extends StatelessWidget {
             ),
             child: const Icon(
               Icons.auto_awesome_rounded,
-              size: 32,
+              size: 36,
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           const Text(
             AppStrings.chatGreetingTitle,
             textAlign: TextAlign.center,
@@ -485,7 +488,7 @@ class _EmptyGreeting extends StatelessWidget {
               color: AppColors.textSecondary,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -497,6 +500,16 @@ class _EmptyGreeting extends StatelessWidget {
                   onTap: () => onPick(suggestion),
                 ),
             ],
+          ),
+          const SizedBox(height: 14),
+          const Text(
+            AppStrings.chatDisclaimer,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 11.5,
+              height: 1.5,
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -571,9 +584,7 @@ class _InputDock extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border(
-          top: BorderSide(
-            color: AppColors.neutral.withValues(alpha: 0.18),
-          ),
+          top: BorderSide(color: AppColors.neutral.withValues(alpha: 0.18)),
         ),
       ),
       child: SafeArea(

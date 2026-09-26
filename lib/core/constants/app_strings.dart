@@ -223,7 +223,12 @@ abstract final class AppStrings {
       'Diskusi santai soal hoaks dan literasi digital dalam Bahasa Indonesia.';
   static const String chatFabLabel = 'Chat dengan AI Literasi';
   static const String chatPresenceName = 'Asisten LiterasiAI';
-  static const String chatPresenceStatus = 'Siap membantu verifikasi';
+
+  /// Subtitle AppBar kontekstual dari status kunci (bukan "online" palsu):
+  /// live bila kunci tersambung, pratinjau bila belum. Tanpa dot hijau
+  /// dan tanpa angka kuota (kuota per-model tidak bisa diketahui client).
+  static const String chatPresenceLive = 'AI live · Siap menjawab';
+  static const String chatPresencePreview = 'Mode pratinjau';
   static const String chatCancel = 'Batal';
   static const String chatKeyBannerTitle =
       'Mode pratinjau: kunci API belum tersambung';
@@ -264,6 +269,11 @@ abstract final class AppStrings {
   static const String chatSuggestion1 = 'Apakah vaksin menyebabkan autisme?';
   static const String chatSuggestion2 = 'Cara kenali judul clickbait?';
   static const String chatSuggestion3 = 'Cara verifikasi sumber berita?';
+
+  /// Disclaimer compact di bawah suggestion chips (empty state saja):
+  /// transparansi model tanpa nama versi yang bisa usang, tanpa ikon.
+  static const String chatDisclaimer =
+      'Didukung Gemini AI · Jawaban bisa keliru, cek ulang info penting.';
   static const String chatInputHint = 'Tulis pertanyaanmu...';
   static const String chatTyping = 'AI sedang mengetik...';
   static const String chatVerifyThis = 'Verifikasi ini';

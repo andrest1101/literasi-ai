@@ -81,7 +81,8 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Asisten LiterasiAI'), findsOneWidget);
-    expect(find.text('Siap membantu verifikasi'), findsOneWidget);
+    expect(find.text('Mode pratinjau'), findsOneWidget);
+    expect(find.text('Siap membantu verifikasi'), findsNothing);
     expect(find.text('Mode pratinjau: kunci API belum tersambung'), findsOneWidget);
     expect(find.text('Salin perintah'), findsOneWidget);
 
