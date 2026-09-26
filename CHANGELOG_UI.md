@@ -206,11 +206,35 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   (`historySubEmpty`), `test/history_refined_test.dart` (8 test).
 - **Rationale:** hierarki tanpa merusak keseragaman baris daftar.
 
+## Anti-duplikasi Riwayat (26 Sep 2026)
+
+- **Masalah:** angka komposisi verdict tampil dua kali (kartu statistik
+  + pill filter) dari sumber hitung yang sama; kartu statistik dead-end
+  (tidak bisa diklik); swipe hapus satu arah tanpa affordance sehingga
+  tidak ditemukan user.
+- **Perubahan (provider/domain tidak tersentuh):**
+  - Hapus `_HistoryStats` + kolom + divider (±90 baris) dan string
+    `historyStatsTitle`; pill filter menjadi satu-satunya representasi
+    angka (angka diperbesar, tint idle ringan, angka 0 selalu tampil
+    sebagai info utuh, Semantics menyebut fungsi saring).
+  - Daftar + filter naik ±110px ke lipatan (efek samping penghapusan).
+  - Swipe dua arah (`horizontal` + `secondaryBackground` cermin) memakai
+    jalur hapus + Urungkan yang sama persis.
+  - Aksi hapus di `HistoryDetailScreen` (dialog konfirmasi + guard
+    ketuk ganda + snackbar + Urungkan + kembali): jalur discoverable
+    kedua selain swipe.
+- **File:** `history_list_screen.dart`, `history_detail_screen.dart`,
+  `history_filter_bar.dart`, `app_strings.dart` (4 string dialog +
+  hapus 1 yatim), `test/history_dedup_test.dart` (6 test), update sadar
+  `history_test`, `premium_upgrade_test`, `ui_u2_identity_test`.
+- **Rationale:** gabungkan, jangan gandakan. Halaman overview baru
+  ditolak (masalahnya kelebihan permukaan); variasi kartu per verdict
+  ditolak (merusak scanability + mengeditorialisasi keliru).
+
 ## Verifikasi
 
 - `flutter analyze --no-pub`: bersih.
-- `flutter test`: 268 lulus, nol gagal.
-- Render 360×800 & 412×915 via test (spine + header + home + hero +
-  3 tab compact + riwayat refined).
+- `flutter test`: 274 lulus, nol gagal.
+- Render 360×800 & 412×915 via test.
 - `flutter build windows --debug`: sukses.
 - Commit manual oleh user (kebijakan repo): pecah per tema bila perlu.
