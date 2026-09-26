@@ -186,8 +186,9 @@ void main() {  group('U2.1 aksen header per tab', () {
       expect(find.text('3'), findsOneWidget);
       expect(find.text('2'), findsOneWidget);
       expect(find.text('1'), findsOneWidget);
-      // Count 0 disembunyikan agar pill tetap ringkas.
-      expect(find.text('0'), findsNothing);
+      // Angka 0 selalu tampil: pill adalah ringkasan komposisi utuh
+      // (kategori kosong = info, bukan error yang disembunyikan).
+      expect(find.text('0'), findsOneWidget);
       expect(find.byType(AnimatedContainer), findsWidgets);
 
       await tester.tap(find.text('Hoaks'));
@@ -196,8 +197,8 @@ void main() {  group('U2.1 aksen header per tab', () {
     });
   });
 
-  group('U2.3 ringkasan angka besar', () {
-    testWidgets('kolom angka + label + semantics selaras pill', (
+  group('U2.3 pill sebagai ringkasan tunggal', () {
+    testWidgets('tanpa kartu statistik terpisah, angka hanya di pill', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -247,9 +248,11 @@ void main() {  group('U2.1 aksen header per tab', () {
       await tester.pumpAndSettle();
       expect(ctaText, findsOneWidget);
       final ctaElement = ctaText.evaluate().single;
+      // Rantai aktual FilledButton.icon ± level 40 (Material + Ink +
+      // Focus + ...) — batas 60 agar longgar terhadap perubahan internal.
       var ancestor = _parentOf(ctaElement);
       var foundFilled = false;
-      for (var i = 0; i < 40 && ancestor != null; i++) {
+      for (var i = 0; i < 60 && ancestor != null; i++) {
         if (ancestor.widget is FilledButton) {
           foundFilled = true;
           break;

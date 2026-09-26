@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:literasi_ai/app/home_screen.dart';
 import 'package:literasi_ai/core/constants/app_colors.dart';
+import 'package:literasi_ai/core/constants/app_styles.dart';
 import 'package:literasi_ai/shared/widgets/app_section_header.dart';
 
 /// Regresi R1–R3: header compact Riwayat/Belajar/Profil.
@@ -33,6 +34,28 @@ void main() {
     }
     return text.style?.color;
   }
+
+  group('Token skala judul tab AppTabTitles', () {
+    test('Display 24 two-tone + Compact 20 two-tone + gap 12', () {
+      // Nilai terkunci = nilai yang sudah teruji di keempat layar.
+      // Display (landing Cek): headline lebih besar karena halaman utama.
+      expect(AppTabTitles.displayLine1.fontSize, 24);
+      expect(AppTabTitles.displayLine2(AppColors.primary).fontSize, 24);
+      expect(
+        AppTabTitles.displayLine2(AppColors.primary).fontStyle,
+        FontStyle.italic,
+      );
+      expect(AppTabTitles.displaySubtitle.fontSize, 13);
+      // Compact (tab utilitas): jangkar toolbar, bukan editorial.
+      expect(AppTabTitles.compactLine1.fontSize, 20);
+      expect(AppTabTitles.compactLine2(AppColors.primary).fontSize, 20);
+      expect(
+        AppTabTitles.compactLine2(AppColors.primary).fontStyle,
+        FontStyle.italic,
+      );
+      expect(AppTabTitles.titleToContentGap, AppSpacing.md);
+    });
+  });
 
   group('Header compact R1–R3', () {
     testWidgets('tanpa header editorial penuh di 3 tab', (

@@ -243,7 +243,9 @@ void main() {
 
     expect(find.text('Kembali'), findsNothing);
     expect(find.text('Asisten LiterasiAI'), findsOneWidget);
-    expect(find.text('Siap membantu verifikasi'), findsOneWidget);
+    // Subtitle kontekstual (tanpa kunci di test env): mode pratinjau.
+    expect(find.text('Mode pratinjau'), findsOneWidget);
+    expect(find.text('Siap membantu verifikasi'), findsNothing);
     expect(find.byTooltip('Mulai baru'), findsOneWidget);
     expect(
       find.text('Mode pratinjau: kunci API belum tersambung'),

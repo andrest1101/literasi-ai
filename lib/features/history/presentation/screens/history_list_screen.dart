@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/constants/app_styles.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../shared/widgets/app_shimmer.dart';
 import '../../../quick_check/domain/entities/verification_result.dart';
+import '../utils/history_time_ago.dart';
 import '../../../quick_check/presentation/screens/quick_check_session_screen.dart';
 import '../../../quick_check/presentation/widgets/quick_check_result_section.dart';
 import '../../domain/entities/history_entry.dart';
@@ -35,9 +37,11 @@ class HistoryListScreen extends ConsumerWidget {
             constraints: const BoxConstraints(maxWidth: 640),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const _HistoryToolbarTitle(),
-              const SizedBox(height: 12),
+              children: [
+                const _HistoryToolbarTitle(),
+                const SizedBox(height: 4),
+                _HistorySubContext(entries: entries),
+                const SizedBox(height: AppTabTitles.titleToContentGap),
                 _HistorySearchField(
                   onChanged: (value) =>
                       ref.read(historySearchProvider.notifier).state = value,
@@ -68,10 +72,12 @@ class HistoryListScreen extends ConsumerWidget {
                         .where(
                           (entry) =>
                               query.isEmpty ||
-                              entry.result.claim.toLowerCase().contains(query) ||
-                              (entry.result.sourceUrl
-                                      ?.toLowerCase()
-                                      .contains(query) ??
+                              entry.result.claim.toLowerCase().contains(
+                                query,
+                              ) ||
+                              (entry.result.sourceUrl?.toLowerCase().contains(
+                                    query,
+                                  ) ??
                                   false),
                         )
                         .toList();
@@ -86,13 +92,16 @@ class HistoryListScreen extends ConsumerWidget {
                         ),
                       );
                     }
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _HistoryStats(items: items),
-                        const SizedBox(height: 14),
-                        _HistoryList(entries: visible),
-                      ],
+                    // Badge TERBARU hanya bila daftar utuh (>1, tanpa filter
+                    // atau search): menandai entri pertama sebagai titik
+                    // orientasi tanpa menyesatkan saat daftar disaring.
+                    final markLatest =
+                        filter == HistoryFilter.all &&
+                        query.isEmpty &&
+                        visible.length > 1;
+                    return _HistoryList(
+                      entries: visible,
+                      markLatest: markLatest,
                     );
                   },
                 ),
@@ -123,30 +132,66 @@ class _HistoryToolbarTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Text.rich(
+    return Text.rich(
       TextSpan(
         children: [
-          TextSpan(
+          const TextSpan(
             text: AppStrings.homeHistoryTitle1,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.4,
-              color: AppColors.textPrimary,
-            ),
+            style: AppTabTitles.compactLine1,
           ),
           TextSpan(
             text: ' ${AppStrings.homeHistoryTitle2}',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              fontStyle: FontStyle.italic,
-              letterSpacing: -0.4,
-              color: AppColors.primaryDeep,
-            ),
+            style: AppTabTitles.compactLine2(AppColors.primaryDeep),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Sub-konteks data-driven di bawah judul: total pemeriksaan + waktu
+/// pemeriksaan terakhir ("4 pemeriksaan · terakhir 2 jam lalu").
+///
+/// Data dari stream yang sama dengan daftar (tanpa query baru); dihitung
+/// dari SELURUH riwayat, bukan hasil filter, agar konsisten dengan kartu
+/// statistik. Saat loading/error: tidak tampil (satu baris teks tidak
+/// butuh skeleton; daftar sudah punya shimmer sendiri).
+class _HistorySubContext extends StatelessWidget {
+  const _HistorySubContext({required this.entries});
+
+  final AsyncValue<List<HistoryEntry>> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    return entries.maybeWhen(
+      data: (items) {
+        if (items.isEmpty) {
+          return const Text(
+            AppStrings.historySubEmpty,
+            style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+          );
+        }
+        var latest = items.first.result.checkedAt;
+        for (final entry in items.skip(1)) {
+          final checkedAt = entry.result.checkedAt;
+          if (checkedAt.isAfter(latest)) latest = checkedAt;
+        }
+        final totalLabel = items.length == 1
+            ? '1 pemeriksaan'
+            : '${items.length} pemeriksaan';
+        final ago = historyTimeAgo(latest);
+        final latestLabel = ago == 'Baru saja' ? ago : '$ago lalu';
+        return Text(
+          '$totalLabel · terakhir $latestLabel',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 12.5,
+            color: AppColors.textSecondary,
+          ),
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }
@@ -162,6 +207,7 @@ class _HistorySearchField extends ConsumerStatefulWidget {
 
 class _HistorySearchState extends ConsumerState<_HistorySearchField> {
   final _controller = TextEditingController();
+  final _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -169,21 +215,34 @@ class _HistorySearchState extends ConsumerState<_HistorySearchField> {
     _controller.addListener(() {
       if (mounted) setState(() {});
     });
+    _focusNode.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // Focus ring biru-arsip: search terasa hidup hanya saat dipakai,
+    // tenang saat idle. Ikon mengikuti status focus yang sama.
+    final focused = _focusNode.hasFocus;
+    final accent = focused ? AppColors.primaryDeep : AppColors.textSecondary;
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         color: AppColors.surface,
-        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: focused
+              ? AppColors.primaryDeep.withValues(alpha: 0.55)
+              : AppColors.neutral.withValues(alpha: 0.2),
+          width: focused ? 1.4 : 1,
+        ),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0D101A33),
@@ -194,6 +253,7 @@ class _HistorySearchState extends ConsumerState<_HistorySearchField> {
       ),
       child: TextField(
         controller: _controller,
+        focusNode: _focusNode,
         onChanged: widget.onChanged,
         textInputAction: TextInputAction.search,
         style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
@@ -203,11 +263,7 @@ class _HistorySearchState extends ConsumerState<_HistorySearchField> {
             fontSize: 13.5,
             color: AppColors.textSecondary,
           ),
-          prefixIcon: const Icon(
-            Icons.search_rounded,
-            size: 20,
-            color: AppColors.textSecondary,
-          ),
+          prefixIcon: Icon(Icons.search_rounded, size: 20, color: accent),
           suffixIcon: _controller.text.isEmpty
               ? null
               : IconButton(
@@ -239,8 +295,8 @@ class _HistorySearchState extends ConsumerState<_HistorySearchField> {
 
 /// Hitung isi tiap filter dari daftar yang sama: tanpa query baru.
 ///
-/// `perluDicek` mencakup verdict kuning + abu (konsisten dengan strip
-/// [_HistoryStats]) agar angka pill dan ringkasan selalu selaras.
+/// `perluDicek` mencakup verdict kuning + abu. Pill filter adalah
+/// satu-satunya representasi angka komposisi verdict di tab ini.
 Map<HistoryFilter, int> _filterCounts(List<HistoryEntry> items) {
   var hoaks = 0;
   var valid = 0;
@@ -267,199 +323,99 @@ Map<HistoryFilter, int> _filterCounts(List<HistoryEntry> items) {
   };
 }
 
-/// Ringkasan verdict: 3 kolom angka besar agar tab Riwayat terasa hidup.
-///
-/// Dihitung dari seluruh riwayat (bukan hasil filter), sehingga angka
-/// tetap jadi konteks walau user menyaring satu verdict. Selaras dengan
-/// angka pill filter ([_filterCounts]).
-class _HistoryStats extends StatelessWidget {
-  const _HistoryStats({required this.items});
-
-  final List<HistoryEntry> items;
-
-  @override
-  Widget build(BuildContext context) {
-    var hoaks = 0;
-    var valid = 0;
-    var perlu = 0;
-    for (final entry in items) {
-      switch (entry.result.verdict) {
-        case Verdict.hoaks:
-          hoaks++;
-          break;
-        case Verdict.valid:
-          valid++;
-          break;
-        case Verdict.perluDicek:
-        case Verdict.tidakDapatDipastikan:
-          perlu++;
-          break;
-      }
-    }
-    return Semantics(
-      label:
-          '${AppStrings.historyStatsTitle}: $hoaks Hoaks, $valid Valid, $perlu Perlu dicek',
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          color: AppColors.surface,
-          border: Border.all(color: AppColors.neutral.withValues(alpha: 0.18)),
-        ),
-        child: Row(
-          children: [
-            _StatColumn(
-              value: hoaks,
-              label: AppStrings.historyFilterHoaks,
-              accent: AppColors.danger,
-            ),
-            _StatsDivider(),
-            _StatColumn(
-              value: valid,
-              label: AppStrings.historyFilterValid,
-              accent: AppColors.success,
-            ),
-            _StatsDivider(),
-            _StatColumn(
-              value: perlu,
-              label: AppStrings.historyFilterNeedCheck,
-              accent: AppColors.verdictAmber,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StatsDivider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 34,
-      color: AppColors.neutral.withValues(alpha: 0.2),
-    );
-  }
-}
-
-class _StatColumn extends StatelessWidget {
-  const _StatColumn({
-    required this.value,
-    required this.label,
-    required this.accent,
-  });
-
-  final int value;
-  final String label;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            height: 3,
-            width: 28,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(999),
-              color: accent,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            '$value',
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.4,
-              color: AppColors.textPrimary,
-              fontFeatures: [FontFeature.tabularFigures()],
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _HistoryList extends ConsumerWidget {
-  const _HistoryList({required this.entries});
+  const _HistoryList({required this.entries, this.markLatest = false});
 
   final List<HistoryEntry> entries;
+  final bool markLatest;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        for (final entry in entries) ...[
-          Dismissible(
-            key: ValueKey(entry.id),
-            direction: DismissDirection.endToStart,
-            onDismissed: (_) async {
-              await ref.read(historyActionProvider.notifier).delete(entry.id);
-              final action = ref.read(historyActionProvider);
-              if (!context.mounted) return;
-              if (action.hasError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(AppStrings.historyDeleteFailed),
-                    behavior: SnackBarBehavior.floating,
+        // Entri pertama = terbaru (stream terurut waktu menurun).
+        for (var i = 0; i < entries.length; i++) ...[
+          Builder(
+            builder: (context) {
+              final entry = entries[i];
+              final latest = markLatest && i == 0;
+              // Dua arah horizontal: pengguna kidal maupun kanan-dominan
+              // sama-sama menemukan hapus; kedua arah memakai jalur hapus
+              // dan Urungkan yang sama persis.
+              return Dismissible(
+                key: ValueKey(entry.id),
+                direction: DismissDirection.horizontal,
+                onDismissed: (_) async {
+                  await ref
+                      .read(historyActionProvider.notifier)
+                      .delete(entry.id);
+                  final action = ref.read(historyActionProvider);
+                  if (!context.mounted) return;
+                  if (action.hasError) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(AppStrings.historyDeleteFailed),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    return;
+                  }
+                  final messenger = ScaffoldMessenger.of(context);
+                  messenger.clearSnackBars();
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: const Text(AppStrings.historyDeleted),
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 4),
+                      action: SnackBarAction(
+                        label: AppStrings.historyUndo,
+                        onPressed: () {
+                          final userId = ref.read(historyUserIdProvider);
+                          if (userId == null) return;
+                          ref.read(saveHistoryProvider)(
+                            userId: userId,
+                            result: entry.result,
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 22),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(22),
+                    color: AppColors.danger,
                   ),
-                );
-                return;
-              }
-              final messenger = ScaffoldMessenger.of(context);
-              messenger.clearSnackBars();
-              messenger.showSnackBar(
-                SnackBar(
-                  content: const Text(AppStrings.historyDeleted),
-                  behavior: SnackBarBehavior.floating,
-                  duration: const Duration(seconds: 4),
-                  action: SnackBarAction(
-                    label: AppStrings.historyUndo,
-                    onPressed: () {
-                      final userId = ref.read(historyUserIdProvider);
-                      if (userId == null) return;
-                      ref.read(saveHistoryProvider)(
-                        userId: userId,
-                        result: entry.result,
-                      );
-                    },
+                  child: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: Colors.white,
+                  ),
+                ),
+                secondaryBackground: Container(
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(left: 22),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(22),
+                    color: AppColors.danger,
+                  ),
+                  child: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: Colors.white,
+                  ),
+                ),
+                child: HistoryCard(
+                  entry: entry,
+                  isLatest: latest,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => HistoryDetailScreen(entry: entry),
+                    ),
                   ),
                 ),
               );
             },
-            background: Container(
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.only(right: 22),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(22),
-                color: AppColors.danger,
-              ),
-              child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
-            ),
-            child: HistoryCard(
-              entry: entry,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => HistoryDetailScreen(entry: entry),
-                ),
-              ),
-            ),
           ),
           const SizedBox(height: 12),
         ],

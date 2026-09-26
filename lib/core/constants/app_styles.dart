@@ -135,3 +135,59 @@ abstract final class AppSpacing {
   static const double xl = 20;
   static const double xxl = 24;
 }
+
+/// Skala judul tab: SATU sumber kebenaran agar keempat tab satu keluarga.
+///
+/// Dua tingkat yang disengaja, bukan kebetulan:
+/// * Display (landing Cek): 24px two-tone 2 baris + subtitle + hairline.
+///   Landing utama boleh sedikit lebih besar: di sinilah aksi primer.
+/// * Compact (Riwayat/Belajar/Profil): 20px two-tone 1 baris.
+///   Tab utilitas: judul hanya jangkar toolbar fungsional di bawahnya.
+/// Hairline pemisah hanya milik Display sebagai jangkar editorial landing
+/// (tiga tab Compact sengaja tanpa hairline: judulnya jangkar toolbar,
+/// bukan editorial). Perbedaan ini keputusan yang didokumentasikan, bukan
+/// inkonsistensi.
+/// Nilai di sini = nilai yang sudah teruji di keempat layar; refactor
+/// screen ke token ini TIDAK mengubah satu piksel pun visual.
+abstract final class AppTabTitles {
+  static const TextStyle displayLine1 = TextStyle(
+    fontSize: 24,
+    height: 1.15,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -0.5,
+    color: AppColors.textPrimary,
+  );
+
+  static TextStyle displayLine2(Color accent) => TextStyle(
+    fontSize: 24,
+    height: 1.15,
+    fontWeight: FontWeight.w800,
+    fontStyle: FontStyle.italic,
+    letterSpacing: -0.5,
+    color: accent,
+  );
+
+  static const TextStyle displaySubtitle = TextStyle(
+    fontSize: 13,
+    height: 1.55,
+    color: AppColors.textSecondary,
+  );
+
+  static const TextStyle compactLine1 = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -0.4,
+    color: AppColors.textPrimary,
+  );
+
+  static TextStyle compactLine2(Color accent) => TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w800,
+    fontStyle: FontStyle.italic,
+    letterSpacing: -0.4,
+    color: accent,
+  );
+
+  /// Gap vertikal judul ke konten: 12px konsisten di keempat tab.
+  static const double titleToContentGap = AppSpacing.md;
+}

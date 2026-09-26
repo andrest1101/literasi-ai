@@ -4,14 +4,15 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/history_filter.dart';
 
-/// Bar filter riwayat: pill animasi beridentitas verdict.
+/// Bar filter riwayat: ringkasan komposisi + kontrol filter sekaligus.
 ///
-/// Bukan [ChoiceChip] default Material: seleksi bertransisi 200ms via
-/// [AnimatedContainer], tiap filter punya aksen warnanya sendiri (Semua
-/// biru, Hoaks merah, Valid hijau, Perlu dicek amber), dan suffix angka
-/// [counts] memberi tahu isi tiap filter tanpa harus mengetuknya dulu.
-/// Label dan angka dirender sebagai [Text] terpisah agar test pencari
-/// label tetap valid.
+/// Satu-satunya representasi angka komposisi verdict di tab ini (kartu
+/// statistik terpisah dihapus agar tidak ganda). Bukan [ChoiceChip]
+/// default Material: seleksi bertransisi 200ms via [AnimatedContainer],
+/// tiap filter punya aksen warnanya sendiri (Semua biru, Hoaks merah,
+/// Valid hijau, Perlu dicek amber), dan suffix angka [counts] memberi
+/// tahu isi tiap filter tanpa harus mengetuknya dulu. Label dan angka
+/// dirender sebagai [Text] terpisah agar test pencari label tetap valid.
 class HistoryFilterBar extends StatelessWidget {
   const HistoryFilterBar({
     super.key,
@@ -90,18 +91,20 @@ class _FilterPill extends StatelessWidget {
     return Semantics(
       button: true,
       selected: active,
-      label: count > 0 ? '$label, $count' : label,
+      label: count > 0
+          ? '$label, $count entri. Ketuk untuk menyaring daftar'
+          : '$label. Ketuk untuk menyaring daftar',
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
             color: active
                 ? accent.withValues(alpha: 0.12)
-                : AppColors.surface,
+                : accent.withValues(alpha: 0.05),
             border: Border.all(
               color: active
                   ? accent.withValues(alpha: 0.45)
@@ -137,18 +140,16 @@ class _FilterPill extends StatelessWidget {
                   color: active ? activeInk : AppColors.textSecondary,
                 ),
               ),
-              if (count > 0) ...[
-                const SizedBox(width: 6),
-                Text(
-                  '$count',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: active ? activeInk : AppColors.textSecondary,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
+              const SizedBox(width: 6),
+              Text(
+                '$count',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: active ? activeInk : AppColors.textPrimary,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
-              ],
+              ),
             ],
           ),
         ),

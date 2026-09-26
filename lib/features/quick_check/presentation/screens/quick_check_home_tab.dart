@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/constants/app_styles.dart';
 import '../../../score/presentation/screens/api_key_screen.dart';
 import '../../../score/presentation/widgets/score_check_chip.dart';
 import '../../../trending/domain/entities/trending_item.dart';
@@ -63,7 +64,7 @@ class QuickCheckHomeTab extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const _CheckHeading(),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppTabTitles.titleToContentGap),
               ScoreCheckChip(
                 onOpenProfile: onOpenProfile,
                 onOpenKeySettings: () => _openKeySettings(context),
@@ -182,35 +183,18 @@ class _CheckHeading extends StatelessWidget {
       children: [
         Text(
           AppStrings.homeCheckTitle1,
-          style: const TextStyle(
-            fontSize: 24,
-            height: 1.15,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
-            color: AppColors.textPrimary,
-          ),
+          style: AppTabTitles.displayLine1,
         ),
-        const Text(
+        Text(
           AppStrings.homeCheckTitle2,
-          style: TextStyle(
-            fontSize: 24,
-            height: 1.15,
-            fontWeight: FontWeight.w800,
-            fontStyle: FontStyle.italic,
-            letterSpacing: -0.5,
-            color: AppColors.primary,
-          ),
+          style: AppTabTitles.displayLine2(AppColors.primary),
         ),
         const SizedBox(height: 6),
         const Text(
           AppStrings.homeCheckSubtitle,
-          style: TextStyle(
-            fontSize: 13,
-            height: 1.55,
-            color: AppColors.textSecondary,
-          ),
+          style: AppTabTitles.displaySubtitle,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppTabTitles.titleToContentGap),
         Container(
           height: 1,
           color: AppColors.neutral.withValues(alpha: 0.18),

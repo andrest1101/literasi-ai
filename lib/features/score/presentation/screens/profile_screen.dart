@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/constants/app_styles.dart';
 import '../../../../core/utils/api_key_resolver.dart';
 import '../../../auth/presentation/screens/auth_screen.dart';
 import '../../../history/presentation/providers/history_providers.dart';
@@ -33,7 +34,7 @@ class ProfileScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const _ProfileHeading(),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppTabTitles.titleToContentGap),
               score.when(
                 loading: () => const _ScoreShimmer(),
                 error: (_, _) => _ScoreError(
@@ -78,36 +79,25 @@ class _ProfileHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text.rich(
           TextSpan(
             children: [
-              TextSpan(
+              const TextSpan(
                 text: AppStrings.homeProfileTitle1,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.4,
-                  color: AppColors.textPrimary,
-                ),
+                style: AppTabTitles.compactLine1,
               ),
               TextSpan(
                 text: ' ${AppStrings.homeProfileTitle2}',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  fontStyle: FontStyle.italic,
-                  letterSpacing: -0.4,
-                  color: AppColors.primaryDark,
-                ),
+                style: AppTabTitles.compactLine2(AppColors.primaryDark),
               ),
             ],
           ),
         ),
-        SizedBox(height: 4),
-        Text(
+        const SizedBox(height: 4),
+        const Text(
           AppStrings.homeProfileSubtitle,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
