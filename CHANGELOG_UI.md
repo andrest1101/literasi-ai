@@ -231,10 +231,57 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   ditolak (masalahnya kelebihan permukaan); variasi kartu per verdict
   ditolak (merusak scanability + mengeditorialisasi keliru).
 
+## Polish Chat C1-C4 (26 Sep 2026)
+
+- **Masalah:** subtitle AppBar generik; tanpa disclaimer model; hero
+  68px kurang presence; AppBar penuh (lingkaran back + squircle avatar
+  + squircle aksi bertarung); overflow laten banner kunci 29px di 360px.
+- **Perubahan (UI-only, provider/domain tidak tersentuh):**
+  - Subtitle kontekstual dari `chatKeyConfiguredProvider`: "AI live ·
+    Siap menjawab" vs "Mode pratinjau". Tanpa dot hijau palsu dan tanpa
+    angka kuota (tidak bisa diketahui client).
+  - Disclaimer compact di bawah chips (empty state saja): "Didukung
+    Gemini AI · Jawaban bisa keliru, cek ulang info penting." Tanpa
+    ikon, tanpa versi model yang bisa usang.
+  - Hero 68→80px + kompresi gap (16→14, padding 32→28, chips 20→16).
+  - AppBar: lingkaran tonal → panah polos bawaan; avatar 38→34px.
+    `SessionBackButton` tetap untuk layar sesi.
+  - Banner kunci responsif (`LayoutBuilder` <340px: aksi full-width di
+    bawah teks): memperbaiki overflow laten, pola sama dengan hero Cek.
+- **Ditolak:** mic voice input (plugin + permission), persistensi
+  welcome-back (lapisan data baru), full-width cards + emoji (AI slop),
+  pulse loop (baterai + calm), dot "Online" palsu, angka kuota palsu.
+
+## Header chat tanpa avatar (26 Sep 2026)
+
+- **Masalah:** shield muncul 3x dalam satu viewport (header + tiap
+  bubble AI): pengulangan identitas, header terasa penuh.
+- **Perubahan:** avatar shield dihapus dari AppBar (identitas milik
+  bubble AI + hero empty-state + FAB); panah kembali dipertegas
+  22→24px sebagai kompensasi visual; pola panah polos dipertahankan
+  (bukan lingkaran: konvensi chat WhatsApp/Telegram/iMessage).
+- **File:** `chat_screen.dart` (hapus `_IdentityAvatar` yatim),
+  `test/chat_polish_test.dart` (assert tanpa shield di AppBar +
+  shield tetap di bubble).
+- **Rationale:** koreksi rekomendasi sebelumnya yang benar untuk empty
+  state tapi redundan saat percakapan berjalan.
+- **Revisi (permintaan user):** tombol kembali lingkaran tonal
+  dikembalikan. Keberatan "bentuk bertarung" hanya valid saat avatar
+  masih ada; tanpa avatar, lingkaran kiri + squircle aksi kanan justru
+  membingkai teks seimbang, dan lingkaran 40px memberi jarak napas
+  alami ke teks (vs panah polos yang menempel). `leadingWidth` 40→56.
+- **File:** `chat_screen.dart`, `app_strings.dart` (3 string baru,
+  1 yatim dihapus), `test/chat_polish_test.dart` (6 test),
+  update sadar `chat_test` + `section_header_test`.
+- **Rationale:** klaim saran luar diverifikasi ke kode dulu: typing
+  indicator, press state chip, tombol kirim adaptif, tombol clear dan
+  hint kiri SUDAH benar (tidak diubah); angka ukuran klaimnya ngawur.
+
 ## Verifikasi
 
 - `flutter analyze --no-pub`: bersih.
-- `flutter test`: 274 lulus, nol gagal.
+- `flutter test`: 281 lulus, nol gagal (tetap, revisi back button tercakup
+  test AppBar yang diperbarui).
 - Render 360×800 & 412×915 via test.
 - `flutter build windows --debug`: sukses.
 - Commit manual oleh user (kebijakan repo): pecah per tema bila perlu.
