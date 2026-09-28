@@ -277,11 +277,97 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   indicator, press state chip, tombol kirim adaptif, tombol clear dan
   hint kiri SUDAH benar (tidak diubah); angka ukuran klaimnya ngawur.
 
+## Jalur Belajar L1-L3 (28 Sep 2026)
+
+- **Masalah:** 3 kartu modul + kotak catatan poin terbaca sebagai 4
+  persegi membulat berurutan: radius mirip, meta pills identik, kotak
+  poin memakai gaya info biru generik. Mata tidak menangkap peran:
+  mana pembuka, lanjutan, dan hadiah.
+- **Perubahan (UI-only, provider/domain/kuis tidak tersentuh):**
+  - Rail jalur pembelajaran: nomor ghost `01/02/03` + konektor vertikal
+    di sisi kiri daftar. Status per node dari `CourseProgress` yang sama
+    (tanpa query baru): selesai = centang hijau penuh, langkah saat ini
+    = lingkar primer, berikutnya = nomor ghost netral. Label semantics
+    "Langkah N dari 3, ..." per node. `IntrinsicHeight` dipakai karena
+    daftar di dalam scroll view (stretch butuh tinggi bounded dan crash
+    `BoxConstraints forces an infinite height`).
+  - Kartu keempat didesain ulang total: kotak info biru menjadi strip
+    hadiah hijau pekat (`AppColors.learnRewardSurface`, sengaja beda
+    dari kartu strip 03 agar dua permukaan gelap tidak menyatu) dengan
+    medallion trofi + judul + hint + divider + dua kolom angka
+    `+20`/`+5` yang dibaca dari `LiteracyScore.modulePoints/quizPoints`
+    (sinkron domain, bukan hardcode). Satu label semantics gabungan.
+    String lama `learnPointsNote` dihapus; 4 string baru
+    (`learnPathCurrent/Next/Start/Final`, `learnRewardTitle/Hint/
+    ModuleLabel/QuizLabel`).
+  - Kartu 1 dan 3 mendapat penanda peran di dalam kartu (bukan
+    mengandalkan rail semata): pill "Mulai dari sini" (play) di hero,
+    pill status "Langkah akhir"/"Selesai" di strip (status dibaca dari
+    `completed` yang sudah ada). Angka raksasa `03` dihapus (duplikat
+    dengan nomor rail). Medallion kartu split diselaraskan amber ke
+    keluarga hijau sukses (`successDark`, token resmi).
+- **Bonus fix:** test render 360px menemukan overflow laten 7.5px di
+  pill hero kartu 1 (font test Ahem lebih lebar; font aksesibilitas
+  besar di device nyata bisa memicu hal sama): Row `Spacer` diganti
+  `Flexible` + ellipsis di pill kartu 1 dan 3. Bug nyata, bukan artefak.
+- **Ditolak:** membongkar struktur 3 varian kartu (sudah heterogen,
+  risiko regresi tanpa nilai tambah), thumbnail ilustrasi (offline,
+  placeholder palsu menurunkan kredibilitas), entrance staggered
+  (prinsip calm), variasi ukuran kartu per status (merusak scanability).
+- **File:** `course_list_screen.dart` (`_LearningPath`, `_PathRow`,
+  `_PathNode`, `_RewardStrip`, `_RewardCell`), `course_card.dart`
+  (pill peran + Flexible + aksen hijau split), `app_colors.dart`
+  (`learnRewardSurface/InkSoft`), `app_strings.dart` (4 yatim dihapus,
+  8 baru), `test/learn_path_test.dart` (6 test: nomor + status,
+  strip sinkron domain, kotak biru lama hilang, render 360/412px),
+  update sadar `tab_headers_test` + `ui_u2_identity_test` (helper
+  aksen kini memilih kandidat Text.rich beranak span agar tahan
+  terhadap konten baru yang memakai kata mirip).
+
+## Library Belajar M1-M5 (28 Sep 2026)
+
+- **Masalah:** rail + 3 kartu berat + strip gelap memakai 4 bahasa warna
+  (biru hero, amber medallion, hijau-gelap 03, hijau-pekat strip) dalam
+  satu layar; kartu berteriak minta perhatian, hierarki dari kotak bukan
+  tipografi; tidak ada affordance "ketuk untuk masuk".
+- **Perubahan (UI-only, data/provider/kuis/skor tidak tersentuh):**
+  - Hapus total: rail `_LearningPath`/`_PathRow`/`_PathNode`, 3 varian
+    `CourseCard` (hero/split/numbered), pill peran rail
+    (`learnPathCurrent/Next/Start/Final`). Dead code removal ±380 baris.
+  - `ModuleRow` baru (`course_card.dart` ditulis ulang): satu baris
+    terang senada per modul: thumbnail prosedural 64px (tint satu
+    keluarga biru-teal-hijau + ikon identitas + pola diagonal samar
+    CustomPainter, tanpa aset/offline-safe) + judul 16 + subtitle 2
+    baris + meta pills netral + tombol panah lingkaran (selesai =
+    centang hijau penuh) + bilah progres kuis jujur `best/quizCount`
+    dari provider yang sama. Badge "Selesai" + thumbnail redup untuk
+    status, bukan kartu berbeda.
+  - `ModuleMotif` + `motifForModule` di `module_motif.dart` baru: satu
+    sumber kebenaran motif dari `accentSeed` data (bukan posisi list).
+  - Hero detail disambungkan: medallion generik `menu_book` diganti
+    motif modul versi besar (tint + ikon sama) dengan pola samar;
+    gradien biru hero dipertahankan (satu keluarga hero Cek).
+  - Header seksi "Modulku" + hitungan "N dari 3 modul selesai" dari
+    stream yang sama (pola Riwayat). Ringkasan ring + strip hadiah
+    hijau pekat dipertahankan: satu-satunya titik fokal gelap di akhir
+    daftar sehingga kontrasnya berfungsi.
+  - 4 string rail yatim dihapus; 5 baru (`learnMyModules/ModulesOf/
+    ModulesDone/OpenModule/QuizProgressLabel`).
+- **Ditolak:** search + filter level (over-engineering untuk 3 modul),
+  activity bars dekoratif (klaim palsu), thumbnail foto/aset, entrance
+  staggered, variasi ukuran kartu per status.
+- **File:** `course_card.dart` (rewrite), `module_motif.dart` (baru),
+  `course_list_screen.dart` (`_ModuleSectionHeader`, `_ModuleList`),
+  `course_detail_screen.dart` (hero motif + `_HeroMotifPattern`),
+  `app_strings.dart`, `test/learn_library_test.dart` (8 test: motif
+  satu sumber, 3 rows + header + hitungan, selesai, progres jujur,
+  strip, hero 3 ikon, render 360/412px). `learn_path_test.dart`
+  dihapus (digantikan). Test lama Belajar/headers tanpa ubahan, hijau.
+
 ## Verifikasi
 
 - `flutter analyze --no-pub`: bersih.
-- `flutter test`: 281 lulus, nol gagal (tetap, revisi back button tercakup
-  test AppBar yang diperbarui).
-- Render 360×800 & 412×915 via test.
-- `flutter build windows --debug`: sukses.
+- `flutter test`: 289 lulus, nol gagal (281 lama + 8 baru library).
+- Render 360×915 & 412×915 via test.
+- `flutter build windows --debug`: sukses, app relaunch hidup.
 - Commit manual oleh user (kebijakan repo): pecah per tema bila perlu.
