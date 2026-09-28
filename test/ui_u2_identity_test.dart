@@ -127,8 +127,22 @@ void main() {  group('U2.1 aksen header per tab', () {
 
       // Judul toolbar compact memakai Text.rich: warna aksen ada di
       // span kedua (kata kedua italic). Baca dari span, bukan Text.style.
+      // Bila beberapa Text cocok (mis. hint konten memakai kata mirip),
+      // pilih kandidat Text.rich beranak span: itulah judul toolbar.
       Color? accentOf(String contains) {
-        final text = tester.widget<Text>(find.textContaining(contains));
+        final rich = find
+            .textContaining(contains)
+            .evaluate()
+            .map((e) => e.widget)
+            .whereType<Text>()
+            .where(
+              (w) =>
+                  w.textSpan is TextSpan &&
+                  (w.textSpan! as TextSpan).children != null,
+            );
+        final text = rich.isNotEmpty
+            ? rich.first
+            : tester.widget<Text>(find.textContaining(contains));
         final span = text.textSpan;
         if (span is TextSpan && span.children != null) {
           for (final child in span.children!) {

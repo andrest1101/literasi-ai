@@ -30,6 +30,12 @@ abstract final class AppColors {
   static const Color heroEnd = Color(0xFF124A9B);
   static const Color heroInkSoft = Color(0xFFD6E5FE);
 
+  // Belajar: panel hadiah hijau pekat (identitas tumbuh). Satu-satunya
+  // permukaan gelap di tab Belajar sehingga kontrasnya berfungsi sebagai
+  // jangkar visual di akhir daftar terang.
+  static const Color learnRewardSurface = Color(0xFF0F3D22);
+  static const Color learnRewardInkSoft = Color(0xFFBFE6CF);
+
   // Garis & bayangan terpusat.
   static const Color hairline = Color(0xFFE3E8F0);
   static const Color disabledSurface = Color(0xFFE8EDF5);

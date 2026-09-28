@@ -21,8 +21,21 @@ void main() {
   }
 
   /// Warna aksen kata kedua judul toolbar compact (Text.rich dua span).
+  ///
+  /// Bila beberapa Text cocok (mis. hint konten memakai kata mirip), pilih
+  /// kandidat Text.rich beranak span: itulah judul toolbar, bukan body.
   Color? toolbarAccent(WidgetTester tester, String contains) {
-    final text = tester.widget<Text>(find.textContaining(contains));
+    final rich = find
+        .textContaining(contains)
+        .evaluate()
+        .map((e) => e.widget)
+        .whereType<Text>()
+        .where(
+          (w) => w.textSpan is TextSpan && (w.textSpan! as TextSpan).children != null,
+        );
+    final text = rich.isNotEmpty
+        ? rich.first
+        : tester.widget<Text>(find.textContaining(contains));
     final span = text.textSpan;
     if (span is TextSpan && span.children != null) {
       for (final child in span.children!) {

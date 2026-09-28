@@ -5,15 +5,18 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_styles.dart';
 import '../../../../shared/widgets/app_shimmer.dart';
+import '../../../score/domain/entities/literacy_score.dart';
+import '../../domain/entities/course_module.dart';
 import '../../domain/entities/course_progress.dart';
 import '../providers/learn_providers.dart';
 import '../widgets/course_card.dart';
 import 'course_detail_screen.dart';
 
-/// Daftar 3 modul: tab Belajar fungsional pertama.
+/// Library modul: daftar baris terang senada + strip hadiah gelap.
 ///
-/// Header editorial + ringkasan progres global + 3 kartu heterogen + catatan
-/// poin. Guest bisa membaca semua modul; progres sync menunggu login.
+/// Satu layar satu bahasa visual: variasi hanya motif thumbnail (bukan
+/// warna permukaan). Guest bisa membaca semua modul; progres sync
+/// menunggu login.
 class CourseListScreen extends ConsumerWidget {
   const CourseListScreen({super.key});
 
@@ -35,64 +38,38 @@ class CourseListScreen extends ConsumerWidget {
               progress.when(
                 loading: () => const _ProgressSkeleton(),
                 error: (_, _) => const SizedBox.shrink(),
-                data: (value) => _ProgressSummary(progress: value, total: modules.length),
+                data: (value) =>
+                    _ProgressSummary(progress: value, total: modules.length),
               ),
-              const SizedBox(height: 14),
-              for (var i = 0; i < modules.length; i++) ...[
-                if (i > 0) const SizedBox(height: 12),
-                progress.when(
-                  loading: () => CourseCard(
-                    module: modules[i],
-                    completed: false,
-                    bestScore: 0,
-                    onTap: () => _openDetail(context, modules[i].id),
-                  ),
-                  error: (_, _) => CourseCard(
-                    module: modules[i],
-                    completed: false,
-                    bestScore: 0,
-                    onTap: () => _openDetail(context, modules[i].id),
-                  ),
-                  data: (value) => CourseCard(
-                    module: modules[i],
-                    completed: value.isCompleted(modules[i].id),
-                    bestScore: value.bestFor(modules[i].id),
-                    onTap: () => _openDetail(context, modules[i].id),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 14),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
-                  color: AppColors.primary.withValues(alpha: 0.06),
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.2),
-                  ),
-                ),
-                child: const Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.info_outline_rounded,
-                      size: 18,
-                      color: AppColors.primary,
-                    ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        AppStrings.learnPointsNote,
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          height: 1.6,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 16),
+              progress.when(
+                loading: () => _ModuleSectionHeader(done: 0, total: 0),
+                error: (_, _) => _ModuleSectionHeader(done: 0, total: 0),
+                data: (value) => _ModuleSectionHeader(
+                  done: value.completedCount.clamp(0, modules.length),
+                  total: modules.length,
                 ),
               ),
+              const SizedBox(height: 10),
+              progress.when(
+                loading: () => _ModuleList(
+                  modules: modules,
+                  progress: const CourseProgress(),
+                  onOpen: _openDetail,
+                ),
+                error: (_, _) => _ModuleList(
+                  modules: modules,
+                  progress: const CourseProgress(),
+                  onOpen: _openDetail,
+                ),
+                data: (value) => _ModuleList(
+                  modules: modules,
+                  progress: value,
+                  onOpen: _openDetail,
+                ),
+              ),
+              const SizedBox(height: 14),
+              const _RewardStrip(),
             ],
           ),
         ),
@@ -102,9 +79,7 @@ class CourseListScreen extends ConsumerWidget {
 
   void _openDetail(BuildContext context, String moduleId) {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => CourseDetailScreen(moduleId: moduleId),
-      ),
+      MaterialPageRoute(builder: (_) => CourseDetailScreen(moduleId: moduleId)),
     );
   }
 }
@@ -112,10 +87,8 @@ class CourseListScreen extends ConsumerWidget {
 /// Judul toolbar compact tab Belajar: satu baris 20px menempel dengan
 /// ringkasan progres tepat di bawahnya sebagai satu blok.
 ///
-/// Menggantikan header editorial penuh. Subtitle lama ("Tiga modul
-/// singkat…") dihapus karena jumlah modul langsung terlihat dari daftar
-/// kartu di bawahnya; info poin tetap ada di `learnPointsNote`. Aksen
-/// hijau-tumbuh dipertahankan pada kata kedua agar identitas tab utuh.
+/// Aksen hijau-tumbuh dipertahankan pada kata kedua agar identitas tab
+/// utuh. Info poin kini milik strip hadiah di akhir daftar.
 class _LearnToolbarTitle extends StatelessWidget {
   const _LearnToolbarTitle();
 
@@ -138,6 +111,223 @@ class _LearnToolbarTitle extends StatelessWidget {
   }
 }
 
+/// Header seksi daftar modul: kalimat orientasi + hitungan selesai.
+///
+/// Menggantikan tumpukan kartu tanpa jangkar. Hitungan dibaca dari
+/// [CourseProgress] yang sama dengan ringkasan (tanpa query baru).
+class _ModuleSectionHeader extends StatelessWidget {
+  const _ModuleSectionHeader({required this.done, required this.total});
+
+  final int done;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          AppStrings.learnMyModules,
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.3,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          '$done ${AppStrings.learnModulesOf} $total ${AppStrings.learnModulesDone}',
+          style: const TextStyle(
+            fontSize: 12.5,
+            color: AppColors.textSecondary,
+            fontFeatures: [FontFeature.tabularFigures()],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Daftar baris library: satu bahasa terang, tanpa kartu berat.
+///
+/// Status selesai + skor terbaik dibaca dari [CourseProgress] yang sama
+/// dengan ringkasan (tanpa query baru). Logika buka detail tidak berubah.
+class _ModuleList extends StatelessWidget {
+  const _ModuleList({
+    required this.modules,
+    required this.progress,
+    required this.onOpen,
+  });
+
+  final List<CourseModule> modules;
+  final CourseProgress progress;
+  final void Function(BuildContext context, String moduleId) onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < modules.length; i++) ...[
+          if (i > 0) const SizedBox(height: 10),
+          ModuleRow(
+            module: modules[i],
+            completed: progress.isCompleted(modules[i].id),
+            bestScore: progress.bestFor(modules[i].id),
+            onTap: () => onOpen(context, modules[i].id),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Strip hadiah: info poin disajikan sebagai hadiah, bukan catatan kaki.
+///
+/// Panel hijau pekat identitas Belajar (bukan info biru generik) dengan dua
+/// kolom angka dari [LiteracyScore.modulePoints]/[quizPoints] agar angka
+/// selalu sinkron dengan domain. Satu label semantics gabungan.
+class _RewardStrip extends StatelessWidget {
+  const _RewardStrip();
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label:
+          '${AppStrings.learnRewardTitle}: '
+          '+${LiteracyScore.modulePoints} poin ${AppStrings.learnRewardModuleLabel}, '
+          '+${LiteracyScore.quizPoints} poin ${AppStrings.learnRewardQuizLabel}.',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: AppColors.learnRewardSurface,
+          border: Border.all(color: AppColors.success.withValues(alpha: 0.4)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x1A0F3D22),
+              blurRadius: 18,
+              offset: Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.success.withValues(alpha: 0.2),
+                    border: Border.all(
+                      color: AppColors.success.withValues(alpha: 0.45),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.emoji_events_outlined,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppStrings.learnRewardTitle,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.2,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        AppStrings.learnRewardHint,
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.55,
+                          color: AppColors.learnRewardInkSoft,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(height: 1, color: Colors.white.withValues(alpha: 0.14)),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _RewardCell(
+                    value: '+${LiteracyScore.modulePoints}',
+                    label: AppStrings.learnRewardModuleLabel,
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 44,
+                  color: Colors.white.withValues(alpha: 0.14),
+                ),
+                Expanded(
+                  child: _RewardCell(
+                    value: '+${LiteracyScore.quizPoints}',
+                    label: AppStrings.learnRewardQuizLabel,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RewardCell extends StatelessWidget {
+  const _RewardCell({required this.value, required this.label});
+
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+            color: Colors.white,
+            fontFeatures: [FontFeature.tabularFigures()],
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 11.5,
+            height: 1.5,
+            color: AppColors.learnRewardInkSoft,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ProgressSummary extends StatelessWidget {
   const _ProgressSummary({required this.progress, required this.total});
 
@@ -153,9 +343,7 @@ class _ProgressSummary extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: AppColors.surface,
-        border: Border.all(
-          color: AppColors.neutral.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0D101A33),
@@ -264,9 +452,7 @@ class _ProgressSkeleton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: AppColors.surface,
-          border: Border.all(
-            color: AppColors.neutral.withValues(alpha: 0.18),
-          ),
+          border: Border.all(color: AppColors.neutral.withValues(alpha: 0.18)),
         ),
         child: const Row(
           children: [
