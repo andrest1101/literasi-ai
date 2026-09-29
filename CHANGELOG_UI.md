@@ -364,10 +364,89 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   strip, hero 3 ikon, render 360/412px). `learn_path_test.dart`
   dihapus (digantikan). Test lama Belajar/headers tanpa ubahan, hijau.
 
+## Hierarki Belajar v2 N1-N7 (28 Sep 2026)
+
+- **Masalah:** daftar baris tanpa focal point (user baru bingung mulai
+  dari mana); hitungan loading "0 dari 0 modul selesai" (bug copy);
+  CTA panah generik tidak status-aware; reward terkubur di bawah.
+- **Perubahan (UI-only, data/provider/kuis/skor tidak tersentuh):**
+  - Hierarki baru: judul toolbar → ringkasan ring → strip hadiah
+    (dipindah ke atas, satu-satunya fokal gelap) → featured row →
+    daftar compact.
+  - Featured = modul pertama yang belum selesai (derivable dari
+    progress, tanpa ubah domain): thumbnail 84px, judul 20px, CTA teks
+    full-width "Mulai"/"Lanjutkan" dengan label jujur "Mulai dari
+    sini"/"Lanjutkan belajarmu". Semua selesai: featured hilang,
+    tampil strip kompak "Semua modul selesai" (dorong ulang kuis).
+  - CTA teks 3-status di baris compact: Selesai (centang hijau),
+    Dikerjakan (Lanjutkan primer), Belum mulai (Mulai primer).
+    Tinggi 44px, ellipsis anti-overflow. Status terkunci ditolak:
+    tidak ada di model (butuh domain baru).
+  - Pill "Selesai" dihapus dari meta: status kini dinyatakan sekali
+    (CTA + thumbnail redup + hitungan seksi), tanpa pengulangan.
+  - Bar kuis 5→7px. Circular ganda + animasi fill ditolak (calm +
+    determinisme test).
+  - Loading: skeleton seksi (tanpa hitungan palsu). 6 string baru,
+    tanpa yatim.
+- **Bonus fix:** pill meta tanpa ellipsis overflow di baris sempit
+  (font test lebar): tambah `Flexible` + ellipsis.
+- **Ditolak dari saran luar (dengan alasan):** rating/foto guru/grid
+  2 kolom/label populer (data tidak ada = klaim palsu), search/filter
+  (over-engineering 3 modul), emoji, radius retroaktif, 5 commit AI,
+  screenshot manual (tanpa display; verifikasi via test render).
+- **File:** `course_list_screen.dart` (`_ModuleSections`,
+  `_SectionSkeleton`, `_AllDoneStrip`, reorder reward),
+  `course_card.dart` (`ModuleCta`, `_RowShell`, `_CompactRow`,
+  `_FeaturedRow`, `_CtaButton`, `_MetaRow` tanpa pill selesai, bar
+  7px, pill ellipsis), `app_strings.dart`,
+  `test/learn_library_test.dart` (11 test: motif, bug loading,
+  featured rule ×3, CTA 3-status, progres jujur, strip, hero,
+  render 360/412px). Test lama tanpa ubahan isi, hijau.
+
+## Refactor Belajar v3 P1-P8 (28 Sep 2026)
+
+- **Masalah:** daftar baris satu pola berulang tanpa variasi peran;
+  reward deep green tabrakan brand biru; label hijau di luar status;
+  CTA panah generik tidak status-aware; hitungan seksi 2 baris boros
+  vertikal.
+- **Perubahan (UI-only, data/provider/kuis/skor tidak tersentuh):**
+  - Hierarki baru: judul toolbar → ringkasan hero (subtitle agregat
+    "3 modul · 9 soal · ±15 mnt" dari data, bar 8px primer, CTA
+    "Mulai Modul N" buka first-incomplete, hilang bila semua selesai)
+    → reward strip → "Modul populer" (1 featured) → "Semua modul".
+  - Featured vertikal: banner motif 110px (tint + pola + medallion
+    ikon 64px) + judul 20px + meta + bar 8px + FilledButton 48px.
+    Satu-satunya tombol besar di tab; compact tanpa FilledButton.
+  - Compact horizontal: thumbnail 56px + teks + kolom kanan 56px
+    (circular progress 40px fill primer/track abu/label "0/3" + teks
+    status Mulai/Lanjutkan/Selesai). Bar tipis dihapus dari compact
+    (tanpa triple-encoding).
+  - Reward: deep green → tint biru primer + rim biru + medallion
+    primer + angka display 26px primer + label hijau sukses.
+    Hijau kini hanya untuk status selesai, bukan permukaan/label.
+  - Header seksi 1 baris ("Semua modul · 0/3 selesai"). Skeleton
+    diselaraskan. 6 string baru, 4 yatim dihapus.
+- **Ditolak (dengan alasan):** hero kedua (duplikat judul/progres/
+  CTA), rating/foto guru/grid/label populer (klaim palsu), search/
+  filter (overkill 3 modul), modul 2-4 (data hanya 3), emoji, radius
+  >20, animasi fill, 5 commit AI, screenshot manual (tanpa display;
+  verifikasi via test render 360/412px).
+- **File:** `course_list_screen.dart` (`_HeroSummary`,
+  `_HeroSummaryBody`, reward tint, `_ModuleSectionHeader` 1 baris,
+  `_FeaturedSectionHeader`, `_ModuleSections`), `course_card.dart`
+  (rewrite: `_RowShell`, `_CompactRow`, `_FeaturedCard`,
+  `_MotifBanner`, `_StatusText`, `_QuizRing`, `_QuizBar`,
+  `_MetaRow`, `_Pill`, `_ModuleThumb`), `module_motif.dart` (tetap),
+  `app_colors.dart` (`learnRewardTint/Rim`, hapus deep green),
+  `app_strings.dart`, `test/learn_library_test.dart` (12 test P1-P8),
+  update sadar `tab_headers_test` (lipatan: CTA hero sebagai aksi
+  fungsional utama). Test lama lain tanpa ubahan isi, hijau.
+
 ## Verifikasi
 
 - `flutter analyze --no-pub`: bersih.
-- `flutter test`: 289 lulus, nol gagal (281 lama + 8 baru library).
-- Render 360×915 & 412×915 via test.
+- `flutter test`: 293 lulus, nol gagal (281 lama + 12 baru refactor).
+- Render 360×800 & 412×915 via test (bebas overlap FAB: seluruh
+  konten ensureVisible tanpa exception).
 - `flutter build windows --debug`: sukses, app relaunch hidup.
 - Commit manual oleh user (kebijakan repo): pecah per tema bila perlu.
