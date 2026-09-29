@@ -170,10 +170,20 @@ abstract final class AppStrings {
   static const String learnProgressSuffix = 'modul selesai';
   static const String learnProgressLoading = 'Memuat progres belajar...';
   static const String learnMyModules = 'Modulku';
-  static const String learnModulesOf = 'dari';
-  static const String learnModulesDone = 'modul selesai';
+  static const String learnPopularModules = 'Modul populer';
+  static const String learnSectionDoneSuffix = 'selesai';
+  static const String learnAllModules = 'Semua modul';
+  static const String learnQuizTotalLabel = 'Progres kuis';
+  static const String learnHeroCtaPrefix = 'Mulai Modul';
   static const String learnOpenModule = 'Buka modul';
   static const String learnQuizProgressLabel = 'Progres kuis';
+  static const String learnFeaturedStart = 'Mulai dari sini';
+  static const String learnFeaturedContinue = 'Lanjutkan belajarmu';
+  static const String learnModuleStart = 'Mulai';
+  static const String learnModuleContinue = 'Lanjutkan';
+  static const String learnAllDone = 'Semua modul selesai';
+  static const String learnAllDoneHint =
+      'Ulangi kuis mana pun untuk pertahankan skormu.';
   static const String learnRewardTitle = 'Hadiah belajar';
   static const String learnRewardHint =
       'Selesaikan modul dan kuis untuk menaikkan skor literasimu.';

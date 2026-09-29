@@ -15,11 +15,13 @@ import 'package:literasi_ai/features/learn/presentation/widgets/module_motif.dar
 import 'package:literasi_ai/features/score/domain/entities/literacy_score.dart';
 import 'package:literasi_ai/features/score/domain/repositories/score_repository.dart';
 import 'package:literasi_ai/features/score/presentation/providers/score_providers.dart';
+import 'package:literasi_ai/shared/widgets/app_shimmer.dart';
 
 class _FakeLearnRepository implements LearnRepository {
-  _FakeLearnRepository(this.progress);
+  _FakeLearnRepository(this.progress, {this.never = false});
 
   final CourseProgress progress;
+  final bool never;
 
   @override
   List<CourseModule> modules() => LearnContentDatasource().modules();
@@ -28,8 +30,10 @@ class _FakeLearnRepository implements LearnRepository {
   CourseModule? moduleById(String id) => LearnContentDatasource().byId(id);
 
   @override
-  Stream<CourseProgress> watchProgress(String userId) =>
-      Stream.value(progress);
+  Stream<CourseProgress> watchProgress(String userId) {
+    if (never) return const Stream.empty();
+    return Stream.value(progress);
+  }
 
   @override
   Future<bool> completeModule(String userId, String moduleId) async => true;
@@ -57,10 +61,19 @@ class _FakeScoreRepository implements ScoreRepository {
   Future<void> awardQuiz(String userId, {required bool correct}) async {}
 }
 
+List<Override> _overrides(CourseProgress progress, {bool never = false}) => [
+  historyUserIdProvider.overrideWithValue('u1'),
+  learnRepositoryProvider.overrideWithValue(
+    _FakeLearnRepository(progress, never: never),
+  ),
+  scoreRepositoryProvider.overrideWithValue(_FakeScoreRepository()),
+];
+
 Future<void> _pumpList(
   WidgetTester tester,
   CourseProgress progress, {
   Size? size,
+  bool never = false,
 }) async {
   if (size != null) {
     tester.view.physicalSize = size;
@@ -72,13 +85,7 @@ Future<void> _pumpList(
   }
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [
-        historyUserIdProvider.overrideWithValue('u1'),
-        learnRepositoryProvider.overrideWithValue(
-          _FakeLearnRepository(progress),
-        ),
-        scoreRepositoryProvider.overrideWithValue(_FakeScoreRepository()),
-      ],
+      overrides: _overrides(progress, never: never),
       child: const MaterialApp(home: Scaffold(body: CourseListScreen())),
     ),
   );
@@ -86,64 +93,144 @@ Future<void> _pumpList(
 }
 
 void main() {
-  group('M1 motif satu sumber', () {
+  group('P1 motif satu sumber', () {
     test('tiga modul tiga motif berbeda dari accentSeed data', () {
       final modules = LearnContentDatasource().modules();
       final motifs = modules.map((m) => motifForModule(m.accentSeed)).toList();
       expect(motifs.map((m) => m.icon).toSet(), hasLength(3));
       expect(motifs.map((m) => m.tint).toSet(), hasLength(3));
-      // Identitas ikut data, bukan posisi: seed sama = motif sama.
-      expect(
-        motifForModule(modules.first.accentSeed).icon,
-        motifForModule(modules.first.accentSeed).icon,
-      );
     });
   });
 
-  group('M2 daftar baris library', () {
-    testWidgets('3 ModuleRow + header seksi + hitungan selesai', (
+  group('P2 hero ringkasan agregat + CTA', () {
+    testWidgets('subtitle agregat dari data + CTA buka modul 1', (
+      tester,
+    ) async {
+      await _pumpList(tester, const CourseProgress());
+
+      expect(find.text('3 modul · 9 soal · ±15 mnt'), findsOneWidget);
+      final cta = find.text('${AppStrings.learnHeroCtaPrefix} 1');
+      await tester.ensureVisible(cta);
+      await tester.pumpAndSettle();
+      await tester.tap(cta);
+      await tester.pumpAndSettle();
+      expect(find.byType(CourseDetailScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('semua selesai: CTA hero hilang', (tester) async {
+      await _pumpList(
+        tester,
+        const CourseProgress(
+          completedModuleIds: [
+            'clickbait',
+            'gambar-manipulasi',
+            'verifikasi-sumber',
+          ],
+        ),
+      );
+
+      expect(
+        find.textContaining(AppStrings.learnHeroCtaPrefix),
+        findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('P3 loading tanpa hitungan palsu', () {
+    testWidgets('loading tampilkan skeleton, bukan "0 dari 0"', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: _overrides(const CourseProgress(), never: true),
+          child: const MaterialApp(home: Scaffold(body: CourseListScreen())),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.textContaining('0 dari 0'), findsNothing);
+      expect(find.byType(AppShimmer), findsWidgets);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('P4 featured vertikal + seksi terpisah', () {
+    testWidgets('progres kosong: featured modul 1 + seksi populer', (
       tester,
     ) async {
       await _pumpList(tester, const CourseProgress());
 
       expect(find.byType(ModuleRow), findsNWidgets(3));
-      expect(find.text(AppStrings.learnMyModules), findsOneWidget);
-      expect(find.textContaining('0 dari 3'), findsOneWidget);
-      expect(find.text('Kenali Judul Clickbait'), findsOneWidget);
-      expect(find.text('Ciri Gambar Manipulasi'), findsOneWidget);
-      expect(find.text('Verifikasi Sumber Berita'), findsOneWidget);
-      // Affordance eksplisit per baris.
-      expect(find.byIcon(Icons.arrow_forward_rounded), findsNWidgets(3));
+      expect(find.text(AppStrings.learnPopularModules), findsOneWidget);
+      // Header 1 baris adalah Text.rich: cocokkan via containing.
+      expect(find.textContaining(AppStrings.learnAllModules), findsOneWidget);
+      expect(find.text(AppStrings.learnFeaturedStart), findsOneWidget);
+      // Satu-satunya FilledButton besar di tab = CTA featured.
+      final filled = find.byType(FilledButton);
+      expect(filled, findsOneWidget);
+      expect(
+        find.descendant(of: filled, matching: find.text('Mulai')),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('selesai: centang penuh + label + hitungan naik', (
+    testWidgets('semua selesai: tanpa featured, strip penutup tampil', (
       tester,
     ) async {
+      await _pumpList(
+        tester,
+        const CourseProgress(
+          completedModuleIds: [
+            'clickbait',
+            'gambar-manipulasi',
+            'verifikasi-sumber',
+          ],
+        ),
+      );
+
+      expect(find.text(AppStrings.learnPopularModules), findsNothing);
+      expect(find.text(AppStrings.learnAllDone), findsOneWidget);
+      expect(find.byType(FilledButton), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('P5 compact: teks status + ring 40px, tanpa tombol besar', () {
+    testWidgets('status Mulai/Lanjutkan/Selesai terbaca per baris', (
+      tester,
+    ) async {
+      await _pumpList(
+        tester,
+        const CourseProgress(
+          completedModuleIds: ['verifikasi-sumber'],
+          quizBest: {'clickbait': 2},
+        ),
+      );
+
+      expect(find.text(AppStrings.learnModuleContinue), findsOneWidget);
+      expect(find.text(AppStrings.learnModuleDone), findsOneWidget);
+      expect(find.text(AppStrings.learnModuleStart), findsOneWidget);
+      // Compact tidak memakai FilledButton: hanya featured yang boleh.
+      expect(find.byType(FilledButton), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('header seksi 1 baris + hitungan', (tester) async {
       await _pumpList(
         tester,
         const CourseProgress(completedModuleIds: ['clickbait']),
       );
 
-      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
-      expect(find.textContaining('1 dari 3'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('progres kuis jujur best/quizCount dari provider', (
-      tester,
-    ) async {
-      await _pumpList(
-        tester,
-        const CourseProgress(quizBest: {'clickbait': 2}),
-      );
-
-      expect(find.text('2/3'), findsNWidgets(2));
+      expect(find.textContaining('Semua modul'), findsOneWidget);
+      expect(find.textContaining('1/3'), findsWidgets);
       expect(tester.takeException(), isNull);
     });
   });
 
-  group('M3 strip hadiah tetap jangkar gelap', () {
+  group('P6 reward tint biru di atas', () {
     testWidgets('judul + angka sinkron konstanta domain', (tester) async {
       await _pumpList(tester, const CourseProgress());
 
@@ -152,25 +239,17 @@ void main() {
       expect(find.text(AppStrings.learnRewardTitle), findsOneWidget);
       expect(find.text('+${LiteracyScore.modulePoints}'), findsOneWidget);
       expect(find.text('+${LiteracyScore.quizPoints}'), findsOneWidget);
-      expect(find.byIcon(Icons.emoji_events_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.emoji_events_outlined), findsWidgets);
       expect(tester.takeException(), isNull);
     });
   });
 
-  group('M4 hero detail memakai motif modul', () {
+  group('P7 hero detail memakai motif modul', () {
     testWidgets('tiga modul tiga ikon hero berbeda', (tester) async {
       for (final id in ['clickbait', 'gambar-manipulasi', 'verifikasi-sumber']) {
         await tester.pumpWidget(
           ProviderScope(
-            overrides: [
-              historyUserIdProvider.overrideWithValue('u1'),
-              learnRepositoryProvider.overrideWithValue(
-                _FakeLearnRepository(const CourseProgress()),
-              ),
-              scoreRepositoryProvider.overrideWithValue(
-                _FakeScoreRepository(),
-              ),
-            ],
+            overrides: _overrides(const CourseProgress()),
             child: MaterialApp(home: CourseDetailScreen(moduleId: id)),
           ),
         );
@@ -185,19 +264,25 @@ void main() {
     });
   });
 
-  group('M5 render responsif', () {
+  group('P8 render responsif + bebas overlap FAB', () {
     for (final width in [360.0, 412.0]) {
-      testWidgets('lebar ${width.toInt()}px render tanpa exception', (
+      testWidgets('lebar ${width.toInt()}px tanpa exception + tanpa overlap', (
         tester,
       ) async {
         await _pumpList(
           tester,
           const CourseProgress(),
-          size: Size(width, 915),
+          size: Size(width, 800),
         );
 
         expect(find.text('Kenali Judul Clickbait'), findsOneWidget);
+        // Gulir sampai strip hadiah: seluruh konten harus bisa dicapai
+        // tanpa tertutup (padding bawah 120px untuk FAB + navbar).
         await tester.ensureVisible(find.text(AppStrings.learnRewardTitle));
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.textContaining(AppStrings.learnAllModules),
+        );
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
       });

@@ -123,13 +123,14 @@ void main() {
       final searchTop = tester.getTopLeft(find.byType(TextField)).dy;
       expect(searchTop, lessThan(800));
 
-      // Belajar: kartu modul pertama terlihat tanpa scroll.
+      // Belajar: CTA hero (aksi fungsional utama hierarki v2) terlihat
+      // tanpa scroll. Kartu modul kini di bawah reward + featured.
       await tester.tap(find.text('Belajar'));
       await tester.pumpAndSettle();
-      final moduleTop = tester
-          .getTopLeft(find.text('Kenali Judul Clickbait'))
+      final ctaTop = tester
+          .getTopLeft(find.textContaining('Mulai Modul'))
           .dy;
-      expect(moduleTop, lessThan(800));
+      expect(ctaTop, lessThan(800));
 
       // Profil: ring skor terlihat tanpa scroll.
       await tester.tap(find.text('Profil'));
