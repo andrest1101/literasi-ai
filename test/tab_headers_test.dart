@@ -21,8 +21,21 @@ void main() {
   }
 
   /// Warna aksen kata kedua judul toolbar compact (Text.rich dua span).
+  ///
+  /// Bila beberapa Text cocok (mis. hint konten memakai kata mirip), pilih
+  /// kandidat Text.rich beranak span: itulah judul toolbar, bukan body.
   Color? toolbarAccent(WidgetTester tester, String contains) {
-    final text = tester.widget<Text>(find.textContaining(contains));
+    final rich = find
+        .textContaining(contains)
+        .evaluate()
+        .map((e) => e.widget)
+        .whereType<Text>()
+        .where(
+          (w) => w.textSpan is TextSpan && (w.textSpan! as TextSpan).children != null,
+        );
+    final text = rich.isNotEmpty
+        ? rich.first
+        : tester.widget<Text>(find.textContaining(contains));
     final span = text.textSpan;
     if (span is TextSpan && span.children != null) {
       for (final child in span.children!) {
@@ -110,13 +123,14 @@ void main() {
       final searchTop = tester.getTopLeft(find.byType(TextField)).dy;
       expect(searchTop, lessThan(800));
 
-      // Belajar: kartu modul pertama terlihat tanpa scroll.
+      // Belajar: CTA hero (aksi fungsional utama hierarki v2) terlihat
+      // tanpa scroll. Kartu modul kini di bawah reward + featured.
       await tester.tap(find.text('Belajar'));
       await tester.pumpAndSettle();
-      final moduleTop = tester
-          .getTopLeft(find.text('Kenali Judul Clickbait'))
+      final ctaTop = tester
+          .getTopLeft(find.textContaining('Mulai Modul'))
           .dy;
-      expect(moduleTop, lessThan(800));
+      expect(ctaTop, lessThan(800));
 
       // Profil: ring skor terlihat tanpa scroll.
       await tester.tap(find.text('Profil'));

@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
 import '../providers/learn_providers.dart';
+import '../widgets/module_motif.dart';
 import 'quiz_screen.dart';
 
 /// Artikel modul: hero gradien + progres baca + sticky CTA.
@@ -21,8 +22,7 @@ class CourseDetailScreen extends ConsumerStatefulWidget {
   final String moduleId;
 
   @override
-  ConsumerState<CourseDetailScreen> createState() =>
-      _CourseDetailScreenState();
+  ConsumerState<CourseDetailScreen> createState() => _CourseDetailScreenState();
 }
 
 class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
@@ -72,9 +72,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          ok
-              ? AppStrings.learnMarkedDone
-              : 'Modul sudah diklaim sebelumnya.',
+          ok ? AppStrings.learnMarkedDone : 'Modul sudah diklaim sebelumnya.',
         ),
         behavior: SnackBarBehavior.floating,
       ),
@@ -83,9 +81,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
 
   void _openQuiz() {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => QuizScreen(moduleId: widget.moduleId),
-      ),
+      MaterialPageRoute(builder: (_) => QuizScreen(moduleId: widget.moduleId)),
     );
   }
 
@@ -173,9 +169,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
           decoration: BoxDecoration(
             color: AppColors.surface,
             border: Border(
-              top: BorderSide(
-                color: AppColors.neutral.withValues(alpha: 0.2),
-              ),
+              top: BorderSide(color: AppColors.neutral.withValues(alpha: 0.2)),
             ),
             boxShadow: const [
               BoxShadow(
@@ -219,10 +213,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                           height: 17,
                           child: CircularProgressIndicator(strokeWidth: 2.2),
                         )
-                      : const Icon(
-                          Icons.emoji_events_outlined,
-                          size: 18,
-                        ),
+                      : const Icon(Icons.emoji_events_outlined, size: 18),
                   label: const Text(AppStrings.learnMarkDone),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
@@ -244,10 +235,12 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
   }
 }
 
-/// Hero gradien pembuka modul: satu keluarga dengan kartu daftar.
+/// Hero gradien pembuka modul: motif thumbnail modul versi besar.
 ///
-/// Medallion ikon + pill durasi/soal/selesai + judul putih + subtitle
-/// terang, sehingga judul tidak lagi menempel polos di background.
+/// Daftar dan detail satu benda: medallion memakai ikon + tint identitas
+/// modul yang sama dengan thumbnail daftar ([motifForModule]), dibesarkan
+/// di atas gradien hero biru. Gradien hero dipertahankan (satu keluarga
+/// dengan hero Cek). Logika klaim/kuis tidak berubah.
 class _ModuleHero extends ConsumerWidget {
   const _ModuleHero({required this.moduleId, required this.done});
 
@@ -261,6 +254,7 @@ class _ModuleHero extends ConsumerWidget {
         .where((m) => m.id == moduleId)
         .firstOrNull;
     if (module == null) return const SizedBox.shrink();
+    final motif = motifForModule(module.accentSeed);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -284,19 +278,24 @@ class _ModuleHero extends ConsumerWidget {
           Row(
             children: [
               Container(
-                width: 46,
-                height: 46,
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: Colors.white.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(17),
+                  color: motif.tint,
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.3),
+                    color: Colors.white.withValues(alpha: 0.5),
+                    width: 1.5,
                   ),
                 ),
-                child: const Icon(
-                  Icons.menu_book_outlined,
-                  size: 24,
-                  color: Colors.white,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: CustomPaint(
+                    painter: _HeroMotifPattern(),
+                    child: Center(
+                      child: Icon(motif.icon, size: 27, color: motif.ink),
+                    ),
+                  ),
                 ),
               ),
               const Spacer(),
@@ -337,11 +336,7 @@ class _ModuleHero extends ConsumerWidget {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.check_rounded,
-                        size: 13,
-                        color: Colors.white,
-                      ),
+                      Icon(Icons.check_rounded, size: 13, color: Colors.white),
                       SizedBox(width: 4),
                       Text(
                         AppStrings.learnModuleDone,
@@ -390,6 +385,30 @@ class _ModuleHero extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Pola diagonal samar hero: gema motif thumbnail dalam versi terang.
+///
+/// Alpha 10% di atas tint medallion agar tekstur terbaca di atas gradien
+/// biru. Dekoratif murni (di dalam ExcludeSemantics).
+class _HeroMotifPattern extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.1)
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+    for (var x = -size.height; x < size.width + size.height; x += 14) {
+      canvas.drawLine(
+        Offset(x, size.height + 3),
+        Offset(x + size.height + 6, -3),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_HeroMotifPattern old) => false;
 }
 
 /// Satu seksi artikel: seksi pertama ([featured]) diberi aksen primer

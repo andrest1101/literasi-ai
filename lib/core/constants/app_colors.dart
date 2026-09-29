@@ -30,6 +30,12 @@ abstract final class AppColors {
   static const Color heroEnd = Color(0xFF124A9B);
   static const Color heroInkSoft = Color(0xFFD6E5FE);
 
+  // Belajar: strip hadiah tint primer (satu keluarga tab Cek). Deep green
+  // ditinggalkan: tabrakan dengan brand biru. Hijau hanya untuk status
+  // selesai dan angka hadiah secukupnya, bukan permukaan besar.
+  static const Color learnRewardTint = Color(0xFFE7F0FE);
+  static const Color learnRewardRim = Color(0xFFBFD6F8);
+
   // Garis & bayangan terpusat.
   static const Color hairline = Color(0xFFE3E8F0);
   static const Color disabledSurface = Color(0xFFE8EDF5);

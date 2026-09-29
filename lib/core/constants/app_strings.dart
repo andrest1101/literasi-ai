@@ -148,7 +148,8 @@ abstract final class AppStrings {
   static const String historyEmptySubtitle =
       'Mulai pemeriksaan pertama dari tab Cek. Hasilmu akan tersimpan di sini.';
   static const String historyEmptyCta = 'Mulai pemeriksaan';
-  static const String historyEmptyFilteredTitle = 'Belum ada hasil di filter ini';
+  static const String historyEmptyFilteredTitle =
+      'Belum ada hasil di filter ini';
   static const String historyEmptyFilteredSubtitle =
       'Coba pilih filter lain untuk melihat pemeriksaan sebelumnya.';
   static const String historyDeleted = 'Riwayat dihapus.';
@@ -168,8 +169,26 @@ abstract final class AppStrings {
   static const String homeLearnTitle2 = 'literasimu.';
   static const String learnProgressSuffix = 'modul selesai';
   static const String learnProgressLoading = 'Memuat progres belajar...';
-  static const String learnPointsNote =
-      'Selesaikan modul +20 poin, tiap jawaban kuis benar +5.';
+  static const String learnMyModules = 'Modulku';
+  static const String learnPopularModules = 'Modul populer';
+  static const String learnSectionDoneSuffix = 'selesai';
+  static const String learnAllModules = 'Semua modul';
+  static const String learnQuizTotalLabel = 'Progres kuis';
+  static const String learnHeroCtaPrefix = 'Mulai Modul';
+  static const String learnOpenModule = 'Buka modul';
+  static const String learnQuizProgressLabel = 'Progres kuis';
+  static const String learnFeaturedStart = 'Mulai dari sini';
+  static const String learnFeaturedContinue = 'Lanjutkan belajarmu';
+  static const String learnModuleStart = 'Mulai';
+  static const String learnModuleContinue = 'Lanjutkan';
+  static const String learnAllDone = 'Semua modul selesai';
+  static const String learnAllDoneHint =
+      'Ulangi kuis mana pun untuk pertahankan skormu.';
+  static const String learnRewardTitle = 'Hadiah belajar';
+  static const String learnRewardHint =
+      'Selesaikan modul dan kuis untuk menaikkan skor literasimu.';
+  static const String learnRewardModuleLabel = 'per modul selesai';
+  static const String learnRewardQuizLabel = 'per jawaban benar';
   static const String learnModuleDone = 'Selesai';
   static const String learnDetailTitle = 'Modul belajar';
   static const String learnReadingProgress = 'Progres baca modul';
@@ -187,7 +206,8 @@ abstract final class AppStrings {
   static const String learnQuizReviewTitle = 'Tinjau jawabanmu';
   static const String learnQuizClaim = 'Klaim poin';
   static const String learnQuizClaimed = 'poin kuis diklaim.';
-  static const String learnQuizNoNew = 'Tidak ada poin baru. Skor terbaikmu bertahan.';
+  static const String learnQuizNoNew =
+      'Tidak ada poin baru. Skor terbaikmu bertahan.';
   static const String learnQuizRetry = 'Ulangi kuis';
   static const String learnQuizBack = 'Kembali ke modul';
   static const String learnGuestNote =
