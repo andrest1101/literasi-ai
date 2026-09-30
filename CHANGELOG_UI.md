@@ -442,11 +442,104 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   update sadar `tab_headers_test` (lipatan: CTA hero sebagai aksi
   fungsional utama). Test lama lain tanpa ubahan isi, hijau.
 
+## Polish Belajar v4 Q1-Q8 (29 Sep 2026)
+
+- **Masalah:** judul hijau tabrakan identitas; copy login duplikat;
+  pattern diagonal berisik di banner 110px; featured tidak radikal;
+  compact masih pola kartu; reward blok biru kedua bertumpuk featured.
+- **Perubahan (UI-only, data/provider/kuis/skor tidak tersentuh):**
+  - Judul kata kedua hijau → biru primer. Badge navbar Belajar
+    SENGAJA tetap hijau (identitas navigasi vs konten boleh beda:
+    pola yang dipakai semua tab); hijau tersisa untuk badge +
+    status selesai. `nav_pill_test` tidak disentuh.
+  - Guest note dihapus dari hero (duplikat CTA profil); 5 string
+    yatim dibersihkan (`learnGuestNote/QuizTotalLabel/HeroCtaPrefix/
+    MyModules/RewardHint`) + 2 token warna reward lama.
+  - Reward digabung ke hero: ring + agregat + bar 8px + divider +
+    label "Hadiah" + dua angka display dari domain. Blok
+    `_RewardStrip`/`_RewardCell` dihapus. Tab tinggal 3 blok:
+    hero-gabungan, featured, daftar. CTA hero dihapus total (peran
+    aksi milik featured/strip).
+  - Featured biru solid: banner gradien `heroBegin→heroEnd` 120px +
+    medallion putih 68px + ikon identitas, tanpa pattern (alpha 0).
+    Satu-satunya kartu biru di tab. Meta 12px/w700 kompensasi
+    kontras di atas gradien.
+  - Compact borderless: tanpa border/shadow, divider hairline antar
+    baris (pola daftar, bukan kartu). Thumbnail pertahankan pattern
+    kecil (tint polos di 56px terlihat seperti placeholder kosong).
+    Ring 40px + status teks tetap.
+  - Spacing seksi 20-22px (pemisah dua biru), skeleton selaras.
+- **Ditolak (dengan alasan):** full-bleed + overlay hitam (premis
+  trending-card salah: rail Cek kartu putih radius 22; full-bleed
+  tabrak padding/maxWidth; tanpa aset = kartu gelap keempat),
+  accent stripe warna-warni (kembalikan 3 bahasa warna), hero kedua
+  (judul/progres/CTA ganda), badge ikut biru (scope creep, merusak
+  sistem 4 tab), hapus pattern thumb (placeholder kosong),
+  grid 2 kolom, emoji, radius >20, animasi fill, screenshot manual.
+- **File:** `course_list_screen.dart` (hero gabungan, judul biru,
+  divider compact, hapus reward strip), `course_card.dart` (rewrite:
+  `_RowShell` borderless, `_CompactRow` borderless,
+  `_FeaturedCard` biru solid, thumb pattern dipertahankan),
+  `app_colors.dart` (hapus token reward lama),
+  `app_strings.dart` (5 yatim dihapus),
+  `test/learn_library_test.dart` (11 test Q1-Q8),
+  update sadar `tab_headers_test` (judul biru + lipatan CTA
+  featured) + `ui_u2_identity_test` (judul biru).
+
+## Polish Belajar v5 V1-V4 (29 Sep 2026)
+
+- **Masalah:** tab masih terasa polos: hero putih besar berisi teks abu
+  (kesan pertama lemah), featured setengah-setengah (hanya strip 120px
+  biru, badan tetap putih → terbaca kartu biasa), reward gabungan hero
+  membuatnya kotak status pucat. Terpisah: overlap FAB nyata (zona FAB
+  = navbar+gap+badan ≈144px > padding 120px lama).
+- **V4 Fix zona FAB:** padding bawah 120 → **160px** (clearance ujung
+  scroll + margin; test mengunci angka). `learn_fab_clearance_test.dart`
+  baru **mengukur rect nyata** di 360×800 & 412×915: (a) scroll-0 CTA
+  featured vs FAB tidak beririsan, (b) baris terakhir di ujung scroll
+  berhenti di atas zona FAB. Keduanya hijau (overlap saat istirahat
+  terbukti tidak terjadi pada layout baru; FAB hide-on-scroll jadi tidak
+  perlu).
+- **V3 Featured = kartu hero keluarga tab Cek:** seluruh badan gradien
+  `heroBegin→heroEnd` radius 20 + glow `primary 32%` + pattern garis
+  diagonal putih 7% (duplikat sadar dari `_HeroPattern` Cek tanpa
+  perisai: motif modul sudah focal); medallion motif putih 52px
+  kanan-atas (slot ilustrasi prosedural); judul putih 22px + subtitle
+  `#D6E5FE` (pola kontras hero Cek, bukan abu); pill meta varian
+  transparan putih; bar progres track putih 30% + isi putih; **CTA
+  putih teks primer** (persis bahasa CTA `_SessionCtaCard`). Overlay
+  hitam 60% ditolak (bahasa app media, app ini trustworthy-bright);
+  full-bleed tanpa radius ditolak (bahasa kartu campur di tengah
+  halaman; token gradien #0D47A1 bukan token app).
+- **V2 Reward = kartu achievement terpisah:** keluar dari hero; tint
+  `primary 7%` + rim `primary 20%` radius 20, medallion trofi, angka
+  display **+20 `successDark` / +5 `warningDark`** (warna makna sama
+  dengan breakdown Profil: modul hijau, kuis amber; `warningDark` token
+  sudah ada). Hero kembali ramping ~110px: ring + agregat + bar, tanpa
+  CTA (keputusan v4 tetap: aksi milik featured). Urutan struktur
+  dipertahankan: hero → reward → featured → compact.
+- **Ditolak (dengan alasan):** accent stripe tosca/sage (premis basi:
+  compact kini borderless, tak ada sudut untuk stripe; motif thumbnail
+  sudah membawa warna per modul → stripe = sinyal ganda; mundur ke
+  keputusan M1-M5 yang membuang multi-bahasa warna), CTA hero
+  "Mulai Modul 1" (rangkap dengan CTA featured), overlay hitam,
+  full-bleed, ilustrasi aset (offline).
+- **File:** `course_list_screen.dart` (padding 160, hero ramping, baru
+  `_RewardCard`/`_RewardCell`, skeleton 230), `course_card.dart`
+  (rewrite `_FeaturedCard` gradien + `_FeaturedMotif` +
+  `_FeaturedPatternPainter`, varian `onGradient` di `_MetaRow`/`_Pill`/
+  `_QuizBar`, `_RowShell` disederhanakan jadi shell compact saja),
+  `test/learn_library_test.dart` (P4 struktur gradien+CTA putih, P6
+  reward kartu tint + warna makna + urutan, helper
+  `_hasHeroGradient` via `visitAncestorElements`),
+  `test/learn_fab_clearance_test.dart` (baru, 4 test ukur rect).
+
 ## Verifikasi
 
 - `flutter analyze --no-pub`: bersih.
-- `flutter test`: 293 lulus, nol gagal (281 lama + 12 baru refactor).
-- Render 360×800 & 412×915 via test (bebas overlap FAB: seluruh
-  konten ensureVisible tanpa exception).
+- `flutter test`: **297 lulus**, nol gagal (292 sebelumnya + 4 FAB +
+  1 struktur featured).
+- Render 360×800 & 412×915 via test (termasuk ukur rect FAB vs konten
+  di scroll-0 dan ujung scroll).
 - `flutter build windows --debug`: sukses, app relaunch hidup.
 - Commit manual oleh user (kebijakan repo): pecah per tema bila perlu.
