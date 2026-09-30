@@ -169,12 +169,9 @@ abstract final class AppStrings {
   static const String homeLearnTitle2 = 'literasimu.';
   static const String learnProgressSuffix = 'modul selesai';
   static const String learnProgressLoading = 'Memuat progres belajar...';
-  static const String learnMyModules = 'Modulku';
   static const String learnPopularModules = 'Modul populer';
   static const String learnSectionDoneSuffix = 'selesai';
   static const String learnAllModules = 'Semua modul';
-  static const String learnQuizTotalLabel = 'Progres kuis';
-  static const String learnHeroCtaPrefix = 'Mulai Modul';
   static const String learnOpenModule = 'Buka modul';
   static const String learnQuizProgressLabel = 'Progres kuis';
   static const String learnFeaturedStart = 'Mulai dari sini';
@@ -185,8 +182,6 @@ abstract final class AppStrings {
   static const String learnAllDoneHint =
       'Ulangi kuis mana pun untuk pertahankan skormu.';
   static const String learnRewardTitle = 'Hadiah belajar';
-  static const String learnRewardHint =
-      'Selesaikan modul dan kuis untuk menaikkan skor literasimu.';
   static const String learnRewardModuleLabel = 'per modul selesai';
   static const String learnRewardQuizLabel = 'per jawaban benar';
   static const String learnModuleDone = 'Selesai';
@@ -210,8 +205,6 @@ abstract final class AppStrings {
       'Tidak ada poin baru. Skor terbaikmu bertahan.';
   static const String learnQuizRetry = 'Ulangi kuis';
   static const String learnQuizBack = 'Kembali ke modul';
-  static const String learnGuestNote =
-      'Masuk untuk menyimpan progres ke semua perangkat. Tanpa login progres hanya sesi ini.';
   static const String homeProfileTitle1 = 'Kelola';
   static const String homeProfileTitle2 = 'profilmu.';
   static const String homeProfileSubtitle =

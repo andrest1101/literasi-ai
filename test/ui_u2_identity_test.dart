@@ -163,7 +163,8 @@ void main() {  group('U2.1 aksen header per tab', () {
 
       await tester.tap(find.text('Belajar'));
       await tester.pumpAndSettle();
-      expect(accentOf('literasimu.'), AppColors.successDark);
+      // Judul Belajar biru primer (hijau hanya status selesai + badge).
+      expect(accentOf('literasimu.'), AppColors.primary);
 
       await tester.tap(find.text('Profil'));
       await tester.pumpAndSettle();
@@ -263,7 +264,7 @@ void main() {  group('U2.1 aksen header per tab', () {
       expect(ctaText, findsOneWidget);
       final ctaElement = ctaText.evaluate().single;
       // Rantai aktual FilledButton.icon ± level 40 (Material + Ink +
-      // Focus + ...) — batas 60 agar longgar terhadap perubahan internal.
+      // Focus + ...); batas 60 agar longgar terhadap perubahan internal.
       var ancestor = _parentOf(ctaElement);
       var foundFilled = false;
       for (var i = 0; i < 60 && ancestor != null; i++) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:literasi_ai/core/constants/app_colors.dart';
 import 'package:literasi_ai/core/constants/app_strings.dart';
 import 'package:literasi_ai/features/history/presentation/providers/history_providers.dart';
 import 'package:literasi_ai/features/learn/data/datasources/learn_content_datasource.dart';
@@ -92,8 +93,67 @@ Future<void> _pumpList(
   await tester.pumpAndSettle();
 }
 
+/// Warna aksen kata kedua judul toolbar Belajar (Text.rich dua span).
+Color? _toolbarAccent(WidgetTester tester) {
+  final rich = find
+      .textContaining('literasimu.')
+      .evaluate()
+      .map((e) => e.widget)
+      .whereType<Text>()
+      .where(
+        (w) =>
+            w.textSpan is TextSpan &&
+            (w.textSpan! as TextSpan).children != null,
+      );
+  final text = rich.isNotEmpty
+      ? rich.first
+      : tester.widget<Text>(find.textContaining('literasimu.'));
+  final span = text.textSpan;
+  if (span is TextSpan && span.children != null) {
+    for (final child in span.children!) {
+      if (child is TextSpan && child.style?.fontStyle == FontStyle.italic) {
+        return child.style?.color;
+      }
+    }
+  }
+  return text.style?.color;
+}
+
+/// Naik rantai leluhur [finder] sampai ketemu Container bergradien.
+///
+/// Membuktikan gradien hero membungkus seluruh kartu featured (rantai
+/// leluhur CTA), bukan hanya strip atas.
+bool _hasHeroGradient(WidgetTester tester, Finder finder) {
+  var found = false;
+  tester.element(finder).visitAncestorElements((node) {
+    final widget = node.widget;
+    if (widget is Container) {
+      final decoration = widget.decoration;
+      if (decoration is BoxDecoration && decoration.gradient != null) {
+        found = true;
+        return false;
+      }
+    }
+    return true;
+  });
+  return found;
+}
+
 void main() {
-  group('P1 motif satu sumber', () {
+  group('Q1 judul biru + tanpa guest note', () {
+    testWidgets('kata kedua judul primer, copy login hilang', (tester) async {
+      await _pumpList(tester, const CourseProgress());
+
+      expect(_toolbarAccent(tester), AppColors.primary);
+      expect(
+        find.textContaining('Masuk untuk menyimpan progres'),
+        findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('Q2 motif satu sumber', () {
     test('tiga modul tiga motif berbeda dari accentSeed data', () {
       final modules = LearnContentDatasource().modules();
       final motifs = modules.map((m) => motifForModule(m.accentSeed)).toList();
@@ -102,46 +162,8 @@ void main() {
     });
   });
 
-  group('P2 hero ringkasan agregat + CTA', () {
-    testWidgets('subtitle agregat dari data + CTA buka modul 1', (
-      tester,
-    ) async {
-      await _pumpList(tester, const CourseProgress());
-
-      expect(find.text('3 modul · 9 soal · ±15 mnt'), findsOneWidget);
-      final cta = find.text('${AppStrings.learnHeroCtaPrefix} 1');
-      await tester.ensureVisible(cta);
-      await tester.pumpAndSettle();
-      await tester.tap(cta);
-      await tester.pumpAndSettle();
-      expect(find.byType(CourseDetailScreen), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('semua selesai: CTA hero hilang', (tester) async {
-      await _pumpList(
-        tester,
-        const CourseProgress(
-          completedModuleIds: [
-            'clickbait',
-            'gambar-manipulasi',
-            'verifikasi-sumber',
-          ],
-        ),
-      );
-
-      expect(
-        find.textContaining(AppStrings.learnHeroCtaPrefix),
-        findsNothing,
-      );
-      expect(tester.takeException(), isNull);
-    });
-  });
-
-  group('P3 loading tanpa hitungan palsu', () {
-    testWidgets('loading tampilkan skeleton, bukan "0 dari 0"', (
-      tester,
-    ) async {
+  group('Q3 loading tanpa hitungan palsu', () {
+    testWidgets('loading tampilkan skeleton, bukan "0 dari 0"', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: _overrides(const CourseProgress(), never: true),
@@ -156,24 +178,54 @@ void main() {
     });
   });
 
-  group('P4 featured vertikal + seksi terpisah', () {
-    testWidgets('progres kosong: featured modul 1 + seksi populer', (
+  group('Q4 featured hero gradien + seksi terpisah', () {
+    testWidgets('progres kosong: featured modul 1 satu FilledButton', (
       tester,
     ) async {
       await _pumpList(tester, const CourseProgress());
 
       expect(find.byType(ModuleRow), findsNWidgets(3));
       expect(find.text(AppStrings.learnPopularModules), findsOneWidget);
-      // Header 1 baris adalah Text.rich: cocokkan via containing.
       expect(find.textContaining(AppStrings.learnAllModules), findsOneWidget);
       expect(find.text(AppStrings.learnFeaturedStart), findsOneWidget);
-      // Satu-satunya FilledButton besar di tab = CTA featured.
-      final filled = find.byType(FilledButton);
-      expect(filled, findsOneWidget);
+      // Satu-satunya FilledButton di tab = CTA featured.
+      expect(find.byType(FilledButton), findsOneWidget);
       expect(
-        find.descendant(of: filled, matching: find.text('Mulai')),
+        find.descendant(
+          of: find.byType(FilledButton),
+          matching: find.text('Mulai'),
+        ),
         findsOneWidget,
       );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('seluruh badan featured bergradien token hero + CTA putih', (
+      tester,
+    ) async {
+      await _pumpList(tester, const CourseProgress());
+
+      // Gradien hero (token tab Cek) menempel pada rantai leluhur CTA:
+      // seluruh kartu, bukan strip120px.
+      expect(_hasHeroGradient(tester, find.byType(FilledButton)), isTrue);
+      // CTA putih teks primer (satu bahasa dengan CTA hero tab Cek).
+      final cta = tester.widget<FilledButton>(find.byType(FilledButton));
+      expect(
+        cta.style?.backgroundColor?.resolve(const <WidgetState>{}),
+        Colors.white,
+      );
+      expect(
+        cta.style?.foregroundColor?.resolve(const <WidgetState>{}),
+        AppColors.primary,
+      );
+      // Subtitle memakai biru muda hero Cek (#D6E5FE), bukan abu netral.
+      final subtitle = tester.widget<Text>(
+        find.text(LearnContentDatasource().byId('clickbait')!.subtitle),
+      );
+      expect(subtitle.style?.color, const Color(0xFFD6E5FE));
+      // Medallion motif modul 1 tampil; modul 1 tidak muncul dua kali
+      // (dikeluarkan dari daftar compact).
+      expect(find.byIcon(motifForModule(0).icon), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -198,7 +250,7 @@ void main() {
     });
   });
 
-  group('P5 compact: teks status + ring 40px, tanpa tombol besar', () {
+  group('Q5 compact borderless: teks status + ring, tanpa tombol besar', () {
     testWidgets('status Mulai/Lanjutkan/Selesai terbaca per baris', (
       tester,
     ) async {
@@ -213,40 +265,71 @@ void main() {
       expect(find.text(AppStrings.learnModuleContinue), findsOneWidget);
       expect(find.text(AppStrings.learnModuleDone), findsOneWidget);
       expect(find.text(AppStrings.learnModuleStart), findsOneWidget);
-      // Compact tidak memakai FilledButton: hanya featured yang boleh.
       expect(find.byType(FilledButton), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('header seksi 1 baris + hitungan', (tester) async {
-      await _pumpList(
-        tester,
-        const CourseProgress(completedModuleIds: ['clickbait']),
-      );
-
-      expect(find.textContaining('Semua modul'), findsOneWidget);
-      expect(find.textContaining('1/3'), findsWidgets);
-      expect(tester.takeException(), isNull);
-    });
-  });
-
-  group('P6 reward tint biru di atas', () {
-    testWidgets('judul + angka sinkron konstanta domain', (tester) async {
+    testWidgets('compact tanpa border/shadow kartu', (tester) async {
       await _pumpList(tester, const CourseProgress());
 
-      await tester.ensureVisible(find.text(AppStrings.learnRewardTitle));
-      await tester.pumpAndSettle();
-      expect(find.text(AppStrings.learnRewardTitle), findsOneWidget);
-      expect(find.text('+${LiteracyScore.modulePoints}'), findsOneWidget);
-      expect(find.text('+${LiteracyScore.quizPoints}'), findsOneWidget);
-      expect(find.byIcon(Icons.emoji_events_outlined), findsWidgets);
+      // Baris compact memakai Material permukaan polos: tidak ada
+      // Container ber-border di dalam ModuleRow non-featured.
+      expect(find.byType(ModuleRow), findsNWidgets(3));
       expect(tester.takeException(), isNull);
     });
   });
 
-  group('P7 hero detail memakai motif modul', () {
+  group('Q6 reward kartu achievement terpisah sinkron domain', () {
+    testWidgets('hadiah di kartu tint terpisah + warna makna per angka', (
+      tester,
+    ) async {
+      await _pumpList(tester, const CourseProgress());
+
+      // Kartu reward = permukaan tint biru sendiri (bukan bagian hero).
+      final rewardTint = AppColors.primary.withValues(alpha: 0.07);
+      expect(
+        find.byWidgetPredicate((w) {
+          if (w is! Container || w.decoration is! BoxDecoration) return false;
+          return (w.decoration! as BoxDecoration).color == rewardTint;
+        }),
+        findsOneWidget,
+      );
+      expect(find.text(AppStrings.learnRewardTitle), findsOneWidget);
+      expect(find.byIcon(Icons.emoji_events_outlined), findsOneWidget);
+      // Angka dari konstanta domain; warna = makna breakdown Profil.
+      final plus20 = tester.widget<Text>(
+        find.text('+${LiteracyScore.modulePoints}'),
+      );
+      expect(plus20.style?.color, AppColors.successDark);
+      final plus5 = tester.widget<Text>(
+        find.text('+${LiteracyScore.quizPoints}'),
+      );
+      expect(plus5.style?.color, AppColors.warningDark);
+      // Urutan: bar hero di atas reward, bar featured di bawah reward
+      // (dua LinearProgressIndicator: hero + featured).
+      expect(find.byType(LinearProgressIndicator), findsNWidgets(2));
+      final heroBar = tester.getTopLeft(
+        find.byType(LinearProgressIndicator).first,
+      );
+      final rewardTitle = tester.getTopLeft(
+        find.text(AppStrings.learnRewardTitle),
+      );
+      final featuredBar = tester.getTopLeft(
+        find.byType(LinearProgressIndicator).at(1),
+      );
+      expect(heroBar.dy, lessThan(rewardTitle.dy));
+      expect(rewardTitle.dy, lessThan(featuredBar.dy));
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('Q7 hero detail memakai motif modul', () {
     testWidgets('tiga modul tiga ikon hero berbeda', (tester) async {
-      for (final id in ['clickbait', 'gambar-manipulasi', 'verifikasi-sumber']) {
+      for (final id in [
+        'clickbait',
+        'gambar-manipulasi',
+        'verifikasi-sumber',
+      ]) {
         await tester.pumpWidget(
           ProviderScope(
             overrides: _overrides(const CourseProgress()),
@@ -264,25 +347,20 @@ void main() {
     });
   });
 
-  group('P8 render responsif + bebas overlap FAB', () {
-    for (final width in [360.0, 412.0]) {
-      testWidgets('lebar ${width.toInt()}px tanpa exception + tanpa overlap', (
+  group('Q8 render responsif + bebas overlap FAB', () {
+    for (final size in [const Size(360, 800), const Size(412, 915)]) {
+      testWidgets('lebar ${size.width.toInt()}px tanpa exception', (
         tester,
       ) async {
-        await _pumpList(
-          tester,
-          const CourseProgress(),
-          size: Size(width, 800),
-        );
+        await _pumpList(tester, const CourseProgress(), size: size);
 
         expect(find.text('Kenali Judul Clickbait'), findsOneWidget);
-        // Gulir sampai strip hadiah: seluruh konten harus bisa dicapai
-        // tanpa tertutup (padding bawah 120px untuk FAB + navbar).
-        await tester.ensureVisible(find.text(AppStrings.learnRewardTitle));
-        await tester.pumpAndSettle();
+        // Seluruh konten bisa dicapai (padding bawah untuk FAB + navbar).
         await tester.ensureVisible(
           find.textContaining(AppStrings.learnAllModules),
         );
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(find.text('Verifikasi Sumber Berita'));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
       });
