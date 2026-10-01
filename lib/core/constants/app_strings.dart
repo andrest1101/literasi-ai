@@ -186,6 +186,7 @@ abstract final class AppStrings {
   static const String learnRewardQuizLabel = 'per jawaban benar';
   static const String learnModuleDone = 'Selesai';
   static const String learnDetailTitle = 'Modul belajar';
+  static const String learnContentsTitle = 'Isi modul';
   static const String learnReadingProgress = 'Progres baca modul';
   static const String learnStartQuiz = 'Mulai kuis';
   static const String learnReadArticle = 'Baca modul';

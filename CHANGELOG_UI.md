@@ -534,6 +534,39 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   `_hasHeroGradient` via `visitAncestorElements`),
   `test/learn_fab_clearance_test.dart` (baru, 4 test ukur rect).
 
+## Detail Modul D1-D2 (30 Sep 2026)
+
+- **Masalah:** 4 kartu artikel `_ArticleSection` identik berulang (radius,
+  ikon, label sama; hanya seksi pertama berborder biru): monoton dan tidak
+  profesional. Tidak ada peta isi: user harus scroll 4 kartu untuk tahu
+  struktur modul.
+- **Perubahan (UI-only, data/provider/kuis/skor tidak tersentuh):**
+  - D1 kartu "Isi modul": satu kartu putih di bawah hero berisi 4 baris
+    judul seksi nyata dari data + nomor tint motif modul (fungsi =
+    kolom "The Course includes" pada referensi, isi = data jujur, tanpa
+    rating/guru/video). 1 string baru (`learnContentsTitle`); tanpa CTA
+    (aksi milik sticky bottom bar).
+  - D2 ritme seksi: rel nomor ghost + konektor vertikal di sisi kiri
+    (alur baca 1-4, dekoratif `ExcludeSemantics`); medallion ikon tiap
+    seksi memakai tint motif modul (biru/teal/hijau sesuai modul, bukan
+    4 warna acak); seksi pertama tetap aksen primer. Label `Bagian N`,
+    heading, body, CTA, hero tidak berubah (dikunci test lama).
+- **Ditolak (dengan alasan):** header ungu + avatar/sapaan (tidak ada
+  profil user di konteks ini + tabrakan identitas biru), rating Bintang /
+  Teacher / video / template (tidak ada di data = klaim palsu), grid
+  2 kolom "For You" (hanya 3 modul), palet pink-ungu (merusak sistem
+  4 tab), ubah radius hero 26px (scope creep, follow-up terpisah).
+- **File:** `course_detail_screen.dart` (`_ContentsCard`, `_ContentsRow`,
+  `_ArticleSection` + `ink`, `_SectionRail`), `app_strings.dart`
+  (`learnContentsTitle`), `test/learn_detail_contents_test.dart` (baru,
+  5 test: isi dari data, urutan hero-isi-artikel-CTA, tint motif,
+  render 360/412px). Test lama tanpa ubahan isi, hijau.
+- **Status verifikasi saat tulis:** `flutter analyze` 1 warning bawaan
+  (`assets/animation/` tidak ada, pubspec tidak tersentuh);
+  test baru + `learn_test` + `ui_u1_polish` hijau; full suite 296 lulus
+  2 gagal bawaan commit (Q4 gradien + lipatan tab_headers, gagal juga
+  di commit murni, bukan akibat D1/D2).
+
 ## Verifikasi
 
 - `flutter analyze --no-pub`: bersih.
