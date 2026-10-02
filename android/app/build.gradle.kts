@@ -10,8 +10,10 @@ plugins {
 
 android {
     namespace = "com.example.literasi_ai"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    // compileSdk 36: syarat flutter_secure_storage (SDK 35 ditolak plugin).
+    compileSdk = 36
+    // NDK 27: syarat plugin Firebase (26.3 ditolak). Terpasang di SDK.
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -23,9 +25,10 @@ android {
         applicationId = "com.example.literasi_ai"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        // minSdk 23 = syarat firebase-auth / cloud_firestore (manifest merger
-        // gagal bila 21). Samsung A15 (API 36) jauh di atas batas ini.
-        minSdk = flutter.minSdkVersion
+        // minSdk 23 = syarat flutter_secure_storage / firebase-auth /
+        // cloud_firestore (manifest merger gagal bila 21). Samsung A15
+        // (API 36) jauh di atas batas ini.
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

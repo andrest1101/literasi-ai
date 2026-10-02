@@ -14,10 +14,11 @@ import 'course_detail_screen.dart';
 
 /// Library modul: ringkasan + hadiah + featured + daftar.
 ///
-/// Hierarki tegas: judul toolbar, ringkasan progres ring, strip hadiah
-/// (satu-satunya fokal gelap, dipindah ke atas agar impactful), featured
-/// row untuk modul pertama yang belum selesai, lalu daftar compact.
-/// Guest bisa membaca semua modul; progres sync menunggu login.
+/// Hierarki tegas: judul toolbar, ringkasan progres ring (ramping, tanpa
+/// CTA), kartu achievement hadiah (tint biru, terpisah agar hero tidak
+/// jadi kotak status pucat), featured hero gradien (fokal tab, satu
+/// bahasa dengan hero Cek), lalu daftar compact. Guest bisa membaca
+/// semua modul; progres sync menunggu login.
 class CourseListScreen extends ConsumerWidget {
   const CourseListScreen({super.key});
 
@@ -26,8 +27,10 @@ class CourseListScreen extends ConsumerWidget {
     final modules = ref.watch(learnContentProvider);
     final progress = ref.watch(learnProgressProvider);
     return SingleChildScrollView(
-      // 120px: ruang pill navbar mengambang + FAB Chat 60px di atasnya.
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
+      // 160px: zona FAB Chat (navbar ~76 + gap 8 + badan 60 = ~144 dari
+      // bawah) + margin, sehingga baris terakhir tidak pernah tertutup
+      // FAB saat scroll berakhir. Test fab_clearance mengunci angka ini.
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 160),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),
@@ -36,14 +39,10 @@ class CourseListScreen extends ConsumerWidget {
             children: [
               const _LearnToolbarTitle(),
               const SizedBox(height: AppTabTitles.titleToContentGap),
-              _HeroSummary(
-                modules: modules,
-                progress: progress,
-                onOpen: _openDetail,
-              ),
-              const SizedBox(height: 12),
-              const _RewardStrip(),
-              const SizedBox(height: 20),
+              _HeroSummary(modules: modules, progress: progress),
+              const SizedBox(height: 14),
+              const _RewardCard(),
+              const SizedBox(height: 22),
               progress.when(
                 loading: () => const _SectionSkeleton(),
                 error: (_, _) => _ModuleSections(
@@ -90,7 +89,7 @@ class _LearnToolbarTitle extends StatelessWidget {
           ),
           TextSpan(
             text: ' ${AppStrings.homeLearnTitle2}',
-            style: AppTabTitles.compactLine2(AppColors.successDark),
+            style: AppTabTitles.compactLine2(AppColors.primary),
           ),
         ],
       ),
@@ -160,7 +159,7 @@ class _FeaturedSectionHeader extends StatelessWidget {
   }
 }
 
-/// Skeleton seksi modul saat loading: judul + 2 baris + 3 baris kartu.
+/// Skeleton seksi modul saat loading: judul + sublabel + featured + baris.
 ///
 /// Meniru bentuk [_ModuleSections] agar transisi loading ke data tidak
 /// melompat, dan tidak pernah menampilkan hitungan "0 dari 0".
@@ -178,11 +177,11 @@ class _SectionSkeleton extends StatelessWidget {
           SizedBox(height: 6),
           ShimmerBar(width: 150, height: 12),
           SizedBox(height: 12),
-          ShimmerBar(height: 150),
+          ShimmerBar(height: 230),
+          SizedBox(height: 14),
+          ShimmerBar(height: 100),
           SizedBox(height: 10),
-          ShimmerBar(height: 120),
-          SizedBox(height: 10),
-          ShimmerBar(height: 120),
+          ShimmerBar(height: 100),
         ],
       ),
     );
@@ -249,7 +248,12 @@ class _ModuleSections extends StatelessWidget {
         const SizedBox(height: 10),
         if (rest.isNotEmpty) ...[
           for (var i = 0; i < rest.length; i++) ...[
-            if (i > 0) const SizedBox(height: 10),
+            if (i > 0)
+              Container(
+                height: 1,
+                margin: const EdgeInsets.symmetric(vertical: 5),
+                color: AppColors.hairline,
+              ),
             ModuleRow(
               module: rest[i],
               completed: progress.isCompleted(rest[i].id),
@@ -317,168 +321,19 @@ class _AllDoneStrip extends StatelessWidget {
   }
 }
 
-/// Strip hadiah: tint biru primer (satu keluarga tab Cek).
-///
-/// Deep green ditinggalkan: tabrakan dengan brand biru. Angka hadiah
-/// memakai font display 26px dari [LiteracyScore.modulePoints]/[quizPoints]
-/// agar sinkron domain. Satu label semantics gabungan. Radius 20 (batas
-/// atas aturan repo untuk permukaan baru).
-class _RewardStrip extends StatelessWidget {
-  const _RewardStrip();
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label:
-          '${AppStrings.learnRewardTitle}: '
-          '+${LiteracyScore.modulePoints} poin ${AppStrings.learnRewardModuleLabel}, '
-          '+${LiteracyScore.quizPoints} poin ${AppStrings.learnRewardQuizLabel}.',
-      excludeSemantics: true,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: AppColors.learnRewardTint,
-          border: Border.all(color: AppColors.learnRewardRim),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x141A73E8),
-              blurRadius: 16,
-              offset: Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.primary,
-                  ),
-                  child: const Icon(
-                    Icons.emoji_events_outlined,
-                    size: 20,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppStrings.learnRewardTitle,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.2,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        AppStrings.learnRewardHint,
-                        style: TextStyle(
-                          fontSize: 12,
-                          height: 1.55,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Container(
-              height: 1,
-              color: AppColors.primary.withValues(alpha: 0.15),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _RewardCell(
-                    value: '+${LiteracyScore.modulePoints}',
-                    label: AppStrings.learnRewardModuleLabel,
-                  ),
-                ),
-                Container(
-                  width: 1,
-                  height: 48,
-                  color: AppColors.primary.withValues(alpha: 0.15),
-                ),
-                Expanded(
-                  child: _RewardCell(
-                    value: '+${LiteracyScore.quizPoints}',
-                    label: AppStrings.learnRewardQuizLabel,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RewardCell extends StatelessWidget {
-  const _RewardCell({required this.value, required this.label});
-
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.8,
-            color: AppColors.primary,
-            fontFeatures: [FontFeature.tabularFigures()],
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 11.5,
-            height: 1.5,
-            color: AppColors.successDark,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Ringkasan hero: agregat jujur + bar tebal + CTA utama.
+/// Ringkasan hero: progres saja dalam kartu putih ramping.
 ///
 /// Subtitle agregat ("3 modul · 9 soal · ±X mnt") dihitung dari data modul
-/// yang sama, bukan hardcode. Bar 8px fill primer. CTA "Mulai Modul N"
-/// membuka modul first-incomplete (atau modul 1 saat loading); hilang
-/// bila semua selesai. Guest note dipertahankan sebagai catatan jujur.
+/// yang sama, bukan hardcode. Bar 8px fill primer. Hadiah DIPISAH ke
+/// [_RewardCard] di bawahnya: hero kini satu pekerjaan (progres), dan
+/// kartu achievement memberi warna yang hilang dari kotak status gabungan.
+/// Tanpa CTA (peran aksi milik featured/strip), tanpa guest note
+/// (duplikat CTA profil).
 class _HeroSummary extends StatelessWidget {
-  const _HeroSummary({
-    required this.modules,
-    required this.progress,
-    required this.onOpen,
-  });
+  const _HeroSummary({required this.modules, required this.progress});
 
   final List<CourseModule> modules;
   final AsyncValue<CourseProgress> progress;
-  final void Function(BuildContext context, String moduleId) onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -492,24 +347,12 @@ class _HeroSummary extends StatelessWidget {
         aggregate: aggregate,
         done: 0,
         total: modules.length,
-        ctaIndex: 0,
-        onOpen: modules.isEmpty
-            ? null
-            : () => onOpen(context, modules.first.id),
       ),
-      data: (value) {
-        final done = value.completedCount.clamp(0, modules.length);
-        final next = modules.indexWhere((m) => !value.isCompleted(m.id));
-        return _HeroSummaryBody(
-          aggregate: aggregate,
-          done: done,
-          total: modules.length,
-          ctaIndex: next,
-          onOpen: next < 0 || modules.isEmpty
-              ? null
-              : () => onOpen(context, modules[next].id),
-        );
-      },
+      data: (value) => _HeroSummaryBody(
+        aggregate: aggregate,
+        done: value.completedCount.clamp(0, modules.length),
+        total: modules.length,
+      ),
     );
   }
 }
@@ -519,15 +362,11 @@ class _HeroSummaryBody extends StatelessWidget {
     required this.aggregate,
     required this.done,
     required this.total,
-    required this.ctaIndex,
-    required this.onOpen,
   });
 
   final String aggregate;
   final int done;
   final int total;
-  final int ctaIndex;
-  final VoidCallback? onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -609,42 +448,135 @@ class _HeroSummaryBody extends StatelessWidget {
               ),
             ),
           ),
-          if (onOpen != null) ...[
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 48,
-              child: FilledButton.icon(
-                onPressed: onOpen,
-                icon: const Icon(Icons.play_arrow_rounded, size: 20),
-                label: Text(
-                  '${AppStrings.learnHeroCtaPrefix} ${ctaIndex + 1}',
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
+        ],
+      ),
+    );
+  }
+}
+
+/// Kartu achievement hadiah: tint biru lembut, terpisah dari hero.
+///
+/// Satu-satunya permukaan tint di tab (featured memakai gradien penuh):
+/// latar `primary 7%` + rim `primary 20%` radius 20 memberi kesan
+/// "highlight", bukan catatan tambahan. Angka display dari konstanta
+/// [LiteracyScore] (sinkron domain); warna mengikuti makna breakdown
+/// Profil: +20 hijau sukses, +5 amber gelap. Tanpa CTA.
+class _RewardCard extends StatelessWidget {
+  const _RewardCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: AppColors.primary.withValues(alpha: 0.07),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.28),
                   ),
                 ),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                child: const Icon(
+                  Icons.emoji_events_outlined,
+                  size: 22,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  AppStrings.learnRewardTitle,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
-            ),
-          ],
-          const SizedBox(height: 8),
-          const Text(
-            AppStrings.learnGuestNote,
-            style: TextStyle(
-              fontSize: 11.5,
-              height: 1.5,
-              color: AppColors.textSecondary,
-            ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _RewardCell(
+                  value: '+${LiteracyScore.modulePoints}',
+                  label: AppStrings.learnRewardModuleLabel,
+                  color: AppColors.successDark,
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 40,
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+                color: AppColors.primary.withValues(alpha: 0.15),
+              ),
+              Expanded(
+                child: _RewardCell(
+                  value: '+${LiteracyScore.quizPoints}',
+                  label: AppStrings.learnRewardQuizLabel,
+                  color: AppColors.warningDark,
+                ),
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Sel angka hadiah: display 26px berwarna makna + label penjelas.
+class _RewardCell extends StatelessWidget {
+  const _RewardCell({
+    required this.value,
+    required this.label,
+    required this.color,
+  });
+
+  final String value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.6,
+            color: color,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 11,
+            height: 1.4,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 }

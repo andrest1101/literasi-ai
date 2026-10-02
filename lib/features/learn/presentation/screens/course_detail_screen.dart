@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
+import '../../domain/entities/course_module.dart';
 import '../providers/learn_providers.dart';
 import '../widgets/module_motif.dart';
 import 'quiz_screen.dart';
@@ -99,6 +100,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
     }
     final progress = ref.watch(learnProgressProvider).valueOrNull;
     final done = progress?.isCompleted(module.id) ?? false;
+    final motif = motifForModule(module.accentSeed);
     final percent = (_readProgress * 100).round();
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -147,6 +149,8 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _ModuleHero(moduleId: module.id, done: done),
+                const SizedBox(height: 14),
+                _ContentsCard(module: module),
                 const SizedBox(height: 18),
                 for (var i = 0; i < module.sections.length; i++) ...[
                   if (i > 0) const SizedBox(height: 14),
@@ -156,6 +160,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                     heading: module.sections[i].heading,
                     body: module.sections[i].body,
                     featured: i == 0,
+                    ink: motif.ink,
                   ),
                 ],
               ],
@@ -411,14 +416,136 @@ class _HeroMotifPattern extends CustomPainter {
   bool shouldRepaint(_HeroMotifPattern old) => false;
 }
 
-/// Satu seksi artikel: seksi pertama ([featured]) diberi aksen primer
-/// agar ritme baca panjang tidak monoton empat kartu identik.
+/// Kartu daftar isi modul: peta baca sebelum 4 kartu artikel.
+///
+/// Fungsi = kolom "The Course includes" pada referensi, isi = data jujur:
+/// judul tiap [CourseSection] + nomor motif modul (bukan nomor ghost
+/// dekoratif). Satu kartu putih, tanpa CTA (aksi milik sticky bottom bar).
+class _ContentsCard extends StatelessWidget {
+  const _ContentsCard({required this.module});
+
+  final CourseModule module;
+
+  @override
+  Widget build(BuildContext context) {
+    final motif = motifForModule(module.accentSeed);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0D101A33),
+            blurRadius: 14,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            AppStrings.learnContentsTitle,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.2,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          for (var i = 0; i < module.sections.length; i++) ...[
+            if (i > 0)
+              Container(
+                height: 1,
+                margin: const EdgeInsets.symmetric(vertical: 9),
+                color: AppColors.hairline,
+              ),
+            _ContentsRow(
+              number: i + 1,
+              heading: module.sections[i].heading,
+              ink: motif.ink,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Satu baris daftar isi: nomor motif + judul seksi.
+///
+/// Nomor memakai tint motif modul (identitas, bukan warna acak): konsisten
+/// dengan thumbnail daftar + medallion hero. Judul 1 baris ellipsis agar
+/// tidak mendorong kartu terlalu tinggi di layar kecil.
+class _ContentsRow extends StatelessWidget {
+  const _ContentsRow({
+    required this.number,
+    required this.heading,
+    required this.ink,
+  });
+
+  final int number;
+  final String heading;
+  final Color ink;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: ink.withValues(alpha: 0.12),
+          ),
+          child: Center(
+            child: Text(
+              '$number',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: ink,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            heading,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Satu seksi artikel: rel nomor ghost + medallion tint motif.
+///
+/// Ritme 4 kartu dipecah tanpa 4 warna acak: rel kiri (angka ghost +
+/// konektor vertikal) menandai alur baca 1-4; medallion ikon memakai tint
+/// motif modul (identitas, konsisten dengan kartu isi + hero). Seksi
+/// pertama ([featured]) tetap aksen primer sebagai pembuka. Label
+/// `Bagian N`, heading, body, CTA tidak berubah (dikunci test).
 class _ArticleSection extends StatelessWidget {
   const _ArticleSection({
     required this.number,
     required this.icon,
     required this.heading,
     required this.body,
+    required this.ink,
     this.featured = false,
   });
 
@@ -426,77 +553,142 @@ class _ArticleSection extends StatelessWidget {
   final IconData icon;
   final String heading;
   final String body;
+  final Color ink;
   final bool featured;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        color: AppColors.surface,
-        border: Border.all(
-          color: featured
-              ? AppColors.primary.withValues(alpha: 0.35)
-              : AppColors.neutral.withValues(alpha: 0.2),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: featured
-                ? AppColors.primary.withValues(alpha: 0.1)
-                : const Color(0x0D101A33),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _SectionRail(number: number, last: number >= 4),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(22),
+                color: AppColors.surface,
+                border: Border.all(
+                  color: featured
+                      ? AppColors.primary.withValues(alpha: 0.35)
+                      : AppColors.neutral.withValues(alpha: 0.2),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: featured
+                        ? AppColors.primary.withValues(alpha: 0.1)
+                        : const Color(0x0D101A33),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(13),
+                          color: (featured ? AppColors.primary : ink)
+                              .withValues(alpha: 0.09),
+                        ),
+                        child: Icon(
+                          icon,
+                          size: 19,
+                          color: featured ? AppColors.primary : ink,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Bagian $number',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                          color: featured ? AppColors.primary : ink,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    heading,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.2,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    body,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1.7,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(13),
-                  color: AppColors.primary.withValues(alpha: 0.09),
-                ),
-                child: Icon(icon, size: 19, color: AppColors.primary),
+    );
+  }
+}
+
+/// Rel nomor ghost di sisi kiri kartu artikel: alur baca 1-4.
+///
+/// Angka ghost netral (bukan warna status) + konektor vertikal hairline
+/// antar kartu. Kartu terakhir tanpa ekor konektor ([last]). Lebar tetap
+/// 26px agar tidak menggeser kartu di layar 360px. Dekoratif
+/// (nomor nyata tetap di label `Bagian N` dalam kartu).
+class _SectionRail extends StatelessWidget {
+  const _SectionRail({required this.number, required this.last});
+
+  final int number;
+  final bool last;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: SizedBox(
+        width: 26,
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            Text(
+              '$number',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
+                color: AppColors.neutral.withValues(alpha: 0.55),
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
-              const SizedBox(width: 10),
-              Text(
-                'Bagian $number',
-                style: const TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                  color: AppColors.primary,
-                  fontFeatures: [FontFeature.tabularFigures()],
+            ),
+            if (!last)
+              Expanded(
+                child: Container(
+                  width: 2,
+                  margin: const EdgeInsets.only(top: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(1),
+                    color: AppColors.neutral.withValues(alpha: 0.25),
+                  ),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            heading,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.2,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            body,
-            style: const TextStyle(
-              fontSize: 14,
-              height: 1.7,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

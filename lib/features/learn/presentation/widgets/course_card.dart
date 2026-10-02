@@ -9,13 +9,13 @@ import 'module_motif.dart';
 /// selesai / dikerjakan-sebagian / belum-mulai.
 enum ModuleCta { done, progress, fresh }
 
-/// Baris library modul: featured vertikal vs compact horizontal.
+/// Baris library modul: featured biru solid vs compact borderless.
 ///
-/// Dua anatomi berbeda, bukan satu pola berulang: featured (modul yang
-/// disarankan dibuka) memakai motif banner di atas + konten di bawah;
-/// compact memakai thumbnail kiri + teks tengah + status kanan.
-/// Satu-satunya tombol besar di tab ini milik featured; compact memakai
-/// teks status kecil (tap milik InkWell baris).
+/// Dua anatomi radikal berbeda, bukan satu pola berulang: featured adalah
+/// satu-satunya kartu biru solid di tab (banner gradien + konten putih di
+/// atasnya mustahil tertukar); compact adalah daftar borderless dengan
+/// divider hairline (pola daftar, bukan kartu). Satu-satunya tombol besar
+/// di tab ini milik featured; compact memakai teks status kecil.
 class ModuleRow extends StatelessWidget {
   const ModuleRow({
     super.key,
@@ -57,22 +57,24 @@ class ModuleRow extends StatelessWidget {
   }
 }
 
-/// Kerangka baris bersama: permukaan terang + InkWell.
+/// Kerangka kartu bersama: permukaan + InkWell.
 ///
-/// Radius 20 (batas aturan repo). CTA/status dirender pemanggil agar
-/// featured dan compact berbagi permukaan tanpa duplikasi decoration.
+/// Radius 20 (batas aturan repo). Compact memakai varian borderless via
+/// [borderless]: tanpa border/shadow, divider digambar pemanggil.
 class _RowShell extends StatelessWidget {
   const _RowShell({
     required this.label,
     required this.onTap,
     required this.child,
     this.padding,
+    this.borderless = false,
   });
 
   final String label;
   final VoidCallback onTap;
   final Widget child;
   final EdgeInsetsGeometry? padding;
+  final bool borderless;
 
   @override
   Widget build(BuildContext context) {
@@ -89,16 +91,18 @@ class _RowShell extends StatelessWidget {
             padding: padding ?? const EdgeInsets.all(14),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: AppColors.neutral.withValues(alpha: 0.2),
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x0D101A33),
-                  blurRadius: 14,
-                  offset: Offset(0, 5),
-                ),
-              ],
+              border: borderless
+                  ? null
+                  : Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
+              boxShadow: borderless
+                  ? null
+                  : const [
+                      BoxShadow(
+                        color: Color(0x0D101A33),
+                        blurRadius: 14,
+                        offset: Offset(0, 5),
+                      ),
+                    ],
             ),
             child: child,
           ),
@@ -108,8 +112,9 @@ class _RowShell extends StatelessWidget {
   }
 }
 
-/// Baris compact: thumbnail kiri + teks tengah + status kanan.
+/// Baris compact borderless: thumbnail kiri + teks tengah + status kanan.
 ///
+/// Tanpa border/shadow: variasi dari ketiadaan kartu, bukan kartu lagi.
 /// Kolom kanan 56px: circular progress 40px (fill primer, track abu,
 /// label "0/3") + teks status kecil di bawahnya. Tanpa tombol besar,
 /// tanpa panah generik.
@@ -135,6 +140,7 @@ class _CompactRow extends StatelessWidget {
     return _RowShell(
       label: '${AppStrings.learnOpenModule}: ${module.title}',
       onTap: onTap,
+      borderless: true,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -187,11 +193,13 @@ class _CompactRow extends StatelessWidget {
   }
 }
 
-/// Kartu featured vertikal: motif banner di atas + konten di bawah.
+/// Kartu featured biru solid: banner gradien + konten putih di bawah.
 ///
-/// Tinggi banner 110px (bukan 60% dari 200px agar total kartu tetap
-/// kompak di 360px). Judul 20px + meta + CTA FilledButton penuh 48px.
-/// Satu-satunya tombol besar di tab Belajar.
+/// Satu-satunya kartu biru di tab: banner gradien heroBegin→heroEnd
+/// (reuse token hero tab Cek) berisi medallion putih + ikon identitas;
+/// judul 20px + meta + bar + CTA FilledButton putih 48px di area putih.
+/// Tanpa pattern diagonal (alpha 0). Kontras: judul 20px/w800 dan meta
+/// 12px/w700 memenuhi WCAG large-text di atas gradien.
 class _FeaturedCard extends StatelessWidget {
   const _FeaturedCard({
     required this.module,
@@ -207,6 +215,7 @@ class _FeaturedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final motif = motifForModule(module.accentSeed);
     final quizTotal = module.quizCount;
     final quizDone = bestScore.clamp(0, quizTotal);
     final ctaLabel = cta == ModuleCta.progress
@@ -219,7 +228,44 @@ class _FeaturedCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _MotifBanner(module: module),
+          Container(
+            height: 120,
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.heroBegin, AppColors.heroEnd],
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(19),
+              ),
+              child: Center(
+                child: Container(
+                  width: 68,
+                  height: 68,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.6),
+                      width: 2,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x400B2F66),
+                        blurRadius: 16,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Icon(motif.icon, size: 32, color: motif.ink),
+                ),
+              ),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
             child: Column(
@@ -277,49 +323,6 @@ class _FeaturedCard extends StatelessWidget {
   }
 }
 
-/// Banner motif featured: tint identitas modul + pola + ikon besar.
-///
-/// Tanpa aset gambar: offline-safe, tanpa placeholder palsu. Ikon 44px
-/// di atas tint terang memberi focal point yang tidak dimiliki baris
-/// compact.
-class _MotifBanner extends StatelessWidget {
-  const _MotifBanner({required this.module});
-
-  final CourseModule module;
-
-  @override
-  Widget build(BuildContext context) {
-    final motif = motifForModule(module.accentSeed);
-    return ExcludeSemantics(
-      child: Container(
-        height: 110,
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          color: motif.tint,
-        ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
-          child: CustomPaint(
-            painter: _ThumbPattern(color: motif.ink),
-            child: Center(
-              child: Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.surface,
-                  border: Border.all(color: motif.ink.withValues(alpha: 0.25)),
-                ),
-                child: Icon(motif.icon, size: 30, color: motif.ink),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// Teks status kecil di bawah ring: "Mulai"/"Lanjutkan"/"Selesai".
 ///
 /// Visual murni (tap milik InkWell baris). Warna status: primer untuk
@@ -356,8 +359,8 @@ class _StatusText extends StatelessWidget {
 
 /// Circular progress 40px: fill primer, track abu, label "0/3".
 ///
-/// Menggantikan bar tipis di baris compact: angka nyata dalam ruang
-/// kecil. Data `bestScore/quizCount` dari provider yang sama.
+/// Angka nyata dalam ruang kecil. Data `bestScore/quizCount` dari
+/// provider yang sama.
 class _QuizRing extends StatelessWidget {
   const _QuizRing({required this.done, required this.total});
 
@@ -549,11 +552,12 @@ class _Pill extends StatelessWidget {
   }
 }
 
-/// Thumbnail prosedural compact: tint satu keluarga + ikon identitas +
-/// pola diagonal samar via CustomPainter.
+/// Thumbnail prosedural compact: tint satu keluarga + ikon identitas.
 ///
-/// Tanpa aset gambar: offline-safe, tanpa biaya unduh, tanpa placeholder
-/// palsu.
+/// Pola diagonal dipertahankan di ukuran kecil (hanya 3-4 garis, tidak
+/// berisik): tint polos di 56px justru terlihat seperti placeholder
+/// kosong. Banner featured yang memakai gradien solid tanpa pattern.
+/// Tanpa aset gambar: offline-safe, tanpa biaya unduh.
 class _ModuleThumb extends StatelessWidget {
   const _ModuleThumb({required this.module, required this.dimmed});
 
@@ -589,8 +593,9 @@ class _ModuleThumb extends StatelessWidget {
   }
 }
 
-/// Pola diagonal samar di atas tint: kedalaman tanpa gambar.
+/// Pola diagonal samar di atas tint thumbnail kecil: kedalaman tanpa gambar.
 ///
+/// Hanya dipakai thumbnail compact 56px (3-4 garis, tidak berisik).
 /// Alpha 8% cukup memberi tekstur tanpa mengganggu ikon; dekoratif murni
 /// (di dalam ExcludeSemantics).
 class _ThumbPattern extends CustomPainter {

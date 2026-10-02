@@ -98,7 +98,8 @@ void main() {
 
       await tester.tap(find.text('Belajar'));
       await tester.pumpAndSettle();
-      expect(toolbarAccent(tester, 'literasimu.'), AppColors.successDark);
+      // Judul Belajar biru primer (hijau hanya status selesai + badge).
+      expect(toolbarAccent(tester, 'literasimu.'), AppColors.primary);
 
       await tester.tap(find.text('Profil'));
       await tester.pumpAndSettle();
@@ -123,13 +124,11 @@ void main() {
       final searchTop = tester.getTopLeft(find.byType(TextField)).dy;
       expect(searchTop, lessThan(800));
 
-      // Belajar: CTA hero (aksi fungsional utama hierarki v2) terlihat
-      // tanpa scroll. Kartu modul kini di bawah reward + featured.
+      // Belajar: CTA featured (satu-satunya tombol besar tab) terlihat
+      // tanpa scroll. Hero kini ringkasan tanpa CTA.
       await tester.tap(find.text('Belajar'));
       await tester.pumpAndSettle();
-      final ctaTop = tester
-          .getTopLeft(find.textContaining('Mulai Modul'))
-          .dy;
+      final ctaTop = tester.getTopLeft(find.byType(FilledButton)).dy;
       expect(ctaTop, lessThan(800));
 
       // Profil: ring skor terlihat tanpa scroll.

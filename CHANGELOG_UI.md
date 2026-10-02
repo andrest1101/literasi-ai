@@ -442,11 +442,201 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   update sadar `tab_headers_test` (lipatan: CTA hero sebagai aksi
   fungsional utama). Test lama lain tanpa ubahan isi, hijau.
 
+## Polish Belajar v4 Q1-Q8 (29 Sep 2026)
+
+- **Masalah:** judul hijau tabrakan identitas; copy login duplikat;
+  pattern diagonal berisik di banner 110px; featured tidak radikal;
+  compact masih pola kartu; reward blok biru kedua bertumpuk featured.
+- **Perubahan (UI-only, data/provider/kuis/skor tidak tersentuh):**
+  - Judul kata kedua hijau → biru primer. Badge navbar Belajar
+    SENGAJA tetap hijau (identitas navigasi vs konten boleh beda:
+    pola yang dipakai semua tab); hijau tersisa untuk badge +
+    status selesai. `nav_pill_test` tidak disentuh.
+  - Guest note dihapus dari hero (duplikat CTA profil); 5 string
+    yatim dibersihkan (`learnGuestNote/QuizTotalLabel/HeroCtaPrefix/
+    MyModules/RewardHint`) + 2 token warna reward lama.
+  - Reward digabung ke hero: ring + agregat + bar 8px + divider +
+    label "Hadiah" + dua angka display dari domain. Blok
+    `_RewardStrip`/`_RewardCell` dihapus. Tab tinggal 3 blok:
+    hero-gabungan, featured, daftar. CTA hero dihapus total (peran
+    aksi milik featured/strip).
+  - Featured biru solid: banner gradien `heroBegin→heroEnd` 120px +
+    medallion putih 68px + ikon identitas, tanpa pattern (alpha 0).
+    Satu-satunya kartu biru di tab. Meta 12px/w700 kompensasi
+    kontras di atas gradien.
+  - Compact borderless: tanpa border/shadow, divider hairline antar
+    baris (pola daftar, bukan kartu). Thumbnail pertahankan pattern
+    kecil (tint polos di 56px terlihat seperti placeholder kosong).
+    Ring 40px + status teks tetap.
+  - Spacing seksi 20-22px (pemisah dua biru), skeleton selaras.
+- **Ditolak (dengan alasan):** full-bleed + overlay hitam (premis
+  trending-card salah: rail Cek kartu putih radius 22; full-bleed
+  tabrak padding/maxWidth; tanpa aset = kartu gelap keempat),
+  accent stripe warna-warni (kembalikan 3 bahasa warna), hero kedua
+  (judul/progres/CTA ganda), badge ikut biru (scope creep, merusak
+  sistem 4 tab), hapus pattern thumb (placeholder kosong),
+  grid 2 kolom, emoji, radius >20, animasi fill, screenshot manual.
+- **File:** `course_list_screen.dart` (hero gabungan, judul biru,
+  divider compact, hapus reward strip), `course_card.dart` (rewrite:
+  `_RowShell` borderless, `_CompactRow` borderless,
+  `_FeaturedCard` biru solid, thumb pattern dipertahankan),
+  `app_colors.dart` (hapus token reward lama),
+  `app_strings.dart` (5 yatim dihapus),
+  `test/learn_library_test.dart` (11 test Q1-Q8),
+  update sadar `tab_headers_test` (judul biru + lipatan CTA
+  featured) + `ui_u2_identity_test` (judul biru).
+
+## Polish Belajar v5 V1-V4 (29 Sep 2026)
+
+- **Masalah:** tab masih terasa polos: hero putih besar berisi teks abu
+  (kesan pertama lemah), featured setengah-setengah (hanya strip 120px
+  biru, badan tetap putih → terbaca kartu biasa), reward gabungan hero
+  membuatnya kotak status pucat. Terpisah: overlap FAB nyata (zona FAB
+  = navbar+gap+badan ≈144px > padding 120px lama).
+- **V4 Fix zona FAB:** padding bawah 120 → **160px** (clearance ujung
+  scroll + margin; test mengunci angka). `learn_fab_clearance_test.dart`
+  baru **mengukur rect nyata** di 360×800 & 412×915: (a) scroll-0 CTA
+  featured vs FAB tidak beririsan, (b) baris terakhir di ujung scroll
+  berhenti di atas zona FAB. Keduanya hijau (overlap saat istirahat
+  terbukti tidak terjadi pada layout baru; FAB hide-on-scroll jadi tidak
+  perlu).
+- **V3 Featured = kartu hero keluarga tab Cek:** seluruh badan gradien
+  `heroBegin→heroEnd` radius 20 + glow `primary 32%` + pattern garis
+  diagonal putih 7% (duplikat sadar dari `_HeroPattern` Cek tanpa
+  perisai: motif modul sudah focal); medallion motif putih 52px
+  kanan-atas (slot ilustrasi prosedural); judul putih 22px + subtitle
+  `#D6E5FE` (pola kontras hero Cek, bukan abu); pill meta varian
+  transparan putih; bar progres track putih 30% + isi putih; **CTA
+  putih teks primer** (persis bahasa CTA `_SessionCtaCard`). Overlay
+  hitam 60% ditolak (bahasa app media, app ini trustworthy-bright);
+  full-bleed tanpa radius ditolak (bahasa kartu campur di tengah
+  halaman; token gradien #0D47A1 bukan token app).
+- **V2 Reward = kartu achievement terpisah:** keluar dari hero; tint
+  `primary 7%` + rim `primary 20%` radius 20, medallion trofi, angka
+  display **+20 `successDark` / +5 `warningDark`** (warna makna sama
+  dengan breakdown Profil: modul hijau, kuis amber; `warningDark` token
+  sudah ada). Hero kembali ramping ~110px: ring + agregat + bar, tanpa
+  CTA (keputusan v4 tetap: aksi milik featured). Urutan struktur
+  dipertahankan: hero → reward → featured → compact.
+- **Ditolak (dengan alasan):** accent stripe tosca/sage (premis basi:
+  compact kini borderless, tak ada sudut untuk stripe; motif thumbnail
+  sudah membawa warna per modul → stripe = sinyal ganda; mundur ke
+  keputusan M1-M5 yang membuang multi-bahasa warna), CTA hero
+  "Mulai Modul 1" (rangkap dengan CTA featured), overlay hitam,
+  full-bleed, ilustrasi aset (offline).
+- **File:** `course_list_screen.dart` (padding 160, hero ramping, baru
+  `_RewardCard`/`_RewardCell`, skeleton 230), `course_card.dart`
+  (rewrite `_FeaturedCard` gradien + `_FeaturedMotif` +
+  `_FeaturedPatternPainter`, varian `onGradient` di `_MetaRow`/`_Pill`/
+  `_QuizBar`, `_RowShell` disederhanakan jadi shell compact saja),
+  `test/learn_library_test.dart` (P4 struktur gradien+CTA putih, P6
+  reward kartu tint + warna makna + urutan, helper
+  `_hasHeroGradient` via `visitAncestorElements`),
+  `test/learn_fab_clearance_test.dart` (baru, 4 test ukur rect).
+
+## Refactor Profil S1-S3 (1 Okt 2026)
+
+- **Masalah:** tab Profil = judul + 3 kartu gaya beda bertumpuk (ring,
+  breakdown, akun, kunci): polos, tanpa pola menu; user login tidak
+  bisa keluar (tidak ada `signOut` di seluruh app).
+- **Perubahan (UI-only + 1 aksi auth yang bolong, domain/skor/kuis
+  tidak tersentuh):**
+  - S1 kartu identitas: avatar inisial + email/label tamu + pill level
+    + status Tersinkron/Tamu + CTA masuk (guest). Satu kartu, bukan
+    judul + kartu gaya beda.
+  - S2 grup skor: `ScoreRing` + `ScoreBreakdown` dipertahankan utuh
+    dalam satu kartu berjudul (tanpa permukaan ganda).
+  - S3 grup menu "Pengaturan" ala settings profesional (baris ikon +
+    chevron + divider, destruktif terpisah): Kunci API (navigasi ke
+    layar yang sudah ada), Keluar (konfirmasi + signOut aman-test +
+    invalidate agar UI ikut logout; gagal ramah via dialog karena tab
+    tanpa Scaffold), Tentang (dialog versi, bukan layar baru).
+- **Ditolak (dengan alasan):** password/notifikasi/dark-mode (tidak ada
+  backend = tombol palsu), Help/FAQ/deactivate (dead-end), avatar foto
+  (tidak ada data; inisial sudah jujur), palet referensi (tabrakan
+  identitas biru), varian dark (scope sistem-wide).
+- **File:** `profile_screen.dart` (rewrite: `_IdentityCard`,
+  `_MiniPill`, `_ScoreGroup`, `_SettingsGroup`, `_SettingsRow`,
+  `_safeSignOut`), `app_strings.dart` (16 string profil),
+  `test/profile_menu_test.dart` (baru, 7 test: struktur, navigasi
+  kunci, dialog Tentang, konfirmasi + batal keluar, render 360/412px),
+  update sadar `api_key_demo_test` (tap baris menu, bukan tombol lama).
+- **Status verifikasi saat tulis:** `flutter analyze` bersih; test
+  profil 38/38 hijau (menu 7 + score + api_key); em-dash 0; full suite
+  303 lulus 2 gagal bawaan commit (Q4 gradien + lipatan headers, gagal
+  juga di commit murni, bukan akibat refactor Profil).
+- **Bonus fix:** test menemukan bug nyata `showSnackBar` tanpa Scaffold
+  (tab Profil memang tanpa Scaffold) → kegagalan keluar kini dialog.
+
+## Lanjutan Profil: avatar + Keluar jujur + layar Kunci API (2 Okt 2026)
+
+- **Masalah:** avatar tamu huruf "T" tanpa penjelasan (membingungkan);
+  baris "Bersihkan sesi tamu" menjanjikan aksi yang tidak ada (tamu
+  tidak punya sesi Firebase); layar Kunci API 4 kartu putih identik
+  bertumpuk tanpa hierarki; hasil tes koneksi dibuang jadi satu string
+  panjang padahal data per tahap tersedia.
+- **Perubahan (UI-only, resolver/controller/probe tidak tersentuh):**
+  - Avatar tamu → ikon person netral (placeholder akun yang jelas);
+    login tetap inisial email. Status pill ke string terpusat.
+  - Baris Keluar hanya bila login ("Keluar akun", berfungsi penuh);
+    tamu tanpa baris destruktif (menampilkannya = dishonest UI; aksi
+    akun tamu cukup CTA masuk di kartu identitas). String yatim
+    `profileGuestLogoutRow` dihapus.
+  - Layar Kunci API: hero status (ikon besar + label AI Live/Mode Demo
+    + sublabel sumber) sebagai fokal; hasil Tes koneksi dirender per
+    tahap probe (DNS/TCP/HTTPS/generate + ikon OK/GAGAL + durasi
+    tabular) + ringkasan kesimpulan; kartu form berjudul; 7 string baru
+    terpusat (tooltip tampil/sembunyi, judul form, label status,
+    judul rincian tahap).
+- **File:** `profile_screen.dart` (avatar ikon, `if (synced)` destruktif),
+  `api_key_screen.dart` (rewrite: `_StatusHero`, `_TestCard`,
+  `_ProbeStepRow`, `_KeyFormCard`, state `_testSteps`), `app_strings.dart`
+  (+9, -1 yatim), `test/profile_menu_test.dart` (avatar ikon + tanpa
+  huruf T + tamu tanpa baris keluar), `test/ui_u2_identity_test.dart`
+  (avatar ikon), `test/api_key_demo_test.dart` (+2: hero demo + tes
+  tanpa kunci tanpa request).
+- **Status verifikasi saat tulis:** `flutter analyze` bersih; test
+  profil + api_key hijau; em-dash 0.
+
+## Detail Modul D1-D2 (30 Sep 2026)
+
+- **Masalah:** 4 kartu artikel `_ArticleSection` identik berulang (radius,
+  ikon, label sama; hanya seksi pertama berborder biru): monoton dan tidak
+  profesional. Tidak ada peta isi: user harus scroll 4 kartu untuk tahu
+  struktur modul.
+- **Perubahan (UI-only, data/provider/kuis/skor tidak tersentuh):**
+  - D1 kartu "Isi modul": satu kartu putih di bawah hero berisi 4 baris
+    judul seksi nyata dari data + nomor tint motif modul (fungsi =
+    kolom "The Course includes" pada referensi, isi = data jujur, tanpa
+    rating/guru/video). 1 string baru (`learnContentsTitle`); tanpa CTA
+    (aksi milik sticky bottom bar).
+  - D2 ritme seksi: rel nomor ghost + konektor vertikal di sisi kiri
+    (alur baca 1-4, dekoratif `ExcludeSemantics`); medallion ikon tiap
+    seksi memakai tint motif modul (biru/teal/hijau sesuai modul, bukan
+    4 warna acak); seksi pertama tetap aksen primer. Label `Bagian N`,
+    heading, body, CTA, hero tidak berubah (dikunci test lama).
+- **Ditolak (dengan alasan):** header ungu + avatar/sapaan (tidak ada
+  profil user di konteks ini + tabrakan identitas biru), rating Bintang /
+  Teacher / video / template (tidak ada di data = klaim palsu), grid
+  2 kolom "For You" (hanya 3 modul), palet pink-ungu (merusak sistem
+  4 tab), ubah radius hero 26px (scope creep, follow-up terpisah).
+- **File:** `course_detail_screen.dart` (`_ContentsCard`, `_ContentsRow`,
+  `_ArticleSection` + `ink`, `_SectionRail`), `app_strings.dart`
+  (`learnContentsTitle`), `test/learn_detail_contents_test.dart` (baru,
+  5 test: isi dari data, urutan hero-isi-artikel-CTA, tint motif,
+  render 360/412px). Test lama tanpa ubahan isi, hijau.
+- **Status verifikasi saat tulis:** `flutter analyze` 1 warning bawaan
+  (`assets/animation/` tidak ada, pubspec tidak tersentuh);
+  test baru + `learn_test` + `ui_u1_polish` hijau; full suite 296 lulus
+  2 gagal bawaan commit (Q4 gradien + lipatan tab_headers, gagal juga
+  di commit murni, bukan akibat D1/D2).
+
 ## Verifikasi
 
 - `flutter analyze --no-pub`: bersih.
-- `flutter test`: 293 lulus, nol gagal (281 lama + 12 baru refactor).
-- Render 360×800 & 412×915 via test (bebas overlap FAB: seluruh
-  konten ensureVisible tanpa exception).
+- `flutter test`: **297 lulus**, nol gagal (292 sebelumnya + 4 FAB +
+  1 struktur featured).
+- Render 360×800 & 412×915 via test (termasuk ukur rect FAB vs konten
+  di scroll-0 dan ujung scroll).
 - `flutter build windows --debug`: sukses, app relaunch hidup.
 - Commit manual oleh user (kebijakan repo): pecah per tema bila perlu.

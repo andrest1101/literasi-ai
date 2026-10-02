@@ -169,12 +169,9 @@ abstract final class AppStrings {
   static const String homeLearnTitle2 = 'literasimu.';
   static const String learnProgressSuffix = 'modul selesai';
   static const String learnProgressLoading = 'Memuat progres belajar...';
-  static const String learnMyModules = 'Modulku';
   static const String learnPopularModules = 'Modul populer';
   static const String learnSectionDoneSuffix = 'selesai';
   static const String learnAllModules = 'Semua modul';
-  static const String learnQuizTotalLabel = 'Progres kuis';
-  static const String learnHeroCtaPrefix = 'Mulai Modul';
   static const String learnOpenModule = 'Buka modul';
   static const String learnQuizProgressLabel = 'Progres kuis';
   static const String learnFeaturedStart = 'Mulai dari sini';
@@ -185,12 +182,11 @@ abstract final class AppStrings {
   static const String learnAllDoneHint =
       'Ulangi kuis mana pun untuk pertahankan skormu.';
   static const String learnRewardTitle = 'Hadiah belajar';
-  static const String learnRewardHint =
-      'Selesaikan modul dan kuis untuk menaikkan skor literasimu.';
   static const String learnRewardModuleLabel = 'per modul selesai';
   static const String learnRewardQuizLabel = 'per jawaban benar';
   static const String learnModuleDone = 'Selesai';
   static const String learnDetailTitle = 'Modul belajar';
+  static const String learnContentsTitle = 'Isi modul';
   static const String learnReadingProgress = 'Progres baca modul';
   static const String learnStartQuiz = 'Mulai kuis';
   static const String learnReadArticle = 'Baca modul';
@@ -210,8 +206,6 @@ abstract final class AppStrings {
       'Tidak ada poin baru. Skor terbaikmu bertahan.';
   static const String learnQuizRetry = 'Ulangi kuis';
   static const String learnQuizBack = 'Kembali ke modul';
-  static const String learnGuestNote =
-      'Masuk untuk menyimpan progres ke semua perangkat. Tanpa login progres hanya sesi ini.';
   static const String homeProfileTitle1 = 'Kelola';
   static const String homeProfileTitle2 = 'profilmu.';
   static const String homeProfileSubtitle =
@@ -233,6 +227,23 @@ abstract final class AppStrings {
   static const String scoreSyncedNote =
       'Skor tersinkron ke akunmu dan bertambah otomatis setiap verifikasi.';
   static const String scoreLoading = 'Memuat skor...';
+  static const String scoreGroupTitle = 'Skor & sumber poin';
+  static const String profileSyncedLabel = 'Tersinkron';
+  static const String profileGuestPill = 'Tamu';
+  static const String profileMenuTitle = 'Pengaturan';
+  static const String profileApiKeyRow = 'Kunci API Gemini';
+  static const String profileLogoutRow = 'Keluar akun';
+  static const String profileLogoutTitle = 'Keluar dari akun?';
+  static const String profileLogoutBody =
+      'Riwayat dan skormu tetap tersimpan di akun ini dan bisa diakses lagi setelah masuk kembali.';
+  static const String profileLogoutConfirm = 'Ya, keluar';
+  static const String profileLogoutCancel = 'Batal';
+  static const String profileLogoutFailed =
+      'Gagal keluar. Periksa koneksi lalu coba lagi.';
+  static const String profileAboutRow = 'Tentang LiterasiAI';
+  static const String profileAboutBody =
+      'LiterasiAI membantu memeriksa kebenaran informasi dalam hitungan detik: tempel teks, gambar, atau link, lalu bagikan hasilnya. Versi 1.0.0.';
+  static const String profileAboutClose = 'Tutup';
   static const String scoreLoadFailed = 'Skor tidak dapat dimuat.';
   static const String scoreLoadFailedSubtitle =
       'Ini soal penyimpanan skor, bukan kunci API. Periksa koneksi atau aturan Firestore, lalu coba lagi.';
@@ -280,6 +291,13 @@ abstract final class AppStrings {
   static const String apiKeyHowToTitle = 'Dari mana dapat kunci?';
   static const String apiKeyHowToBody =
       'Buat gratis di Google AI Studio, salin kuncinya, lalu tempel di sini. Kunci tidak pernah dikirim ke mana pun selain API Gemini.';
+  static const String apiKeyChecking = 'Memeriksa kunci...';
+  static const String apiKeyShowKey = 'Tampilkan kunci';
+  static const String apiKeyHideKey = 'Sembunyikan kunci';
+  static const String apiKeyFormTitle = 'Kelola kunci perangkat';
+  static const String apiKeyStatusActive = 'AI Live';
+  static const String apiKeyStatusDemo = 'Mode Demo';
+  static const String apiKeyProbeStepsTitle = 'Hasil pemeriksaan jalur';
   static const String demoBadge = 'DEMO';
   static const String demoResultNote =
       'Hasil demo offline, bukan penilaian AI live. Sambungkan kunci API untuk verifikasi sungguhan.';
