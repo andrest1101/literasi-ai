@@ -227,6 +227,22 @@ abstract final class AppStrings {
   static const String scoreSyncedNote =
       'Skor tersinkron ke akunmu dan bertambah otomatis setiap verifikasi.';
   static const String scoreLoading = 'Memuat skor...';
+  static const String scoreGroupTitle = 'Skor & sumber poin';
+  static const String profileMenuTitle = 'Pengaturan';
+  static const String profileApiKeyRow = 'Kunci API Gemini';
+  static const String profileLogoutRow = 'Keluar akun';
+  static const String profileLogoutTitle = 'Keluar dari akun?';
+  static const String profileLogoutBody =
+      'Riwayat dan skormu tetap tersimpan di akun ini dan bisa diakses lagi setelah masuk kembali.';
+  static const String profileLogoutConfirm = 'Ya, keluar';
+  static const String profileLogoutCancel = 'Batal';
+  static const String profileLogoutFailed =
+      'Gagal keluar. Periksa koneksi lalu coba lagi.';
+  static const String profileGuestLogoutRow = 'Bersihkan sesi tamu';
+  static const String profileAboutRow = 'Tentang LiterasiAI';
+  static const String profileAboutBody =
+      'LiterasiAI membantu memeriksa kebenaran informasi dalam hitungan detik: tempel teks, gambar, atau link, lalu bagikan hasilnya. Versi 1.0.0.';
+  static const String profileAboutClose = 'Tutup';
   static const String scoreLoadFailed = 'Skor tidak dapat dimuat.';
   static const String scoreLoadFailedSubtitle =
       'Ini soal penyimpanan skor, bukan kunci API. Periksa koneksi atau aturan Firestore, lalu coba lagi.';

@@ -218,9 +218,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore()),
-        ],
+        overrides: [apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore())],
         child: const MaterialApp(home: ApiKeyScreen()),
       ),
     );
@@ -235,9 +233,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore()),
-        ],
+        overrides: [apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore())],
         child: const MaterialApp(home: ApiKeyScreen()),
       ),
     );
@@ -259,9 +255,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore()),
-        ],
+        overrides: [apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore())],
         child: const MaterialApp(home: ProfileScreen()),
       ),
     );
@@ -303,14 +297,12 @@ void main() {
     expect(currentKey.isNotEmpty, isTrue);
   });
 
-  testWidgets('kartu kunci di profil menuju pengaturan', (
+  testWidgets('baris kunci di menu profil menuju pengaturan', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore()),
-        ],
+        overrides: [apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore())],
         child: MaterialApp(
           home: const ProfileScreen(),
           routes: {ApiKeyScreen.route: (_) => const ApiKeyScreen()},
@@ -321,10 +313,10 @@ void main() {
     expect(find.text('Kunci API Gemini'), findsOneWidget);
     expect(find.text('Belum ada kunci. Mode demo aktif.'), findsOneWidget);
 
-    final settingsButton = find.text('Buka Pengaturan');
-    await tester.ensureVisible(settingsButton);
+    final settingsRow = find.text('Kunci API Gemini');
+    await tester.ensureVisible(settingsRow);
     await tester.pumpAndSettle();
-    await tester.tap(settingsButton);
+    await tester.tap(settingsRow);
     await tester.pumpAndSettle();
     expect(find.byType(ApiKeyScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -341,9 +333,7 @@ void main() {
     });
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore()),
-        ],
+        overrides: [apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore())],
         child: MaterialApp(
           home: const QuickCheckHomeTab(),
           routes: {ApiKeyScreen.route: (_) => const ApiKeyScreen()},

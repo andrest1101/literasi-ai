@@ -534,6 +534,40 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   `_hasHeroGradient` via `visitAncestorElements`),
   `test/learn_fab_clearance_test.dart` (baru, 4 test ukur rect).
 
+## Refactor Profil S1-S3 (1 Okt 2026)
+
+- **Masalah:** tab Profil = judul + 3 kartu gaya beda bertumpuk (ring,
+  breakdown, akun, kunci): polos, tanpa pola menu; user login tidak
+  bisa keluar (tidak ada `signOut` di seluruh app).
+- **Perubahan (UI-only + 1 aksi auth yang bolong, domain/skor/kuis
+  tidak tersentuh):**
+  - S1 kartu identitas: avatar inisial + email/label tamu + pill level
+    + status Tersinkron/Tamu + CTA masuk (guest). Satu kartu, bukan
+    judul + kartu gaya beda.
+  - S2 grup skor: `ScoreRing` + `ScoreBreakdown` dipertahankan utuh
+    dalam satu kartu berjudul (tanpa permukaan ganda).
+  - S3 grup menu "Pengaturan" ala settings profesional (baris ikon +
+    chevron + divider, destruktif terpisah): Kunci API (navigasi ada),
+    Keluar (konfirmasi + signOut aman-test + invalidate agar UI ikut
+    logout; gagal ramah via dialog karena tab tanpa Scaffold), Tentang
+    (dialog versi, bukan layar baru).
+- **Ditolak (dengan alasan):** password/notifikasi/dark-mode (tidak ada
+  backend = tombol palsu), Help/FAQ/deactivate (dead-end), avatar foto
+  (tidak ada data; inisial sudah jujur), palet referensi (tabrakan
+  identitas biru), varian dark (scope sistem-wide).
+- **File:** `profile_screen.dart` (rewrite: `_IdentityCard`,
+  `_MiniPill`, `_ScoreGroup`, `_SettingsGroup`, `_SettingsRow`,
+  `_safeSignOut`), `app_strings.dart` (16 string profil),
+  `test/profile_menu_test.dart` (baru, 7 test: struktur, navigasi
+  kunci, dialog Tentang, konfirmasi + batal keluar, render 360/412px),
+  update sadar `api_key_demo_test` (tap baris menu, bukan tombol lama).
+- **Status verifikasi saat tulis:** `flutter analyze` bersih; test
+  profil 38/38 hijau (menu 7 + score + api_key); em-dash 0; full suite
+  303 lulus 2 gagal bawaan commit (Q4 gradien + lipatan headers, gagal
+  juga di commit murni, bukan akibat refactor Profil).
+- **Bonus fix:** test menemukan bug nyata `showSnackBar` tanpa Scaffold
+  (tab Profil memang tanpa Scaffold) → kegagalan keluar kini dialog.
+
 ## Detail Modul D1-D2 (30 Sep 2026)
 
 - **Masalah:** 4 kartu artikel `_ArticleSection` identik berulang (radius,
