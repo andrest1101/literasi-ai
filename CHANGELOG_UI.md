@@ -547,10 +547,10 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   - S2 grup skor: `ScoreRing` + `ScoreBreakdown` dipertahankan utuh
     dalam satu kartu berjudul (tanpa permukaan ganda).
   - S3 grup menu "Pengaturan" ala settings profesional (baris ikon +
-    chevron + divider, destruktif terpisah): Kunci API (navigasi ada),
-    Keluar (konfirmasi + signOut aman-test + invalidate agar UI ikut
-    logout; gagal ramah via dialog karena tab tanpa Scaffold), Tentang
-    (dialog versi, bukan layar baru).
+    chevron + divider, destruktif terpisah): Kunci API (navigasi ke
+    layar yang sudah ada), Keluar (konfirmasi + signOut aman-test +
+    invalidate agar UI ikut logout; gagal ramah via dialog karena tab
+    tanpa Scaffold), Tentang (dialog versi, bukan layar baru).
 - **Ditolak (dengan alasan):** password/notifikasi/dark-mode (tidak ada
   backend = tombol palsu), Help/FAQ/deactivate (dead-end), avatar foto
   (tidak ada data; inisial sudah jujur), palet referensi (tabrakan
@@ -567,6 +567,36 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   juga di commit murni, bukan akibat refactor Profil).
 - **Bonus fix:** test menemukan bug nyata `showSnackBar` tanpa Scaffold
   (tab Profil memang tanpa Scaffold) → kegagalan keluar kini dialog.
+
+## Lanjutan Profil: avatar + Keluar jujur + layar Kunci API (2 Okt 2026)
+
+- **Masalah:** avatar tamu huruf "T" tanpa penjelasan (membingungkan);
+  baris "Bersihkan sesi tamu" menjanjikan aksi yang tidak ada (tamu
+  tidak punya sesi Firebase); layar Kunci API 4 kartu putih identik
+  bertumpuk tanpa hierarki; hasil tes koneksi dibuang jadi satu string
+  panjang padahal data per tahap tersedia.
+- **Perubahan (UI-only, resolver/controller/probe tidak tersentuh):**
+  - Avatar tamu → ikon person netral (placeholder akun yang jelas);
+    login tetap inisial email. Status pill ke string terpusat.
+  - Baris Keluar hanya bila login ("Keluar akun", berfungsi penuh);
+    tamu tanpa baris destruktif (menampilkannya = dishonest UI; aksi
+    akun tamu cukup CTA masuk di kartu identitas). String yatim
+    `profileGuestLogoutRow` dihapus.
+  - Layar Kunci API: hero status (ikon besar + label AI Live/Mode Demo
+    + sublabel sumber) sebagai fokal; hasil Tes koneksi dirender per
+    tahap probe (DNS/TCP/HTTPS/generate + ikon OK/GAGAL + durasi
+    tabular) + ringkasan kesimpulan; kartu form berjudul; 7 string baru
+    terpusat (tooltip tampil/sembunyi, judul form, label status,
+    judul rincian tahap).
+- **File:** `profile_screen.dart` (avatar ikon, `if (synced)` destruktif),
+  `api_key_screen.dart` (rewrite: `_StatusHero`, `_TestCard`,
+  `_ProbeStepRow`, `_KeyFormCard`, state `_testSteps`), `app_strings.dart`
+  (+9, -1 yatim), `test/profile_menu_test.dart` (avatar ikon + tanpa
+  huruf T + tamu tanpa baris keluar), `test/ui_u2_identity_test.dart`
+  (avatar ikon), `test/api_key_demo_test.dart` (+2: hero demo + tes
+  tanpa kunci tanpa request).
+- **Status verifikasi saat tulis:** `flutter analyze` bersih; test
+  profil + api_key hijau; em-dash 0.
 
 ## Detail Modul D1-D2 (30 Sep 2026)
 
