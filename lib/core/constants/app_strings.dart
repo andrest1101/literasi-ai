@@ -228,6 +228,8 @@ abstract final class AppStrings {
       'Skor tersinkron ke akunmu dan bertambah otomatis setiap verifikasi.';
   static const String scoreLoading = 'Memuat skor...';
   static const String scoreGroupTitle = 'Skor & sumber poin';
+  static const String profileSyncedLabel = 'Tersinkron';
+  static const String profileGuestPill = 'Tamu';
   static const String profileMenuTitle = 'Pengaturan';
   static const String profileApiKeyRow = 'Kunci API Gemini';
   static const String profileLogoutRow = 'Keluar akun';
@@ -238,7 +240,6 @@ abstract final class AppStrings {
   static const String profileLogoutCancel = 'Batal';
   static const String profileLogoutFailed =
       'Gagal keluar. Periksa koneksi lalu coba lagi.';
-  static const String profileGuestLogoutRow = 'Bersihkan sesi tamu';
   static const String profileAboutRow = 'Tentang LiterasiAI';
   static const String profileAboutBody =
       'LiterasiAI membantu memeriksa kebenaran informasi dalam hitungan detik: tempel teks, gambar, atau link, lalu bagikan hasilnya. Versi 1.0.0.';
@@ -290,6 +291,13 @@ abstract final class AppStrings {
   static const String apiKeyHowToTitle = 'Dari mana dapat kunci?';
   static const String apiKeyHowToBody =
       'Buat gratis di Google AI Studio, salin kuncinya, lalu tempel di sini. Kunci tidak pernah dikirim ke mana pun selain API Gemini.';
+  static const String apiKeyChecking = 'Memeriksa kunci...';
+  static const String apiKeyShowKey = 'Tampilkan kunci';
+  static const String apiKeyHideKey = 'Sembunyikan kunci';
+  static const String apiKeyFormTitle = 'Kelola kunci perangkat';
+  static const String apiKeyStatusActive = 'AI Live';
+  static const String apiKeyStatusDemo = 'Mode Demo';
+  static const String apiKeyProbeStepsTitle = 'Hasil pemeriksaan jalur';
   static const String demoBadge = 'DEMO';
   static const String demoResultNote =
       'Hasil demo offline, bukan penilaian AI live. Sambungkan kunci API untuk verifikasi sungguhan.';

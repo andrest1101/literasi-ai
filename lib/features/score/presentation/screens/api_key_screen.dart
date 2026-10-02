@@ -32,6 +32,7 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
   bool _testing = false;
   String? _testResult;
   bool? _testOk;
+  List<GeminiProbeStep> _testSteps = const [];
 
   @override
   void dispose() {
@@ -49,9 +50,9 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
       _testing = true;
       _testResult = null;
       _testOk = null;
+      _testSteps = const [];
     });
-    final key =
-        ref.read(apiKeyStatusProvider).valueOrNull?.key.trim() ?? '';
+    final key = ref.read(apiKeyStatusProvider).valueOrNull?.key.trim() ?? '';
     if (key.isEmpty) {
       if (!mounted) return;
       setState(() {
@@ -70,21 +71,15 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
       if (a == null) return b;
       return b.elapsed > a.elapsed ? b : a;
     });
-    final detail = report.steps
-        .map(
-          (s) =>
-              '${s.name}: ${s.ok ? 'OK' : 'GAGAL'} '
-              '${(s.elapsed.inMilliseconds / 1000).toStringAsFixed(1)} dtk',
-        )
-        .join(' • ');
     final total = slowest == null
         ? ''
         : ' (${(slowest.elapsed.inMilliseconds / 1000).toStringAsFixed(1)} dtk tahap terlama).';
     setState(() {
       _testing = false;
       _testOk = report.verdict == GeminiProbeVerdict.healthy;
+      _testSteps = report.steps;
       _testResult =
-          '${GeminiConnectivityProbe.adviceFor(report.verdict)}$total Rincian: $detail.';
+          '${GeminiConnectivityProbe.adviceFor(report.verdict)}$total';
     });
   }
 
@@ -204,214 +199,54 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
                 ),
                 const SizedBox(height: 16),
                 status.when(
-                  loading: () => const _StatusCard(
+                  loading: () => const _StatusHero(
                     icon: Icons.hourglass_empty_rounded,
-                    text: 'Memeriksa kunci...',
+                    title: AppStrings.apiKeyChecking,
+                    subtitle: null,
                     accent: AppColors.textSecondary,
                   ),
-                  error: (_, _) => const _StatusCard(
+                  error: (_, _) => const _StatusHero(
                     icon: Icons.error_outline_rounded,
-                    text: AppStrings.apiKeySaveFailed,
+                    title: AppStrings.apiKeySaveFailed,
+                    subtitle: null,
                     accent: AppColors.danger,
                   ),
-                  data: (value) => _StatusCard(
-                    icon: value.configured
-                        ? Icons.check_circle_outline_rounded
-                        : Icons.key_off_outlined,
-                    text: switch (value.source) {
-                      ApiKeySource.compileDefine =>
-                        AppStrings.apiKeyActiveCompile,
-                      ApiKeySource.userKey => AppStrings.apiKeyActiveUser,
-                      ApiKeySource.none => AppStrings.apiKeyInactive,
-                    },
-                    accent: value.configured
-                        ? AppColors.success
-                        : AppColors.warning,
-                  ),
+                  data: (value) {
+                    final live = value.configured;
+                    return _StatusHero(
+                      icon: live
+                          ? Icons.check_circle_outline_rounded
+                          : Icons.key_off_outlined,
+                      title: live
+                          ? AppStrings.apiKeyStatusActive
+                          : AppStrings.apiKeyStatusDemo,
+                      subtitle: switch (value.source) {
+                        ApiKeySource.compileDefine =>
+                          AppStrings.apiKeyActiveCompile,
+                        ApiKeySource.userKey => AppStrings.apiKeyActiveUser,
+                        ApiKeySource.none => AppStrings.apiKeyInactive,
+                      },
+                      accent: live ? AppColors.success : AppColors.warning,
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(22),
-                    color: AppColors.surface,
-                    border: Border.all(
-                      color: AppColors.neutral.withValues(alpha: 0.2),
-                    ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x0D101A33),
-                        blurRadius: 16,
-                        offset: Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text(
-                        AppStrings.connectionTestTitle,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.2,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 50,
-                        child: FilledButton.icon(
-                          onPressed: _testing ? null : _testConnection,
-                          icon: _testing
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Icon(
-                                  Icons.network_check_outlined,
-                                  size: 19,
-                                ),
-                          label: Text(
-                            _testing
-                                ? AppStrings.connectionTestRunning
-                                : AppStrings.connectionTestRun,
-                          ),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            textStyle: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (_testResult != null) ...[
-                        const SizedBox(height: 10),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              _testOk == true
-                                  ? Icons.check_circle_rounded
-                                  : Icons.error_outline_rounded,
-                              size: 18,
-                              color: _testOk == true
-                                  ? AppColors.success
-                                  : AppColors.danger,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _testResult!,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  height: 1.6,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
+                _TestCard(
+                  testing: _testing,
+                  testOk: _testOk,
+                  testSteps: _testSteps,
+                  testResult: _testResult,
+                  onTest: _testConnection,
                 ),
                 const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(22),
-                    color: AppColors.surface,
-                    border: Border.all(
-                      color: AppColors.neutral.withValues(alpha: 0.2),
-                    ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x0D101A33),
-                        blurRadius: 16,
-                        offset: Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      TextField(
-                        controller: _controller,
-                        obscureText: _obscure,
-                        autocorrect: false,
-                        enableSuggestions: false,
-                        decoration: InputDecoration(
-                          labelText: AppStrings.apiKeyFieldLabel,
-                          hintText: AppStrings.apiKeyFieldHint,
-                          errorText: _localError,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          suffixIcon: IconButton(
-                            tooltip: _obscure
-                                ? 'Tampilkan kunci'
-                                : 'Sembunyikan kunci',
-                            onPressed: () =>
-                                setState(() => _obscure = !_obscure),
-                            icon: Icon(
-                              _obscure
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        height: 50,
-                        child: FilledButton.icon(
-                          onPressed: _saving ? null : _save,
-                          icon: _saving
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Icon(Icons.save_outlined, size: 19),
-                          label: const Text(AppStrings.apiKeySave),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            textStyle: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton.icon(
-                        onPressed: _saving ? null : _confirmRemove,
-                        icon: const Icon(
-                          Icons.delete_outline_rounded,
-                          size: 18,
-                        ),
-                        label: const Text(AppStrings.apiKeyRemove),
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.danger,
-                        ),
-                      ),
-                    ],
-                  ),
+                _KeyFormCard(
+                  controller: _controller,
+                  obscure: _obscure,
+                  localError: _localError,
+                  saving: _saving,
+                  onToggleObscure: () => setState(() => _obscure = !_obscure),
+                  onSave: _save,
+                  onRemove: _confirmRemove,
                 ),
                 const SizedBox(height: 14),
                 Container(
@@ -468,39 +303,360 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
   }
 }
 
-class _StatusCard extends StatelessWidget {
-  const _StatusCard({
+/// Hero status: ikon besar + label sumber + sublabel mask.
+///
+/// Fokal layar: user langsung tahu AI Live atau Mode Demo tanpa membaca
+/// kartu kecil. Warna mengikuti makna (hijau live, amber demo); warna
+/// status tidak dipakai di tempat lain di layar ini agar tidak bersaing.
+class _StatusHero extends StatelessWidget {
+  const _StatusHero({
     required this.icon,
-    required this.text,
+    required this.title,
+    required this.subtitle,
     required this.accent,
   });
 
   final IconData icon;
-  final String text;
+  final String title;
+  final String? subtitle;
   final Color accent;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
         color: accent.withValues(alpha: 0.08),
         border: Border.all(color: accent.withValues(alpha: 0.3)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: accent),
-          const SizedBox(width: 10),
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(17),
+              color: accent.withValues(alpha: 0.15),
+            ),
+            child: Icon(icon, size: 27, color: accent),
+          ),
+          const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle!,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      height: 1.6,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Kartu tes koneksi: CTA + daftar hasil per tahap probe.
+///
+/// Meningkatkan data yang selama ini dibuang: tiap tahap (DNS/TCP/HTTPS/
+/// generate) tampil sebagai baris ikon OK/GAGAL + durasi, bukan satu
+/// string panjang. Kesimpulan + durasi tahap terlama tetap di atas
+/// sebagai ringkasan.
+class _TestCard extends StatelessWidget {
+  const _TestCard({
+    required this.testing,
+    required this.testOk,
+    required this.testSteps,
+    required this.testResult,
+    required this.onTest,
+  });
+
+  final bool testing;
+  final bool? testOk;
+  final List<GeminiProbeStep> testSteps;
+  final String? testResult;
+  final VoidCallback onTest;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0D101A33),
+            blurRadius: 16,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            AppStrings.connectionTestTitle,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.2,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 50,
+            child: FilledButton.icon(
+              onPressed: testing ? null : onTest,
+              icon: testing
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.network_check_outlined, size: 19),
+              label: Text(
+                testing
+                    ? AppStrings.connectionTestRunning
+                    : AppStrings.connectionTestRun,
+              ),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                textStyle: const TextStyle(fontWeight: FontWeight.w800),
               ),
             ),
+          ),
+          if (testResult != null) ...[
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  testOk == true
+                      ? Icons.check_circle_rounded
+                      : Icons.error_outline_rounded,
+                  size: 18,
+                  color: testOk == true ? AppColors.success : AppColors.danger,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    testResult!,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      height: 1.6,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (testSteps.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            const Text(
+              AppStrings.apiKeyProbeStepsTitle,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.4,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            for (var i = 0; i < testSteps.length; i++) ...[
+              if (i > 0) const SizedBox(height: 6),
+              _ProbeStepRow(step: testSteps[i]),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Satu baris hasil tahap probe: ikon status + nama + durasi tabular.
+class _ProbeStepRow extends StatelessWidget {
+  const _ProbeStepRow({required this.step});
+
+  final GeminiProbeStep step;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = step.ok ? AppColors.success : AppColors.danger;
+    final secs = (step.elapsed.inMilliseconds / 1000).toStringAsFixed(1);
+    return Row(
+      children: [
+        Icon(
+          step.ok ? Icons.check_circle_rounded : Icons.cancel_rounded,
+          size: 17,
+          color: color,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            step.name,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+        Text(
+          '$secs dtk',
+          style: const TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textSecondary,
+            fontFeatures: [FontFeature.tabularFigures()],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Kartu form kelola kunci: field + simpan + hapus.
+///
+/// Satu-satunya kartu dengan CTA primer ganda: Simpan (primer) di atas,
+/// Hapus (teks danger) di bawah. Tooltip tampil/sembunyi terpusat agar
+/// tidak hardcode di widget.
+class _KeyFormCard extends StatelessWidget {
+  const _KeyFormCard({
+    required this.controller,
+    required this.obscure,
+    required this.localError,
+    required this.saving,
+    required this.onToggleObscure,
+    required this.onSave,
+    required this.onRemove,
+  });
+
+  final TextEditingController controller;
+  final bool obscure;
+  final String? localError;
+  final bool saving;
+  final VoidCallback onToggleObscure;
+  final VoidCallback onSave;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0D101A33),
+            blurRadius: 16,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            AppStrings.apiKeyFormTitle,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.2,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: controller,
+            obscureText: obscure,
+            autocorrect: false,
+            enableSuggestions: false,
+            decoration: InputDecoration(
+              labelText: AppStrings.apiKeyFieldLabel,
+              hintText: AppStrings.apiKeyFieldHint,
+              errorText: localError,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              suffixIcon: IconButton(
+                tooltip: obscure
+                    ? AppStrings.apiKeyShowKey
+                    : AppStrings.apiKeyHideKey,
+                onPressed: onToggleObscure,
+                icon: Icon(
+                  obscure
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 50,
+            child: FilledButton.icon(
+              onPressed: saving ? null : onSave,
+              icon: saving
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.save_outlined, size: 19),
+              label: const Text(AppStrings.apiKeySave),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                textStyle: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextButton.icon(
+            onPressed: saving ? null : onRemove,
+            icon: const Icon(Icons.delete_outline_rounded, size: 18),
+            label: const Text(AppStrings.apiKeyRemove),
+            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
           ),
         ],
       ),

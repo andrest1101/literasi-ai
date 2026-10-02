@@ -124,11 +124,10 @@ class _ProfileHeading extends StatelessWidget {
 
 /// Kartu identitas: avatar + nama + pill level + status sinkron.
 ///
-/// Menggantikan judul tersebar + kartu akun terpisah: satu kartu berisi
-/// siapa user (inisial email atau "T" tamu), level literasi saat ini, dan
-/// status sinkron 1 baris. CTA Masuk hanya bagi tamu (route `/auth` yang
-/// sudah ada, tanpa flow baru). Tidak ada klaim nama yang tidak dimiliki
-/// data.
+/// Tamu (tanpa email) memakai ikon person netral sebagai placeholder akun
+/// yang jelas, bukan huruf "T" yang membingungkan. User login memakai
+/// inisial email. CTA Masuk hanya bagi tamu (route `/auth` yang sudah
+/// ada, tanpa flow baru). Tidak ada klaim nama yang tidak dimiliki data.
 class _IdentityCard extends ConsumerWidget {
   const _IdentityCard({required this.synced});
 
@@ -138,9 +137,7 @@ class _IdentityCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(historyUserIdProvider) != null ? _safeUser() : null;
     final email = user?.email;
-    final initial = email != null && email.isNotEmpty
-        ? email.trim()[0].toUpperCase()
-        : 'T';
+    final hasEmail = email != null && email.isNotEmpty;
     final accent = synced ? AppColors.success : AppColors.primary;
     final score = ref.watch(scoreProvider).valueOrNull;
     final levelLabel = score?.level.label ?? '';
@@ -173,14 +170,20 @@ class _IdentityCard extends ConsumerWidget {
               ),
             ),
             child: Center(
-              child: Text(
-                initial,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                ),
-              ),
+              child: hasEmail
+                  ? Text(
+                      email.trim()[0].toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(
+                      Icons.person_outline_rounded,
+                      size: 26,
+                      color: Colors.white,
+                    ),
             ),
           ),
           const SizedBox(width: 12),
@@ -212,7 +215,9 @@ class _IdentityCard extends ConsumerWidget {
                       icon: synced
                           ? Icons.cloud_done_outlined
                           : Icons.cloud_off_outlined,
-                      text: synced ? 'Tersinkron' : 'Tamu',
+                      text: synced
+                          ? AppStrings.profileSyncedLabel
+                          : AppStrings.profileGuestPill,
                       color: accent,
                     ),
                   ],
@@ -533,23 +538,28 @@ class _SettingsGroup extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: AppColors.surface,
-            border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
+        // Baris keluar hanya bila login: tamu tidak punya sesi Firebase
+        // sehingga tidak ada yang bisa dibersihkan; menampilkan tombol
+        // keluar untuk tamu = dishonest UI. Aksi akun tamu cukup CTA
+        // "Masuk untuk sinkron" di kartu identitas.
+        if (synced)
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: AppColors.surface,
+              border: Border.all(
+                color: AppColors.danger.withValues(alpha: 0.3),
+              ),
+            ),
+            child: _SettingsRow(
+              icon: Icons.logout_rounded,
+              title: AppStrings.profileLogoutRow,
+              subtitle: null,
+              last: true,
+              destructive: true,
+              onTap: () => _confirmLogout(context, ref),
+            ),
           ),
-          child: _SettingsRow(
-            icon: Icons.logout_rounded,
-            title: synced
-                ? AppStrings.profileLogoutRow
-                : AppStrings.profileGuestLogoutRow,
-            subtitle: null,
-            last: true,
-            destructive: true,
-            onTap: () => _confirmLogout(context, ref),
-          ),
-        ),
       ],
     );
   }

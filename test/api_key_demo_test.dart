@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:literasi_ai/core/constants/app_strings.dart';
 import 'package:literasi_ai/core/utils/api_key_resolver.dart';
 import 'package:literasi_ai/core/utils/api_key_store.dart';
 import 'package:literasi_ai/features/chat/data/datasources/demo_chat_datasource.dart';
@@ -225,6 +226,49 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Tes koneksi AI'), findsOneWidget);
     expect(find.text('Tes koneksi sekarang'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('hero status demo + form kelola kunci tampil sekali', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore())],
+        child: const MaterialApp(home: ApiKeyScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    // Hero: label status mode demo + sublabel sumber (bukan kartu kecil).
+    expect(find.text(AppStrings.apiKeyStatusDemo), findsOneWidget);
+    expect(find.text(AppStrings.apiKeyInactive), findsOneWidget);
+    // Kartu form berjudul + field + simpan + hapus.
+    expect(find.text(AppStrings.apiKeyFormTitle), findsOneWidget);
+    expect(find.text(AppStrings.apiKeySave), findsOneWidget);
+    expect(find.text(AppStrings.apiKeyRemove), findsOneWidget);
+    // Panduan cara dapat kunci tetap ada.
+    expect(find.text(AppStrings.apiKeyHowToTitle), findsOneWidget);
+    // Belum ada hasil probe: judul rincian tahap tidak tampil.
+    expect(find.text(AppStrings.apiKeyProbeStepsTitle), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tes tanpa kunci: pesan inactive tanpa request', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore())],
+        child: const MaterialApp(home: ApiKeyScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tes koneksi sekarang'));
+    await tester.pumpAndSettle();
+    // Jalur kunci kosong: pesan inactive tampil 2x (hero + hasil),
+    // tanpa baris tahap probe.
+    expect(find.text(AppStrings.apiKeyInactive), findsNWidgets(2));
+    expect(find.text(AppStrings.apiKeyProbeStepsTitle), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

@@ -69,10 +69,9 @@ Element? _parentOf(Element element) {
   return parent;
 }
 
-void main() {  group('U2.1 aksen header per tab', () {
-    testWidgets('default tetap biru brand (kompatibel mundur)', (
-      tester,
-    ) async {
+void main() {
+  group('U2.1 aksen header per tab', () {
+    testWidgets('default tetap biru brand (kompatibel mundur)', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -230,9 +229,7 @@ void main() {  group('U2.1 aksen header per tab', () {
   });
 
   group('U2.4 trending primer + review kuis', () {
-    testWidgets('detail: referensi tegas + CTA Filled primer', (
-      tester,
-    ) async {
+    testWidgets('detail: referensi tegas + CTA Filled primer', (tester) async {
       tester.view.physicalSize = const Size(800, 1400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() {
@@ -325,7 +322,7 @@ void main() {  group('U2.1 aksen header per tab', () {
   });
 
   group('U2.5 profil beraksen + akun jujur', () {
-    testWidgets('tamu: avatar T + CTA masuk; breakdown beraksen', (
+    testWidgets('tamu: avatar ikon + CTA masuk; breakdown beraksen', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -340,7 +337,8 @@ void main() {  group('U2.1 aksen header per tab', () {
       await tester.pumpAndSettle();
 
       expect(find.text('Tamu LiterasiAI'), findsOneWidget);
-      expect(find.text('T'), findsOneWidget);
+      expect(find.byIcon(Icons.person_outline_rounded), findsOneWidget);
+      expect(find.text('T'), findsNothing);
       expect(find.text('Masuk untuk sinkron'), findsOneWidget);
       expect(find.text('Sumber poin'), findsOneWidget);
       expect(find.text('+0'), findsNWidgets(3));
