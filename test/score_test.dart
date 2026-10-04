@@ -42,6 +42,33 @@ class _FakeScoreRepository implements ScoreRepository {
   }
 }
 
+/// Repository yang stream-nya gagal N kali lalu sukses: mengunci retry
+/// otomatis provider (kasus stream putus sesaat seperti Alt+Tab).
+class _FlakyScoreRepository implements ScoreRepository {
+  _FlakyScoreRepository({this.failTimes = 0});
+
+  final int failTimes;
+  int calls = 0;
+
+  @override
+  Stream<LiteracyScore> watch(String userId) async* {
+    calls++;
+    if (calls <= failTimes) {
+      throw Exception('stream putus');
+    }
+    yield const LiteracyScore();
+  }
+
+  @override
+  Future<void> awardVerification(String userId) async {}
+
+  @override
+  Future<void> awardModule(String userId, String moduleId) async {}
+
+  @override
+  Future<void> awardQuiz(String userId, {required bool correct}) async {}
+}
+
 void main() {
   group('LiteracyLevel ambang Standar', () {
     test('maps totals to levels', () {
@@ -141,9 +168,7 @@ void main() {
         overrides: [
           historyUserIdProvider.overrideWithValue('u1'),
           scoreRepositoryProvider.overrideWithValue(
-            _FakeScoreRepository(
-              score: const LiteracyScore(verifications: 6),
-            ),
+            _FakeScoreRepository(score: const LiteracyScore(verifications: 6)),
           ),
         ],
       );
@@ -151,6 +176,33 @@ void main() {
       final score = await container.read(scoreProvider.future);
       expect(score.total, 60);
       expect(score.level, LiteracyLevel.waspada);
+    });
+
+    test('retries twice with backoff before succeeding', () async {
+      final flaky = _FlakyScoreRepository(failTimes: 2);
+      final container = ProviderContainer(
+        overrides: [
+          historyUserIdProvider.overrideWithValue('u1'),
+          scoreRepositoryProvider.overrideWithValue(flaky),
+        ],
+      );
+      addTearDown(container.dispose);
+      final score = await container.read(scoreProvider.future);
+      expect(score.total, 0);
+      expect(flaky.calls, 3);
+    });
+
+    test('surfaces error after exhausting retries', () async {
+      final flaky = _FlakyScoreRepository(failTimes: 99);
+      final container = ProviderContainer(
+        overrides: [
+          historyUserIdProvider.overrideWithValue('u1'),
+          scoreRepositoryProvider.overrideWithValue(flaky),
+        ],
+      );
+      addTearDown(container.dispose);
+      await expectLater(container.read(scoreProvider.future), throwsException);
+      expect(flaky.calls, 3);
     });
   });
 
@@ -163,7 +215,10 @@ void main() {
         home: Scaffold(
           body: SingleChildScrollView(
             child: Column(
-              children: [ScoreRing(score: score), ScoreBreakdown(score: score)],
+              children: [
+                ScoreRing(score: score),
+                ScoreBreakdown(score: score),
+              ],
             ),
           ),
         ),
@@ -192,7 +247,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Kelola'), findsOneWidget);
     expect(find.text('Pemula'), findsOneWidget);
-    expect(find.text('Sumber poin'), findsOneWidget);
+    // Judul ganda dihapus: ring + rincian tanpa "Skor & sumber poin".
+    expect(find.text('Skor & sumber poin'), findsNothing);
+    expect(find.text('Sumber poin'), findsNothing);
+    expect(find.text('0 x 10'), findsOneWidget);
     expect(find.text('Tamu LiterasiAI'), findsOneWidget);
     expect(find.text('Masuk untuk sinkron'), findsOneWidget);
     expect(find.textContaining('tanpa akun'), findsOneWidget);
@@ -214,7 +272,7 @@ void main() {
     await tester.tap(find.byType(ScoreCheckChip));
     await tester.pumpAndSettle();
     expect(find.textContaining('Kelola'), findsOneWidget);
-    expect(find.text('Sumber poin'), findsOneWidget);
+    expect(find.text('0 x 10'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

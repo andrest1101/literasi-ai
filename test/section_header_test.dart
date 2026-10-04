@@ -46,7 +46,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('LiterasiAI'), findsNothing);
     expect(find.textContaining('Kelola'), findsOneWidget);
-    expect(find.text('Sumber poin'), findsOneWidget);
+    expect(find.text('0 x 10'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -69,7 +69,7 @@ void main() {
 
     await tester.tap(find.text('Profil'));
     await tester.pumpAndSettle();
-    expect(find.text('Sumber poin'), findsOneWidget);
+    expect(find.text('0 x 10'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -83,7 +83,10 @@ void main() {
     expect(find.text('Asisten LiterasiAI'), findsOneWidget);
     expect(find.text('Mode pratinjau'), findsOneWidget);
     expect(find.text('Siap membantu verifikasi'), findsNothing);
-    expect(find.text('Mode pratinjau: kunci API belum tersambung'), findsOneWidget);
+    expect(
+      find.text('Mode pratinjau: kunci API belum tersambung'),
+      findsOneWidget,
+    );
     expect(find.text('Salin perintah'), findsOneWidget);
 
     await tester.pumpWidget(

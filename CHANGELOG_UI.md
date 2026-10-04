@@ -534,6 +534,43 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   `_hasHeroGradient` via `visitAncestorElements`),
   `test/learn_fab_clearance_test.dart` (baru, 4 test ukur rect).
 
+## Polish Profil P1-P6 + Fix Skor Merah Alt+Tab (2 Okt 2026)
+
+- **Masalah:** kartu identitas tanpa nama; judul ganda ("Skor & sumber
+  poin" + "Sumber poin"); pill "Tersinkron" hijau padahal stream skor
+  error (sumbernya UID, bukan status data); stream Firestore putus
+  saat Alt+Tab dan tidak reconnect (kartu merah sampai user tekan
+  Coba lagi).
+- **Perubahan (UI + provider, domain/data tidak tersentuh):**
+  - P1 nama user: displayName Firebase (Google) → prefix email →
+    label tamu, via `resolveProfileName` murni teruji unit; avatar
+    56px; email baris kedua bila ada.
+  - P2 grup skor: judul ganda dihapus (2 string yatim dibersihkan);
+    divider hairline ring-rincian; ikon makna dipertahankan
+    (biru/hijau/amber); hint best-score inline sudah ada sejak dulu.
+  - P6 error jujur: copy dipertajam tapi tetap diagnostik (bedakan
+    skor vs kunci API); pill "Tersinkron" hijau hanya bila data ada,
+    netral "Offline" bila error; provider retry 2x backoff (1s, 2s)
+    via listener manual sebelum error final (percobaan `yield*`
+    terbukti tidak bisa menahan error generator).
+- **Ditolak (dengan alasan, terverifikasi ke kode):** rename heading
+  (dikunci 5+ file test + menyesatkan karena tab berisi Pengaturan),
+  hapus FAB (tidak ada FAB user; satu-satunya FAB = Chat),
+  ikon seragam biru (hancurkan encoding makna), ring 80px
+  (hero gradien identitas tab), copy error generik (hilangkan nilai
+  diagnostik), heading Belajar (di luar scope).
+- **File:** `profile_screen.dart` (nama + avatar 56 + `scoreOk` +
+  divider grup), `score_breakdown.dart` (hapus judul),
+  `score_providers.dart` (`_watchWithRetry`), `app_strings.dart`
+  (+`profileOfflineLabel`, copy error, -2 yatim),
+  `test/profile_menu_test.dart` (+nama unit, offline, retry-sukses,
+  render 360), `test/score_test.dart` (retry 2x + error final +
+  selaras judul), `test/section_header_test.dart` +
+  `test/ui_u2_identity_test.dart` (selaras judul).
+- **Status verifikasi saat tulis:** `flutter analyze` bersih; em-dash
+  0; full suite 309 lulus 2 gagal bawaan commit (Q4 gradien + lipatan
+  headers, gagal juga di commit murni, bukan akibat kerjaan ini).
+
 ## Refactor Profil S1-S3 (1 Okt 2026)
 
 - **Masalah:** tab Profil = judul + 3 kartu gaya beda bertumpuk (ring,

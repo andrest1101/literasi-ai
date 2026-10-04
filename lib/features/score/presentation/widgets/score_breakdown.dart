@@ -20,9 +20,7 @@ class ScoreBreakdown extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
         color: AppColors.surface,
-        border: Border.all(
-          color: AppColors.neutral.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0D101A33),
@@ -34,16 +32,6 @@ class ScoreBreakdown extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            AppStrings.scoreBreakdownTitle,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.2,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 12),
           _SourceRow(
             icon: Icons.fact_check_outlined,
             label: AppStrings.scoreVerifyRow,
