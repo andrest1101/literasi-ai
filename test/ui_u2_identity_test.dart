@@ -340,7 +340,7 @@ void main() {
       expect(find.byIcon(Icons.person_outline_rounded), findsOneWidget);
       expect(find.text('T'), findsNothing);
       expect(find.text('Masuk untuk sinkron'), findsOneWidget);
-      expect(find.text('Sumber poin'), findsOneWidget);
+      expect(find.text('0 x 10'), findsOneWidget);
       expect(find.text('+0'), findsNWidgets(3));
       expect(find.textContaining('skor terbaik'), findsOneWidget);
       expect(tester.takeException(), isNull);

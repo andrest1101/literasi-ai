@@ -56,9 +56,19 @@ class _FakeLearnRepository implements LearnRepository {
 }
 
 class _FakeScoreRepository implements ScoreRepository {
+  _FakeScoreRepository({this.failTimes = 0});
+
+  int failTimes;
+  int calls = 0;
+
   @override
-  Stream<LiteracyScore> watch(String userId) =>
-      Stream.value(const LiteracyScore());
+  Stream<LiteracyScore> watch(String userId) async* {
+    calls++;
+    if (calls <= failTimes) {
+      throw Exception('stream putus');
+    }
+    yield const LiteracyScore();
+  }
 
   @override
   Future<void> awardVerification(String userId) async {}
@@ -96,7 +106,38 @@ Future<void> _pumpProfile(WidgetTester tester, {Size? size}) async {
   await tester.pumpAndSettle();
 }
 
+Future<void> _pumpProfileLoggedIn(
+  WidgetTester tester, {
+  required ScoreRepository scoreRepository,
+}) async {
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore()),
+        historyUserIdProvider.overrideWithValue('u1'),
+        learnRepositoryProvider.overrideWithValue(_FakeLearnRepository()),
+        scoreRepositoryProvider.overrideWithValue(scoreRepository),
+      ],
+      child: const MaterialApp(home: ProfileScreen()),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
+  group('resolveProfileName jujur dari data', () {
+    test('displayName menang, prefix email fallback, tamu terakhir', () {
+      expect(
+        resolveProfileName('  Budi Santoso ', 'budi@x.id'),
+        'Budi Santoso',
+      );
+      expect(resolveProfileName(null, 'budi.santoso@x.id'), 'budi.santoso');
+      expect(resolveProfileName('   ', 'budi@x.id'), 'budi');
+      expect(resolveProfileName(null, null), AppStrings.scoreGuestLabel);
+      expect(resolveProfileName(null, ''), AppStrings.scoreGuestLabel);
+    });
+  });
+
   group('Menu pengaturan profil', () {
     testWidgets('identitas + skor grup + menu tampil sekali', (tester) async {
       await _pumpProfile(tester);
@@ -107,9 +148,13 @@ void main() {
       expect(find.text(AppStrings.profileGuestPill), findsOneWidget);
       expect(find.byIcon(Icons.person_outline_rounded), findsOneWidget);
       expect(find.text('T'), findsNothing);
-      // Grup skor: ring + rincian dalam satu kartu berjudul.
-      expect(find.text(AppStrings.scoreGroupTitle), findsOneWidget);
-      expect(find.text(AppStrings.scoreBreakdownTitle), findsOneWidget);
+      // Grup skor: ring + rincian tanpa judul ganda.
+      expect(find.text('Skor & sumber poin'), findsNothing);
+      expect(find.text('Sumber poin'), findsNothing);
+      expect(find.text('0 x 10'), findsOneWidget);
+      expect(find.text('0 x 20'), findsOneWidget);
+      expect(find.text('0 x 5'), findsOneWidget);
+      expect(find.text(AppStrings.scoreModuleSoon), findsOneWidget);
       // Grup menu tamu: 2 baris fungsi nyata, tanpa baris Keluar.
       expect(find.text(AppStrings.profileMenuTitle), findsOneWidget);
       expect(find.text(AppStrings.profileApiKeyRow), findsOneWidget);
@@ -156,6 +201,37 @@ void main() {
       // tamu cukup CTA "Masuk untuk sinkron" di kartu identitas.
       expect(find.text(AppStrings.profileLogoutRow), findsNothing);
       expect(find.text(AppStrings.scoreLoginCta), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('login error: pill Offline netral + kartu error', (
+      tester,
+    ) async {
+      await _pumpProfileLoggedIn(
+        tester,
+        scoreRepository: _FakeScoreRepository(failTimes: 99),
+      );
+
+      // Stream selalu gagal (melewati retry + timeout): kartu error tampil
+      // dengan copy diagnostik yang tetap ramah, pill status Offline.
+      expect(find.text(AppStrings.scoreLoadFailed), findsOneWidget);
+      expect(find.text(AppStrings.scoreLoadFailedSubtitle), findsOneWidget);
+      expect(find.text(AppStrings.profileOfflineLabel), findsOneWidget);
+      expect(find.text(AppStrings.profileSyncedLabel), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('login retry: gagal 2x lalu sukses tampil data', (
+      tester,
+    ) async {
+      final repo = _FakeScoreRepository(failTimes: 2);
+      await _pumpProfileLoggedIn(tester, scoreRepository: repo);
+
+      // Retry otomatis 2x backoff menyembuhkan stream putus sesaat
+      // (kasus Alt+Tab): data tampil, tanpa kartu error.
+      expect(find.text(AppStrings.scoreLoadFailed), findsNothing);
+      expect(find.text('0 x 10'), findsOneWidget);
+      expect(repo.calls, 3);
       expect(tester.takeException(), isNull);
     });
 
