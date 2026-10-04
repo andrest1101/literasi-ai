@@ -41,7 +41,7 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               const _ProfileHeading(),
               const SizedBox(height: AppTabTitles.titleToContentGap),
-              _IdentityCard(synced: userId != null),
+              _IdentityCard(synced: userId != null, scoreOk: score.hasValue),
               const SizedBox(height: 14),
               score.when(
                 loading: () => const _ScoreShimmer(),
@@ -67,6 +67,21 @@ User? _safeUser() {
   } catch (_) {
     return null;
   }
+}
+
+/// Nama tampilan jujur dari data yang ada: displayName Firebase bila
+/// diisi (Google Sign-In), prefix email bila tidak, label tamu bila
+/// tanpa akun. Fungsi murni agar teruji unit (jalur login tak terjangkau
+/// widget test tanpa Firebase init). Tanpa klaim nama yang tidak dimiliki
+/// data.
+String resolveProfileName(String? displayName, String? email) {
+  if (displayName != null && displayName.trim().isNotEmpty) {
+    return displayName.trim();
+  }
+  if (email != null && email.isNotEmpty) {
+    return email.trim().split('@').first;
+  }
+  return AppStrings.scoreGuestLabel;
 }
 
 /// Keluar aman-test: tanpa Firebase init mengembalikan false (gagal
@@ -129,15 +144,17 @@ class _ProfileHeading extends StatelessWidget {
 /// inisial email. CTA Masuk hanya bagi tamu (route `/auth` yang sudah
 /// ada, tanpa flow baru). Tidak ada klaim nama yang tidak dimiliki data.
 class _IdentityCard extends ConsumerWidget {
-  const _IdentityCard({required this.synced});
+  const _IdentityCard({required this.synced, required this.scoreOk});
 
   final bool synced;
+  final bool scoreOk;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(historyUserIdProvider) != null ? _safeUser() : null;
     final email = user?.email;
     final hasEmail = email != null && email.isNotEmpty;
+    final shownName = resolveProfileName(user?.displayName, email);
     final accent = synced ? AppColors.success : AppColors.primary;
     final score = ref.watch(scoreProvider).valueOrNull;
     final levelLabel = score?.level.label ?? '';
@@ -159,8 +176,8 @@ class _IdentityCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
@@ -174,14 +191,14 @@ class _IdentityCard extends ConsumerWidget {
                   ? Text(
                       email.trim()[0].toUpperCase(),
                       style: const TextStyle(
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
                       ),
                     )
                   : const Icon(
                       Icons.person_outline_rounded,
-                      size: 26,
+                      size: 30,
                       color: Colors.white,
                     ),
             ),
@@ -192,14 +209,28 @@ class _IdentityCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  email ?? AppStrings.scoreGuestLabel,
+                  shownName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
                     letterSpacing: -0.2,
                     color: AppColors.textPrimary,
                   ),
                 ),
+                if (hasEmail) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    email,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: 6,
@@ -211,14 +242,19 @@ class _IdentityCard extends ConsumerWidget {
                         text: '${AppStrings.scoreLevelPrefix} $levelLabel',
                         color: AppColors.primaryDark,
                       ),
+                    // Pill status jujur terhadap stream skor: hijau hanya
+                    // bila data skor benar-benar ada, netral Offline bila
+                    // stream error/loading (bukan dari UID semata).
                     _MiniPill(
-                      icon: synced
+                      icon: synced && scoreOk
                           ? Icons.cloud_done_outlined
                           : Icons.cloud_off_outlined,
-                      text: synced
+                      text: !synced
+                          ? AppStrings.profileGuestPill
+                          : scoreOk
                           ? AppStrings.profileSyncedLabel
-                          : AppStrings.profileGuestPill,
-                      color: accent,
+                          : AppStrings.profileOfflineLabel,
+                      color: synced && scoreOk ? accent : AppColors.neutral,
                     ),
                   ],
                 ),
@@ -309,11 +345,12 @@ class _MiniPill extends StatelessWidget {
   }
 }
 
-/// Grup skor: ring hero + rincian sumber dalam satu kartu.
+/// Grup skor: ring hero + rincian sumber dalam satu kartu tanpa judul ganda.
 ///
-/// [ScoreRing] dan [ScoreBreakdown] dipertahankan utuh (dikunci test),
-/// hanya pembungkusnya disatukan + judul grup agar tidak terbaca dua
-/// kartu bertumpuk gaya beda.
+/// [ScoreRing] dan [ScoreBreakdown] dipertahankan utuh, hanya pembungkusnya
+/// disatukan + divider agar tidak terbaca dua kartu bertumpuk gaya beda.
+/// Judul ganda ("Skor & sumber poin" + "Sumber poin") dihapus: ring hero
+/// sudah menjelaskan dirinya sendiri.
 class _ScoreGroup extends StatelessWidget {
   const _ScoreGroup({required this.score});
 
@@ -338,18 +375,11 @@ class _ScoreGroup extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            AppStrings.scoreGroupTitle,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.2,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 12),
           ScoreRing(score: score),
-          const SizedBox(height: 12),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(height: 1, color: AppColors.hairline),
+          ),
           ScoreBreakdown(score: score),
         ],
       ),

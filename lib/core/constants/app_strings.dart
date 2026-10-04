@@ -214,7 +214,6 @@ abstract final class AppStrings {
   static const String scorePointsSuffix = 'poin';
   static const String scoreToNextPrefix = 'poin lagi ke';
   static const String scoreMaxLevel = 'Level tertinggi tercapai.';
-  static const String scoreBreakdownTitle = 'Sumber poin';
   static const String scoreVerifyRow = 'Verifikasi';
   static const String scoreModuleRow = 'Modul selesai';
   static const String scoreQuizRow = 'Kuis benar';
@@ -227,8 +226,8 @@ abstract final class AppStrings {
   static const String scoreSyncedNote =
       'Skor tersinkron ke akunmu dan bertambah otomatis setiap verifikasi.';
   static const String scoreLoading = 'Memuat skor...';
-  static const String scoreGroupTitle = 'Skor & sumber poin';
   static const String profileSyncedLabel = 'Tersinkron';
+  static const String profileOfflineLabel = 'Offline';
   static const String profileGuestPill = 'Tamu';
   static const String profileMenuTitle = 'Pengaturan';
   static const String profileApiKeyRow = 'Kunci API Gemini';
@@ -246,7 +245,7 @@ abstract final class AppStrings {
   static const String profileAboutClose = 'Tutup';
   static const String scoreLoadFailed = 'Skor tidak dapat dimuat.';
   static const String scoreLoadFailedSubtitle =
-      'Ini soal penyimpanan skor, bukan kunci API. Periksa koneksi atau aturan Firestore, lalu coba lagi.';
+      'Skor kamu sedang tidak bisa dimuat. Ini soal penyimpanan skor, bukan kunci API: periksa koneksi atau aturan Firestore, lalu coba lagi.';
   static const String chatEyebrow = 'ASISTEN AI';
   static const String chatTitle1 = 'Tanya';
   static const String chatTitle2 = 'apa saja.';
