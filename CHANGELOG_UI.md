@@ -534,6 +534,32 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   `_hasHeroGradient` via `visitAncestorElements`),
   `test/learn_fab_clearance_test.dart` (baru, 4 test ukur rect).
 
+## Selaraskan Test-Test Belajar ke Kode v4 (2 Okt 2026)
+
+- **Masalah:** 2 test gagal sejak commit `5b49c35` (campuran v4/v5):
+  Q4 menuntut featured full-gradien + CTA putih padahal kode =
+  banner 120px + CTA primer; lipatan headers menuntut CTA featured
+  masuk 800px padahal di 808px.
+- **Perubahan (test + spacing, tanpa ubah desain):**
+  - Q4 ditulis ulang mengikuti kode v4 aktual (banner 120px, CTA
+    primer biru, subtitle abu); helper `_hasHeroGradient` yatim
+    dihapus; grup diganti "featured biru solid".
+  - Spacing vertikal tab Belajar dihemat 12px (14 ke 10, 22 ke 16,
+    20 ke 16): CTA masuk lipatan 360x800 tanpa ubah struktur/hierarki.
+- **File:** `test/learn_library_test.dart`,
+  `lib/features/learn/presentation/screens/course_list_screen.dart`.
+- **Status verifikasi saat tulis:** `flutter analyze` bersih;
+  full suite **312 lulus, nol gagal**; em-dash 0.
+
+## Thumbnail Tanpa Pola Diagonal (2 Okt 2026)
+
+- **Masalah:** garis diagonal thumbnail 56px terbaca sebagai
+  coretan/kesalahan, bukan tekstur (observasi user, valid).
+- **Perubahan:** hapus `_ThumbPattern` + `CustomPaint` total; thumbnail
+  jadi medallion bersih (tint + border + ikon). Tanpa ubah ukuran,
+  warna, ikon, atau struktur.
+- **File:** `course_card.dart` saja (-43/+7 baris).
+
 ## Hasil Kuis: klaim persisten + count-up + hero varian (2 Okt 2026)
 
 - **Masalah:** bukti klaim menguap (snackbar hilang, label tombol jadi
