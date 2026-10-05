@@ -534,6 +534,30 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   `_hasHeroGradient` via `visitAncestorElements`),
   `test/learn_fab_clearance_test.dart` (baru, 4 test ukur rect).
 
+## Hasil Kuis: klaim persisten + count-up + hero varian (2 Okt 2026)
+
+- **Masalah:** bukti klaim menguap (snackbar hilang, label tombol jadi
+  kalimat); lingkaran hasil biru generik untuk semua skor; tidak ada
+  momen perayaan saat klaim sukses.
+- **Perubahan (UI-only, provider/domain tidak tersentuh):**
+  - Status klaim persisten nonaktif: trofi hijau + angka count-up
+    0 ke N (600ms, pola ScoreRing) + haptic medium sekali saat
+    selesai + sublabel "masuk ke skormu"; tombol Klaim diganti
+    status, Ulangi nonaktif permanen (backend idempoten best-score).
+  - Hero varian: sempurna = hijau + medallion trofi + catatan;
+    parsial = biru + hint belajar lagi (tanpa string merendahkan).
+  - 3 string baru terpusat; tombol Kembali tetap TextButton tersier.
+- **Ditolak:** confetti/partikel (jank + tidak calm), suara
+  (permission + aset), badge baru (tidak ada sistem badge), animasi
+  loop (baterai + determinisme test).
+- **File:** `quiz_screen.dart` (`_ResultHero`, `_ClaimedStatus`,
+  guard `_claim`, Ulangi nonaktif), `app_strings.dart` (+3),
+  `test/learn_test.dart` (+status persisten, +hasil parsial).
+- **Status verifikasi saat tulis:** `flutter analyze` bersih;
+  test learn 8/8 hijau; em-dash 0; full suite 310 lulus 2 gagal
+  bawaan commit (Q4 gradien + lipatan headers, gagal juga di commit
+  murni).
+
 ## Anti-hardcode Detail Modul (2 Okt 2026)
 
 - **Masalah:** `_SectionRail` memakai `number >= 4` hardcode dan tidak ada

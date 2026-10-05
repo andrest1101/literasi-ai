@@ -150,9 +150,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('detail modul klaim dan buka kuis', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('detail modul klaim dan buka kuis', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(800, 1400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -190,9 +188,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('kuis kunci jawaban dan klaim poin', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('kuis kunci jawaban dan klaim poin', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(800, 1400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -237,6 +233,62 @@ void main() {
     await tester.tap(find.text('Klaim poin'));
     await tester.pumpAndSettle();
     expect(find.textContaining('poin kuis diklaim'), findsWidgets);
+    // Status klaim persisten nonaktif: trofi + angka + sublabel tetap
+    // tampil (bukti klaim tidak menguap bersama snackbar).
+    expect(find.text('Sudah masuk ke skormu.'), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle_rounded), findsWidgets);
+    // Tombol klaim hilang (diganti status), Ulangi nonaktif permanen.
+    expect(find.text('Klaim poin'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('hasil parsial: hero biru + hint belajar lagi', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          historyUserIdProvider.overrideWithValue('u1'),
+          learnRepositoryProvider.overrideWithValue(_FakeLearnRepository()),
+          scoreRepositoryProvider.overrideWithValue(_FakeScoreRepository()),
+        ],
+        child: const MaterialApp(home: QuizScreen(moduleId: 'clickbait')),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // 2 benar 1 salah: jawab soal terakhir dengan opsi salah.
+    const answers = [
+      'HEBOH! Minum ini sembuh total dalam semalam, sebarkan!',
+      'Periksa penerbit, tanggal, dan isi artikel',
+      'Karena emosi membuat kuota internet habis',
+    ];
+    for (var i = 0; i < 3; i++) {
+      final option = find.text(answers[i]);
+      await tester.ensureVisible(option);
+      await tester.pumpAndSettle();
+      await tester.tap(option);
+      await tester.pumpAndSettle();
+      final next = find.text(i == 2 ? 'Lihat hasil' : 'Lanjut');
+      await tester.ensureVisible(next);
+      await tester.pumpAndSettle();
+      await tester.tap(next);
+      await tester.pumpAndSettle();
+    }
+    expect(find.text('Hasil kuismu'), findsOneWidget);
+    expect(find.text('2/3'), findsOneWidget);
+    // Hero parsial: tanpa catatan sempurna, dengan hint belajar lagi.
+    expect(find.text('Sempurna! Semua jawaban benar.'), findsNothing);
+    expect(
+      find.text('Pelajari lagi bagian yang salah, lalu ulangi kuis.'),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 }

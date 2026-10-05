@@ -202,6 +202,10 @@ abstract final class AppStrings {
   static const String learnQuizReviewTitle = 'Tinjau jawabanmu';
   static const String learnQuizClaim = 'Klaim poin';
   static const String learnQuizClaimed = 'poin kuis diklaim.';
+  static const String learnQuizClaimedHint = 'Sudah masuk ke skormu.';
+  static const String learnQuizPerfectNote = 'Sempurna! Semua jawaban benar.';
+  static const String learnQuizPartialHint =
+      'Pelajari lagi bagian yang salah, lalu ulangi kuis.';
   static const String learnQuizNoNew =
       'Tidak ada poin baru. Skor terbaikmu bertahan.';
   static const String learnQuizRetry = 'Ulangi kuis';

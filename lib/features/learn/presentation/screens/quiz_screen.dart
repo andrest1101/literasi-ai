@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -64,7 +65,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   Future<void> _claim(int correct) async {
-    if (_claiming) return;
+    if (_claiming || _claimed > 0) return;
     setState(() => _claiming = true);
     final fresh = await ref
         .read(learnActionProvider.notifier)
@@ -102,6 +103,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       for (var i = 0; i < _answers.length; i++)
         if (module.quiz[i].isCorrect(_answers[i])) 1,
     ].length;
+    final perfect = correct >= module.quiz.length;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -141,6 +143,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               ? _ResultPanel(
                   correct: correct,
                   total: module.quiz.length,
+                  perfect: perfect,
                   claimed: _claimed,
                   claiming: _claiming,
                   answers: List.of(_answers),
@@ -159,10 +162,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 )
               : Column(
                   children: [
-                    _ProgressDots(
-                      index: _index,
-                      total: module.quiz.length,
-                    ),
+                    _ProgressDots(index: _index, total: module.quiz.length),
                     Expanded(
                       child: PageView.builder(
                         controller: _pager,
@@ -255,8 +255,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                                 style: const TextStyle(
                                                   fontSize: 13.5,
                                                   fontWeight: FontWeight.w800,
-                                                  color:
-                                                      AppColors.textPrimary,
+                                                  color: AppColors.textPrimary,
                                                 ),
                                               ),
                                               const SizedBox(height: 3),
@@ -322,7 +321,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 enum _OptionState { idle, correct, wrong, dimmed }
 
 class _OptionCard extends StatelessWidget {
-  const _OptionCard({required this.text, required this.state, required this.onTap});
+  const _OptionCard({
+    required this.text,
+    required this.state,
+    required this.onTap,
+  });
 
   final String text;
   final _OptionState state;
@@ -458,9 +461,7 @@ class _ReviewList extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         color: AppColors.surface,
-        border: Border.all(
-          color: AppColors.neutral.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -479,8 +480,7 @@ class _ReviewList extends StatelessWidget {
             if (i > 0) const SizedBox(height: 8),
             _ReviewRow(
               number: i + 1,
-              right: i < answers.length &&
-                  questions[i].isCorrect(answers[i]),
+              right: i < answers.length && questions[i].isCorrect(answers[i]),
               correctAnswer: questions[i].options[questions[i].correctIndex],
             ),
           ],
@@ -556,6 +556,7 @@ class _ResultPanel extends StatelessWidget {
   const _ResultPanel({
     required this.correct,
     required this.total,
+    required this.perfect,
     required this.claimed,
     required this.claiming,
     required this.answers,
@@ -567,6 +568,10 @@ class _ResultPanel extends StatelessWidget {
 
   final int correct;
   final int total;
+
+  /// Hasil sempurna (semua benar): hero hijau + catatan sempurna.
+  /// Parsial memakai biru + hint belajar lagi. Tanpa string merendahkan.
+  final bool perfect;
   final int claimed;
   final bool claiming;
 
@@ -585,79 +590,66 @@ class _ResultPanel extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
       child: Column(
         children: [
-          Container(
-            width: 84,
-            height: 84,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF2F80ED), Color(0xFF124A9B)],
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x331558B0),
-                  blurRadius: 24,
-                  offset: Offset(0, 12),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                '$correct/$total',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                  fontFeatures: [FontFeature.tabularFigures()],
-                ),
-              ),
-            ),
-          ),
+          _ResultHero(correct: correct, total: total, perfect: perfect),
           const SizedBox(height: 16),
-          const Text(
-            AppStrings.learnQuizScoreTitle,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.3,
-              color: AppColors.textPrimary,
+          if (perfect)
+            const Text(
+              AppStrings.learnQuizPerfectNote,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: AppColors.successDark,
+              ),
+            )
+          else
+            const Text(
+              AppStrings.learnQuizPartialHint,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.6,
+                color: AppColors.textSecondary,
+              ),
             ),
-          ),
           const SizedBox(height: 14),
           _ReviewList(answers: answers, questions: questions),
           const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: FilledButton.icon(
-              onPressed: claiming ? null : onClaim,
-              icon: claiming
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.emoji_events_outlined, size: 19),
-              label: Text(
-                claimed > 0
-                    ? '$claimed ${AppStrings.learnQuizClaimed}'
-                    : AppStrings.learnQuizClaim,
-              ),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+          if (claimed > 0)
+            _ClaimedStatus(
+              claimed: claimed,
+              onCountDone: () => HapticFeedback.mediumImpact(),
+            )
+          else
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: FilledButton.icon(
+                onPressed: claiming ? null : onClaim,
+                icon: claiming
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.emoji_events_outlined, size: 19),
+                label: const Text(AppStrings.learnQuizClaim),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: AppColors.neutral.withValues(
+                    alpha: 0.2,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  textStyle: const TextStyle(fontWeight: FontWeight.w800),
                 ),
-                textStyle: const TextStyle(fontWeight: FontWeight.w800),
               ),
             ),
-          ),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -665,11 +657,15 @@ class _ResultPanel extends StatelessWidget {
                 child: SizedBox(
                   height: 48,
                   child: OutlinedButton.icon(
-                    onPressed: onRetry,
+                    // Nonaktif permanen setelah klaim: status persisten di
+                    // atas adalah bukti klaim; menekan ulang hanya mengulang
+                    // request best-score yang idempoten.
+                    onPressed: claimed > 0 ? null : onRetry,
                     icon: const Icon(Icons.refresh_rounded, size: 18),
                     label: const Text(AppStrings.learnQuizRetry),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
+                      disabledForegroundColor: AppColors.neutral,
                       side: BorderSide(
                         color: AppColors.primary.withValues(alpha: 0.4),
                       ),
@@ -691,6 +687,182 @@ class _ResultPanel extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Hero hasil kuis: lingkaran skor + judul, varian sempurna/parsiil.
+///
+/// Sempurna = medallion hijau + trofi di bawah angka (momen perayaan
+/// tanpa confetti). Parsial = biru seperti semula. Tanpa aset, tanpa
+/// animasi loop: calm dan deterministik untuk test.
+class _ResultHero extends StatelessWidget {
+  const _ResultHero({
+    required this.correct,
+    required this.total,
+    required this.perfect,
+  });
+
+  final int correct;
+  final int total;
+  final bool perfect;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 84,
+          height: 84,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: perfect
+                  ? const [Color(0xFF34A853), Color(0xFF1E7E34)]
+                  : const [Color(0xFF2F80ED), Color(0xFF124A9B)],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color:
+                    (perfect
+                            ? const Color(0xFF1E7E34)
+                            : const Color(0xFF1558B0))
+                        .withValues(alpha: 0.2),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              '$correct/$total',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                fontFeatures: [FontFeature.tabularFigures()],
+              ),
+            ),
+          ),
+        ),
+        if (perfect) ...[
+          const SizedBox(height: 8),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.success.withValues(alpha: 0.12),
+              border: Border.all(
+                color: AppColors.success.withValues(alpha: 0.35),
+              ),
+            ),
+            child: const Icon(
+              Icons.emoji_events_outlined,
+              size: 19,
+              color: AppColors.successDark,
+            ),
+          ),
+        ],
+        const SizedBox(height: 16),
+        const Text(
+          AppStrings.learnQuizScoreTitle,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.3,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Status klaim persisten: bukti klaim yang tidak menguap.
+///
+/// Menggantikan label tombol yang berubah jadi kalimat: trofi hijau +
+/// angka count-up + sublabel "masuk ke skormu". Nonaktif permanen
+/// (anti double-claim visual; backend idempoten via best-score).
+/// Haptic medium sekali saat angka selesai (via [onCountDone]).
+class _ClaimedStatus extends StatefulWidget {
+  const _ClaimedStatus({required this.claimed, required this.onCountDone});
+
+  final int claimed;
+  final VoidCallback onCountDone;
+
+  @override
+  State<_ClaimedStatus> createState() => _ClaimedStatusState();
+}
+
+class _ClaimedStatusState extends State<_ClaimedStatus> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: AppColors.success.withValues(alpha: 0.08),
+        border: Border.all(color: AppColors.success.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.success.withValues(alpha: 0.15),
+            ),
+            child: const Icon(
+              Icons.emoji_events_outlined,
+              size: 22,
+              color: AppColors.successDark,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TweenAnimationBuilder<int>(
+                  tween: IntTween(begin: 0, end: widget.claimed),
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.easeOutCubic,
+                  onEnd: widget.onCountDone,
+                  builder: (context, value, _) {
+                    return Text(
+                      '+$value ${AppStrings.learnQuizClaimed}',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.successDark,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  AppStrings.learnQuizClaimedHint,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.check_circle_rounded,
+            size: 22,
+            color: AppColors.success,
           ),
         ],
       ),
