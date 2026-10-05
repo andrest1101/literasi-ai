@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -552,15 +553,13 @@ class _SettingsGroup extends ConsumerWidget {
                 last: true,
                 onTap: () => showDialog<void>(
                   context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text(AppStrings.profileAboutRow),
-                    content: const Text(AppStrings.profileAboutBody),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text(AppStrings.profileAboutClose),
-                      ),
-                    ],
+                  builder: (_) => _ProfileDialog(
+                    icon: Icons.info_outline_rounded,
+                    accent: AppColors.primary,
+                    title: AppStrings.profileAboutRow,
+                    body: AppStrings.profileAboutBody,
+                    primaryLabel: AppStrings.profileAboutClose,
+                    onPrimary: () => Navigator.of(context).pop(),
                   ),
                 ),
               ),
@@ -595,22 +594,19 @@ class _SettingsGroup extends ConsumerWidget {
   }
 
   Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    HapticFeedback.mediumImpact();
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text(AppStrings.profileLogoutTitle),
-        content: const Text(AppStrings.profileLogoutBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(AppStrings.profileLogoutCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(backgroundColor: AppColors.danger),
-            child: const Text(AppStrings.profileLogoutConfirm),
-          ),
-        ],
+      builder: (_) => _ProfileDialog(
+        icon: Icons.logout_rounded,
+        accent: AppColors.danger,
+        title: AppStrings.profileLogoutTitle,
+        body: AppStrings.profileLogoutBody,
+        primaryLabel: AppStrings.profileLogoutConfirm,
+        primaryDanger: true,
+        onPrimary: () => Navigator.of(context).pop(true),
+        secondaryLabel: AppStrings.profileLogoutCancel,
+        onSecondary: () => Navigator.of(context).pop(false),
       ),
     );
     if (ok != true || !context.mounted) return;
@@ -622,15 +618,13 @@ class _SettingsGroup extends ConsumerWidget {
       // untuk present).
       await showDialog<void>(
         context: context,
-        builder: (_) => AlertDialog(
-          title: const Text(AppStrings.profileLogoutTitle),
-          content: const Text(AppStrings.profileLogoutFailed),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(AppStrings.profileAboutClose),
-            ),
-          ],
+        builder: (_) => _ProfileDialog(
+          icon: Icons.cloud_off_outlined,
+          accent: AppColors.danger,
+          title: AppStrings.profileLogoutTitle,
+          body: AppStrings.profileLogoutFailed,
+          primaryLabel: AppStrings.profileAboutClose,
+          onPrimary: () => Navigator.of(context).pop(),
         ),
       );
       return;
@@ -638,6 +632,107 @@ class _SettingsGroup extends ConsumerWidget {
     ref.invalidate(historyUserIdProvider);
     ref.invalidate(scoreProvider);
     ref.invalidate(apiKeyControllerProvider);
+  }
+}
+
+/// Dialog khas Profil: ikon medallion + judul + body + aksi.
+///
+/// Menggantikan `AlertDialog` generik di 3 callsite tab ini (konfirmasi
+/// keluar, gagal keluar, Tentang) agar satu keluarga: medallion 48px
+/// tint aksen + judul 17px + body 14px + tombol primer penuh + sekunder
+/// teks. Copy tidak berubah (dikunci test).
+class _ProfileDialog extends StatelessWidget {
+  const _ProfileDialog({
+    required this.icon,
+    required this.accent,
+    required this.title,
+    required this.body,
+    required this.primaryLabel,
+    required this.onPrimary,
+    this.primaryDanger = false,
+    this.secondaryLabel,
+    this.onSecondary,
+  });
+
+  final IconData icon;
+  final Color accent;
+  final String title;
+  final String body;
+  final String primaryLabel;
+  final VoidCallback onPrimary;
+  final bool primaryDanger;
+  final String? secondaryLabel;
+  final VoidCallback? onSecondary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 24, 22, 18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              alignment: Alignment.centerLeft,
+              child: Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: accent.withValues(alpha: 0.12),
+                ),
+                child: Icon(icon, size: 27, color: accent),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.2,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              body,
+              style: const TextStyle(
+                fontSize: 14,
+                height: 1.6,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              height: 48,
+              child: FilledButton(
+                onPressed: onPrimary,
+                style: FilledButton.styleFrom(
+                  backgroundColor: primaryDanger
+                      ? AppColors.danger
+                      : AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  textStyle: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                child: Text(primaryLabel, overflow: TextOverflow.ellipsis),
+              ),
+            ),
+            if (secondaryLabel != null && onSecondary != null) ...[
+              const SizedBox(height: 4),
+              TextButton(onPressed: onSecondary, child: Text(secondaryLabel!)),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
 

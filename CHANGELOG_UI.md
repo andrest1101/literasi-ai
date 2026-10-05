@@ -534,6 +534,27 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   `_hasHeroGradient` via `visitAncestorElements`),
   `test/learn_fab_clearance_test.dart` (baru, 4 test ukur rect).
 
+## Dialog Profil satu keluarga + haptic Keluar (2 Okt 2026)
+
+- **Masalah:** 3 dialog inline `AlertDialog` generik (konfirmasi keluar,
+  gagal keluar, Tentang): judul + body + tombol tanpa identitas, tidak
+  satu keluarga satu sama lain maupun dengan bahasa kartu tab.
+- **Perubahan (UI-only, teks + alur + provider tidak tersentuh):**
+  - `_ProfileDialog` baru: medallion ikon 52px tint aksen + judul 17px
+    + body + tombol primer penuh (danger untuk aksi destruktif) +
+    sekunder teks opsional. Dipakai ketiga callsite; copy dikunci
+    test, tidak berubah satu huruf.
+  - `HapticFeedback.mediumImpact` di tap baris Keluar saja (pola yang
+    dipakai navbar/onboarding/hero Cek); baris biasa tanpa haptic.
+- **Ditolak:** shadow/glow tambahan kartu (hierarki sudah benar),
+  animasi entrance (prinsip calm), baris menu jadi kartu terpisah
+  (mundur ke pola yang baru dirapikan), ikon custom/emoji (AI slop).
+- **File:** `profile_screen.dart` (`_ProfileDialog`, 3 callsite,
+  haptic), `test/profile_menu_test.dart` (struktur dialog Tentang).
+- **Status verifikasi saat tulis:** `flutter analyze` bersih; test
+  profil 56/56 hijau; em-dash 0; full suite 309 lulus 2 gagal bawaan
+  commit (Q4 gradien + lipatan headers, gagal juga di commit murni).
+
 ## Polish Profil P1-P6 + Fix Skor Merah Alt+Tab (2 Okt 2026)
 
 - **Masalah:** kartu identitas tanpa nama; judul ganda ("Skor & sumber

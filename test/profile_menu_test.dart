@@ -185,7 +185,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(row);
       await tester.pumpAndSettle();
+      // Dialog satu keluarga: ikon + judul + body + tombol tutup.
       expect(find.text(AppStrings.profileAboutBody), findsOneWidget);
+      expect(find.byIcon(Icons.info_outline_rounded), findsWidgets);
       await tester.tap(find.text(AppStrings.profileAboutClose));
       await tester.pumpAndSettle();
       expect(find.text(AppStrings.profileAboutBody), findsNothing);
