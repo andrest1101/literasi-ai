@@ -534,6 +534,21 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   `_hasHeroGradient` via `visitAncestorElements`),
   `test/learn_fab_clearance_test.dart` (baru, 4 test ukur rect).
 
+## Anti-hardcode Detail Modul (2 Okt 2026)
+
+- **Masalah:** `_SectionRail` memakai `number >= 4` hardcode dan tidak ada
+  guard jumlah ikon vs seksi: tambah/kurangi seksi data merusak rel
+  konektor tanpa peringatan.
+- **Perubahan (UI-only, data tidak tersentuh):** `_ArticleSection`
+  terima `last` dari `sections.length` (tanpa angka 4 di widget);
+  `assert` ikon vs seksi di build (gagal cepat di debug bila data
+  berubah). Tanpa ubah tampilan/logika.
+- **File:** `course_detail_screen.dart` saja.
+- **Status verifikasi saat tulis:** `flutter analyze` bersih;
+  test learn 21/21 hijau; em-dash 0; full suite 309 lulus 2 gagal
+  bawaan commit (Q4 gradien + lipatan headers, gagal juga di commit
+  murni).
+
 ## Dialog Profil satu keluarga + haptic Keluar (2 Okt 2026)
 
 - **Masalah:** 3 dialog inline `AlertDialog` generik (konfirmasi keluar,
