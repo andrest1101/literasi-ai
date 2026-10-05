@@ -552,12 +552,13 @@ class _Pill extends StatelessWidget {
   }
 }
 
-/// Thumbnail prosedural compact: tint satu keluarga + ikon identitas.
+/// Thumbnail compact: medallion tint + ikon identitas, tanpa pola.
 ///
-/// Pola diagonal dipertahankan di ukuran kecil (hanya 3-4 garis, tidak
-/// berisik): tint polos di 56px justru terlihat seperti placeholder
-/// kosong. Banner featured yang memakai gradien solid tanpa pattern.
-/// Tanpa aset gambar: offline-safe, tanpa biaya unduh.
+/// Garis diagonal dihapus total: di ukuran 56px ia terbaca sebagai
+/// coretan/kesalahan, bukan tekstur. Medallion bersih (tint + border +
+/// ikon motif) sudah cukup sebagai identitas; banner featured yang memakai
+/// gradien solid juga tanpa pattern. Tanpa aset gambar: offline-safe,
+/// tanpa biaya unduh.
 class _ModuleThumb extends StatelessWidget {
   const _ModuleThumb({required this.module, required this.dimmed});
 
@@ -578,46 +579,9 @@ class _ModuleThumb extends StatelessWidget {
             color: motif.tint,
             border: Border.all(color: motif.ink.withValues(alpha: 0.3)),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(15),
-            child: CustomPaint(
-              painter: _ThumbPattern(color: motif.ink),
-              child: Center(
-                child: Icon(motif.icon, size: 25, color: motif.ink),
-              ),
-            ),
-          ),
+          child: Center(child: Icon(motif.icon, size: 25, color: motif.ink)),
         ),
       ),
     );
   }
-}
-
-/// Pola diagonal samar di atas tint thumbnail kecil: kedalaman tanpa gambar.
-///
-/// Hanya dipakai thumbnail compact 56px (3-4 garis, tidak berisik).
-/// Alpha 8% cukup memberi tekstur tanpa mengganggu ikon; dekoratif murni
-/// (di dalam ExcludeSemantics).
-class _ThumbPattern extends CustomPainter {
-  _ThumbPattern({required this.color});
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color.withValues(alpha: 0.08)
-      ..strokeWidth = 5
-      ..strokeCap = StrokeCap.round;
-    for (var x = -size.height; x < size.width + size.height; x += 18) {
-      canvas.drawLine(
-        Offset(x, size.height + 4),
-        Offset(x + size.height + 8, -4),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_ThumbPattern old) => old.color != color;
 }

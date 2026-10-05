@@ -40,9 +40,9 @@ class CourseListScreen extends ConsumerWidget {
               const _LearnToolbarTitle(),
               const SizedBox(height: AppTabTitles.titleToContentGap),
               _HeroSummary(modules: modules, progress: progress),
-              const SizedBox(height: 14),
+              const SizedBox(height: 10),
               const _RewardCard(),
-              const SizedBox(height: 22),
+              const SizedBox(height: 16),
               progress.when(
                 loading: () => const _SectionSkeleton(),
                 error: (_, _) => _ModuleSections(
@@ -241,7 +241,7 @@ class _ModuleSections extends StatelessWidget {
             onTap: () => onOpen(context, modules[featuredIndex].id),
             featured: true,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
         ] else
           const _AllDoneStrip(),
         _ModuleSectionHeader(done: done, total: modules.length),

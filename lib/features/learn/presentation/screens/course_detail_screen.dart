@@ -102,6 +102,10 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
     final done = progress?.isCompleted(module.id) ?? false;
     final motif = motifForModule(module.accentSeed);
     final percent = (_readProgress * 100).round();
+    assert(
+      module.sections.length == _sectionIcons.length,
+      'Jumlah ikon statis harus sama dengan jumlah seksi modul',
+    );
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -161,6 +165,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                     body: module.sections[i].body,
                     featured: i == 0,
                     ink: motif.ink,
+                    last: i == module.sections.length - 1,
                   ),
                 ],
               ],
@@ -537,8 +542,10 @@ class _ContentsRow extends StatelessWidget {
 /// Ritme 4 kartu dipecah tanpa 4 warna acak: rel kiri (angka ghost +
 /// konektor vertikal) menandai alur baca 1-4; medallion ikon memakai tint
 /// motif modul (identitas, konsisten dengan kartu isi + hero). Seksi
-/// pertama ([featured]) tetap aksen primer sebagai pembuka. Label
-/// `Bagian N`, heading, body, CTA tidak berubah (dikunci test).
+/// pertama ([featured]) tetap aksen primer sebagai pembuka. Konektor
+/// terakhir diputus via [last] dari panjang seksi data (tanpa hardcode
+/// angka). Label `Bagian N`, heading, body, CTA tidak berubah
+/// (dikunci test).
 class _ArticleSection extends StatelessWidget {
   const _ArticleSection({
     required this.number,
@@ -546,6 +553,7 @@ class _ArticleSection extends StatelessWidget {
     required this.heading,
     required this.body,
     required this.ink,
+    required this.last,
     this.featured = false,
   });
 
@@ -554,6 +562,7 @@ class _ArticleSection extends StatelessWidget {
   final String heading;
   final String body;
   final Color ink;
+  final bool last;
   final bool featured;
 
   @override
@@ -562,7 +571,7 @@ class _ArticleSection extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _SectionRail(number: number, last: number >= 4),
+          _SectionRail(number: number, last: last),
           const SizedBox(width: 12),
           Expanded(
             child: Container(

@@ -119,26 +119,6 @@ Color? _toolbarAccent(WidgetTester tester) {
   return text.style?.color;
 }
 
-/// Naik rantai leluhur [finder] sampai ketemu Container bergradien.
-///
-/// Membuktikan gradien hero membungkus seluruh kartu featured (rantai
-/// leluhur CTA), bukan hanya strip atas.
-bool _hasHeroGradient(WidgetTester tester, Finder finder) {
-  var found = false;
-  tester.element(finder).visitAncestorElements((node) {
-    final widget = node.widget;
-    if (widget is Container) {
-      final decoration = widget.decoration;
-      if (decoration is BoxDecoration && decoration.gradient != null) {
-        found = true;
-        return false;
-      }
-    }
-    return true;
-  });
-  return found;
-}
-
 void main() {
   group('Q1 judul biru + tanpa guest note', () {
     testWidgets('kata kedua judul primer, copy login hilang', (tester) async {
@@ -178,7 +158,7 @@ void main() {
     });
   });
 
-  group('Q4 featured hero gradien + seksi terpisah', () {
+  group('Q4 featured biru solid + seksi terpisah', () {
     testWidgets('progres kosong: featured modul 1 satu FilledButton', (
       tester,
     ) async {
@@ -200,29 +180,27 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('seluruh badan featured bergradien token hero + CTA putih', (
+    testWidgets('banner gradien 120px + CTA primer di badan putih', (
       tester,
     ) async {
       await _pumpList(tester, const CourseProgress());
 
-      // Gradien hero (token tab Cek) menempel pada rantai leluhur CTA:
-      // seluruh kartu, bukan strip120px.
-      expect(_hasHeroGradient(tester, find.byType(FilledButton)), isTrue);
-      // CTA putih teks primer (satu bahasa dengan CTA hero tab Cek).
+      // Featured v4: banner gradien hero 120px di atas (bukan seluruh
+      // badan), konten putih di bawah dengan CTA primer biru.
       final cta = tester.widget<FilledButton>(find.byType(FilledButton));
       expect(
         cta.style?.backgroundColor?.resolve(const <WidgetState>{}),
-        Colors.white,
+        AppColors.primary,
       );
       expect(
         cta.style?.foregroundColor?.resolve(const <WidgetState>{}),
-        AppColors.primary,
+        Colors.white,
       );
-      // Subtitle memakai biru muda hero Cek (#D6E5FE), bukan abu netral.
+      // Subtitle di badan putih memakai abu netral, bukan biru muda hero.
       final subtitle = tester.widget<Text>(
         find.text(LearnContentDatasource().byId('clickbait')!.subtitle),
       );
-      expect(subtitle.style?.color, const Color(0xFFD6E5FE));
+      expect(subtitle.style?.color, AppColors.textSecondary);
       // Medallion motif modul 1 tampil; modul 1 tidak muncul dua kali
       // (dikeluarkan dari daftar compact).
       expect(find.byIcon(motifForModule(0).icon), findsOneWidget);
