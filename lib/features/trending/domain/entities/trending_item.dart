@@ -16,6 +16,7 @@ class TrendingItem {
     required this.isHot,
     required this.checkedAt,
     required this.reference,
+    required this.referenceUrl,
   });
 
   final String id;
@@ -27,6 +28,12 @@ class TrendingItem {
   final bool isHot;
   final DateTime checkedAt;
   final String reference;
+
+  /// Tautan resmi sumber rujukan: dibuka via browser eksternal.
+  /// Selalu halaman resmi nyata (bukan artikel karangan).
+  final String referenceUrl;
+
+  Uri get referenceUri => Uri.parse(referenceUrl);
 
   /// Konversi ke hasil verifikasi agar detail reuse kartu hasil + share.
   VerificationResult toResult() {

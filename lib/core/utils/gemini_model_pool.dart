@@ -9,12 +9,13 @@ import 'gemini_error_mapper.dart';
 ///
 /// `GenerativeModel` adalah class final di SDK sehingga tidak bisa di-fake;
 /// test menyuntikkan transport ini untuk mensimulasikan 429/404/503 per model.
-typedef GeminiTransport = Future<GenerateContentResponse> Function({
-  required String model,
-  required String apiKey,
-  required GenerationConfig generationConfig,
-  required List<Content> contents,
-});
+typedef GeminiTransport =
+    Future<GenerateContentResponse> Function({
+      required String model,
+      required String apiKey,
+      required GenerationConfig generationConfig,
+      required List<Content> contents,
+    });
 
 /// Pool model Gemini dengan gagal-pindah (failover) otomatis antar model.
 ///
@@ -62,6 +63,7 @@ class GeminiModelPool {
   static const Duration busyPenalty = Duration(seconds: 45);
   static const Duration retiredPenalty = Duration(hours: 12);
   static const Duration timeoutPenalty = Duration(seconds: 45);
+  static const Duration defaultGlobalDeadline = Duration(seconds: 75);
 
   /// Instansi bersama seluruh datasource + probe: status model yang sedang
   /// gagal saling menguntungkan, bukan duplikasi request antar fitur.
@@ -102,18 +104,31 @@ class GeminiModelPool {
     required List<Content> contents,
     required String context,
     Duration timeout = const Duration(seconds: 30),
+    Duration globalDeadline = defaultGlobalDeadline,
   }) async {
+    final startedAt = _clock();
     final errors = <Object>[];
     final failedModels = <String>[];
     for (var round = 0; round < 2; round++) {
       for (final model in _order(ignorePenalty: round > 0)) {
+        final remaining = globalDeadline - _clock().difference(startedAt);
+        if (remaining <= Duration.zero) {
+          final timeoutError = TimeoutException(
+            'Deadline global Gemini [$context] terlampaui.',
+            globalDeadline,
+          );
+          errors.add(timeoutError);
+          debugPrint('Gemini [$context] stop: deadline global terlampaui.');
+          throw GeminiErrorMapper.finalFailure(errors, context: context);
+        }
+        final attemptTimeout = remaining < timeout ? remaining : timeout;
         try {
           final response = await _invoke(
             model: model,
             apiKey: apiKey,
             generationConfig: generationConfig,
             contents: contents,
-          ).timeout(timeout);
+          ).timeout(attemptTimeout);
           _onSuccess(model, context);
           return response;
         } on GenerativeAIException catch (e) {
@@ -139,6 +154,8 @@ class GeminiModelPool {
       // (server sibuk/timeout). Kuota, model ditarik, atau error isi tidak
       // akan berubah dalam hitungan detik: tidak perlu membuang request.
       if (round == 1 || !errors.every(GeminiErrorMapper.isTransient)) break;
+      final remaining = globalDeadline - _clock().difference(startedAt);
+      if (remaining <= _retryDelay) break;
       await Future<void>.delayed(_retryDelay);
     }
     debugPrint(

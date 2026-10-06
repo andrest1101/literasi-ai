@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
@@ -37,6 +38,16 @@ class TrendingDetailScreen extends ConsumerWidget {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => TrendingDetailScreen(item: other)),
     );
+  }
+
+  Future<void> _openReference(BuildContext context) async {
+    final uri = item.referenceUri;
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(AppStrings.trendingLinkFailed)),
+      );
+    }
   }
 
   @override
@@ -87,64 +98,92 @@ class TrendingDetailScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(13),
-                  decoration: BoxDecoration(
+                Semantics(
+                  button: true,
+                  label:
+                      '${AppStrings.trendingReference}: ${item.reference}. ${AppStrings.trendingReferenceHint}.',
+                  child: Material(
+                    color: Colors.transparent,
                     borderRadius: BorderRadius.circular(16),
-                    color: AppColors.primary.withValues(alpha: 0.06),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.3),
-                    ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x0D101A33),
-                        blurRadius: 12,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
+                    child: InkWell(
+                      onTap: () => _openReference(context),
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.all(13),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(16),
+                          color: AppColors.primary.withValues(alpha: 0.06),
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x0D101A33),
+                              blurRadius: 12,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
                         ),
-                        child: const Icon(
-                          Icons.verified_outlined,
-                          size: 17,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
                           children: [
-                            const Text(
-                              AppStrings.trendingReference,
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1.0,
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                              ),
+                              child: const Icon(
+                                Icons.verified_outlined,
+                                size: 17,
                                 color: AppColors.primary,
                               ),
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              item.reference,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    AppStrings.trendingReference,
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 1.0,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    item.reference,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  const Text(
+                                    AppStrings.trendingOfflineNote,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      height: 1.5,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
                               ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(
+                              Icons.open_in_new_rounded,
+                              size: 18,
+                              color: AppColors.primary,
                             ),
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -191,8 +230,7 @@ class TrendingDetailScreen extends ConsumerWidget {
                     if (i > 0) const SizedBox(height: 10),
                     _RelatedCard(
                       item: related[i],
-                      onTap: () =>
-                          _openRelated(context, related[i]),
+                      onTap: () => _openRelated(context, related[i]),
                     ),
                   ],
                 ],
@@ -225,9 +263,7 @@ class _RelatedCard extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: AppColors.neutral.withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
           ),
           child: Row(
             children: [

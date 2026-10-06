@@ -109,23 +109,34 @@ abstract final class AppStrings {
   static const String quickCheckTileImageSubtitle = 'Screenshot maks 5 MB';
   static const String quickCheckExampleTitle = 'Coba contoh sekali ketuk';
   static const String quickCheckExampleSubtitle =
-      'Ketuk salah satu contoh untuk langsung mengisi sesi pemeriksaan.';
+      'Contoh pesan yang sering beredar di WhatsApp. Ketuk untuk langsung mengisi sesi pemeriksaan.';
   static const String quickCheckExampleCta = 'Cek ini';
+  static const String quickCheckExampleTag1 = 'Kesehatan';
   static const String quickCheckExample1 =
-      'Apakah benar minum air rebusan daun tertentu dapat menyembuhkan semua penyakit?';
+      'Diteruskan berkali-kali: minum rebusan daun kelor setiap pagi bisa membersihkan paru-paru dan menyembuhkan semua penyakit.';
+  static const String quickCheckExampleTag2 = 'Bansos';
   static const String quickCheckExample2 =
-      'Beredar pesan berantai tentang bantuan tunai yang meminta data rekening. Apakah ini penipuan?';
+      'Pesan berantai: bantuan tunai Rp5 juta cair hari ini, cukup isi data rekening lewat tautan berikut.';
+  static const String quickCheckExampleTag3 = 'Kebijakan';
   static const String quickCheckExample3 =
-      'Viral kabar libur nasional tambahan minggu ini. Apakah informasi ini valid?';
+      'Broadcast grup: pemerintah menambah libur nasional minggu ini, tapi tidak ada surat resminya.';
+  static const String quickCheckExampleTag4 = 'Bencana';
   static const String quickCheckExample4 =
-      'Ada broadcast yang mengklaim gempa besar akan terjadi besok di kota tertentu. Apakah informasi ini bisa dipercaya?';
+      'Pesan darurat: gempa besar diprediksi terjadi besok di kota tertentu, sebarkan sebelum terlambat.';
+  static const String quickCheckExampleTag5 = 'Loker';
   static const String quickCheckExample5 =
-      'Beredar kabar lowongan kerja bergaji besar yang meminta biaya pendaftaran di awal. Apakah ini modus penipuan?';
+      'Tawaran kerja: gaji besar tanpa seleksi, cukup bayar biaya pendaftaran di awal via chat pribadi.';
   static const String trendingTitle = 'Trending hoaks';
   static const String trendingSubtitle =
-      'Hoaks viral yang dikurasi manual. Ketuk untuk detail dan verifikasi serupa.';
+      'Pola hoaks yang sering beredar, dikurasi offline. Ketuk untuk detail dan verifikasi serupa.';
   static const String trendingHot = 'HOT';
+  static const String trendingOfflineBadge = 'Kurasi offline';
   static const String trendingReference = 'Rujukan';
+  static const String trendingReferenceHint = 'Ketuk untuk buka sumber resmi';
+  static const String trendingReferenceOpen = 'Buka rujukan';
+  static const String trendingLinkFailed = 'Tidak bisa membuka rujukan.';
+  static const String trendingOfflineNote =
+      'Penilaian redaksi dari paket konten offline, bukan hasil AI live.';
   static const String trendingVerifySimilar = 'Verifikasi serupa';
   static const String trendingRelatedTitle = 'Konteks terkait';
   static const String quickCheckBackToHome = 'Kembali ke Beranda';

@@ -1,7 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:literasi_ai/core/errors/failures.dart';
+import 'package:literasi_ai/features/quick_check/data/datasources/gemini_text_datasource.dart';
+import 'package:literasi_ai/features/quick_check/data/datasources/gemini_vision_datasource.dart';
 import 'package:literasi_ai/features/quick_check/data/models/verification_result_model.dart';
+import 'package:literasi_ai/features/quick_check/data/repositories/verification_repository_impl.dart';
 import 'package:literasi_ai/features/quick_check/domain/entities/image_attachment.dart';
 import 'package:literasi_ai/features/quick_check/domain/entities/verification_result.dart';
 import 'package:literasi_ai/features/quick_check/domain/repositories/verification_repository.dart';
@@ -64,6 +69,29 @@ class _FakeRepository implements VerificationRepository {
   }
 }
 
+class _FakeVisionDatasource extends GeminiVisionDatasource {
+  int calls = 0;
+
+  @override
+  Future<VerificationResult> verifyImageWithKey({
+    required ImageAttachment image,
+    String caption = '',
+    required String apiKey,
+  }) async {
+    calls++;
+    return VerificationResult(
+      claim: caption.isEmpty ? 'Gambar: ${image.fileName}' : caption,
+      verdict: calls == 1 ? Verdict.valid : Verdict.hoaks,
+      confidence: 80,
+      explanation: 'Penjelasan gambar.',
+      suggestion: 'Saran gambar.',
+      checkedAt: DateTime(2026, 10, 6),
+      source: VerificationSource.image,
+      imageFileName: image.fileName,
+    );
+  }
+}
+
 void main() {
   group('VerificationResultModel', () {
     const claim = 'Klaim uji yang cukup panjang untuk validasi.';
@@ -91,26 +119,25 @@ void main() {
       expect(result.confidence, 64);
     });
 
-    test('treats unknown verdict as parsing failure', () {
-      expect(
-        () => VerificationResultModel.fromRawText(
-          '{"verdict":"MUNGKIN","confidence":50,'
-          '"explanation":"x","suggestion":"y"}',
-          claim,
-        ),
-        throwsA(isA<ParsingFailure>()),
+    test('unknown-ish verdict falls back to a safe uncertain result', () {
+      final result = VerificationResultModel.fromRawText(
+        '{"verdict":"MUNGKIN","confidence":50,'
+        '"explanation":"x","suggestion":"y"}',
+        claim,
       );
+
+      expect(result.verdict, Verdict.perluDicek);
+      expect(result.confidence, 50);
     });
 
-    test('rejects confidence outside 0-100', () {
-      expect(
-        () => VerificationResultModel.fromRawText(
-          '{"verdict":"VALID","confidence":120,'
-          '"explanation":"x","suggestion":"y"}',
-          claim,
-        ),
-        throwsA(isA<ParsingFailure>()),
+    test('clamps confidence outside 0-100', () {
+      final result = VerificationResultModel.fromRawText(
+        '{"verdict":"VALID","confidence":120,'
+        '"explanation":"x","suggestion":"y"}',
+        claim,
       );
+
+      expect(result.confidence, 100);
     });
 
     test('rejects empty raw text', () {
@@ -120,15 +147,62 @@ void main() {
       );
     });
 
-    test('rejects empty explanation', () {
-      expect(
-        () => VerificationResultModel.fromRawText(
-          '{"verdict":"VALID","confidence":80,"explanation":" ","suggestion":"y"}',
-          claim,
-        ),
-        throwsA(isA<ParsingFailure>()),
+    test('fills empty explanation instead of failing a usable result', () {
+      final result = VerificationResultModel.fromRawText(
+        '{"verdict":"VALID","confidence":80,"explanation":" ","suggestion":"y"}',
+        claim,
       );
+
+      expect(result.verdict, Verdict.valid);
+      expect(result.explanation, isNotEmpty);
     });
+
+    test(
+      'extracts first complete JSON object despite braces in surrounding text',
+      () {
+        final result = VerificationResultModel.fromRawText(
+          'Catatan {bukan json} {"verdict":"FALSE","confidence":70,'
+          '"explanation":"Ada simbol {contoh} di teks.","suggestion":"Cek ulang."} akhir',
+          claim,
+        );
+
+        expect(result.verdict, Verdict.hoaks);
+        expect(result.confidence, 70);
+      },
+    );
+  });
+
+  group('VerificationRepositoryImpl cache gambar', () {
+    test(
+      'gambar beda dengan nama sama tidak memakai cache yang sama',
+      () async {
+        final vision = _FakeVisionDatasource();
+        final repo = VerificationRepositoryImpl(
+          GeminiTextDatasource(apiKey: 'uji'),
+          visionDatasource: vision,
+          hasApiKey: () => true,
+          resolveApiKey: () => 'uji',
+          requestGap: Duration.zero,
+        );
+        final first = ImageAttachment(
+          bytes: Uint8List.fromList([1, 2, 3]),
+          mimeType: 'image/png',
+          fileName: 'screenshot.png',
+        );
+        final second = ImageAttachment(
+          bytes: Uint8List.fromList([9, 8, 7]),
+          mimeType: 'image/png',
+          fileName: 'screenshot.png',
+        );
+
+        final firstResult = await repo.verifyImageClaim(image: first);
+        final secondResult = await repo.verifyImageClaim(image: second);
+
+        expect(vision.calls, 2);
+        expect(firstResult.verdict, Verdict.valid);
+        expect(secondResult.verdict, Verdict.hoaks);
+      },
+    );
   });
 
   group('VerifyClaim usecase', () {

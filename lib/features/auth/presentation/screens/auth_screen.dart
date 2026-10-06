@@ -98,12 +98,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           '${AppStrings.authAnonymousFailed} (${e.code})',
         );
       }
-      _goHome();
     } catch (_) {
       if (mounted) {
         showAuthMessage(context, AppStrings.authAnonymousFailed);
       }
-      _goHome();
     } finally {
       if (mounted) setState(() => _anonLoading = false);
     }

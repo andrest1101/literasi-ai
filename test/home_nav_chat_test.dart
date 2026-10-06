@@ -110,7 +110,7 @@ void main() {
     await tester.tap(exampleCard);
     await tester.pumpAndSettle();
     expect(find.byType(QuickCheckSessionScreen), findsOneWidget);
-    expect(find.textContaining('menyembuhkan'), findsWidgets);
+    expect(find.textContaining('paru-paru'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
@@ -118,7 +118,7 @@ void main() {
     WidgetTester tester,
   ) async {
     const seed =
-        'Apakah benar minum air rebusan daun tertentu dapat menyembuhkan semua penyakit?';
+        'Diteruskan berkali-kali: minum rebusan daun kelor setiap pagi bisa membersihkan paru-paru dan menyembuhkan semua penyakit.';
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(

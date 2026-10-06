@@ -61,12 +61,14 @@ class GeminiChatDatasource {
   }) async {
     final contents = <Content>[
       Content.text(_systemPrompt),
-      for (final item in history.take(maxHistory))
+      for (final item in history.skip(
+        history.length > maxHistory ? history.length - maxHistory : 0,
+      ))
         if (item.isUser)
-          Content.text('Pengguna: ${item.text}')
+          Content.text('Pengguna: ${_sanitize(item.text)}')
         else
-          Content.model([TextPart('Asisten: ${item.text}')]),
-      Content.text('Pengguna: $message'),
+          Content.model([TextPart('Asisten: ${_sanitize(item.text)}')]),
+      Content.text('Pengguna: ${_sanitize(message)}'),
     ];
     try {
       final response = await _generate(contents, apiKey);
@@ -114,6 +116,19 @@ class GeminiChatDatasource {
       context: 'chat-reply',
       timeout: timeout,
     );
+  }
+
+  static String _sanitize(String text) {
+    return text
+        .replaceAll(
+          RegExp(
+            r'^\s*(system|instruksi|developer)\s*:.*$',
+            caseSensitive: false,
+            multiLine: true,
+          ),
+          '[dihapus]',
+        )
+        .trim();
   }
 
   static const String _systemPrompt =
