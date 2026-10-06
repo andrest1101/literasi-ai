@@ -32,6 +32,7 @@ TrendingItem _item({required String id, Verdict verdict = Verdict.hoaks}) {
     isHot: true,
     checkedAt: DateTime.utc(2026, 9, 21, 12, 0),
     reference: 'TurnBackHoax',
+    referenceUrl: 'https://turnbackhoax.id/',
   );
 }
 
@@ -74,8 +75,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('history card tap flies hero to detail and back',
-      (tester) async {
+  testWidgets('history card tap flies hero to detail and back', (tester) async {
     final entry = HistoryEntry(id: 'hero-nav', result: _result());
     await tester.pumpWidget(
       MaterialApp(
@@ -107,8 +107,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('result section without heroTag renders no hero',
-      (tester) async {
+  testWidgets('result section without heroTag renders no hero', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -127,8 +126,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('result section with heroTag renders one hero',
-      (tester) async {
+  testWidgets('result section with heroTag renders one hero', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -151,8 +149,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('trending rail heroes are unique and open detail',
-      (tester) async {
+  testWidgets('trending rail heroes are unique and open detail', (
+    tester,
+  ) async {
     final items = [_item(id: 'trend-1'), _item(id: 'trend-2')];
     // ProviderScope di luar MaterialApp agar route detail yang di-push
     // (TrendingDetailScreen kini ConsumerWidget) tetap di dalam scope.

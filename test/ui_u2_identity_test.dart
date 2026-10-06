@@ -242,7 +242,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final card = find.text(
-        'Pesan bantuan tunai Rp 5 juta minta data rekening',
+        'Pesan bantuan tunai Rp5 juta yang minta data rekening',
       );
       await tester.ensureVisible(card);
       await tester.pumpAndSettle();
