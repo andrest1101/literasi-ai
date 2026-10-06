@@ -12,11 +12,7 @@ import '../../domain/entities/trending_item.dart';
 /// baris, kategori + tanggal, badge HOT melayang. Tidak ada pola persegi
 /// berulang dengan blok lain.
 class TrendingRail extends StatelessWidget {
-  const TrendingRail({
-    super.key,
-    required this.items,
-    required this.onPick,
-  });
+  const TrendingRail({super.key, required this.items, required this.onPick});
 
   final List<TrendingItem> items;
   final ValueChanged<TrendingItem> onPick;
@@ -68,9 +64,7 @@ class _TrendingCard extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(22),
-              border: Border.all(
-                color: style.accent.withValues(alpha: 0.28),
-              ),
+              border: Border.all(color: style.accent.withValues(alpha: 0.28)),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x0D101A33),
@@ -99,11 +93,7 @@ class _TrendingCard extends StatelessWidget {
                     children: [
                       Hero(
                         tag: TrendingRail.heroTagFor(item.id),
-                        child: Icon(
-                          style.icon,
-                          size: 16,
-                          color: style.accent,
-                        ),
+                        child: Icon(style.icon, size: 16, color: style.accent),
                       ),
                       const SizedBox(width: 6),
                       Expanded(
@@ -177,7 +167,7 @@ class _TrendingCard extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                '${item.category} - ${_date(item.checkedAt)}',
+                                '${item.category} - ${AppStrings.trendingOfflineBadge}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -192,9 +182,7 @@ class _TrendingCard extends StatelessWidget {
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w800,
                                 color: AppColors.textPrimary,
-                                fontFeatures: [
-                                  FontFeature.tabularFigures(),
-                                ],
+                                fontFeatures: [FontFeature.tabularFigures()],
                               ),
                             ),
                           ],
@@ -209,9 +197,5 @@ class _TrendingCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  static String _date(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}';
   }
 }

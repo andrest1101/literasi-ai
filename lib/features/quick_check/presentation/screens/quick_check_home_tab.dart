@@ -181,10 +181,7 @@ class _CheckHeading extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppStrings.homeCheckTitle1,
-          style: AppTabTitles.displayLine1,
-        ),
+        Text(AppStrings.homeCheckTitle1, style: AppTabTitles.displayLine1),
         Text(
           AppStrings.homeCheckTitle2,
           style: AppTabTitles.displayLine2(AppColors.primary),
@@ -195,10 +192,7 @@ class _CheckHeading extends StatelessWidget {
           style: AppTabTitles.displaySubtitle,
         ),
         const SizedBox(height: AppTabTitles.titleToContentGap),
-        Container(
-          height: 1,
-          color: AppColors.neutral.withValues(alpha: 0.18),
-        ),
+        Container(height: 1, color: AppColors.neutral.withValues(alpha: 0.18)),
       ],
     );
   }
@@ -228,13 +222,10 @@ class _HeroEntranceState extends State<_HeroEntrance>
     parent: _controller,
     curve: Curves.easeOutCubic,
   );
-  late final Animation<Offset> _slide =
-      Tween<Offset>(
-        begin: const Offset(0, 0.06),
-        end: Offset.zero,
-      ).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-      );
+  late final Animation<Offset> _slide = Tween<Offset>(
+    begin: const Offset(0, 0.06),
+    end: Offset.zero,
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
   @override
   void initState() {
@@ -682,26 +673,30 @@ class _ExampleRail extends StatelessWidget {
   final ValueChanged<String> onPick;
 
   static const _examples = [
-    AppStrings.quickCheckExample1,
-    AppStrings.quickCheckExample2,
-    AppStrings.quickCheckExample3,
-    AppStrings.quickCheckExample4,
-    AppStrings.quickCheckExample5,
+    (AppStrings.quickCheckExampleTag1, AppStrings.quickCheckExample1),
+    (AppStrings.quickCheckExampleTag2, AppStrings.quickCheckExample2),
+    (AppStrings.quickCheckExampleTag3, AppStrings.quickCheckExample3),
+    (AppStrings.quickCheckExampleTag4, AppStrings.quickCheckExample4),
+    (AppStrings.quickCheckExampleTag5, AppStrings.quickCheckExample5),
   ];
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 148,
+      height: 164,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: _examples.length,
         separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
-          final claim = _examples[index];
+          final (tag, claim) = _examples[index];
           return SizedBox(
             width: 248,
-            child: _ExampleCard(claim: claim, onTap: () => onPick(claim)),
+            child: _ExampleCard(
+              tag: tag,
+              claim: claim,
+              onTap: () => onPick(claim),
+            ),
           );
         },
       ),
@@ -710,8 +705,13 @@ class _ExampleRail extends StatelessWidget {
 }
 
 class _ExampleCard extends StatelessWidget {
-  const _ExampleCard({required this.claim, required this.onTap});
+  const _ExampleCard({
+    required this.tag,
+    required this.claim,
+    required this.onTap,
+  });
 
+  final String tag;
   final String claim;
   final VoidCallback onTap;
 
@@ -719,7 +719,7 @@ class _ExampleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Coba contoh pemeriksaan',
+      label: 'Coba contoh $tag: $claim',
       child: Material(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
@@ -738,15 +738,28 @@ class _ExampleCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '"',
-                  style: TextStyle(
-                    fontSize: 22,
-                    height: 1,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(999),
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                  ),
+                  child: Text(
+                    tag,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ),
+                const SizedBox(height: 8),
                 Expanded(
                   child: Text(
                     claim,

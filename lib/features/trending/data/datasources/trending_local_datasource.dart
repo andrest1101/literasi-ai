@@ -7,91 +7,104 @@ import '../../domain/entities/trending_item.dart';
 /// tanggal cek, dan rujukan verifikasi. Tanpa login, tanpa API key, tanpa
 /// Firebase: guest offline tetap melihat feed penuh.
 class TrendingLocalDatasource {
+  /// Paket konten offline v1.1, dikurasi Oktober 2026.
+  /// Bukan feed live: tanggal per item sengaja dilepas agar tidak basi,
+  /// penilaian redaksi ditandai jujur di UI sebagai kurasi offline.
+  static const String packVersion = 'v1.1';
+  static final DateTime packUpdatedAt = DateTime(2026, 10, 6);
+
   // Non-const karena DateTime bukan constant expression.
   List<TrendingItem> items() => [
     TrendingItem(
       id: 'bantuan-tunai-berantai',
-      title: 'Pesan bantuan tunai Rp 5 juta minta data rekening',
+      title: 'Pesan bantuan tunai Rp5 juta yang minta data rekening',
       summary:
-          'Pesan berantai mengklaim bantuan tunai cair hari ini bila mengisi data rekening lewat link. Pola link + urgensi + data pribadi adalah ciri penipuan bantuan sosial.',
+          'Pesan berantai menjanjikan bantuan cair hari ini asal mengisi data rekening lewat tautan. Pola tautan asing, urgensi, dan permintaan data pribadi adalah ciri khas penipuan bansos.',
       verdict: Verdict.hoaks,
       confidence: 93,
       category: 'Penipuan',
       isHot: true,
-      checkedAt: DateTime(2026, 9, 20),
+      checkedAt: packUpdatedAt,
       reference: 'TurnBackHoax',
+      referenceUrl: 'https://turnbackhoax.id/',
     ),
     TrendingItem(
       id: 'libur-nasional-tambahan',
-      title: 'Viral kabar libur nasional tambahan minggu ini',
+      title: 'Broadcast libur nasional tambahan tanpa surat resmi',
       summary:
-          'Broadcast menyebut ada libur tambahan tanpa surat keputusan resmi. Kalender libur nasional hanya sah bila diumumkan pemerintah lewat Keppres atau SKB menteri.',
+          'Pesan viral menyebut ada libur tambahan tanpa melampirkan keputusan resmi. Hari libur nasional hanya sah bila diumumkan pemerintah melalui keputusan resmi.',
       verdict: Verdict.perluDicek,
       confidence: 71,
       category: 'Kebijakan',
       isHot: true,
-      checkedAt: DateTime(2026, 9, 19),
+      checkedAt: packUpdatedAt,
       reference: 'Setkab RI',
+      referenceUrl: 'https://setkab.go.id/',
     ),
     TrendingItem(
       id: 'air-rebusan-sembuh-total',
-      title: 'Air rebusan daun disebut sembuhkan semua penyakit',
+      title: 'Rebusan daun kelor diklaim bersihkan paru-paru',
       summary:
-          'Klaim menyembuhkan semua penyakit tanpa dosis, uji klinis, atau sumber medis. Klaim kesehatan absolut tanpa bukti adalah bendera merah klasik hoaks kesehatan.',
+          'Unggahan menyebut rebusan daun kelor bisa membersihkan paru-paru dari racun dan polusi. Belum ada bukti klinis yang mendukung klaim penyembuhan total tersebut.',
       verdict: Verdict.hoaks,
       confidence: 91,
       category: 'Kesehatan',
       isHot: true,
-      checkedAt: DateTime(2026, 9, 18),
+      checkedAt: packUpdatedAt,
       reference: 'Kemenkes RI',
+      referenceUrl: 'https://kemkes.go.id/hoaks-kesehatan',
     ),
     TrendingItem(
       id: 'undian-telepon-seluler',
-      title: 'Undian berhadiah telepon seluler dari nomor tak dikenal',
+      title: 'SMS undian berhadiah yang minta transfer pajak kemenangan',
       summary:
-          'SMS undian meminta pajak kemenangan ditransfer dulu. Penyelenggara undian resmi tidak memungut biaya di muka lewat nomor pribadi.',
+          'SMS dari nomor tak dikenal mengaku pemenang undian, lalu meminta pajak kemenangan ditransfer dulu. Penyelenggara resmi tidak memungut biaya lewat nomor pribadi.',
       verdict: Verdict.hoaks,
       confidence: 95,
       category: 'Penipuan',
       isHot: false,
-      checkedAt: DateTime(2026, 9, 17),
+      checkedAt: packUpdatedAt,
       reference: 'TurnBackHoax',
+      referenceUrl: 'https://turnbackhoax.id/',
     ),
     TrendingItem(
       id: 'foto-banjir-daur-ulang',
-      title: 'Foto banjir lama disebar sebagai banjir kemarin',
+      title: 'Foto banjir lama disebar ulang sebagai kejadian kemarin',
       summary:
-          'Foto yang sama pernah muncul di peristiwa 2019 dan disebar ulang dengan narasi baru. Pencarian gambar terbalik menemukan sumber aslinya dalam hitungan detik.',
+          'Foto yang sama pernah muncul pada peristiwa tahun-tahun sebelumnya, lalu disebar ulang dengan narasi baru. Pencarian gambar terbalik bisa menemukan sumber aslinya.',
       verdict: Verdict.perluDicek,
       confidence: 78,
       category: 'Visual',
       isHot: false,
-      checkedAt: DateTime(2026, 9, 16),
-      reference: 'Cek Fakta Media',
+      checkedAt: packUpdatedAt,
+      reference: 'Cek Fakta Tempo',
+      referenceUrl: 'https://cekfakta.tempo.co/',
     ),
     TrendingItem(
       id: 'vaksin-autisme',
-      title: 'Vaksin disebut sebabkan autisme pada anak',
+      title: 'Klaim lama vaksin menyebabkan autisme pada anak',
       summary:
-          'Klaim lama yang sudah dibantah banyak studi besar. Konsensus medis: tidak ada kaitan vaksin dan autisme. Khawatir soal jadwal imunisasi, konsultasikan ke dokter anak.',
+          'Klaim ini sudah dibantah banyak studi besar dan konsensus medis dunia. Bila ragu soal jadwal imunisasi, konsultasikan langsung ke dokter anak atau puskesmas.',
       verdict: Verdict.hoaks,
       confidence: 94,
       category: 'Kesehatan',
       isHot: false,
-      checkedAt: DateTime(2026, 9, 15),
+      checkedAt: packUpdatedAt,
       reference: 'WHO Indonesia',
+      referenceUrl: 'https://www.who.int/indonesia',
     ),
     TrendingItem(
       id: 'lowongan-kerja-palsu',
-      title: 'Lowongan kerja gaji besar tanpa seleksi via chat',
+      title: 'Lowongan gaji besar tanpa seleksi yang minta biaya di awal',
       summary:
-          'Tawaran kerja instan meminta biaya administrasi atau data KTP di awal. Rekrutmen resmi selalu lewat kanal perusahaan dan tidak memungut biaya pendaftaran.',
+          'Tawaran kerja instan meminta biaya pendaftaran atau data KTP di awal percakapan. Rekrutmen resmi selalu lewat kanal perusahaan dan tidak memungut biaya pendaftaran.',
       verdict: Verdict.perluDicek,
       confidence: 74,
       category: 'Penipuan',
       isHot: false,
-      checkedAt: DateTime(2026, 9, 14),
-      reference: 'Disnaker',
+      checkedAt: packUpdatedAt,
+      reference: 'Kemnaker RI',
+      referenceUrl: 'https://kemnaker.go.id/',
     ),
   ];
 }
