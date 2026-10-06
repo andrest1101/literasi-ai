@@ -36,23 +36,24 @@ class VerificationResultModel {
     String claim, {
     DateTime? checkedAt,
   }) {
-    final cleaned = _stripCodeFence(rawText);
-    if (cleaned.isEmpty) {
+    final candidates = _extractJsonObjects(_stripCodeFence(rawText));
+    if (candidates.isEmpty || candidates.every((text) => text.trim().isEmpty)) {
       throw const ParsingFailure(
         'Hasil AI kosong. Coba verifikasi ulang klaimmu.',
       );
     }
-    try {
-      final decoded = jsonDecode(cleaned);
-      if (decoded is! Map<String, dynamic>) {
-        throw const ParsingFailure();
+    for (final candidate in candidates) {
+      try {
+        final decoded = jsonDecode(candidate);
+        if (decoded is! Map<String, dynamic>) continue;
+        return fromJson(decoded, claim, checkedAt: checkedAt);
+      } on ParsingFailure {
+        rethrow;
+      } catch (_) {
+        continue;
       }
-      return fromJson(decoded, claim, checkedAt: checkedAt);
-    } on ParsingFailure {
-      rethrow;
-    } catch (_) {
-      throw const ParsingFailure();
     }
+    throw const ParsingFailure();
   }
 
   Map<String, dynamic> toJson(VerificationResult result) {
@@ -77,29 +78,61 @@ class VerificationResultModel {
     if (match != null) {
       text = match.group(1)?.trim() ?? '';
     }
-    // Ambil objek JSON pertama bila model menambah teks di sekitarnya.
-    final start = text.indexOf('{');
-    final end = text.lastIndexOf('}');
-    if (start >= 0 && end > start) {
-      return text.substring(start, end + 1).trim();
-    }
     return text;
+  }
+
+  static List<String> _extractJsonObjects(String text) {
+    if (!text.contains('{')) return [text.trim()];
+    final objects = <String>[];
+
+    var inString = false;
+    var escaped = false;
+    var depth = 0;
+    var start = -1;
+    for (var i = 0; i < text.length; i++) {
+      final char = text.codeUnitAt(i);
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+        } else if (char == 0x5c) {
+          escaped = true;
+        } else if (char == 0x22) {
+          inString = false;
+        }
+        continue;
+      }
+      if (char == 0x22) {
+        inString = true;
+      } else if (char == 0x7b) {
+        if (depth == 0) start = i;
+        depth++;
+      } else if (char == 0x7d) {
+        depth--;
+        if (depth == 0 && start >= 0) {
+          objects.add(text.substring(start, i + 1).trim());
+          start = -1;
+        }
+      }
+    }
+    return objects.isEmpty ? [text.trim()] : objects;
   }
 
   static Verdict _parseVerdict(Object? value) {
     final normalized = value.toString().trim().toUpperCase();
     return switch (normalized) {
       'HOAKS' || 'HOAX' => Verdict.hoaks,
-      'VALID' || 'BENAR' || 'FAKTA' => Verdict.valid,
+      'PALSU' || 'FALSE' || 'MISLEADING' || 'MENYESATKAN' => Verdict.hoaks,
+      'VALID' || 'BENAR' || 'FAKTA' || 'TRUE' => Verdict.valid,
       'PERLU_DICEK' ||
       'PERLU DICEK' ||
       'MERAGUKAN' ||
+      'MUNGKIN' ||
       'UNCERTAIN' => Verdict.perluDicek,
       'TIDAK_DAPAT_DIPASTIKAN' ||
       'TIDAK DAPAT DIPASTIKAN' ||
       'TIDAK_DAPAT_DIVERIFIKASI' ||
       'UNKNOWN' => Verdict.tidakDapatDipastikan,
-      _ => throw const ParsingFailure(),
+      _ => Verdict.tidakDapatDipastikan,
     };
   }
 
@@ -110,19 +143,11 @@ class VerificationResultModel {
     } else {
       parsed = int.tryParse(value.toString().trim()) ?? -1;
     }
-    if (parsed < 0 || parsed > 100) {
-      throw const ParsingFailure(
-        'Skor keyakinan AI tidak valid. Coba verifikasi ulang.',
-      );
-    }
-    return parsed;
+    return parsed.clamp(0, 100);
   }
 
   static String _parseText(Object? value) {
     final text = value?.toString().trim() ?? '';
-    if (text.isEmpty) {
-      throw const ParsingFailure();
-    }
-    return text;
+    return text.isEmpty ? 'Model tidak memberikan detail tambahan.' : text;
   }
 }

@@ -84,31 +84,18 @@ void main() {
     expect(find.text('Masukkan alamat email yang valid.'), findsOneWidget);
     expect(find.text('Kata sandi minimal 6 karakter.'), findsOneWidget);
 
-    // Lanjut tanpa akun → Home. Di test env Firebase absen sehingga
-    // jalur gagal yang jalan (tetap ke Home); snackbar info sukses hanya
-    // muncul di perangkat nyata.
+    // Lanjut tanpa akun gagal di test env tanpa Firebase. App harus tetap
+    // di Auth, bukan masuk Home dengan user null/stale.
     await tester.ensureVisible(find.text('Lanjut tanpa akun'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Lanjut tanpa akun'));
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
-    // Tab Quick Check sekarang heading compact (tanpa wordmark + pill)
-    // + CTA sesi dedicated.
-    expect(find.text('LiterasiAI'), findsNothing);
-    expect(find.text('VERIFIKASI AI'), findsNothing);
-    expect(find.text('Cek kebenaran'), findsOneWidget);
-    expect(find.text('sebelum sebar.'), findsOneWidget);
-    expect(find.text('Mulai Pemeriksaan'), findsOneWidget);
-    final ctaButton = find.widgetWithText(
-      FilledButton,
-      'Mulai Pemeriksaan',
+    expect(find.text('Masuk ke LiterasiAI'), findsOneWidget);
+    expect(
+      find.textContaining('Mode offline. Firebase belum dikonfigurasi.'),
+      findsOneWidget,
     );
-    await tester.ensureVisible(ctaButton);
-    await tester.pumpAndSettle();
-    await tester.tap(ctaButton);
-    await tester.pumpAndSettle();
-    expect(find.text('SESI FOKUS'), findsOneWidget);
-    expect(find.text('Verifikasi Sekarang'), findsOneWidget);
   });
 
   testWidgets('GoogleGLogo renders official asset without error', (

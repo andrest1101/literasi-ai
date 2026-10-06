@@ -29,14 +29,18 @@ final historyFilterProvider = StateProvider<HistoryFilter>((ref) {
 /// sehingga guest/offline dan filter verdict tetap konsisten.
 final historySearchProvider = StateProvider<String>((ref) => '');
 
-/// UID aman-test: bungkus FirebaseAuth agar widget test tanpa Firebase
-/// init tetap jalan (kembali null), dan test bisa override via provider.
-final historyUserIdProvider = Provider<String?>((ref) {
+final authStateProvider = StreamProvider<User?>((ref) {
   try {
-    return FirebaseAuth.instance.currentUser?.uid;
+    return FirebaseAuth.instance.authStateChanges();
   } catch (_) {
-    return null;
+    return Stream<User?>.value(null);
   }
+});
+
+/// UID aman-test: authStateChanges membuat login/logout langsung menyegarkan
+/// history/score/learn, sementara widget test tetap bisa override provider ini.
+final historyUserIdProvider = Provider<String?>((ref) {
+  return ref.watch(authStateProvider).valueOrNull?.uid;
 });
 
 final historyEntriesProvider = StreamProvider<List<HistoryEntry>>((ref) {

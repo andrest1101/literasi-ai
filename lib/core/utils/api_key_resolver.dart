@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'api_key_store.dart';
+import 'gemini_model_pool.dart';
 
 /// Sumber kunci API yang aktif: prioritas jelas, tanpa tebakan.
 enum ApiKeySource { compileDefine, userKey, none }
@@ -117,6 +118,7 @@ class ApiKeyController extends AsyncNotifier<ApiKeyStatus> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(apiKeyStoreProvider).write(key);
+      GeminiModelPool.shared.reset();
       // Invalidate di sini saja; consumer lain mendengar perubahan status.
       ref.invalidate(apiKeyStatusProvider);
       return ref.watch(apiKeyStatusProvider.future);
@@ -128,6 +130,7 @@ class ApiKeyController extends AsyncNotifier<ApiKeyStatus> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(apiKeyStoreProvider).clear();
+      GeminiModelPool.shared.reset();
       ref.invalidate(apiKeyStatusProvider);
       return ref.watch(apiKeyStatusProvider.future);
     });
@@ -135,6 +138,4 @@ class ApiKeyController extends AsyncNotifier<ApiKeyStatus> {
 }
 
 final apiKeyControllerProvider =
-    AsyncNotifierProvider<ApiKeyController, ApiKeyStatus>(
-      ApiKeyController.new,
-    );
+    AsyncNotifierProvider<ApiKeyController, ApiKeyStatus>(ApiKeyController.new);

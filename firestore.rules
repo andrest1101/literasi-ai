@@ -5,8 +5,65 @@ rules_version = '2';
 // Tanpa login: semua ditolak (app menampilkan empty state, bukan crash).
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    function signedInOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function validString(value, max) {
+      return value is string && value.size() > 0 && value.size() <= max;
+    }
+
+    match /users/{userId}/verifications/{entryId} {
+      allow read, delete: if signedInOwner(userId);
+      allow create: if signedInOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          'claim', 'verdict', 'confidence', 'explanation', 'suggestion',
+          'checkedAt', 'source', 'imageFileName', 'sourceUrl', 'sourceTitle'
+        ])
+        && validString(request.resource.data.claim, 4000)
+        && request.resource.data.verdict in [
+          'HOAKS', 'VALID', 'PERLU_DICEK', 'TIDAK_DAPAT_DIPASTIKAN'
+        ]
+        && request.resource.data.confidence is int
+        && request.resource.data.confidence >= 0
+        && request.resource.data.confidence <= 100
+        && validString(request.resource.data.explanation, 4000)
+        && validString(request.resource.data.suggestion, 4000)
+        && validString(request.resource.data.checkedAt, 64)
+        && request.resource.data.source in ['text', 'image', 'url'];
+      allow update: if false;
+    }
+
+    match /users/{userId}/score/summary {
+      allow read: if signedInOwner(userId);
+      allow create, update: if signedInOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          'verifications', 'modulesDone', 'quizCorrect', 'updatedAt'
+        ])
+        && (!('verifications' in request.resource.data)
+          || (request.resource.data.verifications is int
+            && request.resource.data.verifications >= 0
+            && request.resource.data.verifications <= 100000))
+        && (!('quizCorrect' in request.resource.data)
+          || (request.resource.data.quizCorrect is int
+            && request.resource.data.quizCorrect >= 0
+            && request.resource.data.quizCorrect <= 100000))
+        && (!('modulesDone' in request.resource.data)
+          || request.resource.data.modulesDone is list);
+      allow delete: if false;
+    }
+
+    match /users/{userId}/learn/progress {
+      allow read: if signedInOwner(userId);
+      allow create, update: if signedInOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          'completedModules', 'quizBest', 'updatedAt'
+        ])
+        && (!('completedModules' in request.resource.data)
+          || request.resource.data.completedModules is list)
+        && (!('quizBest' in request.resource.data)
+          || request.resource.data.quizBest is map);
+      allow delete: if false;
     }
   }
 }

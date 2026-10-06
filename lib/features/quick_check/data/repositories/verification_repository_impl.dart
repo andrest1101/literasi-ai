@@ -24,12 +24,14 @@ class VerificationRepositoryImpl implements VerificationRepository {
     bool Function()? hasApiKey,
     Future<VerificationResult> Function(String claim, String apiKey)?
     verifyTextFn,
+    Duration? requestGap,
   }) : _visionDatasource = visionDatasource ?? GeminiVisionDatasource(),
        _urlFetcher = urlFetcher ?? UrlFetcher(),
        _demoDatasource = demoDatasource ?? DemoVerificationDatasource(),
        _resolveApiKey = resolveApiKey ?? (() => _compileKey),
        _hasApiKey = hasApiKey ?? (() => _defaultHasKey(resolveApiKey)),
-       _verifyTextFn = verifyTextFn;
+       _verifyTextFn = verifyTextFn,
+       _requestGap = requestGap ?? minRequestGap;
 
   static bool _defaultHasKey(String Function()? resolve) =>
       (resolve?.call() ?? _compileKey).isNotEmpty;
@@ -60,13 +62,28 @@ class VerificationRepositoryImpl implements VerificationRepository {
   /// jebol bila user menekan berulang. Controller sudah cegah request ganda;
   /// ini lapisan kedua di repository.
   static const Duration minRequestGap = Duration(seconds: 2);
+  final Duration _requestGap;
   DateTime? _lastLiveAt;
 
   bool get _demoMode => !_hasApiKey();
 
   String _cacheKey(String kind, String raw) {
-    final normalized = raw.trim().replaceAll(RegExp(r'\s+'), ' ');
+    final normalized = raw.trim().replaceAll(RegExp(r'\s+'), ' ').toLowerCase();
     return '$kind::$normalized';
+  }
+
+  String _imageCacheKey(ImageAttachment image, String caption) {
+    final digest = _fnv1a32(image.bytes);
+    return _cacheKey('image', '${image.mimeType}::$digest::$caption');
+  }
+
+  String _fnv1a32(List<int> bytes) {
+    var hash = 0x811c9dc5;
+    for (final byte in bytes) {
+      hash ^= byte;
+      hash = (hash * 0x01000193) & 0xffffffff;
+    }
+    return hash.toRadixString(16).padLeft(8, '0');
   }
 
   void _remember(String key, VerificationResult result) {
@@ -83,7 +100,7 @@ class VerificationRepositoryImpl implements VerificationRepository {
     final last = _lastLiveAt;
     if (last == null) return;
     final gap = DateTime.now().difference(last);
-    if (gap < minRequestGap) {
+    if (gap < _requestGap) {
       throw const NetworkFailure(
         'Terlalu cepat. Tunggu sebentar lalu coba lagi.',
       );
@@ -117,7 +134,7 @@ class VerificationRepositoryImpl implements VerificationRepository {
         caption: caption,
       );
     }
-    final key = _cacheKey('image', '${image.fileName}::$caption');
+    final key = _imageCacheKey(image, caption);
     final cached = _cache[key];
     if (cached != null) return cached;
     _enforceRateLimit();

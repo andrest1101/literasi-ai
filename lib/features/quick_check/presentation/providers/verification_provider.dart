@@ -33,10 +33,11 @@ final geminiVisionDatasourceProvider = Provider<GeminiVisionDatasource>((ref) {
   return GeminiVisionDatasource(apiKey: status?.key ?? '');
 });
 
-final demoVerificationDatasourceProvider =
-    Provider<DemoVerificationDatasource>((ref) {
-      return DemoVerificationDatasource();
-    });
+final demoVerificationDatasourceProvider = Provider<DemoVerificationDatasource>(
+  (ref) {
+    return DemoVerificationDatasource();
+  },
+);
 
 final imagePickerServiceProvider = Provider<ImagePickerService>((ref) {
   return ImagePickerDatasource();
@@ -45,8 +46,7 @@ final imagePickerServiceProvider = Provider<ImagePickerService>((ref) {
 final verificationRepositoryProvider = Provider<VerificationRepository>((ref) {
   // Baca status live setiap request via closure (bukan snapshot sekali),
   // agar kunci user yang baru disimpan langsung aktif tanpa restart app.
-  String resolveKey() =>
-      ref.read(apiKeyStatusProvider).valueOrNull?.key ?? '';
+  String resolveKey() => ref.read(apiKeyStatusProvider).valueOrNull?.key ?? '';
   bool hasKey() =>
       ref.read(apiKeyStatusProvider).valueOrNull?.configured ?? false;
   return VerificationRepositoryImpl(
@@ -204,6 +204,7 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
   /// UID dibaca via provider agar widget test bisa override tanpa Firebase.
   /// Skor +10 diberikan best-effort bersamaan dengan auto-save riwayat.
   void _saveHistory(VerificationResult result) {
+    if (result.isDemo) return;
     String? userId;
     try {
       userId = ref.read(historyUserIdProvider);
@@ -213,18 +214,20 @@ class QuickCheckController extends AsyncNotifier<VerificationResult?> {
     }
     if (userId == null) return;
     unawaited(
-      ref
-          .read(saveHistoryProvider)(userId: userId, result: result)
-          .catchError((Object error, StackTrace stackTrace) {
-            debugPrint('Gagal menyimpan riwayat: $error');
-          }),
+      ref.read(saveHistoryProvider)(userId: userId, result: result).catchError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        debugPrint('Gagal menyimpan riwayat: $error');
+      }),
     );
     unawaited(
-      ref
-          .read(awardVerificationProvider)(userId)
-          .catchError((Object error, StackTrace stackTrace) {
-            debugPrint('Gagal menambah skor: $error');
-          }),
+      ref.read(awardVerificationProvider)(userId).catchError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        debugPrint('Gagal menambah skor: $error');
+      }),
     );
   }
 }
