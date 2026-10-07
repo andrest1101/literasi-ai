@@ -167,6 +167,8 @@ abstract final class AppStrings {
   static const String historyDeleteFailed =
       'Riwayat tidak dapat dihapus. Coba lagi.';
   static const String historyUndo = 'Urungkan';
+  static const String historySwipeDeleteLabel = 'Hapus';
+  static const String historySwipeHint = 'Geser kartu untuk menghapus.';
   static const String historyDeleteTitle = 'Hapus riwayat ini?';
   static const String historyDeleteBody =
       'Entri ini hilang dari semua perangkat. Kamu bisa mengurungkan sesaat setelah menghapus.';

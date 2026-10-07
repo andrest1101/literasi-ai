@@ -16,6 +16,7 @@ import '../providers/history_providers.dart';
 import '../widgets/history_card.dart';
 import '../widgets/history_empty_state.dart';
 import '../widgets/history_filter_bar.dart';
+import '../widgets/swipe_delete_background.dart';
 import 'history_detail_screen.dart';
 
 class HistoryListScreen extends ConsumerWidget {
@@ -323,6 +324,29 @@ Map<HistoryFilter, int> _filterCounts(List<HistoryEntry> items) {
   };
 }
 
+/// Petunjuk sekali pandang: kartu riwayat bisa digeser untuk menghapus.
+///
+/// Tanpa hint ini, swipe adalah fitur tak terlihat: user tidak tahu aksi
+/// hapus ada sampai tidak sengaja menggeser. Teks kecil + ikon swipe
+/// memberi affordance tanpa menambah tombol di tiap kartu.
+class _SwipeHint extends StatelessWidget {
+  const _SwipeHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        Icon(Icons.swipe_rounded, size: 14, color: AppColors.textSecondary),
+        SizedBox(width: 6),
+        Text(
+          AppStrings.historySwipeHint,
+          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
+      ],
+    );
+  }
+}
+
 class _HistoryList extends ConsumerWidget {
   const _HistoryList({required this.entries, this.markLatest = false});
 
@@ -333,6 +357,8 @@ class _HistoryList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
+        const _SwipeHint(),
+        const SizedBox(height: 8),
         // Entri pertama = terbaru (stream terurut waktu menurun).
         for (var i = 0; i < entries.length; i++) ...[
           Builder(
@@ -381,29 +407,11 @@ class _HistoryList extends ConsumerWidget {
                     ),
                   );
                 },
-                background: Container(
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 22),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(22),
-                    color: AppColors.danger,
-                  ),
-                  child: const Icon(
-                    Icons.delete_outline_rounded,
-                    color: Colors.white,
-                  ),
+                background: const SwipeDeleteBackground(
+                  side: SwipeDeleteSide.leading,
                 ),
-                secondaryBackground: Container(
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.only(left: 22),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(22),
-                    color: AppColors.danger,
-                  ),
-                  child: const Icon(
-                    Icons.delete_outline_rounded,
-                    color: Colors.white,
-                  ),
+                secondaryBackground: const SwipeDeleteBackground(
+                  side: SwipeDeleteSide.trailing,
                 ),
                 child: HistoryCard(
                   entry: entry,
