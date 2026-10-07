@@ -257,46 +257,48 @@ void main() {
     });
   });
 
-  group('Q6 reward kartu achievement terpisah sinkron domain', () {
-    testWidgets('hadiah di kartu tint terpisah + warna makna per angka', (
-      tester,
-    ) async {
+  group('Q6 reward strip inline sinkron domain, bukan kartu baru', () {
+    testWidgets('hadiah satu baris + warna makna per angka', (tester) async {
       await _pumpList(tester, const CourseProgress());
 
-      // Kartu reward = permukaan tint biru sendiri (bukan bagian hero).
+      // Strip inline: tanpa permukaan tint kartu baru.
       final rewardTint = AppColors.primary.withValues(alpha: 0.07);
       expect(
         find.byWidgetPredicate((w) {
           if (w is! Container || w.decoration is! BoxDecoration) return false;
           return (w.decoration! as BoxDecoration).color == rewardTint;
         }),
-        findsOneWidget,
+        findsNothing,
       );
-      expect(find.text(AppStrings.learnRewardTitle), findsOneWidget);
       expect(find.byIcon(Icons.emoji_events_outlined), findsOneWidget);
       // Angka dari konstanta domain; warna = makna breakdown Profil.
-      final plus20 = tester.widget<Text>(
-        find.text('+${LiteracyScore.modulePoints}'),
+      final rewardText = tester.widget<Text>(
+        find.textContaining('+${LiteracyScore.modulePoints}'),
       );
-      expect(plus20.style?.color, AppColors.successDark);
-      final plus5 = tester.widget<Text>(
-        find.text('+${LiteracyScore.quizPoints}'),
-      );
-      expect(plus5.style?.color, AppColors.warningDark);
-      // Urutan: bar hero di atas reward, bar featured di bawah reward
+      final spans =
+          (rewardText.textSpan as TextSpan?)?.children
+              ?.whereType<TextSpan>()
+              .toList() ??
+          const [];
+      expect(spans.length, greaterThanOrEqualTo(4));
+      expect(spans[0].text, contains('+${LiteracyScore.modulePoints}'));
+      expect(spans[0].style?.color, AppColors.successDark);
+      expect(spans[2].text, contains('+${LiteracyScore.quizPoints}'));
+      expect(spans[2].style?.color, AppColors.warningDark);
+      // Urutan: bar hero di atas strip, bar featured di bawah strip
       // (dua LinearProgressIndicator: hero + featured).
       expect(find.byType(LinearProgressIndicator), findsNWidgets(2));
       final heroBar = tester.getTopLeft(
         find.byType(LinearProgressIndicator).first,
       );
-      final rewardTitle = tester.getTopLeft(
-        find.text(AppStrings.learnRewardTitle),
+      final rewardStrip = tester.getTopLeft(
+        find.byIcon(Icons.emoji_events_outlined),
       );
       final featuredBar = tester.getTopLeft(
         find.byType(LinearProgressIndicator).at(1),
       );
-      expect(heroBar.dy, lessThan(rewardTitle.dy));
-      expect(rewardTitle.dy, lessThan(featuredBar.dy));
+      expect(heroBar.dy, lessThan(rewardStrip.dy));
+      expect(rewardStrip.dy, lessThan(featuredBar.dy));
       expect(tester.takeException(), isNull);
     });
   });

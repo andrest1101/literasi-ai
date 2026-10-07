@@ -41,7 +41,7 @@ class CourseListScreen extends ConsumerWidget {
               const SizedBox(height: AppTabTitles.titleToContentGap),
               _HeroSummary(modules: modules, progress: progress),
               const SizedBox(height: 10),
-              const _RewardCard(),
+              const _RewardStrip(),
               const SizedBox(height: 16),
               progress.when(
                 loading: () => const _SectionSkeleton(),
@@ -454,129 +454,84 @@ class _HeroSummaryBody extends StatelessWidget {
   }
 }
 
-/// Kartu achievement hadiah: tint biru lembut, terpisah dari hero.
+/// Strip hadiah inline: satu baris info, bukan kartu baru.
 ///
-/// Satu-satunya permukaan tint di tab (featured memakai gradien penuh):
-/// latar `primary 7%` + rim `primary 20%` radius 20 memberi kesan
-/// "highlight", bukan catatan tambahan. Angka display dari konstanta
-/// [LiteracyScore] (sinkron domain); warna mengikuti makna breakdown
-/// Profil: +20 hijau sukses, +5 amber gelap. Tanpa CTA.
-class _RewardCard extends StatelessWidget {
-  const _RewardCard();
+/// Menggantikan [_RewardCard] lama yang menambah pola kartu persegi ke
+/// tab yang sudah penuh (hero + featured + daftar). Bentuk strip:
+/// ikon trofi kecil + teks satu baris berisi kedua angka hadiah. Angka
+/// tetap dari konstanta [LiteracyScore] (sinkron domain); warna mengikuti
+/// makna breakdown Profil: +20 hijau sukses, +5 amber gelap. Tanpa
+/// permukaan kartu, tanpa border, tanpa shadow.
+class _RewardStrip extends StatelessWidget {
+  const _RewardStrip();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: AppColors.primary.withValues(alpha: 0.07),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.28),
-                  ),
-                ),
-                child: const Icon(
-                  Icons.emoji_events_outlined,
-                  size: 22,
-                  color: AppColors.primary,
-                ),
+    return Semantics(
+      label:
+          '${AppStrings.learnRewardTitle}: '
+          '+${LiteracyScore.modulePoints} ${AppStrings.learnRewardModuleLabel}, '
+          '+${LiteracyScore.quizPoints} ${AppStrings.learnRewardQuizLabel}.',
+      child: ExcludeSemantics(
+        child: Row(
+          children: [
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withValues(alpha: 0.1),
               ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text(
-                  AppStrings.learnRewardTitle,
-                  style: TextStyle(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.2,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
+              child: const Icon(
+                Icons.emoji_events_outlined,
+                size: 16,
+                color: AppColors.primary,
               ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _RewardCell(
-                  value: '+${LiteracyScore.modulePoints}',
-                  label: AppStrings.learnRewardModuleLabel,
-                  color: AppColors.successDark,
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 40,
-                margin: const EdgeInsets.symmetric(horizontal: 10),
-                color: AppColors.primary.withValues(alpha: 0.15),
-              ),
-              Expanded(
-                child: _RewardCell(
-                  value: '+${LiteracyScore.quizPoints}',
-                  label: AppStrings.learnRewardQuizLabel,
-                  color: AppColors.warningDark,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: '+${LiteracyScore.modulePoints} ',
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.successDark,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                    TextSpan(
+                      text: '${AppStrings.learnRewardModuleLabel} · ',
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    TextSpan(
+                      text: '+${LiteracyScore.quizPoints} ',
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.warningDark,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                    const TextSpan(
+                      text: AppStrings.learnRewardQuizLabel,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Sel angka hadiah: display 26px berwarna makna + label penjelas.
-class _RewardCell extends StatelessWidget {
-  const _RewardCell({
-    required this.value,
-    required this.label,
-    required this.color,
-  });
-
-  final String value;
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.6,
-            color: color,
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ),
+            ),
+          ],
         ),
-        const SizedBox(height: 3),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 11,
-            height: 1.4,
-            color: AppColors.textSecondary,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
