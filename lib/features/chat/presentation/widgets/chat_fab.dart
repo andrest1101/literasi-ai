@@ -24,8 +24,7 @@ class ChatFab extends StatefulWidget {
   State<ChatFab> createState() => _ChatFabState();
 }
 
-class _ChatFabState extends State<ChatFab>
-    with SingleTickerProviderStateMixin {
+class _ChatFabState extends State<ChatFab> with SingleTickerProviderStateMixin {
   late final AnimationController _press = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 120),
@@ -144,9 +143,7 @@ class _AiSparkleBadge extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.white,
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.25),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x33101A33),

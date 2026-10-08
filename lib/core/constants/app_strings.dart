@@ -167,6 +167,8 @@ abstract final class AppStrings {
   static const String historyDeleteFailed =
       'Riwayat tidak dapat dihapus. Coba lagi.';
   static const String historyUndo = 'Urungkan';
+  static const String historySwipeDeleteLabel = 'Hapus';
+  static const String historySwipeHint = 'Geser kartu untuk menghapus.';
   static const String historyDeleteTitle = 'Hapus riwayat ini?';
   static const String historyDeleteBody =
       'Entri ini hilang dari semua perangkat. Kamu bisa mengurungkan sesaat setelah menghapus.';
@@ -331,7 +333,23 @@ abstract final class AppStrings {
   static const String chatVerifyThis = 'Verifikasi ini';
   static const String chatRetry = 'Kirim ulang';
   static const String chatClear = 'Mulai baru';
-  static const String chatClearConfirm = 'Hapus semua pesan?';
+  static const String chatClearConfirm =
+      'Mulai baru akan menghapus percakapan ini dari layar. Arsip terakhir tersimpan di perangkat. Hapus yang lama?';
+  static const String chatCopy = 'Salin';
+  static const String chatCopied = 'Jawaban disalin.';
+  static const String chatRegenerate = 'Tulis ulang';
+  static const String chatStop = 'Hentikan';
+  static const String chatHistoryTitle = 'Percakapan tersimpan';
+  static const String chatHistoryContinue = 'Lanjutkan';
+  static const String chatHistoryDelete = 'Hapus arsip';
+  static const String chatHistoryEmpty = 'Belum ada percakapan tersimpan.';
+  static const String chatHistoryMeta =
+      'Percakapan sebelumnya tersimpan di perangkat ini saja.';
+  static const String chatArchiveRestored = 'Percakapan terakhir dipulihkan.';
+  static const String chatArchiveDeleted = 'Arsip percakapan dihapus.';
+  static const String chatHistoryTooltip = 'Riwayat percakapan';
+  static const String chatToday = 'Hari ini';
+  static const String chatYesterday = 'Kemarin';
   static const String chatTooLong =
       'Pertanyaan terlalu panjang. Batasi maksimal 1.000 karakter.';
   static const String chatSendFailed = 'Pesan gagal dikirim. Coba lagi.';

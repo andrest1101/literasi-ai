@@ -10,6 +10,7 @@ import 'package:literasi_ai/features/history/presentation/screens/history_detail
 import 'package:literasi_ai/features/history/presentation/screens/history_list_screen.dart';
 import 'package:literasi_ai/features/history/presentation/widgets/history_card.dart';
 import 'package:literasi_ai/features/history/presentation/widgets/history_filter_bar.dart';
+import 'package:literasi_ai/features/history/presentation/widgets/swipe_delete_background.dart';
 import 'package:literasi_ai/features/quick_check/domain/entities/verification_result.dart';
 
 /// Regresi anti-duplikasi Riwayat: pill filter adalah satu-satunya
@@ -28,7 +29,10 @@ VerificationResult _result({Verdict verdict = Verdict.hoaks}) {
 }
 
 HistoryEntry _entry({String id = 'entry-1', Verdict verdict = Verdict.hoaks}) {
-  return HistoryEntry(id: id, result: _result(verdict: verdict));
+  return HistoryEntry(
+    id: id,
+    result: _result(verdict: verdict),
+  );
 }
 
 class _FakeHistoryRepository implements HistoryRepository {
@@ -38,8 +42,7 @@ class _FakeHistoryRepository implements HistoryRepository {
   int deletes = 0;
 
   @override
-  Stream<List<HistoryEntry>> watch(String userId) =>
-      Stream.value(entries);
+  Stream<List<HistoryEntry>> watch(String userId) => Stream.value(entries);
 
   @override
   Future<void> save({
@@ -48,10 +51,7 @@ class _FakeHistoryRepository implements HistoryRepository {
   }) async {}
 
   @override
-  Future<void> delete({
-    required String userId,
-    required String entryId,
-  }) async {
+  Future<void> delete({required String userId, required String entryId}) async {
     deletes++;
   }
 }
@@ -77,9 +77,7 @@ Future<void> _pumpList(
 
 void main() {
   group('Satu sumber angka: hanya pill filter', () {
-    testWidgets('tanpa kartu statistik, angka verdict tunggal', (
-      tester,
-    ) async {
+    testWidgets('tanpa kartu statistik, angka verdict tunggal', (tester) async {
       await _pumpList(
         tester,
         entries: [
@@ -120,7 +118,48 @@ void main() {
     });
   });
 
-  group('Swipe dua arah menghapus', () {
+  group('Swipe dua arah: background eksplisit + menghapus', () {
+    testWidgets('hint affordance tampil di atas daftar', (tester) async {
+      await _pumpList(
+        tester,
+        entries: [_entry(id: 'a', verdict: Verdict.hoaks)],
+      );
+      expect(find.text(AppStrings.historySwipeHint), findsOneWidget);
+      expect(find.byIcon(Icons.swipe_rounded), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('background kiri dan kanan memakai sisi yang benar', (
+      tester,
+    ) async {
+      Future<Offset> iconCenter(SwipeDeleteSide side) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                width: 360,
+                child: SwipeDeleteBackground(key: ValueKey(side), side: side),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        return tester.getCenter(find.byIcon(Icons.delete_outline_rounded));
+      }
+
+      final leadingIcon = await iconCenter(SwipeDeleteSide.leading);
+      final trailingIcon = await iconCenter(SwipeDeleteSide.trailing);
+      final labelCenter = tester.getCenter(
+        find.text(AppStrings.historySwipeDeleteLabel),
+      );
+      // Kiri: ikon di kiri label. Kanan: ikon di kanan label. Urutan cermin
+      // mengunci alignment per arah agar tidak tertukar seperti bug awal.
+      expect(leadingIcon.dx, lessThan(180));
+      expect(trailingIcon.dx, greaterThan(180));
+      expect(labelCenter.dx, greaterThan(0));
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('geser kiri menghapus + urungkan', (tester) async {
       await _pumpList(
         tester,
@@ -172,9 +211,7 @@ void main() {
     }
 
     testWidgets('ikon hapus + dialog konfirmasi + undo', (tester) async {
-      final repository = _FakeHistoryRepository(
-        entries: [_entry(id: 'a')],
-      );
+      final repository = _FakeHistoryRepository(entries: [_entry(id: 'a')]);
       await pumpDetail(tester, repository: repository);
 
       await tester.tap(find.byIcon(Icons.delete_outline_rounded));
@@ -191,9 +228,7 @@ void main() {
     });
 
     testWidgets('batal mempertahankan entri', (tester) async {
-      final repository = _FakeHistoryRepository(
-        entries: [_entry(id: 'a')],
-      );
+      final repository = _FakeHistoryRepository(entries: [_entry(id: 'a')]);
       await pumpDetail(tester, repository: repository);
 
       await tester.tap(find.byIcon(Icons.delete_outline_rounded));
