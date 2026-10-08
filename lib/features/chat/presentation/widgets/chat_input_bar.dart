@@ -14,11 +14,13 @@ class ChatInputBar extends StatefulWidget {
     required this.controller,
     required this.sending,
     required this.onSend,
+    required this.onStop,
   });
 
   final TextEditingController controller;
   final bool sending;
   final ValueChanged<String> onSend;
+  final VoidCallback onStop;
 
   @override
   State<ChatInputBar> createState() => _ChatInputBarState();
@@ -132,54 +134,58 @@ class _ChatInputBarState extends State<ChatInputBar> {
               ),
             ),
             const SizedBox(width: 8),
+            // Satu tombol, dua peran: kirim (panah) saat siap, hentikan
+            // (stop) saat AI sedang menjawab. Nol layout tambahan sehingga
+            // dock input tidak bergeser di layar 360px.
             Semantics(
               button: true,
-              label: 'Kirim pesan',
-              child: Material(
-                color: Colors.transparent,
-                shape: const CircleBorder(),
-                child: InkWell(
-                  onTap: _canSend ? _submit : null,
-                  customBorder: const CircleBorder(),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: _canSend
-                          ? const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [Color(0xFF2F80ED), Color(0xFF124A9B)],
-                            )
-                          : null,
-                      color: _canSend ? null : AppColors.neutral.withValues(alpha: 0.2),
-                      boxShadow: _canSend
-                          ? const [
-                              BoxShadow(
-                                color: Color(0x331A73E8),
-                                blurRadius: 12,
-                                offset: Offset(0, 4),
-                              ),
-                            ]
-                          : null,
+              label: widget.sending ? AppStrings.chatStop : 'Kirim pesan',
+              child: Tooltip(
+                message: widget.sending ? AppStrings.chatStop : '',
+                child: Material(
+                  color: Colors.transparent,
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    onTap: widget.sending
+                        ? widget.onStop
+                        : (_canSend ? _submit : null),
+                    customBorder: const CircleBorder(),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: _canSend || widget.sending
+                            ? const LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [Color(0xFF2F80ED), Color(0xFF124A9B)],
+                              )
+                            : null,
+                        color: _canSend || widget.sending
+                            ? null
+                            : AppColors.neutral.withValues(alpha: 0.2),
+                        boxShadow: _canSend || widget.sending
+                            ? const [
+                                BoxShadow(
+                                  color: Color(0x331A73E8),
+                                  blurRadius: 12,
+                                  offset: Offset(0, 4),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Icon(
+                        widget.sending
+                            ? Icons.stop_rounded
+                            : Icons.arrow_upward_rounded,
+                        size: widget.sending ? 20 : 22,
+                        color: _canSend || widget.sending
+                            ? Colors.white
+                            : AppColors.textSecondary,
+                      ),
                     ),
-                    child: widget.sending
-                        ? const Padding(
-                            padding: EdgeInsets.all(13),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.4,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Icon(
-                            Icons.arrow_upward_rounded,
-                            size: 22,
-                            color: _canSend
-                                ? Colors.white
-                                : AppColors.textSecondary,
-                          ),
                   ),
                 ),
               ),
