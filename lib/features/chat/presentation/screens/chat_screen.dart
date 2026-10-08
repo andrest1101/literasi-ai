@@ -6,6 +6,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
 import '../../../score/presentation/screens/api_key_screen.dart';
+import '../../domain/entities/chat_message.dart';
+import '../../data/datasources/chat_session_local_datasource.dart';
 import '../providers/chat_providers.dart';
 import '../widgets/chat_bubble.dart';
 import '../widgets/chat_input_bar.dart';
@@ -37,6 +39,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   void _send(String text) {
+    // Umpan balik taktil ringan saat mengirim: pola sama dengan hero Cek,
+    // tile mode, dan navbar.
+    HapticFeedback.lightImpact();
     ref.read(chatControllerProvider.notifier).send(text);
     _inputController.clear();
     _scrollToBottom();
@@ -76,6 +81,55 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (confirmed == true) notifier.clear();
   }
 
+  /// Buka arsip percakapan terakhir: sesi lama tidak hilang saat "Mulai baru".
+  Future<void> _openArchive() async {
+    final notifier = ref.read(chatControllerProvider.notifier);
+    final archive = await notifier.loadArchive();
+    if (!mounted) return;
+    if (archive == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(AppStrings.chatHistoryEmpty),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    final messenger = ScaffoldMessenger.of(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (sheetContext) => _ArchiveSheet(
+        archive: archive,
+        onContinue: () {
+          Navigator.of(sheetContext).pop();
+          notifier.restoreArchive(archive);
+          _scrollToBottom();
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text(AppStrings.chatArchiveRestored),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+        onDelete: () async {
+          Navigator.of(sheetContext).pop();
+          await notifier.clearArchive();
+          if (!context.mounted) return;
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text(AppStrings.chatArchiveDeleted),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final chat = ref.watch(chatControllerProvider);
@@ -105,6 +159,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         centerTitle: false,
         title: _IdentityTitle(keyConfigured: keyConfigured),
         actions: [
+          _HistoryAction(onOpen: _openArchive),
+          const SizedBox(width: 8),
           _NewChatAction(onClear: _confirmClear),
           const SizedBox(width: 12),
         ],
@@ -132,11 +188,26 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         separatorBuilder: (_, _) => const SizedBox(height: 14),
                         itemBuilder: (context, index) {
                           final message = chat.messages[index];
-                          return ChatBubble(
-                            message: message,
-                            onRetry: () => ref
-                                .read(chatControllerProvider.notifier)
-                                .retry(message.id),
+                          final previous = index == 0
+                              ? null
+                              : chat.messages[index - 1];
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (_needsDateDivider(previous, message))
+                                _DateDivider(date: message.createdAt),
+                              ChatBubble(
+                                message: message,
+                                onRetry: () => ref
+                                    .read(chatControllerProvider.notifier)
+                                    .retry(message.id),
+                                onRegenerate: message.role == ChatRole.ai
+                                    ? () => ref
+                                          .read(chatControllerProvider.notifier)
+                                          .regenerate(message.id)
+                                    : null,
+                              ),
+                            ],
                           );
                         },
                       ),
@@ -145,9 +216,217 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 controller: _inputController,
                 sending: chat.sending,
                 onSend: _send,
+                onStop: () => ref.read(chatControllerProvider.notifier).stop(),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Pemisah tanggal: hanya muncul saat hari pesan berubah, supaya percakapan
+/// panjang punya orientasi waktu tanpa mengulang label di tiap bubble.
+class _DateDivider extends StatelessWidget {
+  const _DateDivider({required this.date});
+
+  final DateTime date;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          const Expanded(child: Divider(height: 1)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Text(
+              _label(date),
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.4,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          const Expanded(child: Divider(height: 1)),
+        ],
+      ),
+    );
+  }
+
+  static String _label(DateTime date) {
+    final now = DateTime.now();
+    final local = date.toLocal();
+    final today = DateTime(now.year, now.month, now.day);
+    final target = DateTime(local.year, local.month, local.day);
+    final days = today.difference(target).inDays;
+    if (days <= 0) return AppStrings.chatToday;
+    if (days == 1) return AppStrings.chatYesterday;
+    return '${local.day.toString().padLeft(2, '0')}/'
+        '${local.month.toString().padLeft(2, '0')}/${local.year}';
+  }
+}
+
+bool _needsDateDivider(ChatMessage? previous, ChatMessage current) {
+  if (previous == null) return true;
+  final a = previous.createdAt.toLocal();
+  final b = current.createdAt.toLocal();
+  return a.year != b.year || a.month != b.month || a.day != b.day;
+}
+
+/// Aksi riwayat di AppBar: membuka arsip percakapan terakhir.
+///
+/// Berdampingan dengan "Mulai baru" sehingga aksi hapus tidak lagi satu
+///-satunya jalan keluar: sesi lama bisa dipulihkan kapan saja.
+class _HistoryAction extends StatelessWidget {
+  const _HistoryAction({required this.onOpen});
+
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: AppStrings.chatHistoryTooltip,
+      child: Tooltip(
+        message: AppStrings.chatHistoryTooltip,
+        child: Material(
+          color: AppColors.primary.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            onTap: onOpen,
+            borderRadius: BorderRadius.circular(12),
+            child: const Padding(
+              padding: EdgeInsets.all(10),
+              child: Icon(
+                Icons.history_rounded,
+                size: 20,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Bottom sheet arsip: ringkasan singkat + lanjutkan atau hapus.
+class _ArchiveSheet extends StatelessWidget {
+  const _ArchiveSheet({
+    required this.archive,
+    required this.onContinue,
+    required this.onDelete,
+  });
+
+  final ChatSessionArchive archive;
+  final VoidCallback onContinue;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final preview = archive.messages
+        .firstWhere((m) => m.isUser, orElse: () => archive.messages.first)
+        .text;
+    final answerCount = archive.messages.where((m) => !m.isUser).length;
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.neutral.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              AppStrings.chatHistoryTitle,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.2,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              '${archive.messages.length} pesan · $answerCount jawaban',
+              style: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: AppColors.background,
+                border: Border.all(
+                  color: AppColors.neutral.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Text(
+                preview,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 14,
+                  height: 1.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              AppStrings.chatHistoryMeta,
+              style: TextStyle(
+                fontSize: 12,
+                height: 1.5,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 50,
+              child: FilledButton.icon(
+                onPressed: onContinue,
+                icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+                label: const Text(AppStrings.chatHistoryContinue),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 48,
+              child: TextButton.icon(
+                onPressed: onDelete,
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  size: 18,
+                  color: AppColors.danger,
+                ),
+                label: const Text(
+                  AppStrings.chatHistoryDelete,
+                  style: TextStyle(color: AppColors.danger),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -284,6 +563,8 @@ class _KeySetupBanner extends StatelessWidget {
                 SizedBox(height: 3),
                 Text(
                   AppStrings.chatKeyBannerSubtitle,
+                  maxLines: 5,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 12.5,
                     height: 1.55,
@@ -309,11 +590,14 @@ class _KeySetupBanner extends StatelessWidget {
               color: AppColors.primary,
             ),
           );
-          // Banner sempit (<340px, mis. layar 360px): aksi full-width
-          // di bawah teks agar kolom tombol tidak menjepit teks hingga
-          // overflow; normal tetap satu baris (pola responsif yang sama
-          // dengan hero Cek).
-          if (constraints.maxWidth < 340) {
+          // Banner sempit: aksi turun ke bawah teks agar kolom tombol tidak
+          // menggigit teks. Ambang 420px (bukan 340px) karena dua tombol
+          // banner membutuhkan ~215px saat font aksesibilitas besar; pada
+          // lebar 412-420px teks sempat tergigit hanya ~60px dan membungkus
+          //undreds baris sehingga banner menutupi layar (RenderFlex
+          // overflow). Di bawah ambang ini selalu susun bertumpuk; tablet
+          // dan desktop tetap satu baris lewat maxWidth 680.
+          if (constraints.maxWidth < 420) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -349,6 +633,14 @@ class _KeyBannerActions extends StatelessWidget {
 
   final VoidCallback onCopy;
 
+  // Label tombol banner dibatasi satu baris: lebar intrinsik yang tidak
+  // terbatasi membuat teks menggigit kolom judul pada layar sempit.
+  static const _bannerLabel = TextStyle(
+    fontSize: 12.5,
+    fontWeight: FontWeight.w800,
+    color: Colors.white,
+  );
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -371,12 +663,12 @@ class _KeyBannerActions extends StatelessWidget {
                   children: [
                     Icon(Icons.key_outlined, size: 15, color: Colors.white),
                     SizedBox(width: 5),
-                    Text(
-                      AppStrings.apiKeyOpenSettings,
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                    Flexible(
+                      child: Text(
+                        AppStrings.apiKeyOpenSettings,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: _bannerLabel,
                       ),
                     ),
                   ],
@@ -406,12 +698,16 @@ class _KeyBannerActions extends StatelessWidget {
                       color: AppColors.primary,
                     ),
                     SizedBox(width: 5),
-                    Text(
-                      AppStrings.chatKeyCopy,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
+                    Flexible(
+                      child: Text(
+                        AppStrings.chatKeyCopy,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
                   ],
@@ -572,11 +868,13 @@ class _InputDock extends StatelessWidget {
     required this.controller,
     required this.sending,
     required this.onSend,
+    required this.onStop,
   });
 
   final TextEditingController controller;
   final bool sending;
   final ValueChanged<String> onSend;
+  final VoidCallback onStop;
 
   @override
   Widget build(BuildContext context) {
@@ -595,6 +893,7 @@ class _InputDock extends StatelessWidget {
             controller: controller,
             sending: sending,
             onSend: onSend,
+            onStop: onStop,
           ),
         ),
       ),

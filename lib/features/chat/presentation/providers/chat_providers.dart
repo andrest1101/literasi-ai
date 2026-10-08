@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/api_key_resolver.dart';
+import '../../data/datasources/chat_session_local_datasource.dart';
 import '../../data/datasources/gemini_chat_datasource.dart';
 import '../../data/repositories/chat_repository_impl.dart';
 import '../../domain/entities/chat_message.dart';
@@ -16,8 +20,7 @@ final geminiChatDatasourceProvider = Provider<GeminiChatDatasource>((ref) {
 final chatRepositoryProvider = Provider<ChatRepository>((ref) {
   // Closure live agar kunci BYOK yang baru disimpan langsung dipakai
   // request berikutnya tanpa restart layar chat.
-  String resolveKey() =>
-      ref.read(apiKeyStatusProvider).valueOrNull?.key ?? '';
+  String resolveKey() => ref.read(apiKeyStatusProvider).valueOrNull?.key ?? '';
   bool hasKey() =>
       ref.read(apiKeyStatusProvider).valueOrNull?.configured ?? false;
   return ChatRepositoryImpl(
@@ -49,17 +52,68 @@ class ChatState {
   final bool sending;
 }
 
-final chatControllerProvider =
-    NotifierProvider<ChatController, ChatState>(ChatController.new);
+final chatControllerProvider = NotifierProvider<ChatController, ChatState>(
+  ChatController.new,
+);
 
 class ChatController extends Notifier<ChatState> {
   int _counter = 0;
+  bool _stopped = false;
+
+  ChatSessionLocalDatasource? _archiveDatasource;
 
   @override
   ChatState build() => const ChatState();
 
+  Future<ChatSessionLocalDatasource?> _archive() async {
+    final cached = _archiveDatasource;
+    if (cached != null) return cached;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _archiveDatasource = ChatSessionLocalDatasource(prefs);
+      return _archiveDatasource;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Simpan daftar pesan berjalan sebagai arsip terakhir yang bisa dibuka lagi.
+  Future<void> _persist(List<ChatMessage> messages) async {
+    final ds = await _archive();
+    if (ds == null) return;
+    final archiveable = messages
+        .where((m) => m.text.isNotEmpty && !m.isFailed)
+        .toList(growable: false);
+    if (archiveable.length >= 2) {
+      await ds.save(
+        ChatSessionArchive(savedAt: DateTime.now(), messages: archiveable),
+      );
+    }
+  }
+
+  Future<void> _persistCurrent() => _persist(state.messages);
+
+  /// Arsip sesi terakhir bila JSON valid: null bila kosong/korup/belum ada.
+  Future<ChatSessionArchive?> loadArchive() async {
+    final ds = await _archive();
+    return ds?.load();
+  }
+
+  /// Hapus arsip sesi terakhir dari perangkat.
+  Future<void> clearArchive() async {
+    final ds = await _archive();
+    await ds?.clear();
+  }
+
+  /// Ganti pesan aktif dengan arsip: daftar pesan kembali ke sesi lama.
+  void restoreArchive(ChatSessionArchive archive) {
+    if (state.sending) return;
+    state = ChatState(messages: List.of(archive.messages));
+  }
+
   Future<void> send(String rawMessage) async {
     if (state.sending) return;
+    _stopped = false;
     final text = rawMessage.trim().replaceAll(RegExp(r'\s+'), ' ');
     if (text.isEmpty) return;
     final userMessage = ChatMessage(
@@ -81,6 +135,7 @@ class ChatController extends Notifier<ChatState> {
 
   Future<void> retry(String failedId) async {
     if (state.sending) return;
+    _stopped = false;
     final index = state.messages.indexWhere((m) => m.id == failedId);
     if (index < 0) return;
     final failed = state.messages[index];
@@ -93,9 +148,47 @@ class ChatController extends Notifier<ChatState> {
     await _resolve(typing.id, seed: seed);
   }
 
+  /// Tulis ulang jawaban AI dengan pertanyaan sumber yang sama.
+  Future<void> regenerate(String aiMessageId) async {
+    if (state.sending) return;
+    _stopped = false;
+    final index = state.messages.indexWhere((m) => m.id == aiMessageId);
+    if (index < 0) return;
+    final target = state.messages[index];
+    if (target.role != ChatRole.ai || target.text.isEmpty) return;
+    final seed = target.verifySeed?.trim().isNotEmpty == true
+        ? target.verifySeed!.trim()
+        : _seedFor(index);
+    if (seed.trim().isEmpty) return;
+    final typing = target.copyWith(text: '', status: ChatStatus.sent);
+    final updated = [...state.messages];
+    updated[index] = typing;
+    state = ChatState(messages: updated);
+    await _resolve(typing.id, seed: seed);
+  }
+
+  /// Hentikan jawaban yang sedang dibuat: bubble mengetik dibatalkan,
+  /// pesan user tetap ada, dan sesi bisa dipakai lagi tanpa menunggu.
+  void stop() {
+    if (!state.sending) return;
+    _stopped = true;
+    final updated = state.messages
+        .where((m) => !(m.role == ChatRole.ai && m.text.isEmpty))
+        .toList(growable: false);
+    state = ChatState(messages: updated, sending: false);
+  }
+
+  /// Mulai baru: layar kosong seketika, arsip disimpan di belakang layar.
+  ///
+  /// Reset state sengaja sinkron agar UI tidak menunggu storage: pesan lama
+  /// tetap bisa dipulihkan lewat tombol riwayat.
   void clear() {
     if (state.sending) return;
+    final previous = state.messages;
     state = const ChatState();
+    if (previous.length >= 2) {
+      unawaited(_persist(previous));
+    }
   }
 
   Future<void> _resolve(String typingId, {required String seed}) async {
@@ -107,11 +200,13 @@ class ChatController extends Notifier<ChatState> {
       final answer = await ref
           .read(sendChatMessageProvider)
           .call(history: history, rawMessage: seed);
+      if (_stopped) return;
       _replace(
         typingId,
         (m) => m.copyWith(text: answer, status: ChatStatus.sent),
       );
     } catch (error) {
+      if (_stopped) return;
       final message = error is Failure
           ? error.message
           : 'Pesan gagal dikirim. Coba lagi.';
@@ -120,7 +215,9 @@ class ChatController extends Notifier<ChatState> {
         (m) => m.copyWith(text: message, status: ChatStatus.failed),
       );
     } finally {
+      _stopped = false;
       state = ChatState(messages: state.messages);
+      await _persistCurrent();
     }
   }
 
