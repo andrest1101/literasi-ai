@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sama persis dengan AppColors.primary. Dipakai window background,
+         splash Android 12, dan layer native lain agar tidak ada hex liar
+         di resource Android. -->
+    <color name="brand_primary">#1A73E8</color>
+</resources>
