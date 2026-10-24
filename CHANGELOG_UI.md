@@ -763,3 +763,47 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   di scroll-0 dan ujung scroll).
 - `flutter build windows --debug`: sukses, app relaunch hidup.
 - Commit manual oleh user (kebijakan repo): pecah per tema bila perlu.
+
+## Brand Pack Native + Shell State (24 Okt 2026)
+
+- **Masalah:** reviewer melihat hal pertama sebelum UI: nama aplikasi,
+  ikon, dan launch screen. Saat itu keduanya masih default Flutter —
+  logo Flutter di home screen, layar putih saat start, label
+  `literasi_ai` di Android dan `Literasi Ai` di iOS. Di dalam app,
+  shell 4 tab memakai `switch (_index)` sehingga setiap pindah tab
+  membuang widget lama: scroll dan kata kunci pencarian hilang.
+- **Perubahan brand:**
+  - `tool/generate_brand_assets.ps1` menjadi satu sumber kebenaran:
+    menggambar mark langsung di ukuran target (bukan resize bitmap),
+    output deterministik dan di-commit. Mark = gradien hero
+    `#2F80ED → #124A9B` + perisai putih + centang `#1A73E8`, konsisten
+    dengan identitas `verified_user` di app.
+  - iOS: 15 AppIcon RGB tanpa alpha (syarat App Store), LaunchImage
+    120/240/360, storyboard latar `#1A73E8` + mark 120pt.
+  - Android: legacy + round (sudut dibakar untuk API < 26), adaptive
+    icon API 26+ dengan **VectorDrawable** foreground/background/
+    monochrome, splash API 31 lewat `values-v31/styles.xml`, dan
+    `launch_background` non-putih untuk API < 31.
+  - Splash Flutter memakai `assets/branding/app_mark.png` yang sama,
+    jadi tidak ada pergantian logo saat native hand-off.
+- **Perubahan shell:** `IndexedStack` malas + `Set<int> _mounted`.
+  Hanya tab yang pernah dibuka yang dibangun; `PopScope` mengembalikan
+  back ke tab Cek sebelum route ditutup. Eager mount sengaja ditolak:
+  app start akan menembak History/Learn/Profile sekaligus, termasuk
+  stream Firestore.
+- **Ditolak (dengan alasan):** adaptive layer PNG per-density (diganti
+  vector supaya ikon splash Android 12 tidak pecah); `dart format`
+  repo-wide (SDK ini memakai tall style, menulis ulang 43 file lama;
+  hanya file yang disentuh yang diformat); ikon iOS dengan sudut
+  membulat (iOS memotong sendiri, sudut ganda terlihat salah).
+- **File:** `tool/generate_brand_assets.ps1`, `assets/branding/`,
+  `ios/Runner/{Info.plist,Base.lproj/LaunchScreen.storyboard,
+  Assets.xcassets/{AppIcon.appiconset,LaunchImage.imageset}}`,
+  `android/app/src/main/{AndroidManifest.xml,res/**}`,
+  `lib/app/home_screen.dart`,
+  `lib/features/auth/presentation/screens/splash_screen.dart`,
+  `pubspec.yaml`, `test/{native_brand,home_tab_state}_test.dart`.
+- **Status verifikasi saat tulis:** `flutter analyze` bersih;
+  `flutter test` **352 lulus**, 40 file (naik dari 332); `flutter build
+  apk --debug` sukses. iOS hanya tervalidasi struktural (Windows) —
+  perlu `flutter build ios` di Mac.

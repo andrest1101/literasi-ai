@@ -1,5 +1,52 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 25 September 2026_
+_Last updated: 24 Oktober 2026_
+
+## Status: Brand Pack Native + Tab State Preservation — SELESAI
+
+### Yang dikerjakan
+- **Identitas native**: kedua platform masih memakai aset default Flutter
+  (logo Flutter, layar putih) dan label `literasi_ai` / `Literasi Ai`.
+  Sekarang `LiterasiAI` di AndroidManifest dan `CFBundleDisplayName` /
+  `CFBundleName`, dengan ikon dan launch screen yang sama di kedua OS.
+- **Satu sumber kebenaran**: `tool/generate_brand_assets.ps1`
+  (System.Drawing, tanpa dependensi baru) menggambar mark di resolusi
+  target — gradien `#2F80ED → #124A9B`, perisai putih, centang
+  `#1A73E8` — bukan mengecilkan satu bitmap. Output deterministik dan
+  ikut di-commit, jadi `flutter build` tidak pernah butuh script ini.
+- **iOS**: 15 ikon AppIcon (semua PNG color type 2 / tanpa alpha, syarat
+  App Store), `LaunchImage` 120/240/360pt, storyboard berlatar
+  `#1A73E8` + mark 120pt. Nama bundle diseragamkan.
+- **Android**: ikon legacy + round dengan sudut dibakar (API < 26),
+  adaptive icon API 26+ memakai **VectorDrawable** (bukan PNG) supaya
+  ikon splash Android 12 tetap tajam; layer `monochrome` untuk themed
+  icon Android 13; `values-v31/styles.xml` memakai
+  `windowSplashScreenBackground` + `windowSplashScreenAnimatedIcon`;
+  `launch_background.xml` (dan `-v21`) tidak lagi putih.
+- **Splash Flutter** memakai `assets/branding/app_mark.png` yang identik
+  dengan mark native, bukan `Icons.fact_check`, sehingga transisi
+  native → frame Flutter tidak menampilkan logo berbeda.
+- **Shell tab**: body `HomeScreen` dulu `switch (_index)`, jadi tab lama
+  dibuang setiap pindah dan posisi scroll / kata kunci pencarian hilang.
+  Sekarang `IndexedStack` yang **malas**: hanya tab yang pernah dibuka
+  yang di-mount (app start tidak menembak empat layar + stream Firestore
+  sekaligus), dan `PopScope` mengembalikan back dari tab mana pun ke tab
+  Cek sebelum sistem menutup route.
+- **Ditolak (dengan alasan)**: layer adaptive PNG per-density (diganti
+  vector agar tidak pecah di splash 12); `dart format` repo-wide (SDK ini
+  memakai tall style dan menulis ulang 43 file lama — noise di luar
+  scope, sudah di-revert).
+
+### Verifikasi
+- `flutter analyze` → `No issues found!`
+- `flutter test` → **352 test lolos**, 40 file (naik dari 332). Dua suite
+  baru: `native_brand_test.dart` (15) mengunci nama, dimensi/alpha ikon,
+  layer adaptive, dan launch screen; `home_tab_state_test.dart` (5)
+  mengunci scroll, pencarian, lazy mount, dan back.
+- `flutter build apk --debug` → sukses (vector drawable, adaptive icon,
+  dan splash v31 benar-benar terkompilasi, bukan hanya XML valid).
+- **Belum tervalidasi**: build/visual iOS butuh macOS. Konfigurasi iOS
+  divalidasi struktural lewat test; user perlu menjalankan
+  `flutter build ios` di Mac.
 
 ## Status: Failover Model AI + Budget Token Thinking — SELESAI (akar masalah final)
 

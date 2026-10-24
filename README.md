@@ -11,8 +11,8 @@ hoaks. Dibangun sebagai portfolio Apple Developer Academy 2026.
 [![Flutter](https://img.shields.io/badge/Flutter-3.32+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.8+-0175C2?logo=dart&logoColor=white)](https://dart.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-DD2C00?logo=firebase&logoColor=white)](https://firebase.google.com)
-[![Gemini](https://img.shields.io/badge/Gemini-3.5--flash--lite-1A73E8?logo=google&logoColor=white)](https://ai.google.dev)
-[![Tests](https://img.shields.io/badge/tests-153%20passed-34A853?logo=flutter&logoColor=white)](#-pengujian)
+[![Gemini](https://img.shields.io/badge/Gemini-3.6--flash%20%2B%20failover-1A73E8?logo=google&logoColor=white)](https://ai.google.dev)
+[![Tests](https://img.shields.io/badge/tests-352%20passed-34A853?logo=flutter&logoColor=white)](#-pengujian)
 [![Analyze](https://img.shields.io/badge/flutter%20analyze-clean-34A853)](#-pengujian)
 
 > **Purpose.** Indonesia termasuk negara dengan penyebaran hoaks tertinggi,
@@ -91,7 +91,7 @@ flutter run -d linux     # atau: -d macos, -d windows
 
 ```bash
 flutter analyze   # ekspektasi: No issues found!
-flutter test      # ekspektasi: All tests passed! (153 test)
+flutter test      # ekspektasi: All tests passed! (352 test, 40 file)
 ```
 
 ## ⚙️ Konfigurasi
@@ -114,12 +114,12 @@ Clean Architecture berbasis fitur plus Riverpod (`Notifier` /
 `AsyncNotifier` / `ConsumerWidget`):
 
 - **Domain** — entity Dart murni, interface repository, use case. Tanpa dependensi Flutter.
-- **Data** — model JSON, datasource (Gemini `gemini-3.6-flash`, Firestore), implementasi repository.
+- **Data** — model JSON, datasource (pool Gemini `gemini-3.6-flash` dengan failover otomatis, Firestore), implementasi repository.
 - **Presentation** — screen, widget reusable, dan provider Riverpod untuk state UI.
 
 ```
 lib/
-├── app/home_screen.dart            # Shell 4 tab + FAB Chat
+├── app/home_screen.dart            # Shell 4 tab (IndexedStack malas) + FAB Chat
 ├── core/
 │   ├── constants/                  # app_colors, app_strings, app_styles
 │   ├── errors/                     # failures (sealed class)
@@ -136,6 +136,14 @@ lib/
 ├── firebase_options.dart           # hasil flutterfire configure
 ├── main.dart                       # ProviderScope + init best-effort
 └── shared/widgets/                 # header editorial, navbar, error/loading
+```
+
+Di luar `lib/`:
+
+```
+assets/branding/                    # app_icon_1024 (master) + app_mark (splash)
+tool/generate_brand_assets.ps1      # sumber kebenaran ikon iOS/Android + launch mark
+test/                               # 40 file, 352 test regresi
 ```
 
 Prinsip yang dijaga di seluruh codebase:
@@ -215,32 +223,32 @@ BYOK (Bring Your Own Key) memungkinkan reviewer menjalankan fitur live tanpa kar
 ## ✅ Pengujian
 
 Kondisi terakhir terverifikasi: `flutter analyze` → `No issues found!`,
-`flutter test` → `All tests passed!` (**153 test**, 17 file).
+`flutter test` → `All tests passed!` (**352 test**, 40 file), dan
+`flutter build apk --debug` → sukses. Suite berjalan offline (network
+diinjeksi lewat fake), jadi hasilnya deterministik di mesin mana pun.
 
-| File test | Jumlah | Cakupan |
-| --------- | ------ | ------- |
-| `api_key_demo_test.dart` | 15 | Resolver BYOK, propagasi instan, mode demo |
-| `chat_test.dart` | 11 | Domain, controller, retry, seed verifikasi |
-| `history_test.dart` | 18 | Model round-trip, usecase, provider stream, swipe + undo |
-| `home_nav_chat_test.dart` | 4 | Navigasi 4 tab, FAB, tile mode, switch tab |
-| `learn_test.dart` | 7 | Modul, kuis, best-score anti-farming |
-| `onboarding_persistence_test.dart` | 5 | Datasource, controller, routing splash dua arah |
-| `premium_upgrade_test.dart` | 9 | Headline verdict, salin, search, sanitasi, OG tags |
-| `quick_check_image_test.dart` | 12 | Validasi attachment, usecase gambar, retry |
-| `quick_check_redesign_test.dart` | 4 | Struktur session hasil redesign |
-| `quick_check_screen_test.dart` | 7 | Alur input-analyzing-result sesi |
-| `quick_check_url_share_test.dart` | 18 | Validasi URL, controller, ShareService, ShareCard |
-| `quick_check_verification_test.dart` | 12 | Parsing JSON toleran, batas validasi, mapping failure |
-| `score_test.dart` | 13 | Level, award, increment, mapping korup |
-| `section_header_test.dart` | 4 | Header editorial semua tab |
-| `trending_test.dart` | 4 | Domain, curated offline, navigasi detail |
-| `verify_performance_test.dart` | 6 | Cache klaim identik, rate limit (injeksi tanpa network) |
-| `widget_test.dart` | 4 | Onboarding, logo resmi, segitiga auth, medallion |
+| Area | File test (jumlah test) | Total |
+| ---- | ----------------------- | ----- |
+| Quick Check | `quick_check_url_share` 18, `quick_check_verification` 14, `quick_check_image` 12, `quick_check_screen` 7, `verify_performance` 6, `hero_verdict` 5, `verdict_spine` 4, `check_heading` 4, `quick_check_redesign` 4, `mode_identity` 2 | 76 |
+| Gemini & BYOK | `gemini_model_pool` 22, `api_key_demo` 20, `gemini_error_mapper` 16, `gemini_probe` 9 | 67 |
+| Chat | `chat_room` 15, `chat_test` 11, `chat_polish` 7 | 33 |
+| History | `history_test` 18, `history_dedup` 8, `history_refined` 8 | 34 |
+| Learn | `learn_library` 12, `learn_test` 8, `learn_detail_contents` 5 | 25 |
+| Score & profil | `score_test` 15, `profile_menu` 9 | 24 |
+| Shell, nav, brand | `native_brand` 15, `nav_pill` 9, `home_nav_chat` 5, `home_tab_state` 5, `tab_headers` 4 | 38 |
+| Polish & identitas UI | `premium_upgrade` 9, `ui_u1_polish` 9, `ui_u2_identity` 8, `font_bundle` 5, `header_compact` 4, `section_header` 4, `hero_pattern` 2 | 41 |
+| Auth & onboarding | `onboarding_persistence` 5, `widget_test` 4 | 9 |
+| Trending | `trending_test` 5 | 5 |
+
+Test `native_brand_test.dart` mengunci kontrak native tanpa perlu Xcode:
+nama aplikasi, 15 ikon iOS (dimensi + tanpa alpha), ikon legacy/adaptive
+Android, dan launch screen kedua platform. `home_tab_state_test.dart`
+mengunci state tab: scroll, kata kunci pencarian, lazy mount, dan back.
 
 ### Cara menjalankan
 
 ```bash
-flutter test                          # semua 153 test
+flutter test                          # semua 352 test
 flutter test test/score_test.dart     # satu file
 flutter test --plain-name "cache"     # filter berdasarkan nama
 ```
@@ -254,7 +262,10 @@ flutter test --plain-name "cache"     # filter berdasarkan nama
 ## 🗺️ Status dan roadmap
 
 - [x] MVP: Quick Check tiga mode, Chat, History Firestore, Share, Trending, Mini-Course, Score, BYOK/Demo, Onboarding, polish premium
+- [x] Brand pack native: ikon iOS/Android (adaptive + monochrome), launch screen brand, nama `LiterasiAI`, splash Flutter satu identitas
+- [x] Shell: tab state preservation lewat `IndexedStack` malas + back-to-tab-0
 - [ ] UI polish lanjutan (micro-interactions terkurasi)
+- [ ] Parity iOS: build di Mac, Google Sign-In URL scheme, validasi TestFlight
 - [ ] Video demo 60 detik
 - [ ] Merge final `dev` → `main` dan publikasi GitHub
 

@@ -16,6 +16,12 @@ import '../shared/widgets/bottom_nav_bar.dart';
 /// Belajar, Profil) sehingga tidak ada brand ganda di semua halaman.
 /// Wordmark kecil hanya ada di tab Cek. Navbar pill mengambang
 /// ([AppBottomNavBar]); FAB Chat diangkat di atas pill agar tidak menimpa.
+///
+/// Tab disimpan di [IndexedStack] yang di-mount malas: berpindah tab tidak
+/// lagi membuang widget lama, jadi posisi scroll, kata kunci pencarian, dan
+/// state lokal lain bertahan. Tab yang belum pernah dibuka sengaja tidak
+/// dibangun agar app start tidak menembak empat layar (dan stream Firestore)
+/// sekaligus.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -26,7 +32,13 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  static const int _tabCount = 4;
+
   int _index = 0;
+
+  /// Indeks tab yang sudah pernah dibuka. Tab lain tetap berupa placeholder
+  /// sampai pengguna benar-benar mengunjunginya.
+  final Set<int> _mounted = {0};
 
   void _openChat() {
     Navigator.of(context).pushNamed(ChatScreen.route);
@@ -34,33 +46,59 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _openTab(int index) {
     if (index == _index) return;
-    setState(() => _index = index);
+    setState(() {
+      _index = index;
+      _mounted.add(index);
+    });
+  }
+
+  Widget _buildTab(int index) {
+    return switch (index) {
+      0 => QuickCheckHomeTab(onOpenProfile: () => _openTab(3)),
+      1 => const HistoryListScreen(),
+      2 => const CourseListScreen(),
+      _ => const ProfileScreen(),
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        bottom: false,
-        child: switch (_index) {
-          0 => QuickCheckHomeTab(onOpenProfile: () => _openTab(3)),
-          1 => const HistoryListScreen(),
-          2 => const CourseListScreen(),
-          _ => const ProfileScreen(),
-        },
-      ),
-      floatingActionButton: Transform.translate(
-        // Turun 8px dari margin bawaan Scaffold (16px): FAB duduk rapat
-        // 8px di atas zona badge navbar. Tidak lebih rendah: badge tab
-        // Profil butuh zona itu (test no-overlap mengunci gap >= 8px).
-        offset: const Offset(0, 8),
-        child: ChatFab(onTap: _openChat),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: AppBottomNavBar(
-        currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
+    return PopScope(
+      // Back di tab mana pun kembali ke tab Cek lebih dulu; hanya dari Cek
+      // sistem boleh menutup route (keluar aplikasi).
+      canPop: _index == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _openTab(0);
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          bottom: false,
+          child: IndexedStack(
+            index: _index,
+            sizing: StackFit.expand,
+            children: [
+              for (var i = 0; i < _tabCount; i++)
+                if (_mounted.contains(i))
+                  _buildTab(i)
+                else
+                  const SizedBox.shrink(),
+            ],
+          ),
+        ),
+        floatingActionButton: Transform.translate(
+          // Turun 8px dari margin bawaan Scaffold (16px): FAB duduk rapat
+          // 8px di atas zona badge navbar. Tidak lebih rendah: badge tab
+          // Profil butuh zona itu (test no-overlap mengunci gap >= 8px).
+          offset: const Offset(0, 8),
+          child: ChatFab(onTap: _openChat),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        bottomNavigationBar: AppBottomNavBar(
+          currentIndex: _index,
+          onTap: _openTab,
+        ),
       ),
     );
   }
