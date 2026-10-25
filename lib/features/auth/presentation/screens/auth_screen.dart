@@ -1,11 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:literasi_ai/app/home_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../domain/entities/auth_failure.dart';
+import '../providers/auth_controller.dart';
 import '../widgets/auth_form_parts.dart';
 import '../widgets/auth_page_shell.dart';
 import '../widgets/google_g_logo.dart';
@@ -62,15 +63,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   Future<void> _signInWithGoogle() async {
     setState(() => _googleLoading = true);
     try {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return;
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = await ref
+          .read(authControllerProvider.notifier)
+          .signInWithGoogle();
+      if (user == null) return;
       _goHome();
+    } on AuthFailure catch (error) {
+      if (mounted) showAuthMessage(context, authFailureMessage(error));
     } catch (_) {
       if (mounted) {
         showAuthMessage(context, AppStrings.authGoogleFailed);
@@ -83,7 +82,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   Future<void> _signInAnonymously() async {
     setState(() => _anonLoading = true);
     try {
-      await FirebaseAuth.instance.signInAnonymously();
+      await ref.read(authControllerProvider.notifier).signInAnonymously();
       // Catatan offline yang dulu teks permanen kini jadi pesan sekali
       // tampil agar footer bernapas.
       if (mounted) {
@@ -91,6 +90,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       }
       await Future<void>.delayed(const Duration(milliseconds: 600));
       _goHome();
+    } on AuthFailure catch (error) {
+      if (mounted) {
+        showAuthMessage(context, authFailureMessage(error));
+      }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         showAuthMessage(
@@ -114,10 +117,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
     setState(() => _emailLoading = true);
     try {
-      // Provider email belum aktif di Firebase project ini.
-      // Validasi lolos, lalu arahkan jujur ke jalur yang tersedia.
-      if (!mounted) return;
-      showAuthMessage(context, AppStrings.authNoAccount);
+      await ref
+          .read(authControllerProvider.notifier)
+          .signInWithEmail(
+            email: _emailController.text,
+            password: _passwordController.text,
+          );
+      _goHome();
+    } on AuthFailure catch (error) {
+      if (mounted) showAuthMessage(context, authFailureMessage(error));
+    } catch (_) {
+      if (mounted) showAuthMessage(context, AppStrings.authUnexpectedFailed);
     } finally {
       if (mounted) setState(() => _emailLoading = false);
     }

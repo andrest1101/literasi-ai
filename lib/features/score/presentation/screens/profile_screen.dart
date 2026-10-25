@@ -8,6 +8,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_styles.dart';
 import '../../../../core/utils/api_key_resolver.dart';
 import '../../../auth/presentation/screens/auth_screen.dart';
+import '../../../auth/presentation/providers/auth_controller.dart';
 import '../../../history/presentation/providers/history_providers.dart';
 import '../../domain/entities/literacy_score.dart';
 import '../providers/score_providers.dart';
@@ -87,9 +88,9 @@ String resolveProfileName(String? displayName, String? email) {
 
 /// Keluar aman-test: tanpa Firebase init mengembalikan false (gagal
 /// ramah), agar widget test tidak crash. Sukses mengembalikan true.
-Future<bool> _safeSignOut() async {
+Future<bool> _safeSignOut(WidgetRef ref) async {
   try {
-    await FirebaseAuth.instance.signOut();
+    await ref.read(authControllerProvider.notifier).signOut();
     return true;
   } catch (_) {
     return false;
@@ -610,7 +611,7 @@ class _SettingsGroup extends ConsumerWidget {
       ),
     );
     if (ok != true || !context.mounted) return;
-    final done = await _safeSignOut();
+    final done = await _safeSignOut(ref);
     if (!context.mounted) return;
     if (!done) {
       // Profil adalah konten tab tanpa Scaffold sendiri: kegagalan
@@ -630,6 +631,7 @@ class _SettingsGroup extends ConsumerWidget {
       return;
     }
     ref.invalidate(historyUserIdProvider);
+    ref.invalidate(authControllerProvider);
     ref.invalidate(scoreProvider);
     ref.invalidate(apiKeyControllerProvider);
   }

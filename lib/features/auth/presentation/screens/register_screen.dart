@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/home_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../domain/entities/auth_failure.dart';
+import '../providers/auth_controller.dart';
 import '../widgets/auth_form_parts.dart';
 import '../widgets/auth_page_shell.dart';
 import '../widgets/password_requirement_list.dart';
@@ -60,11 +63,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _submitting = true);
     try {
-      // Provider email belum aktif di Firebase project ini.
-      // Validasi lolos, lalu arahkan jujur ke jalur yang tersedia.
-      await Future<void>.delayed(const Duration(milliseconds: 400));
+      await ref
+          .read(authControllerProvider.notifier)
+          .registerWithEmail(
+            name: _nameController.text.trim(),
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
       if (!mounted) return;
-      showAuthMessage(context, AppStrings.registerPending);
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(HomeScreen.route, (_) => false);
+    } on AuthFailure catch (error) {
+      if (mounted) showAuthMessage(context, authFailureMessage(error));
+    } catch (_) {
+      if (mounted) showAuthMessage(context, AppStrings.authUnexpectedFailed);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }

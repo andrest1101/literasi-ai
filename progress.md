@@ -1,6 +1,44 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
 _Last updated: 24 Oktober 2026_
 
+## Status: Auth Android Firebase (Email, Google, Guest) — IMPLEMENTASI SELESAI
+
+### Yang dikerjakan
+- Sebelumnya layar Masuk/Daftar email hanya validasi dan snackbar; sekarang
+  sign-in, create account, dan reset password masuk melalui kontrak domain,
+  Firebase datasource/repository, lalu Riverpod `AsyncNotifier`.
+- Error Firebase dipetakan menjadi kategori dan copy bahasa Indonesia tanpa
+  menampilkan exception mentah. Login salah vs email terdaftar, jaringan,
+  provider disabled, konflik akun, dan pembatalan Google ditangani spesifik.
+- Daftar saat sedang sebagai user anonim memakai `linkWithCredential`, jadi
+  identitas Firebase/UID (dan data terkait akun) dipertahankan saat upgrade.
+  Google Sign-In juga mencoba link ke akun anonim yang aktif.
+- Splash sekarang membaca sesi Firebase; user yang masih login langsung ke
+  Home, sementara user belum login tetap mengikuti alur onboarding/auth.
+- Logout menggunakan controller auth; pembersihan sesi Firebase adalah
+  sumber kebenaran, cleanup sesi Google bersifat best-effort.
+- Form login menjelaskan fungsi aktif, bukan lagi copy “segera dibuka”.
+
+### Catatan konfigurasi Google Android
+- Provider Google aktif di Firebase Console (dikonfirmasi user), tetapi
+  `android/app/google-services.json` yang ada masih memiliki `oauth_client: []`.
+- SHA-1 debug lokal diperoleh dari keystore: `9B:B1:5F:0F:10:F9:88:D0:14:C5:DA:EF:72:5E:15:87:33:7F:5E:09`.
+  Untuk Google live sign-in, tambahkan SHA-1 itu pada Firebase Project
+  settings → Android app `com.example.literasi_ai`, unduh ulang
+  `google-services.json`, lalu pasang ulang app. Kode dan APK dapat dibangun,
+  tetapi OAuth Google live belum bisa diuji sampai file itu diperbarui.
+- iOS sengaja tidak diubah/ditargetkan karena belum ada Mac; Android-only
+  implementasi ini tidak mempretend bahwa iOS telah tervalidasi.
+
+### Verifikasi
+- `flutter analyze` → `No issues found!`
+- `flutter test` → **369 test lulus**, 42 file; termasuk 13 test kategori
+  error Firebase + 4 test controller dengan fake repository.
+- `flutter build apk --debug` → sukses.
+- Belum diuji terhadap project Firebase live/device: kredensial nyata tidak
+  tersedia pada harness. Google Android membutuhkan refresh config seperti
+  catatan di atas.
+
 ## Status: Brand Pack Native + Tab State Preservation — SELESAI
 
 ### Yang dikerjakan
@@ -38,7 +76,7 @@ _Last updated: 24 Oktober 2026_
 
 ### Verifikasi
 - `flutter analyze` → `No issues found!`
-- `flutter test` → **352 test lolos**, 40 file (naik dari 332). Dua suite
+- `flutter test` → **352 test lolos**, 40 file pada fase brand/shell (naik dari 332). Dua suite
   baru: `native_brand_test.dart` (15) mengunci nama, dimensi/alpha ikon,
   layer adaptive, dan launch screen; `home_tab_state_test.dart` (5)
   mengunci scroll, pencarian, lazy mount, dan back.
