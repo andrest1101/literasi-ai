@@ -12,7 +12,7 @@ hoaks. Dibangun sebagai portfolio Apple Developer Academy 2026.
 [![Dart](https://img.shields.io/badge/Dart-3.8+-0175C2?logo=dart&logoColor=white)](https://dart.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-DD2C00?logo=firebase&logoColor=white)](https://firebase.google.com)
 [![Gemini](https://img.shields.io/badge/Gemini-3.6--flash%20%2B%20failover-1A73E8?logo=google&logoColor=white)](https://ai.google.dev)
-[![Tests](https://img.shields.io/badge/tests-352%20passed-34A853?logo=flutter&logoColor=white)](#-pengujian)
+[![Tests](https://img.shields.io/badge/tests-369%20passed-34A853?logo=flutter&logoColor=white)](#-pengujian)
 [![Analyze](https://img.shields.io/badge/flutter%20analyze-clean-34A853)](#-pengujian)
 
 > **Purpose.** Indonesia termasuk negara dengan penyebaran hoaks tertinggi,
@@ -91,7 +91,7 @@ flutter run -d linux     # atau: -d macos, -d windows
 
 ```bash
 flutter analyze   # ekspektasi: No issues found!
-flutter test      # ekspektasi: All tests passed! (352 test, 40 file)
+flutter test      # ekspektasi: All tests passed! (369 test, 42 file)
 ```
 
 ## ⚙️ Konfigurasi
@@ -143,7 +143,7 @@ Di luar `lib/`:
 ```
 assets/branding/                    # app_icon_1024 (master) + app_mark (splash)
 tool/generate_brand_assets.ps1      # sumber kebenaran ikon iOS/Android + launch mark
-test/                               # 40 file, 352 test regresi
+test/                               # 42 file, 369 test regresi
 ```
 
 Prinsip yang dijaga di seluruh codebase:
@@ -223,7 +223,7 @@ BYOK (Bring Your Own Key) memungkinkan reviewer menjalankan fitur live tanpa kar
 ## ✅ Pengujian
 
 Kondisi terakhir terverifikasi: `flutter analyze` → `No issues found!`,
-`flutter test` → `All tests passed!` (**352 test**, 40 file), dan
+`flutter test` → `All tests passed!` (**369 test**, 42 file), dan
 `flutter build apk --debug` → sukses. Suite berjalan offline (network
 diinjeksi lewat fake), jadi hasilnya deterministik di mesin mana pun.
 
@@ -235,10 +235,14 @@ diinjeksi lewat fake), jadi hasilnya deterministik di mesin mana pun.
 | History | `history_test` 18, `history_dedup` 8, `history_refined` 8 | 34 |
 | Learn | `learn_library` 12, `learn_test` 8, `learn_detail_contents` 5 | 25 |
 | Score & profil | `score_test` 15, `profile_menu` 9 | 24 |
+| Auth & onboarding | `auth_repository` 13, `auth_controller` 4, `onboarding_persistence` 5, `widget_test` 4 | 26 |
 | Shell, nav, brand | `native_brand` 15, `nav_pill` 9, `home_nav_chat` 5, `home_tab_state` 5, `tab_headers` 4 | 38 |
 | Polish & identitas UI | `premium_upgrade` 9, `ui_u1_polish` 9, `ui_u2_identity` 8, `font_bundle` 5, `header_compact` 4, `section_header` 4, `hero_pattern` 2 | 41 |
-| Auth & onboarding | `onboarding_persistence` 5, `widget_test` 4 | 9 |
 | Trending | `trending_test` 5 | 5 |
+
+Suite auth memverifikasi pemetaan error Firebase ke pesan aman, state sesi
+Riverpod, sign-in/registrasi, reset kata sandi, dan logout memakai fake
+repository (tanpa request ke akun sungguhan).
 
 Test `native_brand_test.dart` mengunci kontrak native tanpa perlu Xcode:
 nama aplikasi, 15 ikon iOS (dimensi + tanpa alpha), ikon legacy/adaptive
@@ -248,7 +252,7 @@ mengunci state tab: scroll, kata kunci pencarian, lazy mount, dan back.
 ### Cara menjalankan
 
 ```bash
-flutter test                          # semua 352 test
+flutter test                          # semua 369 test
 flutter test test/score_test.dart     # satu file
 flutter test --plain-name "cache"     # filter berdasarkan nama
 ```
@@ -264,6 +268,7 @@ flutter test --plain-name "cache"     # filter berdasarkan nama
 - [x] MVP: Quick Check tiga mode, Chat, History Firestore, Share, Trending, Mini-Course, Score, BYOK/Demo, Onboarding, polish premium
 - [x] Brand pack native: ikon iOS/Android (adaptive + monochrome), launch screen brand, nama `LiterasiAI`, splash Flutter satu identitas
 - [x] Shell: tab state preservation lewat `IndexedStack` malas + back-to-tab-0
+- [x] Auth Android: email/password, daftar, reset sandi, anonymous, sesi persisten, dan logout
 - [ ] UI polish lanjutan (micro-interactions terkurasi)
 - [ ] Parity iOS: build di Mac, Google Sign-In URL scheme, validasi TestFlight
 - [ ] Video demo 60 detik
@@ -275,7 +280,7 @@ flutter test --plain-name "cache"     # filter berdasarkan nama
 | ------ | ------ |
 | `libsecret-1>=0.18.4 not found` saat build Linux | `sudo apt-get install -y libsecret-1-dev` |
 | `Permission denied` ke `/usr/local/...` saat `flutter run -d linux` | Hapus cache CMake basi: `rm -rf build/linux`, lalu run ulang |
-| Login Google gagal di Android | SHA-1 debug belum didaftarkan di Firebase Console sehingga `oauth_client` kosong |
+| Login Google gagal di Android | Tambahkan SHA-1 debug/release ke Firebase Console → Project settings → Android app, lalu unduh ulang `google-services.json`; saat ini `oauth_client` pada file lokal masih kosong |
 | Skor/history gagal tersimpan padahal kunci valid | `firestore.rules` belum di-deploy (bukan masalah kunci API) |
 | Selalu `TIDAK_DAPAT_DIPASTIKAN` | Kunci Gemini kosong/invalid — cek **Profil → Kunci API Gemini**, atau pakai mode demo |
 | `flutter` CLI macet di terminal | Biasanya terkunci daemon VS Code yang sedang berjalan; tunggu atau tutup run aktif, lalu ulangi |

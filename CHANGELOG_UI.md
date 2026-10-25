@@ -807,3 +807,36 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   `flutter test` **352 lulus**, 40 file (naik dari 332); `flutter build
   apk --debug` sukses. iOS hanya tervalidasi struktural (Windows) —
   perlu `flutter build ios` di Mac.
+
+## Auth Firebase Android (24 Okt 2026)
+
+- **Masalah:** halaman email login/register hanya memvalidasi form lalu
+  menampilkan pesan bahwa fitur belum dibuka; pengguna tidak benar-benar
+  membuat sesi. Splash juga tidak memeriksa sesi Firebase sehingga user
+  lama kembali ke auth screen setelah membuka ulang app.
+- **Perubahan:** alur Auth mengikuti batas layer: kontrak `AuthRepository` +
+  entity `AuthUser/AuthFailure`, datasource Firebase/Google, implementasi
+  repository untuk mapping error yang aman, dan Riverpod `AsyncNotifier`
+  sebagai controller sesi. Login email, daftar, reset password, guest,
+  Google, dan logout dihubungkan ke controller. Splash membaca current
+  session: sesi aktif langsung ke Home.
+- **Peningkatan guest:** daftar email saat Firebase user anonim aktif
+  memakai `linkWithCredential` (UID tetap sama). Google Sign-In juga mencoba
+  link credential pada guest aktif. Cleanup Google saat logout best-effort
+  agar Firebase sign-out tidak batal karena plugin cleanup.
+- **Error UX:** error Firebase dipetakan ke copy Indonesia (kredensial
+  salah, email terdaftar, email invalid, sandi lemah, jaringan, provider
+  nonaktif, konflik credential, dibatalkan, unknown); exception mentah tidak
+  ditampilkan kepada pengguna.
+- **Batas konfigurasi:** Google provider Console aktif sesuai konfirmasi
+  user, tetapi `android/app/google-services.json` lokal masih
+  `oauth_client: []`. SHA-1 debug lokal:
+  `9B:B1:5F:0F:10:F9:88:D0:14:C5:DA:EF:72:5E:15:87:33:7F:5E:09`; tambahkan
+  ke Firebase Project settings → Android app dan unduh ulang config. Google
+  live auth belum dapat disahkan sebelum langkah itu. iOS sengaja ditunda.
+- **File:** `lib/features/auth/{domain,data,presentation}/**`, auth screens,
+  `lib/core/constants/app_strings.dart`, profile logout,
+  `test/auth_{repository,controller}_test.dart`, README, progress.
+- **Status verifikasi:** `flutter analyze` bersih; full test **369 lulus**,
+  42 file; `flutter build apk --debug` sukses. Test memakai fake repository,
+  bukan request Firebase live.
