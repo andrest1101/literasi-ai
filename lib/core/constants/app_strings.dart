@@ -36,20 +36,18 @@ abstract final class AppStrings {
   static const String authSubmit = 'Masuk';
   static const String authFormTitle = 'Masuk dengan email';
   static const String authFormSubtitle =
-      'Validasi dulu, lalu lanjut ke jalur yang tersedia.';
-  static const String authNoAccount =
-      'Belum punya akun email? Coba masuk dengan Google atau lanjut tanpa akun.';
+      'Masuk dengan email dan kata sandi akunmu.';
   static const String authDivider = 'atau';
   static const String authGoogle = 'Masuk dengan Google';
   static const String authAnonymous = 'Lanjut tanpa akun';
   static const String authOfflineNote =
       'Mode tanpa akun. Riwayat hanya tersimpan di perangkat ini.';
-  static const String authEmailSent =
-      'Tautan masuk dikirim. Cek kotak masuk emailmu.';
   static const String authGoogleFailed =
       'Masuk Google gagal. Periksa koneksi atau lanjut tanpa akun.';
   static const String authAnonymousFailed =
       'Mode offline. Firebase belum dikonfigurasi.';
+  static const String authUnexpectedFailed =
+      'Terjadi kendala saat masuk. Periksa koneksi lalu coba lagi.';
   static const String authGoRegisterPrefix = 'Belum punya akun?';
   static const String authGoRegisterAction = 'Daftar';
   static const String authGoLoginPrefix = 'Sudah punya akun?';
@@ -71,8 +69,6 @@ abstract final class AppStrings {
   static const String registerReqLength = 'Minimal 6 karakter';
   static const String registerReqDigit = 'Mengandung angka';
   static const String registerSubmit = 'Daftar';
-  static const String registerPending =
-      'Pendaftaran email segera dibuka. Untuk sekarang, masuk dengan Google atau lanjut tanpa akun.';
 
   static const String forgotTitle = 'Lupa Kata Sandi';
   static const String forgotSubtitle =

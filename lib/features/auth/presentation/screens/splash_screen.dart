@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_strings.dart';
+import '../providers/auth_controller.dart';
 import '../providers/onboarding_provider.dart';
 import 'auth_screen.dart';
 import 'onboarding_screen.dart';
@@ -34,8 +35,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       completed = false;
     }
     if (!mounted) return;
+    final user = await ref.read(authControllerProvider.future);
+    if (!mounted) return;
     Navigator.of(context).pushReplacementNamed(
-      completed ? AuthScreen.route : OnboardingScreen.route,
+      user != null
+          ? '/home'
+          : completed
+          ? AuthScreen.route
+          : OnboardingScreen.route,
     );
   }
 

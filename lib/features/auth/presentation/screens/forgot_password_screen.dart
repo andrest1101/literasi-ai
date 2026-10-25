@@ -1,9 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../domain/entities/auth_failure.dart';
+import '../providers/auth_controller.dart';
 import '../widgets/auth_form_parts.dart';
 import '../widgets/auth_page_shell.dart';
 import 'auth_screen.dart';
@@ -46,15 +47,15 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       _sent = false;
     });
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(
-        email: _emailController.text.trim(),
-      );
+      await ref
+          .read(authControllerProvider.notifier)
+          .sendPasswordResetEmail(_emailController.text.trim());
       if (!mounted) return;
       setState(() => _sent = true);
       showAuthMessage(context, AppStrings.forgotSent);
-    } on FirebaseAuthException {
+    } on AuthFailure catch (error) {
       if (!mounted) return;
-      showAuthMessage(context, AppStrings.forgotFailed);
+      showAuthMessage(context, authFailureMessage(error));
     } catch (_) {
       if (!mounted) return;
       showAuthMessage(context, AppStrings.forgotFailed);
