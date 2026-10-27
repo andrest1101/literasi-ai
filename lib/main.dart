@@ -15,6 +15,7 @@ import 'features/auth/presentation/screens/forgot_password_screen.dart';
 import 'features/auth/presentation/screens/onboarding_screen.dart';
 import 'features/auth/presentation/screens/register_screen.dart';
 import 'features/auth/presentation/screens/splash_screen.dart';
+import 'features/auth/presentation/screens/verify_email_screen.dart';
 import 'features/chat/presentation/screens/chat_screen.dart';
 import 'features/score/presentation/screens/api_key_screen.dart';
 import 'features/quick_check/presentation/screens/quick_check_screen.dart';
@@ -69,7 +70,7 @@ void _startFrameProbe() {
 }
 
 class LiterasiAIApp extends StatelessWidget {
-  const LiterasiAIApp({super.key}); 
+  const LiterasiAIApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +85,7 @@ class LiterasiAIApp extends StatelessWidget {
         AuthScreen.route: (_) => const AuthScreen(),
         RegisterScreen.route: (_) => const RegisterScreen(),
         ForgotPasswordScreen.route: (_) => const ForgotPasswordScreen(),
+        VerifyEmailScreen.route: (_) => const VerifyEmailScreen(),
         QuickCheckScreen.route: (_) => const QuickCheckScreen(),
         QuickCheckSessionScreen.route: (_) => const QuickCheckSessionScreen(),
         ChatScreen.route: (_) => const ChatScreen(),

@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
+import 'package:flutter/services.dart';
 
 import '../../domain/entities/auth_failure.dart';
 import '../../domain/entities/auth_user.dart';
@@ -39,11 +40,18 @@ class FirebaseAuthRepository implements AuthRepository {
       // Account creation/linking succeeded; a profile label failure must not
       // strand a valid new session on the registration form.
     }
+    try {
+      await _datasource.sendEmailVerification();
+    } catch (_) {
+      // Akun sudah sah meski pengiriman email gagal sesaat. Layar verifikasi
+      // menyediakan "Kirim ulang email" yang melaporkan kegagalan sebenarnya.
+    }
     return AuthUser(
       id: user.id,
       email: user.email,
       displayName: name.trim(),
       isAnonymous: user.isAnonymous,
+      emailVerified: user.emailVerified,
     );
   });
 
@@ -64,15 +72,33 @@ class FirebaseAuthRepository implements AuthRepository {
       _guard(() => _datasource.sendPasswordResetEmail(email));
 
   @override
+  Future<void> sendEmailVerification() =>
+      _guard(_datasource.sendEmailVerification);
+
+  @override
+  Future<AuthUser?> refreshUser() =>
+      _guard(() async => _mapUser(await _datasource.reloadCurrentUser()));
+
+  @override
+  Future<void> deleteAccount() => _guard(() async {
+    await _datasource.deleteCurrentUser();
+    await _datasource.signOut();
+  });
+
+  @override
   Future<void> signOut() => _guard(_datasource.signOut);
 
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {
       return await action();
-    } on firebase.FirebaseAuthException catch (error) {
-      throw AuthFailure(firebaseAuthFailureForCode(error.code));
     } on AuthFailure {
       rethrow;
+    } on firebase.FirebaseAuthException catch (error) {
+      throw AuthFailure(firebaseAuthFailureForCode(error.code));
+    } on GoogleIdTokenMissingException {
+      throw const AuthFailure(AuthFailureCode.googleConfigMissing);
+    } on PlatformException catch (error) {
+      throw AuthFailure(googleAuthFailureFor(error));
     } catch (_) {
       throw const AuthFailure(AuthFailureCode.unknown);
     }
@@ -88,6 +114,7 @@ class FirebaseAuthRepository implements AuthRepository {
           email: user.email,
           displayName: user.displayName,
           isAnonymous: user.isAnonymous,
+          emailVerified: user.emailVerified,
         );
 }
 
@@ -103,5 +130,34 @@ AuthFailureCode firebaseAuthFailureForCode(String code) => switch (code) {
   'account-exists-with-different-credential' ||
   'credential-already-in-use' => AuthFailureCode.accountConflict,
   'popup-closed-by-user' || 'sign_in_canceled' => AuthFailureCode.cancelled,
+  'too-many-requests' => AuthFailureCode.tooManyRequests,
+  'requires-recent-login' ||
+  'user-token-expired' => AuthFailureCode.requiresRecentLogin,
+  'user-disabled' => AuthFailureCode.accountDisabled,
   _ => AuthFailureCode.unknown,
 };
+
+/// Memetakan kegagalan plugin Google Sign-In ke kategori yang bisa dijelaskan.
+///
+/// `google_sign_in_android` membungkus `ApiException` Play Services menjadi
+/// `PlatformException(code: 'sign_in_failed', message: '10: ...')`, sehingga
+/// kode numeriknya hanya terbaca dari pesan.
+AuthFailureCode googleAuthFailureFor(PlatformException error) {
+  final raw = '${error.code} ${error.message ?? ''}';
+  final apiCode = int.tryParse(
+    RegExp(r'(\d{1,5}):').firstMatch(raw)?.group(1) ?? '',
+  );
+  return switch (apiCode) {
+    // DEVELOPER_ERROR: paket + SHA-1 belum terdaftar sebagai OAuth client.
+    10 => AuthFailureCode.googleConfigMissing,
+    12500 => AuthFailureCode.googleConfigMissing,
+    12501 => AuthFailureCode.cancelled,
+    12502 => AuthFailureCode.googleSignInFailed,
+    7 => AuthFailureCode.network,
+    1 || 2 || 3 => AuthFailureCode.playServicesUnavailable,
+    _ =>
+      raw.contains('sign_in_canceled')
+          ? AuthFailureCode.cancelled
+          : AuthFailureCode.googleSignInFailed,
+  };
+}

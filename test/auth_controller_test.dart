@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:literasi_ai/features/auth/domain/entities/auth_failure.dart';
 import 'package:literasi_ai/features/auth/domain/entities/auth_user.dart';
 import 'package:literasi_ai/features/auth/domain/repositories/auth_repository.dart';
 import 'package:literasi_ai/features/auth/presentation/providers/auth_controller.dart';
@@ -12,6 +13,10 @@ class _FakeAuthRepository implements AuthRepository {
   String? lastName;
   String? resetEmail;
   int signOutCalls = 0;
+  int sendVerificationCalls = 0;
+  int deleteCalls = 0;
+  int refreshCalls = 0;
+  AuthUser? refreshedUser;
 
   @override
   AuthUser? get currentUser => user;
@@ -39,8 +44,11 @@ class _FakeAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AuthUser?> signInWithGoogle() async =>
-      user = const AuthUser(id: 'google-user', email: 'user@example.com');
+  Future<AuthUser?> signInWithGoogle() async => user = const AuthUser(
+    id: 'google-user',
+    email: 'user@example.com',
+    emailVerified: true,
+  );
 
   @override
   Future<AuthUser> signInAnonymously() async =>
@@ -49,6 +57,23 @@ class _FakeAuthRepository implements AuthRepository {
   @override
   Future<void> sendPasswordResetEmail(String email) async {
     resetEmail = email;
+  }
+
+  @override
+  Future<void> sendEmailVerification() async {
+    sendVerificationCalls++;
+  }
+
+  @override
+  Future<AuthUser?> refreshUser() async {
+    refreshCalls++;
+    return user = refreshedUser ?? user;
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    deleteCalls++;
+    user = null;
   }
 
   @override
@@ -107,6 +132,87 @@ void main() {
       container.read(authControllerProvider).requireValue?.id,
       'registered',
     );
+  });
+
+  test('new email account stays gated until the inbox is verified', () async {
+    final user = await container
+        .read(authControllerProvider.notifier)
+        .registerWithEmail(
+          name: 'Nama Pengguna',
+          email: 'new@example.com',
+          password: 'secret123',
+        );
+
+    expect(user.needsEmailVerification, isTrue);
+  });
+
+  test('Google session arrives verified and is never gated', () async {
+    final user = await container
+        .read(authControllerProvider.notifier)
+        .signInWithGoogle();
+
+    expect(user?.needsEmailVerification, isFalse);
+  });
+
+  test('refreshUser replaces the session with the reloaded profile', () async {
+    repository.user = const AuthUser(id: 'uid', email: 'a@example.com');
+    repository.refreshedUser = const AuthUser(
+      id: 'uid',
+      email: 'a@example.com',
+      emailVerified: true,
+    );
+    final controller = container.read(authControllerProvider.notifier);
+    await container.read(authControllerProvider.future);
+
+    final refreshed = await controller.refreshUser();
+
+    expect(repository.refreshCalls, 1);
+    expect(refreshed?.emailVerified, isTrue);
+    expect(
+      container.read(authControllerProvider).requireValue?.emailVerified,
+      isTrue,
+    );
+  });
+
+  test('resend enforces a cooldown after the first delivery', () async {
+    final controller = container.read(authControllerProvider.notifier);
+
+    await controller.resendVerificationEmail();
+    expect(repository.sendVerificationCalls, 1);
+    expect(controller.resendBlockedUntil, isNotNull);
+
+    await expectLater(
+      controller.resendVerificationEmail(),
+      throwsA(
+        isA<AuthFailure>().having(
+          (failure) => failure.code,
+          'code',
+          AuthFailureCode.tooManyRequests,
+        ),
+      ),
+    );
+    expect(repository.sendVerificationCalls, 1);
+  });
+
+  test('sign out clears the cooldown so another account can verify', () async {
+    final controller = container.read(authControllerProvider.notifier);
+    await controller.resendVerificationEmail();
+    await controller.signOut();
+
+    expect(controller.resendBlockedUntil, isNull);
+    await controller.resendVerificationEmail();
+    expect(repository.sendVerificationCalls, 2);
+  });
+
+  test('deleteAccount removes the account and clears the session', () async {
+    repository.user = const AuthUser(id: 'uid', email: 'a@example.com');
+    final controller = container.read(authControllerProvider.notifier);
+    await container.read(authControllerProvider.future);
+
+    await controller.deleteAccount();
+
+    expect(repository.deleteCalls, 1);
+    expect(container.read(authControllerProvider).requireValue, isNull);
   });
 
   test('password reset trims email', () async {

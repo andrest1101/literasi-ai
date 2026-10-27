@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../app/home_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/auth_failure.dart';
@@ -10,12 +9,14 @@ import '../widgets/auth_form_parts.dart';
 import '../widgets/auth_page_shell.dart';
 import '../widgets/password_requirement_list.dart';
 import 'auth_screen.dart';
+import 'verify_email_screen.dart';
 
 /// Halaman Daftar: nama, email, kata sandi, dan konfirmasi.
 ///
-/// Syarat sandi dievaluasi live saat mengetik. Provider email belum dibuka di
-/// backend, jadi tombol Daftar memvalidasi lalu mengarahkan ke jalur yang
-/// tersedia (Google atau tanpa akun). Tidak ada akun yang dibuat diam-diam.
+/// Syarat sandi dievaluasi live saat mengetik. Setelah akun dibuat, Firebase
+/// mengirim tautan verifikasi dan pengguna ditahan di [VerifyEmailScreen]
+/// sampai inbox-nya terbukti, sehingga satu alamat email tidak bisa didaftarkan
+/// oleh orang lain.
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
@@ -73,7 +74,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (!mounted) return;
       Navigator.of(
         context,
-      ).pushNamedAndRemoveUntil(HomeScreen.route, (_) => false);
+      ).pushNamedAndRemoveUntil(VerifyEmailScreen.route, (_) => false);
     } on AuthFailure catch (error) {
       if (mounted) showAuthMessage(context, authFailureMessage(error));
     } catch (_) {
