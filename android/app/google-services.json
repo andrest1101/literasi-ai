@@ -12,7 +12,20 @@
           "package_name": "com.example.literasi_ai"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "604940502186-kdlulm1admch6lqq687uvm9ej1g9numl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.literasi_ai",
+            "certificate_hash": "9bb15f0f10f988d014c5daef725e1587337f5e09"
+          }
+        },
+        {
+          "client_id": "604940502186-3bqps8tr9lspnvoqtqu15t2p8b5qqifn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDsXe6AekkFub5yXWmvBg9tanIufD3dxf0"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "604940502186-3bqps8tr9lspnvoqtqu15t2p8b5qqifn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "604940502186-5a8bi83qqrn8uo5o5q4u6dmgsr603o4h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.literasiAi"
+              }
+            }
+          ]
         }
       }
     }
