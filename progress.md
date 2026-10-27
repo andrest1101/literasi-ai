@@ -1,5 +1,55 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
-_Last updated: 24 Oktober 2026_
+_Last updated: 27 Oktober 2026_
+
+## Status: Verifikasi Email + Perbaikan Google Sign-In Android — SELESAI
+
+### Akar masalah Google Sign-In (terbukti, bukan dugaan)
+- `android/app/google-services.json` lama berisi `"oauth_client": []`. Akibatnya
+  Gradle google-services tidak menghasilkan resource `default_web_client_id`.
+- `google_sign_in_android` 6.2.1 membaca resource itu untuk memanggil
+  `requestIdToken()`; tanpa resource, plugin tidak pernah meminta ID token.
+  Kredensial diteruskan ke Firebase tanpa bukti identitas lalu ditolak dengan
+  kode error di luar peta, sehingga UI menampilkan pesan generik
+  "terjadi kendala, coba lagi beberapa saat".
+- SHA-1 APK terpasang diverifikasi dengan `apksigner`:
+  `9B:B1:5F:0F:10:F9:88:D0:14:C5:DA:EF:72:5E:15:87:33:7F:5E:09` (cocok dengan
+  debug keystore), jadi masalahnya memang OAuth client belum terdaftar.
+- Perbaikan dari user: SHA-1 didaftarkan, `google-services.json` diunduh ulang,
+  dan "Link accounts that use the same email" diaktifkan. Build baru sekarang
+  menghasilkan `default_web_client_id` = web client `...3bqps8tr...`.
+
+### Yang dikerjakan
+- **Gerbang verifikasi email**: akun email wajib membuktikan kepemilikan inbox
+  sebelum masuk app. `AuthUser` membawa `emailVerified` + `needsEmailVerification`;
+  register mengirim tautan Firebase lalu mengarah ke `VerifyEmailScreen`;
+  login dan splash juga menahan sesi yang belum terverifikasi.
+- **Layar verifikasi** menyediakan "Saya sudah verifikasi" (reload profil),
+  "Kirim ulang email" dengan jeda 60 detik, "Keluar dan masuk akun lain", dan
+  "Batalkan pendaftaran" yang menghapus akun agar email salah ketik tidak
+  menjadi akun yatim. Status juga diperiksa ulang saat app kembali ke foreground.
+- **Error Google spesifik**: kegagalan Play Services dipetakan dari
+  `ApiException` (10/12500/12501/12502/7/1-3) ke pesan yang bisa ditindaklanjuti;
+  `idToken` kosong dideteksi sebelum memanggil Firebase. Log mentah hanya di
+  `kDebugMode`.
+- **Izin jaringan**: `INTERNET` dipindah/ditambahkan ke manifest utama karena
+  sebelumnya hanya ada di manifest debug/profile — APK release tidak punya akses
+  internet sama sekali.
+- Kategori error baru: `tooManyRequests`, `requiresRecentLogin`,
+  `accountDisabled`, `googleConfigMissing`, `googleSignInFailed`,
+  `playServicesUnavailable`, `verificationRequired`.
+
+### Verifikasi
+- `flutter analyze` → `No issues found!`
+- `flutter test` → **399 test lulus**, 44 file (naik dari 369/42).
+- `flutter build apk --debug` → sukses; APK dipasang ulang di perangkat
+  `RR8X100CH5Z`.
+- `build/app/generated/res/processDebugGoogleServices/values/values.xml`
+  terverifikasi memuat `default_web_client_id`.
+- Test baru: `auth_android_config_test.dart` (manifest + OAuth client),
+  `email_verification_test.dart` (gerbang splash, unlock, pesan, hapus akun),
+  perluasan `auth_repository_test.dart` (29) dan `auth_controller_test.dart` (10).
+- **Belum diuji end-to-end dengan akun Google nyata**: pemilihan akun butuh
+  interaksi manusia di perangkat. Kode, konfigurasi, dan resource sudah benar.
 
 ## Status: Auth Android Firebase (Email, Google, Guest) — IMPLEMENTASI SELESAI
 
