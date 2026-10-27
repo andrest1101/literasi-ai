@@ -48,6 +48,37 @@ abstract final class AppStrings {
       'Mode offline. Firebase belum dikonfigurasi.';
   static const String authUnexpectedFailed =
       'Terjadi kendala saat masuk. Periksa koneksi lalu coba lagi.';
+  // Pesan kegagalan auth: satu sumber copy untuk `authFailureMessage`.
+  static const String authErrorInvalidCredentials =
+      'Email atau kata sandi tidak cocok.';
+  static const String authErrorEmailInUse =
+      'Email ini sudah terdaftar. Silakan masuk.';
+  static const String authErrorInvalidEmail = 'Format email belum benar.';
+  static const String authErrorWeakPassword =
+      'Kata sandi terlalu lemah. Coba gunakan yang lebih kuat.';
+  static const String authErrorNetwork =
+      'Koneksi bermasalah. Periksa internet lalu coba lagi.';
+  static const String authErrorProviderDisabled =
+      'Metode masuk ini belum diaktifkan di Firebase.';
+  static const String authErrorAccountConflict =
+      'Email ini sudah terhubung ke metode masuk lain. Coba metode tersebut.';
+  static const String authErrorCancelled = 'Proses masuk dibatalkan.';
+  static const String authErrorGoogleConfig =
+      'Google Sign-In belum siap di perangkat ini. Konfigurasi OAuth aplikasi belum lengkap.';
+  static const String authErrorGoogleFailed =
+      'Google menolak proses masuk. Coba pilih akun lain atau masuk dengan email.';
+  static const String authErrorPlayServices =
+      'Google Play Services perlu diperbarui sebelum masuk dengan Google.';
+  static const String authErrorVerificationRequired =
+      'Verifikasi email dulu sebelum memakai aplikasi.';
+  static const String authErrorTooManyRequests =
+      'Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.';
+  static const String authErrorRequiresRecentLogin =
+      'Sesi sudah terlalu lama. Masuk ulang lalu coba lagi.';
+  static const String authErrorAccountDisabled =
+      'Akun ini dinonaktifkan. Hubungi dukungan Firebase.';
+  static const String authErrorUnknown =
+      'Terjadi kendala. Coba lagi beberapa saat.';
   static const String authGoRegisterPrefix = 'Belum punya akun?';
   static const String authGoRegisterAction = 'Daftar';
   static const String authGoLoginPrefix = 'Sudah punya akun?';
@@ -69,6 +100,34 @@ abstract final class AppStrings {
   static const String registerReqLength = 'Minimal 6 karakter';
   static const String registerReqDigit = 'Mengandung angka';
   static const String registerSubmit = 'Daftar';
+
+  static const String verifyEmailTitle = 'Verifikasi Email';
+  static const String verifyEmailSubtitle =
+      'Satu langkah lagi sebelum kamu bisa memakai LiterasiAI.';
+  static const String verifyEmailFormTitle = 'Cek kotak masukmu';
+  static const String verifyEmailSentPrefix = 'Tautan verifikasi kami kirim ke';
+  static const String verifyEmailGuide =
+      'Buka tautan di email itu, lalu kembali ke aplikasi ini. Cek juga folder spam atau promosi bila belum terlihat.';
+  static const String verifyEmailNote =
+      'Verifikasi ini membuktikan kamu pemilik alamat email, bukan identitas nama asli.';
+  static const String verifyEmailCheck = 'Saya sudah verifikasi';
+  static const String verifyEmailResend = 'Kirim ulang email';
+  static const String verifyEmailResendIn = 'Kirim ulang dalam';
+  static const String verifyEmailStillUnverified =
+      'Email belum terverifikasi. Buka tautan di inbox dulu, lalu coba lagi.';
+  static const String verifyEmailSendAgain =
+      'Email verifikasi dikirim ulang. Cek inbox dan folder spam.';
+  static const String verifyEmailDelete = 'Batalkan pendaftaran';
+  static const String verifyEmailDeleteTitle = 'Batalkan pendaftaran?';
+  static const String verifyEmailDeleteBody =
+      'Akun ini akan dihapus permanen. Kamu bisa mendaftar lagi dengan alamat email yang benar.';
+  static const String verifyEmailDeleteConfirm = 'Hapus akun';
+  static const String verifyEmailDeleteCancel = 'Batal';
+  static const String verifyEmailDeleted =
+      'Pendaftaran dibatalkan. Kamu bisa daftar lagi dengan email yang benar.';
+  static const String verifyEmailSignOut = 'Keluar dan masuk akun lain';
+  static const String verifyEmailMissingSession =
+      'Sesi tidak ditemukan. Silakan masuk lagi.';
 
   static const String forgotTitle = 'Lupa Kata Sandi';
   static const String forgotSubtitle =

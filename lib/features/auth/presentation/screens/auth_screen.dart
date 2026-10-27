@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,12 +5,14 @@ import 'package:literasi_ai/app/home_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/auth_failure.dart';
+import '../../domain/entities/auth_user.dart';
 import '../providers/auth_controller.dart';
 import '../widgets/auth_form_parts.dart';
 import '../widgets/auth_page_shell.dart';
 import '../widgets/google_g_logo.dart';
 import 'forgot_password_screen.dart';
 import 'register_screen.dart';
+import 'verify_email_screen.dart';
 
 /// Auth Screen: Masuk via email, Google, atau tanpa akun (PRD Fitur Auth).
 ///
@@ -43,11 +44,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   static final _emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -55,9 +51,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     super.dispose();
   }
 
-  void _goHome() {
+  /// Satu tempat memutuskan tujuan setelah sesi dibuat.
+  ///
+  /// Akun email yang belum terbukti memiliki inbox-nya ditahan di layar
+  /// verifikasi; Google dan tamu langsung masuk karena tidak perlu verifikasi.
+  void _routeAfterAuth(AuthUser user) {
     if (!mounted) return;
-    Navigator.of(context).pushReplacementNamed(HomeScreen.route);
+    Navigator.of(context).pushReplacementNamed(
+      user.needsEmailVerification ? VerifyEmailScreen.route : HomeScreen.route,
+    );
   }
 
   Future<void> _signInWithGoogle() async {
@@ -67,7 +69,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           .read(authControllerProvider.notifier)
           .signInWithGoogle();
       if (user == null) return;
-      _goHome();
+      _routeAfterAuth(user);
     } on AuthFailure catch (error) {
       if (mounted) showAuthMessage(context, authFailureMessage(error));
     } catch (_) {
@@ -89,17 +91,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         showAuthMessage(context, AppStrings.authOfflineNote);
       }
       await Future<void>.delayed(const Duration(milliseconds: 600));
-      _goHome();
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed(HomeScreen.route);
     } on AuthFailure catch (error) {
       if (mounted) {
         showAuthMessage(context, authFailureMessage(error));
-      }
-    } on FirebaseAuthException catch (e) {
-      if (mounted) {
-        showAuthMessage(
-          context,
-          '${AppStrings.authAnonymousFailed} (${e.code})',
-        );
       }
     } catch (_) {
       if (mounted) {
@@ -117,13 +113,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
     setState(() => _emailLoading = true);
     try {
-      await ref
+      final user = await ref
           .read(authControllerProvider.notifier)
           .signInWithEmail(
             email: _emailController.text,
             password: _passwordController.text,
           );
-      _goHome();
+      _routeAfterAuth(user);
     } on AuthFailure catch (error) {
       if (mounted) showAuthMessage(context, authFailureMessage(error));
     } catch (_) {

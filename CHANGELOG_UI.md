@@ -840,3 +840,48 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
 - **Status verifikasi:** `flutter analyze` bersih; full test **369 lulus**,
   42 file; `flutter build apk --debug` sukses. Test memakai fake repository,
   bukan request Firebase live.
+
+## Verifikasi Email + Google Sign-In Android (27 Okt 2026)
+
+- **Masalah 1:** Login Google selalu berakhir dengan pesan generik "terjadi
+  kendala, coba lagi beberapa saat". Penyebabnya bukan kode jaringan:
+  `google-services.json` lama tidak memuat `oauth_client`, sehingga Gradle tidak
+  menghasilkan `default_web_client_id`. Plugin `google_sign_in_android` 6.2.1
+  hanya meminta ID token bila resource itu ada (dibuktikan dari source plugin,
+  baris 231–249). Tanpa ID token, Firebase menolak kredensial dengan kode di
+  luar peta error, lalu UI jatuh ke pesan generik. SHA-1 APK terpasang dicek
+  dengan `apksigner` dan cocok dengan debug keystore, jadi akar masalahnya OAuth
+  client belum terdaftar.
+- **Perbaikan konfigurasi:** SHA-1 didaftarkan di Firebase Console,
+  `google-services.json` diunduh ulang, dan opsi "Link accounts that use the
+  same email" diaktifkan. Build baru menghasilkan `default_web_client_id`.
+- **Masalah 2:** Siapa pun bisa mendaftar memakai alamat email orang lain; akun
+  langsung aktif tanpa bukti kepemilikan inbox.
+- **Perubahan UI:** layar baru `VerifyEmailScreen` menjadi gerbang wajib untuk
+  akun email yang belum terverifikasi. Isinya: alamat tujuan, panduan cek inbox
+  dan spam, catatan batas verifikasi (bukan KTP), CTA "Saya sudah verifikasi",
+  "Kirim ulang email" dengan hitung mundur 60 detik, "Keluar dan masuk akun
+  lain", serta "Batalkan pendaftaran" dengan dialog konfirmasi destruktif.
+  Register mengarah ke layar ini; login email dan splash menahan sesi yang belum
+  terverifikasi di tempat yang sama. Status diperiksa ulang saat app kembali ke
+  foreground, jadi pengguna tidak perlu menekan tombol setelah membuka inbox.
+- **Perubahan lapisan:** `AuthUser` menambah `emailVerified` dan
+  `needsEmailVerification`; kontrak repository menambah
+  `sendEmailVerification`, `refreshUser`, `deleteAccount`; controller menegakkan
+  jeda kirim ulang dan tidak memakai `AsyncLoading` saat refresh agar layar tidak
+  berkedip. Pemetaan error Google membaca `ApiException` Play Services
+  (10/12500/12501/12502/7/1–3) dan mendeteksi `idToken` kosong sebelum memanggil
+  Firebase; log mentah hanya pada `kDebugMode`.
+- **Perbaikan tersembunyi:** `INTERNET` hanya ada di manifest debug/profile
+  sehingga APK release tidak bisa menghubungi Firebase maupun Gemini. Izin
+  dipindahkan ke manifest utama.
+- **File:** `lib/features/auth/**`, `lib/core/constants/app_strings.dart`,
+  `lib/main.dart`, `android/app/src/main/AndroidManifest.xml`,
+  `android/app/google-services.json`,
+  `test/{auth_repository,auth_controller,email_verification,auth_android_config}_test.dart`,
+  README, progress.
+- **Status verifikasi:** `flutter analyze` bersih; full test **399 lulus**,
+  44 file; `flutter build apk --debug` sukses dan dipasang di perangkat.
+  `default_web_client_id` terverifikasi ada di resource hasil build. Login
+  Google dengan akun nyata belum diuji otomatis karena pemilihan akun butuh
+  interaksi manusia.

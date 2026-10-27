@@ -1,3 +1,5 @@
+import '../../../../core/constants/app_strings.dart';
+
 /// Safe, user-facing authentication failure categories.
 enum AuthFailureCode {
   invalidCredentials,
@@ -8,6 +10,13 @@ enum AuthFailureCode {
   providerDisabled,
   accountConflict,
   cancelled,
+  googleConfigMissing,
+  googleSignInFailed,
+  playServicesUnavailable,
+  verificationRequired,
+  tooManyRequests,
+  requiresRecentLogin,
+  accountDisabled,
   unknown,
 }
 
@@ -18,18 +27,22 @@ class AuthFailure implements Exception {
 }
 
 String authFailureMessage(AuthFailure failure) => switch (failure.code) {
-  AuthFailureCode.invalidCredentials => 'Email atau kata sandi tidak cocok.',
-  AuthFailureCode.emailAlreadyInUse =>
-    'Email ini sudah terdaftar. Silakan masuk.',
-  AuthFailureCode.invalidEmail => 'Format email belum benar.',
-  AuthFailureCode.weakPassword =>
-    'Kata sandi terlalu lemah. Coba gunakan yang lebih kuat.',
-  AuthFailureCode.network =>
-    'Koneksi bermasalah. Periksa internet lalu coba lagi.',
-  AuthFailureCode.providerDisabled =>
-    'Metode masuk ini belum diaktifkan di Firebase.',
-  AuthFailureCode.accountConflict =>
-    'Email ini sudah terhubung ke metode masuk lain. Coba metode tersebut.',
-  AuthFailureCode.cancelled => 'Proses masuk dibatalkan.',
-  AuthFailureCode.unknown => 'Terjadi kendala. Coba lagi beberapa saat.',
+  AuthFailureCode.invalidCredentials => AppStrings.authErrorInvalidCredentials,
+  AuthFailureCode.emailAlreadyInUse => AppStrings.authErrorEmailInUse,
+  AuthFailureCode.invalidEmail => AppStrings.authErrorInvalidEmail,
+  AuthFailureCode.weakPassword => AppStrings.authErrorWeakPassword,
+  AuthFailureCode.network => AppStrings.authErrorNetwork,
+  AuthFailureCode.providerDisabled => AppStrings.authErrorProviderDisabled,
+  AuthFailureCode.accountConflict => AppStrings.authErrorAccountConflict,
+  AuthFailureCode.cancelled => AppStrings.authErrorCancelled,
+  AuthFailureCode.googleConfigMissing => AppStrings.authErrorGoogleConfig,
+  AuthFailureCode.googleSignInFailed => AppStrings.authErrorGoogleFailed,
+  AuthFailureCode.playServicesUnavailable => AppStrings.authErrorPlayServices,
+  AuthFailureCode.verificationRequired =>
+    AppStrings.authErrorVerificationRequired,
+  AuthFailureCode.tooManyRequests => AppStrings.authErrorTooManyRequests,
+  AuthFailureCode.requiresRecentLogin =>
+    AppStrings.authErrorRequiresRecentLogin,
+  AuthFailureCode.accountDisabled => AppStrings.authErrorAccountDisabled,
+  AuthFailureCode.unknown => AppStrings.authErrorUnknown,
 };

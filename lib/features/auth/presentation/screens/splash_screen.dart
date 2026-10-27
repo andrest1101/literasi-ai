@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_strings.dart';
+import '../../../../app/home_screen.dart';
 import '../providers/auth_controller.dart';
 import '../providers/onboarding_provider.dart';
 import 'auth_screen.dart';
 import 'onboarding_screen.dart';
+import 'verify_email_screen.dart';
 
 /// Splash: tampil singkat lalu routing sesuai flag onboarding.
 class SplashScreen extends ConsumerStatefulWidget {
@@ -37,13 +39,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     if (!mounted) return;
     final user = await ref.read(authControllerProvider.future);
     if (!mounted) return;
-    Navigator.of(context).pushReplacementNamed(
-      user != null
-          ? '/home'
-          : completed
-          ? AuthScreen.route
-          : OnboardingScreen.route,
-    );
+    final String route;
+    if (user == null) {
+      route = completed ? AuthScreen.route : OnboardingScreen.route;
+    } else if (user.needsEmailVerification) {
+      route = VerifyEmailScreen.route;
+    } else {
+      route = HomeScreen.route;
+    }
+    Navigator.of(context).pushReplacementNamed(route);
   }
 
   @override

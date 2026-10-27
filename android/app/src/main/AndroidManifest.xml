@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Firebase Auth, Firestore, dan Gemini memerlukan internet. Izin ini
+         wajib ada di manifest utama agar APK release tidak kehilangan akses;
+         sebelumnya hanya dideklarasikan pada manifest debug/profile. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <!-- Quick Check mode gambar: kamera + galeri (image_picker). -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
