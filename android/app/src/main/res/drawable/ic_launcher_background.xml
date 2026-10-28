@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Layer background adaptive icon: gradien hero yang sama dengan app icon
-     (HeroBegin #2F80ED -> HeroEnd #124A9B). -->
+<!-- Layer background adaptive icon: gradien bidang logo LiterasiAI.
+     Nilai warna diambil dari hasil fit least-squares atas
+     assets/image/logo_literasiAI.png oleh tool/generate_brand_assets.ps1,
+     jadi ikon launcher tidak menebak dua stop warna. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <gradient
         android:angle="315"
-        android:endColor="#124A9B"
-        android:startColor="#2F80ED"
+        android:endColor="#062FE6"
+        android:startColor="#06B5FF"
         android:type="linear" />
 </shape>
