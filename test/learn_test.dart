@@ -74,24 +74,31 @@ class _FakeScoreRepository implements ScoreRepository {
 }
 
 void main() {
-  group('Konten 3 modul PRD', () {
-    test('valid: 3 modul, 4 seksi, 3 soal berpenjelasan', () {
+  group('Katalog modul literasi digital', () {
+    test('9 modul unik dengan materi dan kuis yang lengkap', () {
       final modules = LearnContentDatasource().modules();
-      expect(modules, hasLength(3));
+      expect(modules, hasLength(9));
       expect(modules.map((m) => m.id), [
         'clickbait',
         'gambar-manipulasi',
         'verifikasi-sumber',
+        'cek-konteks-media',
+        'statistik-menyesatkan',
+        'literasi-kesehatan',
+        'anti-phishing',
+        'konten-ai-deepfake',
+        'fakta-opini-satire',
       ]);
       for (final module in modules) {
         expect(module.sections, hasLength(4));
-        expect(module.quiz, hasLength(3));
+        expect(module.quiz.length, inInclusiveRange(3, 4));
         for (final q in module.quiz) {
           expect(q.options, hasLength(4));
           expect(q.correctIndex, inInclusiveRange(0, 3));
           expect(q.explanation.isNotEmpty, isTrue);
         }
       }
+      expect(modules.map((m) => m.id).toSet(), hasLength(9));
     });
   });
 
@@ -146,7 +153,7 @@ void main() {
     });
   });
 
-  testWidgets('tab belajar render 3 kartu heterogen', (
+  testWidgets('tab belajar render katalog modul beragam', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(

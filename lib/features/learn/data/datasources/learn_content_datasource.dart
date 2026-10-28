@@ -1,5 +1,6 @@
 import '../../domain/entities/course_module.dart';
 import '../../domain/entities/quiz_question.dart';
+import 'learn_extra_modules.dart';
 
 /// Konten 3 modul PRD §4.2: statis lokal Bahasa Indonesia.
 ///
@@ -7,7 +8,12 @@ import '../../domain/entities/quiz_question.dart';
 /// seksi artikel + 3 soal kuis dengan penjelasan. Tanpa network agar bisa
 /// dibaca offline oleh guest sekalipun.
 class LearnContentDatasource {
-  List<CourseModule> modules() => const [_clickbait, _manipulatedImage, _verifySource];
+  List<CourseModule> modules() => const [
+    _clickbait,
+    _manipulatedImage,
+    _verifySource,
+    ...extraLearnModules,
+  ];
 
   CourseModule? byId(String id) {
     for (final module in modules()) {
