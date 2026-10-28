@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../shared/widgets/assistant_mark.dart';
 
 /// Tombol Chat AI mengambang: opsi A: shield verified + badge sparkle.
 ///
@@ -110,11 +111,7 @@ class _ChatFabState extends State<ChatFab> with SingleTickerProviderStateMixin {
                       ),
                     ),
                     const Center(
-                      child: Icon(
-                        Icons.verified_user_rounded,
-                        size: 28,
-                        color: Colors.white,
-                      ),
+                      child: AssistantGlyph(size: 30),
                     ),
                     const Positioned(
                       right: 7,
