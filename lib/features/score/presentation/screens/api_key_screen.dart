@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
@@ -112,6 +113,18 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
         behavior: SnackBarBehavior.floating,
       ),
     );
+  }
+
+  Future<void> _pasteKey() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final pasted = data?.text?.trim();
+    if (!mounted || pasted == null || pasted.isEmpty) return;
+    setState(() {
+      _controller.text = pasted;
+      _controller.selection = TextSelection.collapsed(offset: pasted.length);
+      _localError = null;
+      _testResult = null;
+    });
   }
 
   Future<void> _confirmRemove() async {
@@ -231,68 +244,66 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                _TestCard(
-                  testing: _testing,
-                  testOk: _testOk,
-                  testSteps: _testSteps,
-                  testResult: _testResult,
-                  onTest: _testConnection,
-                ),
-                const SizedBox(height: 16),
                 _KeyFormCard(
                   controller: _controller,
                   obscure: _obscure,
                   localError: _localError,
                   saving: _saving,
                   onToggleObscure: () => setState(() => _obscure = !_obscure),
+                  onPaste: _pasteKey,
                   onSave: _save,
                   onRemove: _confirmRemove,
                 ),
-                const SizedBox(height: 14),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
-                    color: AppColors.primary.withValues(alpha: 0.06),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.2),
+                const SizedBox(height: 12),
+                const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.lock_outline_rounded,
+                      size: 17,
+                      color: AppColors.primary,
                     ),
-                  ),
-                  child: const Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.info_outline_rounded,
-                        size: 18,
-                        color: AppColors.primary,
-                      ),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              AppStrings.apiKeyHowToTitle,
-                              style: TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            SizedBox(height: 3),
-                            Text(
-                              AppStrings.apiKeyHowToBody,
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                height: 1.6,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        AppStrings.apiKeySecureNote,
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.5,
+                          color: AppColors.textSecondary,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _TestCard(
+                  testing: _testing,
+                  testOk: _testOk,
+                  testSteps: _testSteps,
+                  testResult: _testResult,
+                  canTest: status.valueOrNull?.configured ?? false,
+                  onTest: _testConnection,
+                ),
+                const SizedBox(height: 14),
+                ExpansionTile(
+                  tilePadding: const EdgeInsets.symmetric(horizontal: 4),
+                  childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                  leading: const Icon(Icons.help_outline_rounded, size: 20),
+                  title: const Text(AppStrings.apiKeyHowToTitle),
+                  children: const [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        AppStrings.apiKeyHowToBody,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          height: 1.6,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -388,6 +399,7 @@ class _TestCard extends StatelessWidget {
     required this.testOk,
     required this.testSteps,
     required this.testResult,
+    required this.canTest,
     required this.onTest,
   });
 
@@ -395,6 +407,7 @@ class _TestCard extends StatelessWidget {
   final bool? testOk;
   final List<GeminiProbeStep> testSteps;
   final String? testResult;
+  final bool canTest;
   final VoidCallback onTest;
 
   @override
@@ -429,7 +442,7 @@ class _TestCard extends StatelessWidget {
           SizedBox(
             height: 50,
             child: FilledButton.icon(
-              onPressed: testing ? null : onTest,
+              onPressed: testing || !canTest ? null : onTest,
               icon: testing
                   ? const SizedBox(
                       width: 18,
@@ -453,6 +466,17 @@ class _TestCard extends StatelessWidget {
                 ),
                 textStyle: const TextStyle(fontWeight: FontWeight.w800),
               ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            canTest
+                ? AppStrings.apiKeyTestSavedKey
+                : AppStrings.apiKeyTestNeedsKey,
+            style: const TextStyle(
+              fontSize: 12,
+              height: 1.5,
+              color: AppColors.textSecondary,
             ),
           ),
           if (testResult != null) ...[
@@ -559,6 +583,7 @@ class _KeyFormCard extends StatelessWidget {
     required this.localError,
     required this.saving,
     required this.onToggleObscure,
+    required this.onPaste,
     required this.onSave,
     required this.onRemove,
   });
@@ -568,6 +593,7 @@ class _KeyFormCard extends StatelessWidget {
   final String? localError;
   final bool saving;
   final VoidCallback onToggleObscure;
+  final VoidCallback onPaste;
   final VoidCallback onSave;
   final VoidCallback onRemove;
 
@@ -605,6 +631,8 @@ class _KeyFormCard extends StatelessWidget {
             obscureText: obscure,
             autocorrect: false,
             enableSuggestions: false,
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
+            textInputAction: TextInputAction.done,
             decoration: InputDecoration(
               labelText: AppStrings.apiKeyFieldLabel,
               hintText: AppStrings.apiKeyFieldHint,
@@ -623,6 +651,15 @@ class _KeyFormCard extends StatelessWidget {
                       : Icons.visibility_off_outlined,
                 ),
               ),
+              prefixIcon: const Icon(Icons.key_rounded),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: saving ? null : onPaste,
+              icon: const Icon(Icons.content_paste_rounded, size: 17),
+              label: const Text(AppStrings.apiKeyPaste),
             ),
           ),
           const SizedBox(height: 12),
