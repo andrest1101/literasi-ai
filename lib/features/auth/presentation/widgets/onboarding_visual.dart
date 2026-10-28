@@ -136,7 +136,7 @@ class _Stage extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Colors.white, Color(0xFFEAF1FC)],
+          colors: [Colors.white, AppColors.heroInkSoft],
         ),
       ),
       clipBehavior: Clip.antiAlias,
@@ -543,9 +543,7 @@ class _TextVerifyVisual extends StatelessWidget {
                       ),
                       decoration: const BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(999)),
-                        gradient: LinearGradient(
-                          colors: [Color(0xFFF05545), AppColors.danger],
-                        ),
+                        color: AppColors.danger,
                         boxShadow: [
                           BoxShadow(
                             color: Color(0x55EA4335),
@@ -589,7 +587,7 @@ class _TextVerifyVisual extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(4)),
                         gradient: LinearGradient(
-                          colors: [Color(0xFFF05545), AppColors.danger],
+                          colors: [AppColors.danger, AppColors.danger],
                         ),
                       ),
                     ),
@@ -915,11 +913,7 @@ class _MediaVisual extends StatelessWidget {
             height: 32,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF4DB96A), AppColors.success],
-              ),
+              color: AppColors.success,
               boxShadow: [
                 BoxShadow(
                   color: Color(0x4D34A853),
@@ -1041,7 +1035,7 @@ class _HistoryVisual extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF4B8DF6), AppColors.primary],
+                      colors: [AppColors.heroBegin, AppColors.primary],
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -1101,7 +1095,7 @@ class _HistoryVisual extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF4DB96A), AppColors.success],
+                colors: [AppColors.success, AppColors.success],
               ),
               boxShadow: [
                 BoxShadow(

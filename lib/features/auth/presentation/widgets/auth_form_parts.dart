@@ -243,7 +243,7 @@ class AuthTrustMedallion extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFF4B8DF6), AppColors.primary],
+                  colors: [AppColors.heroBegin, AppColors.primary],
                 ),
                 boxShadow: [
                   BoxShadow(

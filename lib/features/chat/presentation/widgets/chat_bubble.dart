@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
-import '../../../../shared/widgets/assistant_mark.dart';
 import '../../../quick_check/presentation/screens/quick_check_session_screen.dart';
 import '../../domain/entities/chat_message.dart';
 import 'chat_rich_text.dart';
@@ -69,7 +68,7 @@ class _UserBubble extends StatelessWidget {
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFF2F80ED), Color(0xFF1A5FCE)],
+                      colors: [AppColors.heroBegin, AppColors.heroEnd],
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -117,8 +116,6 @@ class _AiBubble extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const AssistantMark(size: 30, showSparkle: false, key: ValueKey('assistant-mark-bubble')),
-        const SizedBox(width: 8),
         Flexible(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 300),

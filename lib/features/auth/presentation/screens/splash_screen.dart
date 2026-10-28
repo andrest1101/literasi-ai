@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_styles.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../app/home_screen.dart';
 import '../providers/auth_controller.dart';
@@ -53,8 +55,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: const Center(
+      backgroundColor: AppColors.primary,
+      body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -69,9 +71,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             SizedBox(height: 16),
             Text(
               AppStrings.appName,
-              style: TextStyle(
+              style: AppStyles.heading.copyWith(
                 fontSize: 32,
-                fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
@@ -79,10 +80,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             Text(
               AppStrings.tagline,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.white70),
+              style: AppTabTitles.displaySubtitle.copyWith(
+                fontSize: 14,
+                color: Colors.white70,
+              ),
             ),
             SizedBox(height: 24),
-            CircularProgressIndicator(color: Colors.white),
+            const CircularProgressIndicator(color: Colors.white),
           ],
         ),
       ),

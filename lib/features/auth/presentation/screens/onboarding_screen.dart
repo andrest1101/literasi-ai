@@ -112,7 +112,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [Color(0xFF4B8DF6), AppColors.primary],
+                        colors: [AppColors.heroBegin, AppColors.primary],
                       ),
                       boxShadow: [
                         BoxShadow(
@@ -181,105 +181,111 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             PillPageIndicator(count: _slides.length, current: _page),
             const SizedBox(height: 22),
             // Nav bawah: [Back ikon | Next/Get Started].
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 56,
-                    height: 56,
-                    child: AnimatedOpacity(
-                      opacity: _page > 0 ? 1 : 0,
-                      duration: const Duration(milliseconds: 250),
-                      child: IgnorePointer(
-                        ignoring: _page == 0,
-                        child: Semantics(
-                          button: true,
-                          label: AppStrings.onboardingBack,
-                          child: OutlinedButton(
-                            onPressed: _back,
-                            style: OutlinedButton.styleFrom(
-                              padding: EdgeInsets.zero,
-                              shape: const CircleBorder(),
-                              backgroundColor: AppColors.surface,
-                              side: BorderSide(
-                                color: AppColors.neutral.withValues(
-                                  alpha: 0.35,
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 56,
+                      height: 56,
+                      child: AnimatedOpacity(
+                        opacity: _page > 0 ? 1 : 0,
+                        duration: const Duration(milliseconds: 250),
+                        child: IgnorePointer(
+                          ignoring: _page == 0,
+                          child: Semantics(
+                            button: true,
+                            label: AppStrings.onboardingBack,
+                            child: OutlinedButton(
+                              onPressed: _back,
+                              style: OutlinedButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                shape: const CircleBorder(),
+                                backgroundColor: AppColors.surface,
+                                side: BorderSide(
+                                  color: AppColors.neutral.withValues(
+                                    alpha: 0.35,
+                                  ),
                                 ),
+                                foregroundColor: AppColors.textPrimary,
                               ),
-                              foregroundColor: AppColors.textPrimary,
+                              child: const Icon(Icons.arrow_back_rounded),
                             ),
-                            child: const Icon(Icons.arrow_back_rounded),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Semantics(
-                      button: true,
-                      label: _isLast
-                          ? AppStrings.onboardingStart
-                          : AppStrings.onboardingNext,
-                      child: FilledButton(
-                        onPressed: _next,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size.fromHeight(56),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          textStyle: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.1,
-                          ),
-                          elevation: 6,
-                          shadowColor: AppColors.primary.withValues(
-                            alpha: 0.45,
-                          ),
-                        ),
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 250),
-                          transitionBuilder: (child, anim) => FadeTransition(
-                            opacity: anim,
-                            child: SlideTransition(
-                              position: Tween<Offset>(
-                                begin: const Offset(0, 0.3),
-                                end: Offset.zero,
-                              ).animate(anim),
-                              child: child,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Semantics(
+                        button: true,
+                        label: _isLast
+                            ? AppStrings.onboardingStart
+                            : AppStrings.onboardingNext,
+                        child: FilledButton(
+                          onPressed: _next,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size.fromHeight(56),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.1,
+                            ),
+                            elevation: 6,
+                            shadowColor: AppColors.primary.withValues(
+                              alpha: 0.45,
                             ),
                           ),
-                          child: _isLast
-                              ? const Row(
-                                  key: ValueKey('start'),
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(AppStrings.onboardingStart),
-                                    SizedBox(width: 8),
-                                    Icon(
-                                      Icons.rocket_launch_outlined,
-                                      size: 20,
-                                    ),
-                                  ],
-                                )
-                              : const Row(
-                                  key: ValueKey('next'),
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(AppStrings.onboardingNext),
-                                    SizedBox(width: 8),
-                                    Icon(Icons.arrow_forward_rounded, size: 20),
-                                  ],
-                                ),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 250),
+                            transitionBuilder: (child, anim) => FadeTransition(
+                              opacity: anim,
+                              child: SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: const Offset(0, 0.3),
+                                  end: Offset.zero,
+                                ).animate(anim),
+                                child: child,
+                              ),
+                            ),
+                            child: _isLast
+                                ? const Row(
+                                    key: ValueKey('start'),
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(AppStrings.onboardingStart),
+                                      SizedBox(width: 8),
+                                      Icon(
+                                        Icons.rocket_launch_outlined,
+                                        size: 20,
+                                      ),
+                                    ],
+                                  )
+                                : const Row(
+                                    key: ValueKey('next'),
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(AppStrings.onboardingNext),
+                                      SizedBox(width: 8),
+                                      Icon(
+                                        Icons.arrow_forward_rounded,
+                                        size: 20,
+                                      ),
+                                    ],
+                                  ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

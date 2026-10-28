@@ -160,7 +160,10 @@ class _ChatInputBarState extends State<ChatInputBar> {
                             ? const LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: [Color(0xFF2F80ED), Color(0xFF124A9B)],
+                                colors: [
+                                  AppColors.heroBegin,
+                                  AppColors.heroEnd,
+                                ],
                               )
                             : null,
                         color: _canSend || widget.sending

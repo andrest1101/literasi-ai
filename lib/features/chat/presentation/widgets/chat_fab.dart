@@ -73,7 +73,7 @@ class _ChatFabState extends State<ChatFab> with SingleTickerProviderStateMixin {
                   gradient: const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFF2F80ED), Color(0xFF124A9B)],
+                    colors: [AppColors.heroBegin, AppColors.heroEnd],
                   ),
                   border: Border.all(color: Colors.white, width: 2.5),
                   boxShadow: const [
@@ -83,7 +83,7 @@ class _ChatFabState extends State<ChatFab> with SingleTickerProviderStateMixin {
                       offset: Offset(0, 8),
                     ),
                     BoxShadow(
-                      color: Color(0x1A101A33),
+                      color: AppColors.shadowInk,
                       blurRadius: 6,
                       offset: Offset(0, 2),
                     ),
@@ -110,9 +110,7 @@ class _ChatFabState extends State<ChatFab> with SingleTickerProviderStateMixin {
                         ),
                       ),
                     ),
-                    const Center(
-                      child: AssistantGlyph(size: 30),
-                    ),
+                    const Center(child: AssistantGlyph(size: 30)),
                     const Positioned(
                       right: 7,
                       bottom: 7,

@@ -147,7 +147,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        toolbarHeight: 68,
+        toolbarHeight: 64,
         leadingWidth: 56,
         // Lingkaran tonal SessionBackButton (dipakai bersama layar sesi
         // Quick Check): tanpa avatar header, komposisi kini seimbang
@@ -740,7 +740,11 @@ class _EmptyGreeting extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
       child: Column(
         children: [
-          const AssistantMark(size: 80, showShadow: true, key: ValueKey('assistant-mark-greeting')),
+          const AssistantMark(
+            size: 80,
+            showShadow: true,
+            key: ValueKey('assistant-mark-greeting'),
+          ),
           const SizedBox(height: 14),
           const Text(
             AppStrings.chatGreetingTitle,

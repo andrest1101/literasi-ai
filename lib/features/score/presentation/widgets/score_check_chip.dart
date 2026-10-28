@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/api_key_resolver.dart';
 import '../../domain/entities/literacy_score.dart';
 import '../providers/score_providers.dart';
@@ -82,10 +83,10 @@ class _ScoreZone extends StatelessWidget {
       ),
       error: (_, _) => const _ScoreContent(
         progress: 0,
-        color: AppColors.neutral,
-        icon: Icons.spa_outlined,
-        label: 'Pemula',
-        sub: '0 poin',
+        color: AppColors.danger,
+        icon: Icons.cloud_off_outlined,
+        label: AppStrings.scoreLoadFailed,
+        sub: null,
       ),
       data: (value) {
         final next = value.level.next;
@@ -105,9 +106,7 @@ class _ScoreZone extends StatelessWidget {
       label: 'Lihat skor literasi di Profil',
       child: InkWell(
         onTap: onTap,
-        borderRadius: const BorderRadius.horizontal(
-          left: Radius.circular(20),
-        ),
+        borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: content,
@@ -205,13 +204,13 @@ class _KeyZone extends StatelessWidget {
     final content = status.when(
       loading: () => const _KeyContent(
         dot: AppColors.neutral,
-        label: 'Cek kunci…',
+        label: AppStrings.apiKeyChecking,
         semantics: 'Status AI: memeriksa kunci',
       ),
       error: (_, _) => const _KeyContent(
-        dot: AppColors.warning,
-        label: 'Demo',
-        semantics: 'Status AI: mode demo',
+        dot: AppColors.danger,
+        label: AppStrings.apiKeyStatusError,
+        semantics: 'Status AI: tidak dapat dicek',
       ),
       data: (value) => _KeyContent(
         dot: value.configured ? AppColors.success : AppColors.warning,
@@ -226,9 +225,7 @@ class _KeyZone extends StatelessWidget {
       label: content.semantics,
       child: InkWell(
         onTap: onTap,
-        borderRadius: const BorderRadius.horizontal(
-          right: Radius.circular(20),
-        ),
+        borderRadius: const BorderRadius.horizontal(right: Radius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: content,
