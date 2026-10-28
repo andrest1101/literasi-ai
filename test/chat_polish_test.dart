@@ -33,8 +33,7 @@ class _FakeChatRepository implements ChatRepository {
   Future<String> reply({
     required List<ChatMessage> history,
     required String message,
-  }) async =>
-      'Jawaban uji.';
+  }) async => 'Jawaban uji.';
 }
 
 Future<void> _pumpChat(
@@ -55,7 +54,6 @@ Future<void> _pumpChat(
   );
   await tester.pumpAndSettle();
 }
-
 
 void main() {
   group('Subtitle kontekstual C1 (jujur, tanpa dot palsu)', () {
@@ -98,18 +96,14 @@ void main() {
     ) async {
       await _pumpChat(tester);
       expect(
-        tester.getSize(
-          find.byKey(const ValueKey('assistant-mark-greeting')),
-        ),
+        tester.getSize(find.byKey(const ValueKey('assistant-mark-greeting'))),
         const Size(80, 80),
       );
       expect(find.text('Halo, aku asisten literasimu.'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('AppBar back lingkaran + tanpa avatar header', (
-      tester,
-    ) async {
+    testWidgets('AppBar back lingkaran + tanpa avatar header', (tester) async {
       await _pumpChat(tester);
       // Tombol kembali lingkaran tonal 40px (jarak napas ke teks),
       // dan shield TIDAK ada di AppBar: identitas milik bubble AI +
@@ -127,12 +121,14 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('bubble AI tetap membawa avatar shield', (tester) async {
+    testWidgets('bubble AI tampil rata kiri tanpa avatar kecil', (
+      tester,
+    ) async {
       await _pumpChat(tester);
       await tester.tap(find.text('Apakah vaksin menyebabkan autisme?'));
       await tester.pumpAndSettle();
-      // Avatar shield muncul di daftar pesan (bubble AI), bukan di AppBar.
-      expect(find.byKey(const ValueKey('assistant-mark-bubble')), findsWidgets);
+      // Bubble AI dimulai dari sisi kiri tanpa mark kecil yang menggeser teks.
+      expect(find.byKey(const ValueKey('assistant-mark-bubble')), findsNothing);
       expect(
         find.descendant(
           of: find.byType(AppBar),
@@ -143,9 +139,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('hero render penuh di 360×800 tanpa overflow', (
-      tester,
-    ) async {
+    testWidgets('hero render penuh di 360×800 tanpa overflow', (tester) async {
       tester.view.physicalSize = const Size(360, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() {
@@ -154,10 +148,7 @@ void main() {
       });
       await _pumpChat(tester);
       expect(find.text('Halo, aku asisten literasimu.'), findsOneWidget);
-      expect(
-        find.text('Apakah vaksin menyebabkan autisme?'),
-        findsOneWidget,
-      );
+      expect(find.text('Apakah vaksin menyebabkan autisme?'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   });
