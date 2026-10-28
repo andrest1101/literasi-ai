@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:literasi_ai/app/home_screen.dart';
 import 'package:literasi_ai/features/history/presentation/providers/history_providers.dart';
 import 'package:literasi_ai/features/learn/data/datasources/learn_content_datasource.dart';
@@ -106,14 +107,25 @@ void main() {
   });
 
   group('Learn providers', () {
-    test('guest mendapat progres kosong tanpa login', () async {
-      final container = ProviderContainer(
-        overrides: [historyUserIdProvider.overrideWithValue(null)],
-      );
-      addTearDown(container.dispose);
-      final progress = await container.read(learnProgressProvider.future);
-      expect(progress.completedCount, 0);
-    });
+    test(
+      'progres tamu tersimpan lokal dan hanya menambah best score',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final container = ProviderContainer(
+          overrides: [historyUserIdProvider.overrideWithValue(null)],
+        );
+        addTearDown(container.dispose);
+        final actions = container.read(learnActionProvider.notifier);
+        expect(await actions.completeModule('clickbait'), isTrue);
+        expect(await actions.submitQuiz('clickbait', 2), 2);
+        expect(await actions.submitQuiz('clickbait', 1), 0);
+        final progress = await container
+            .read(learnLocalDatasourceProvider)
+            .readProgress();
+        expect(progress.isCompleted('clickbait'), isTrue);
+        expect(progress.bestFor('clickbait'), 2);
+      },
+    );
 
     test('complete modul memicu award Score sekali', () async {
       final learn = _FakeLearnRepository();
