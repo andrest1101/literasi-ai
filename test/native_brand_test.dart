@@ -138,7 +138,9 @@ void main() {
           );
           expect(header.width, entry.value, reason: '$name lebar');
           expect(header.height, entry.value, reason: '$name tinggi');
-          expect(header.colorType, isNot(6), reason: '$name tidak boleh alpha');
+          // Rounded squircle dengan sudut transparan: alpha diizinkan agar
+          // Android < 26 tidak menampilkan baji hitam di belakang ikon.
+          expect(header.colorType, 6, reason: '$name harus RGBA');
         }
 
         final mark = _readPngHeader(

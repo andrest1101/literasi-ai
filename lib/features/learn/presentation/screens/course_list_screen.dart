@@ -5,6 +5,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_styles.dart';
 import '../../../../shared/widgets/app_shimmer.dart';
+import '../../../history/presentation/providers/history_providers.dart';
 import '../../../score/domain/entities/literacy_score.dart';
 import '../../domain/entities/course_module.dart';
 import '../../domain/entities/course_progress.dart';
@@ -56,6 +57,10 @@ class CourseListScreen extends ConsumerWidget {
                   onOpen: _openDetail,
                 ),
               ),
+              if (ref.watch(historyUserIdProvider) == null) ...[
+                const SizedBox(height: 14),
+                const _GuestProgressNote(),
+              ],
             ],
           ),
         ),
@@ -66,6 +71,38 @@ class CourseListScreen extends ConsumerWidget {
   void _openDetail(BuildContext context, String moduleId) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => CourseDetailScreen(moduleId: moduleId)),
+    );
+  }
+}
+
+class _GuestProgressNote extends StatelessWidget {
+  const _GuestProgressNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.055),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.14)),
+      ),
+      child: const Row(
+        children: [
+          Icon(Icons.phone_android_rounded, size: 19, color: AppColors.primary),
+          SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Progres tamu tersimpan di perangkat ini. Masuk untuk sinkronisasi dan mengumpulkan poin.',
+              style: TextStyle(
+                fontSize: 12,
+                height: 1.5,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../shared/widgets/assistant_mark.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
 import '../../../score/presentation/screens/api_key_screen.dart';
 import '../../domain/entities/chat_message.dart';
@@ -739,30 +740,7 @@ class _EmptyGreeting extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
       child: Column(
         children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(27),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF2F80ED), Color(0xFF124A9B)],
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x331558B0),
-                  blurRadius: 22,
-                  offset: Offset(0, 10),
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.auto_awesome_rounded,
-              size: 36,
-              color: Colors.white,
-            ),
-          ),
+          const AssistantMark(size: 80, showShadow: true, key: ValueKey('assistant-mark-greeting')),
           const SizedBox(height: 14),
           const Text(
             AppStrings.chatGreetingTitle,

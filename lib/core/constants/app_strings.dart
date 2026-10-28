@@ -237,7 +237,7 @@ abstract final class AppStrings {
   static const String homeLearnTitle2 = 'literasimu.';
   static const String learnProgressSuffix = 'modul selesai';
   static const String learnProgressLoading = 'Memuat progres belajar...';
-  static const String learnPopularModules = 'Modul populer';
+  static const String learnPopularModules = 'Rekomendasi untukmu';
   static const String learnSectionDoneSuffix = 'selesai';
   static const String learnAllModules = 'Semua modul';
   static const String learnOpenModule = 'Buka modul';
@@ -260,6 +260,9 @@ abstract final class AppStrings {
   static const String learnReadArticle = 'Baca modul';
   static const String learnMarkDone = 'Tandai selesai +20';
   static const String learnMarkedDone = 'Modul selesai. +20 poin diklaim.';
+  static const String learnMarkedDoneLocal =
+      'Progres modul tersimpan di perangkat. Masuk untuk mengumpulkan poin.';
+  static const String learnMarkedDoneAgain = 'Modul ini sudah selesai.';
   static const String learnQuizTitle = 'Kuis pemahaman';
   static const String learnQuizOf = 'Soal';
   static const String learnQuizNext = 'Lanjut';
@@ -271,6 +274,11 @@ abstract final class AppStrings {
   static const String learnQuizClaim = 'Klaim poin';
   static const String learnQuizClaimed = 'poin kuis diklaim.';
   static const String learnQuizClaimedHint = 'Sudah masuk ke skormu.';
+  static const String learnQuizSavedLocalHint =
+      'Skor terbaik tersimpan di perangkat, belum menjadi poin.';
+  static const String learnQuizLocalClaim = 'Simpan progres kuis';
+  static const String learnQuizLocalSaved =
+      'Progres kuis tersimpan di perangkat.';
   static const String learnQuizPerfectNote = 'Sempurna! Semua jawaban benar.';
   static const String learnQuizPartialHint =
       'Pelajari lagi bagian yang salah, lalu ulangi kuis.';
@@ -362,6 +370,13 @@ abstract final class AppStrings {
   static const String apiKeyHowToTitle = 'Dari mana dapat kunci?';
   static const String apiKeyHowToBody =
       'Buat gratis di Google AI Studio, salin kuncinya, lalu tempel di sini. Kunci tidak pernah dikirim ke mana pun selain API Gemini.';
+  static const String apiKeySecureNote =
+      'Kunci disimpan di penyimpanan aman perangkat ini dan hanya dikirim ke Google Gemini.';
+  static const String apiKeyPaste = 'Tempel';
+  static const String apiKeyTestNeedsKey =
+      'Simpan kunci terlebih dahulu untuk menguji koneksi.';
+  static const String apiKeyTestSavedKey =
+      'Tes menggunakan kunci aktif yang tersimpan.';
   static const String apiKeyChecking = 'Memeriksa kunci...';
   static const String apiKeyShowKey = 'Tampilkan kunci';
   static const String apiKeyHideKey = 'Sembunyikan kunci';

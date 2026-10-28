@@ -225,7 +225,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Tes koneksi AI'), findsOneWidget);
-    expect(find.text('Tes koneksi sekarang'), findsOneWidget);
+    expect(find.text(AppStrings.connectionTestRun), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -253,7 +253,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('tes tanpa kunci: pesan inactive tanpa request', (
+  testWidgets('tes koneksi nonaktif sampai ada kunci aktif', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -263,11 +263,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Tes koneksi sekarang'));
-    await tester.pumpAndSettle();
-    // Jalur kunci kosong: pesan inactive tampil 2x (hero + hasil),
-    // tanpa baris tahap probe.
-    expect(find.text(AppStrings.apiKeyInactive), findsNWidgets(2));
+    expect(find.text(AppStrings.apiKeyTestNeedsKey), findsOneWidget);
+    expect(find.text(AppStrings.apiKeyInactive), findsOneWidget);
     expect(find.text(AppStrings.apiKeyProbeStepsTitle), findsNothing);
     expect(tester.takeException(), isNull);
   });

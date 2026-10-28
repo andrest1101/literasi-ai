@@ -885,3 +885,17 @@ gradient norak, tanpa dependensi icon/font eksternal, animasi 1x calm.
   `default_web_client_id` terverifikasi ada di resource hasil build. Login
   Google dengan akun nyata belum diuji otomatis karena pemilihan akun butuh
   interaksi manusia.
+
+## Learn Guest Progress + BYOK UX (27 Okt 2026)
+
+- Progres guest tidak lagi selalu kembali kosong: modul selesai dan best-score
+  kuis tersimpan lokal dengan SharedPreferences. Kuis tetap anti-farming; guest
+  tidak memperoleh poin cloud palsu.
+- Home Belajar menampilkan perjalanan belajar sebelum hadiah, menggunakan
+  rekomendasi yang jujur, dan menjelaskan batas progres guest vs sinkronisasi.
+- Halaman kunci Gemini mengurutkan form sebelum tes, menambahkan aksi tempel,
+  input monospace, catatan penyimpanan aman, status jelas bahwa tes memakai
+  kunci aktif tersimpan, dan panduan yang bisa dibuka sesuai kebutuhan.
+- Test progres guest dan state kunci tanpa konfigurasi diperbarui.
+- **Verifikasi:** `flutter analyze` bersih; full test **399 lulus**;
+  `flutter build apk --debug` sukses.

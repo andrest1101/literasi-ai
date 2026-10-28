@@ -1,24 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Layer monochrome (Android 13 themed icon): garis perisai + centang dalam
-     satu tinta. Sistem yang memberi warna; alpha inilah siluetnya.
-     Diperkecil 6% dari foreground agar stroke tetap di dalam safe zone. -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-
-    <path
-        android:fillColor="#00000000"
-        android:pathData="M32.68,28.62 L75.32,28.62 L75.32,55.5228 C75.32,67.1976 62.9544,72.7812 54,79.38 C45.0456,72.7812 32.68,67.1976 32.68,55.5228 Z"
-        android:strokeColor="#FFFFFFFF"
-        android:strokeLineJoin="round"
-        android:strokeWidth="3.78" />
-
-    <path
-        android:pathData="M45.2588,54.5076 L52.0812,62.883 L64.2336,43.848"
-        android:strokeColor="#FFFFFFFF"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:strokeWidth="4.4669" />
-</vector>
+<!-- Layer monochrome (Android 13 themed icon): siluet glyph dalam satu tinta.
+     Sistem yang memberi warna; alpha inilah siluetnya. Bayangan halus pada
+     logo sumber sudah dibuang oleh generator agar tema tidak terlihat kabur. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/ic_launcher_monochrome_glyph" />
+    </item>
+</layer-list>

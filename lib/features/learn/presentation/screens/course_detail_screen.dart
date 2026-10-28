@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../history/presentation/providers/history_providers.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
 import '../../domain/entities/course_module.dart';
 import '../providers/learn_providers.dart';
@@ -64,16 +65,27 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
 
   Future<void> _claim() async {
     if (_claiming) return;
+    final alreadyDone =
+        ref
+            .read(learnProgressProvider)
+            .valueOrNull
+            ?.isCompleted(widget.moduleId) ??
+        false;
     setState(() => _claiming = true);
     final ok = await ref
         .read(learnActionProvider.notifier)
         .completeModule(widget.moduleId);
     if (!mounted) return;
+    final isGuest = ref.read(historyUserIdProvider) == null;
     setState(() => _claiming = false);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          ok ? AppStrings.learnMarkedDone : 'Modul sudah diklaim sebelumnya.',
+          !ok || alreadyDone
+              ? AppStrings.learnMarkedDoneAgain
+              : isGuest
+              ? AppStrings.learnMarkedDoneLocal
+              : AppStrings.learnMarkedDone,
         ),
         behavior: SnackBarBehavior.floating,
       ),

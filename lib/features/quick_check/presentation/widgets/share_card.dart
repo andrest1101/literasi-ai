@@ -187,10 +187,12 @@ class _BrandStrip extends StatelessWidget {
               shape: BoxShape.circle,
               color: Colors.white.withValues(alpha: 0.16),
             ),
-            child: const Icon(
-              Icons.verified_user_rounded,
-              size: 24,
-              color: Colors.white,
+            child: Center(
+              child: Image(
+                image: const AssetImage('assets/branding/app_mark.png'),
+                height: 28,
+                excludeFromSemantics: true,
+              ),
             ),
           ),
           const SizedBox(width: 12),

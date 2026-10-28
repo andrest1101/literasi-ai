@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../history/presentation/providers/history_providers.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
 import '../../domain/entities/quiz_question.dart';
 import '../providers/learn_providers.dart';
@@ -71,6 +72,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         .read(learnActionProvider.notifier)
         .submitQuiz(widget.moduleId, correct);
     if (!mounted) return;
+    final isGuest = ref.read(historyUserIdProvider) == null;
     setState(() {
       _claiming = false;
       _claimed = fresh;
@@ -79,7 +81,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       SnackBar(
         content: Text(
           fresh > 0
-              ? '$fresh ${AppStrings.learnQuizClaimed}'
+              ? isGuest
+                    ? AppStrings.learnQuizLocalSaved
+                    : '$fresh ${AppStrings.learnQuizClaimed}'
               : AppStrings.learnQuizNoNew,
         ),
         behavior: SnackBarBehavior.floating,
@@ -146,6 +150,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   perfect: perfect,
                   claimed: _claimed,
                   claiming: _claiming,
+                  isGuest: ref.read(historyUserIdProvider) == null,
                   answers: List.of(_answers),
                   questions: module.quiz,
                   onClaim: () => _claim(correct),
@@ -559,6 +564,7 @@ class _ResultPanel extends StatelessWidget {
     required this.perfect,
     required this.claimed,
     required this.claiming,
+    required this.isGuest,
     required this.answers,
     required this.questions,
     required this.onClaim,
@@ -574,6 +580,7 @@ class _ResultPanel extends StatelessWidget {
   final bool perfect;
   final int claimed;
   final bool claiming;
+  final bool isGuest;
 
   /// Jawaban user per soal (indeks opsi terpilih): dipakai daftar review.
   final List<int> answers;
@@ -618,6 +625,7 @@ class _ResultPanel extends StatelessWidget {
           if (claimed > 0)
             _ClaimedStatus(
               claimed: claimed,
+              isGuest: isGuest,
               onCountDone: () => HapticFeedback.mediumImpact(),
             )
           else
@@ -636,7 +644,11 @@ class _ResultPanel extends StatelessWidget {
                         ),
                       )
                     : const Icon(Icons.emoji_events_outlined, size: 19),
-                label: const Text(AppStrings.learnQuizClaim),
+                label: Text(
+                  isGuest
+                      ? AppStrings.learnQuizLocalClaim
+                      : AppStrings.learnQuizClaim,
+                ),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -791,9 +803,14 @@ class _ResultHero extends StatelessWidget {
 /// (anti double-claim visual; backend idempoten via best-score).
 /// Haptic medium sekali saat angka selesai (via [onCountDone]).
 class _ClaimedStatus extends StatefulWidget {
-  const _ClaimedStatus({required this.claimed, required this.onCountDone});
+  const _ClaimedStatus({
+    required this.claimed,
+    required this.isGuest,
+    required this.onCountDone,
+  });
 
   final int claimed;
+  final bool isGuest;
   final VoidCallback onCountDone;
 
   @override
@@ -838,7 +855,9 @@ class _ClaimedStatusState extends State<_ClaimedStatus> {
                   onEnd: widget.onCountDone,
                   builder: (context, value, _) {
                     return Text(
-                      '+$value ${AppStrings.learnQuizClaimed}',
+                      widget.isGuest
+                          ? AppStrings.learnQuizSavedLocalHint
+                          : '+$value ${AppStrings.learnQuizClaimed}',
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
@@ -849,9 +868,11 @@ class _ClaimedStatusState extends State<_ClaimedStatus> {
                   },
                 ),
                 const SizedBox(height: 2),
-                const Text(
-                  AppStrings.learnQuizClaimedHint,
-                  style: TextStyle(
+                Text(
+                  widget.isGuest
+                      ? AppStrings.learnQuizLocalSaved
+                      : AppStrings.learnQuizClaimedHint,
+                  style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
                   ),

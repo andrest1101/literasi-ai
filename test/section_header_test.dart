@@ -38,7 +38,8 @@ void main() {
     expect(find.textContaining('pemeriksaanmu.'), findsOneWidget);
 
     await tester.tap(find.text('Belajar'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
     expect(find.text('LiterasiAI'), findsNothing);
     expect(find.textContaining('Naikkan'), findsOneWidget);
 
@@ -64,7 +65,8 @@ void main() {
     expect(find.text('Semua'), findsOneWidget);
 
     await tester.tap(find.text('Belajar'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
     expect(find.text('Kenali Judul Clickbait'), findsOneWidget);
 
     await tester.tap(find.text('Profil'));

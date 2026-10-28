@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../shared/widgets/assistant_mark.dart';
 import '../../../quick_check/presentation/screens/quick_check_session_screen.dart';
 import '../../domain/entities/chat_message.dart';
 import 'chat_rich_text.dart';
@@ -116,23 +117,7 @@ class _AiBubble extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 30,
-          height: 30,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(11),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF2F80ED), Color(0xFF124A9B)],
-            ),
-          ),
-          child: const Icon(
-            Icons.verified_user_rounded,
-            size: 16,
-            color: Colors.white,
-          ),
-        ),
+        const AssistantMark(size: 30, showSparkle: false, key: ValueKey('assistant-mark-bubble')),
         const SizedBox(width: 8),
         Flexible(
           child: ConstrainedBox(
