@@ -271,28 +271,39 @@ class _FeaturedCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  module.title,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.4,
-                    color: AppColors.textPrimary,
+                SizedBox(
+                  height: 48,
+                  child: Text(
+                    module.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  module.subtitle,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    height: 1.6,
-                    color: AppColors.textSecondary,
+                SizedBox(
+                  height: 42,
+                  child: Text(
+                    module.subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      height: 1.6,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
-                _MetaRow(module: module, bestScore: bestScore),
+                SizedBox(
+                  height: 26,
+                  child: _MetaRow(module: module, bestScore: bestScore),
+                ),
                 const SizedBox(height: 10),
                 _QuizBar(done: quizDone, total: quizTotal),
                 const SizedBox(height: 12),

@@ -31,7 +31,9 @@ void main() {
         .map((e) => e.widget)
         .whereType<Text>()
         .where(
-          (w) => w.textSpan is TextSpan && (w.textSpan! as TextSpan).children != null,
+          (w) =>
+              w.textSpan is TextSpan &&
+              (w.textSpan! as TextSpan).children != null,
         );
     final text = rich.isNotEmpty
         ? rich.first
@@ -39,8 +41,7 @@ void main() {
     final span = text.textSpan;
     if (span is TextSpan && span.children != null) {
       for (final child in span.children!) {
-        if (child is TextSpan &&
-            child.style?.fontStyle == FontStyle.italic) {
+        if (child is TextSpan && child.style?.fontStyle == FontStyle.italic) {
           return child.style?.color;
         }
       }
@@ -124,11 +125,10 @@ void main() {
       final searchTop = tester.getTopLeft(find.byType(TextField)).dy;
       expect(searchTop, lessThan(800));
 
-      // Belajar: CTA featured (satu-satunya tombol besar tab) terlihat
-      // tanpa scroll. Hero kini ringkasan tanpa CTA.
+      // Belajar: CTA kartu rekomendasi pertama terlihat tanpa scroll.
       await tester.tap(find.text('Belajar'));
       await tester.pumpAndSettle();
-      final ctaTop = tester.getTopLeft(find.byType(FilledButton)).dy;
+      final ctaTop = tester.getTopLeft(find.byType(FilledButton).first).dy;
       expect(ctaTop, lessThan(800));
 
       // Profil: ring skor terlihat tanpa scroll.
