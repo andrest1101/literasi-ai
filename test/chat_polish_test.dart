@@ -56,22 +56,6 @@ Future<void> _pumpChat(
   await tester.pumpAndSettle();
 }
 
-/// Container terdekat di atas ikon: pembungkus avatar gradien.
-Finder _avatarBoxOf(WidgetTester tester, IconData icon) {
-  Element? current = tester.element(find.byIcon(icon));
-  while (current != null) {
-    Element? parent;
-    current.visitAncestorElements((e) {
-      parent = e;
-      return false;
-    });
-    if (parent?.widget is Container) {
-      return find.byWidget(parent!.widget as Container);
-    }
-    current = parent;
-  }
-  throw StateError('Pembungkus avatar untuk $icon tidak ditemukan');
-}
 
 void main() {
   group('Subtitle kontekstual C1 (jujur, tanpa dot palsu)', () {
@@ -115,7 +99,7 @@ void main() {
       await _pumpChat(tester);
       expect(
         tester.getSize(
-          _avatarBoxOf(tester, Icons.auto_awesome_rounded),
+          find.byKey(const ValueKey('assistant-mark-greeting')),
         ),
         const Size(80, 80),
       );
@@ -148,7 +132,7 @@ void main() {
       await tester.tap(find.text('Apakah vaksin menyebabkan autisme?'));
       await tester.pumpAndSettle();
       // Avatar shield muncul di daftar pesan (bubble AI), bukan di AppBar.
-      expect(find.byIcon(Icons.verified_user_rounded), findsWidgets);
+      expect(find.byKey(const ValueKey('assistant-mark-bubble')), findsWidgets);
       expect(
         find.descendant(
           of: find.byType(AppBar),

@@ -31,7 +31,6 @@ void main() {
 
     expect(find.byTooltip('Chat dengan AI Literasi'), findsOneWidget);
     expect(find.byType(ChatFab), findsOneWidget);
-    expect(find.byIcon(Icons.verified_user_rounded), findsWidgets);
     expect(find.byIcon(Icons.auto_awesome_rounded), findsOneWidget);
     expect(find.byIcon(Icons.smart_toy_outlined), findsNothing);
 
@@ -63,7 +62,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // Identitas shield dipertahankan (bukan robot generik).
-    expect(find.byIcon(Icons.verified_user_rounded), findsOneWidget);
     expect(find.byIcon(Icons.smart_toy_outlined), findsNothing);
 
     // Tekan-tahan-tanpa-lepas tidak crash (press controller jalan).
