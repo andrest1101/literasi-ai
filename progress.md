@@ -1,6 +1,22 @@
 _project ini adalah dokumen hidup — update sesuai perkembangan development._
 _Last updated: 27 Oktober 2026_
 
+## Status: Progres Belajar Tamu + UX Belajar/BYOK — SELESAI
+
+- Progres belajar akun tamu kini persisten lokal (modul selesai + skor kuis
+  terbaik) lewat SharedPreferences; skor kuis tetap anti-farming. Guest tidak
+  menerima atau melihat klaim poin cloud yang tidak bisa tersinkron.
+- Halaman Belajar memprioritaskan progres dan modul sebelum informasi hadiah;
+  label rekomendasi tidak lagi menyiratkan data popularitas. Guest mendapat
+  penjelasan ringkas bahwa progres tersimpan di perangkat, sedangkan poin perlu
+  akun.
+- Halaman Kunci API menempatkan form sebelum tes koneksi, menyediakan tempel
+  clipboard dan input monospace, menyatakan tes memakai kunci aktif tersimpan,
+  serta merangkum penyimpanan aman. Panduan cara mendapat kunci dapat dibuka
+  saat diperlukan.
+- `flutter analyze` bersih; `flutter test` **399 lulus**; APK debug Android
+  berhasil dibangun.
+
 ## Status: Verifikasi Email + Perbaikan Google Sign-In Android — SELESAI
 
 ### Akar masalah Google Sign-In (terbukti, bukan dugaan)

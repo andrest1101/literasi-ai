@@ -163,7 +163,7 @@ Prinsip yang dijaga di seluruh codebase:
 | `users/{uid}/score/summary` | Total skor, modul selesai (`arrayUnion` idempoten), best-score kuis | Increment atomik; mapping toleran terhadap dokumen korup |
 | `users/{uid}/learn/progress` | Modul selesai dan best-score per kuis (anti-farming: hanya skor terbaik yang dihitung) | Tulis idempoten, baca stream dengan timeout |
 
-Semua path di atas berada di bawah `users/{uid}` sehingga tercakup rules owner-only. Tamu tanpa login tidak punya UID: repo mengembalikan stream kosong dan UI menampilkan empty state yang jujur, bukan error.
+Semua path di atas berada di bawah `users/{uid}` sehingga tercakup rules owner-only. Progres belajar tamu disimpan lokal di perangkat melalui SharedPreferences (modul selesai + skor kuis terbaik), tetapi tidak dihitung sebagai poin cloud. Saat pengguna masuk dengan akun, progres guest lokal tidak otomatis disinkronkan; sinkronisasi/konversi akun harus dilakukan secara eksplisit agar tidak menggabungkan atau menggandakan skor tanpa persetujuan.
 
 ### Lokal (perangkat)
 
