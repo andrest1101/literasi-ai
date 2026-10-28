@@ -117,9 +117,7 @@ class ShareCard extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 color: AppColors.background,
-                border: Border(
-                  left: BorderSide(color: style.accent, width: 5),
-                ),
+                border: Border(left: BorderSide(color: style.accent, width: 5)),
               ),
               child: Text(
                 '“${_shortClaim(result.claim)}”',
@@ -175,7 +173,7 @@ class _BrandStrip extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF2F80ED), Color(0xFF124A9B)],
+          colors: [AppColors.heroBegin, AppColors.heroEnd],
         ),
       ),
       child: Row(
@@ -214,7 +212,7 @@ class _BrandStrip extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFFD6E5FE),
+                    color: AppColors.heroInkSoft,
                   ),
                 ),
               ],
@@ -248,9 +246,7 @@ class _FooterStrip extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
         color: accent.withValues(alpha: 0.08),
-        border: Border(
-          top: BorderSide(color: accent.withValues(alpha: 0.25)),
-        ),
+        border: Border(top: BorderSide(color: accent.withValues(alpha: 0.25))),
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,

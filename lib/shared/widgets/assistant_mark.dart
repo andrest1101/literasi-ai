@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+
+import '../../core/constants/app_colors.dart';
 
 /// Penanda asisten AI: buku terbuka + sparkle.
 ///
@@ -43,7 +45,7 @@ class AssistantMark extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF2F80ED), Color(0xFF124A9B)],
+          colors: [AppColors.heroBegin, AppColors.heroEnd],
         ),
         boxShadow: showShadow
             ? const [
@@ -87,10 +89,7 @@ class AssistantGlyph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size.square(size),
-      painter: _BookPainter(color),
-    );
+    return CustomPaint(size: Size.square(size), painter: _BookPainter(color));
   }
 }
 
@@ -181,7 +180,5 @@ class _SparklePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_SparklePainter oldDelegate) =>
-      oldDelegate.color != color;
+  bool shouldRepaint(_SparklePainter oldDelegate) => oldDelegate.color != color;
 }
-

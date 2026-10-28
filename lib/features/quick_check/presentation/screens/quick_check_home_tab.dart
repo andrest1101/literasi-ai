@@ -294,7 +294,7 @@ class _SessionCtaCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12.5,
                       height: 1.6,
-                      color: Color(0xFFD6E5FE),
+                      color: AppColors.heroInkSoft,
                     ),
                   ),
                 ],

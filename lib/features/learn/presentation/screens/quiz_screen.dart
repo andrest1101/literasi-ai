@@ -298,8 +298,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                           style: FilledButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
-                            disabledBackgroundColor: const Color(0xFFE8EDF5),
-                            disabledForegroundColor: const Color(0xFF5B6B80),
+                            disabledBackgroundColor: AppColors.disabledSurface,
+                            disabledForegroundColor: AppColors.disabledInk,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15),
                             ),
@@ -735,16 +735,13 @@ class _ResultHero extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: perfect
-                  ? const [Color(0xFF34A853), Color(0xFF1E7E34)]
-                  : const [Color(0xFF2F80ED), Color(0xFF124A9B)],
+                  ? const [AppColors.success, AppColors.successDark]
+                  : const [AppColors.heroBegin, AppColors.heroEnd],
             ),
             boxShadow: [
               BoxShadow(
-                color:
-                    (perfect
-                            ? const Color(0xFF1E7E34)
-                            : const Color(0xFF1558B0))
-                        .withValues(alpha: 0.2),
+                color: (perfect ? AppColors.successDark : AppColors.heroEnd)
+                    .withValues(alpha: 0.2),
                 blurRadius: 24,
                 offset: const Offset(0, 12),
               ),

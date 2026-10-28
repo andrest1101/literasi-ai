@@ -134,8 +134,8 @@ class QuickCheckImageSection extends StatelessWidget {
                 FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: const Color(0xFFE8EDF5),
-                  disabledForegroundColor: const Color(0xFF5B6B80),
+                  disabledBackgroundColor: AppColors.disabledSurface,
+                  disabledForegroundColor: AppColors.disabledInk,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
                   ),
@@ -149,7 +149,7 @@ class QuickCheckImageSection extends StatelessWidget {
                   animationDuration: const Duration(milliseconds: 250),
                   side: WidgetStateProperty.resolveWith((states) {
                     if (states.contains(WidgetState.disabled)) {
-                      return const BorderSide(color: Color(0xFFD5DDE9));
+                      return BorderSide(color: AppColors.disabledBorder);
                     }
                     return BorderSide.none;
                   }),
@@ -363,7 +363,7 @@ class _ImagePreview extends StatelessWidget {
                       const Icon(
                         Icons.check_circle_rounded,
                         size: 14,
-                        color: Color(0xFF7BE3A0),
+                        color: AppColors.success,
                       ),
                       const SizedBox(width: 5),
                       Text(

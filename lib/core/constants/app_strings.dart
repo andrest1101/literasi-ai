@@ -383,6 +383,7 @@ abstract final class AppStrings {
   static const String apiKeyFormTitle = 'Kelola kunci perangkat';
   static const String apiKeyStatusActive = 'AI Live';
   static const String apiKeyStatusDemo = 'Mode Demo';
+  static const String apiKeyStatusError = 'Status AI tidak dapat dicek.';
   static const String apiKeyProbeStepsTitle = 'Hasil pemeriksaan jalur';
   static const String demoBadge = 'DEMO';
   static const String demoResultNote =
