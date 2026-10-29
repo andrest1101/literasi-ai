@@ -201,8 +201,6 @@ abstract final class AppStrings {
   static const String navProfile = 'Profil';
   static const String homeCheckTitle1 = 'Cek kebenaran';
   static const String homeCheckTitle2 = 'sebelum sebar.';
-  static const String homeCheckSubtitle =
-      'Satu sesi fokus untuk teks, gambar, atau link. Hasil dan saran verifikasi langsung keluar.';
   static const String homeHistoryTitle1 = 'Jejak';
   static const String homeHistoryTitle2 = 'pemeriksaanmu.';
   static const String historySubEmpty = 'Belum ada yang tersimpan.';

@@ -5,8 +5,8 @@ import 'package:literasi_ai/features/quick_check/presentation/screens/quick_chec
 import 'package:literasi_ai/features/quick_check/presentation/screens/quick_check_session_screen.dart';
 
 /// Regresi P1: heading tab Cek ramping: tanpa wordmark, tanpa pill
-/// eyebrow. Judul two-tone + subtitle padat + hairline; hero naik ke
-/// lipatan layar 360×800.
+/// eyebrow, tanpa subtitle. Judul two-tone + hairline saja; kartu skor dan
+/// hero naik ke lipatan layar 360×800.
 void main() {
   Future<void> pumpHome(WidgetTester tester) async {
     await tester.pumpWidget(
@@ -14,9 +14,7 @@ void main() {
         child: MaterialApp(
           home: const Scaffold(body: QuickCheckHomeTab()),
           onGenerateRoute: (settings) => MaterialPageRoute(
-            builder: (_) => Scaffold(
-              body: Text('rute: ${settings.name}'),
-            ),
+            builder: (_) => Scaffold(body: Text('rute: ${settings.name}')),
           ),
         ),
       ),
@@ -25,7 +23,7 @@ void main() {
   }
 
   group('Heading compact P1', () {
-    testWidgets('tanpa wordmark + pill, judul + subtitle tetap ada', (
+    testWidgets('tanpa wordmark, pill, dan subtitle; judul two-tone tetap', (
       WidgetTester tester,
     ) async {
       await pumpHome(tester);
@@ -33,25 +31,25 @@ void main() {
       expect(find.text('VERIFIKASI AI'), findsNothing);
       expect(find.text('Cek kebenaran'), findsOneWidget);
       expect(find.text('sebelum sebar.'), findsOneWidget);
+      // Subtitle lama mengulang isi pill status + tile mode; dihapus agar
+      // konten utama naik.
+      expect(find.textContaining('Satu sesi fokus'), findsNothing);
       final accent = tester.widget<Text>(find.text('sebelum sebar.'));
       expect(accent.style?.fontStyle, FontStyle.italic);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('tinggi heading di bawah 150px (hemat ±80px)', (
+    testWidgets('tinggi heading hanya dua baris judul (< 80px)', (
       WidgetTester tester,
     ) async {
       await pumpHome(tester);
-      final titleBox =
-          tester.getRect(find.text('Cek kebenaran'));
-      final subtitleBox = tester.getRect(
-        find.textContaining('Satu sesi fokus'),
-      );
-      final headingHeight = subtitleBox.bottom - titleBox.top;
+      final titleTop = tester.getRect(find.text('Cek kebenaran')).top;
+      final titleBottom = tester.getRect(find.text('sebelum sebar.')).bottom;
+      final headingHeight = titleBottom - titleTop;
       expect(
         headingHeight,
-        lessThan(150),
-        reason: 'heading teks (judul + subtitle) harus ramping',
+        lessThan(80),
+        reason: 'heading tanpa subtitle harus ramping (±2 baris judul)',
       );
       expect(tester.takeException(), isNull);
     });
