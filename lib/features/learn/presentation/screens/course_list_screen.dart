@@ -225,14 +225,11 @@ class _SectionSkeleton extends StatelessWidget {
   }
 }
 
-/// Seksi modul: featured + daftar compact + strip semua-selesai.
+/// Seksi modul: carousel rekomendasi + daftar compact + strip semua-selesai.
 ///
-/// Featured = modul pertama yang belum selesai (derivable dari progress,
-/// tanpa ubah domain): focal point daftar dengan label jujur
-/// "Mulai dari sini"/"Lanjutkan belajarmu". Bila semua selesai, featured
-/// hilang dan tampil strip "Semua modul selesai". Status + skor dibaca
-/// dari [CourseProgress] yang sama dengan ringkasan. Logika buka detail
-/// tidak berubah.
+/// Rekomendasi = hingga tiga modul yang belum selesai, dengan yang paling
+/// awal diurutkan mengikuti katalog. Modul yang sudah direkomendasikan tidak
+/// diduplikasi di daftar ringkas di bawahnya. Semua modul tetap dapat dibuka.
 class _ModuleSections extends StatelessWidget {
   const _ModuleSections({
     required this.modules,
@@ -246,22 +243,21 @@ class _ModuleSections extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final featuredIndex = modules.indexWhere(
-      (m) => !progress.isCompleted(m.id),
-    );
+    final pending = modules.where((m) => !progress.isCompleted(m.id)).toList();
+    final recommended = pending.take(3).toList();
     final done = progress.completedCount.clamp(0, modules.length);
-    final rest = [
-      for (var i = 0; i < modules.length; i++)
-        if (i != featuredIndex) modules[i],
-    ];
+    final recommendedIds = recommended.map((module) => module.id).toSet();
+    final rest = modules
+        .where((module) => !recommendedIds.contains(module.id))
+        .toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (featuredIndex >= 0) ...[
+        if (recommended.isNotEmpty) ...[
           const _FeaturedSectionHeader(),
           const SizedBox(height: 2),
           Text(
-            progress.bestFor(modules[featuredIndex].id) > 0
+            recommended.any((module) => progress.bestFor(module.id) > 0)
                 ? AppStrings.learnFeaturedContinue
                 : AppStrings.learnFeaturedStart,
             style: const TextStyle(
@@ -271,12 +267,10 @@ class _ModuleSections extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          ModuleRow(
-            module: modules[featuredIndex],
-            completed: false,
-            bestScore: progress.bestFor(modules[featuredIndex].id),
-            onTap: () => onOpen(context, modules[featuredIndex].id),
-            featured: true,
+          _RecommendedCarousel(
+            modules: recommended,
+            progress: progress,
+            onOpen: onOpen,
           ),
           const SizedBox(height: 16),
         ] else
@@ -300,6 +294,55 @@ class _ModuleSections extends StatelessWidget {
           ],
         ],
       ],
+    );
+  }
+}
+
+class _RecommendedCarousel extends StatelessWidget {
+  const _RecommendedCarousel({
+    required this.modules,
+    required this.progress,
+    required this.onOpen,
+  });
+
+  final List<CourseModule> modules;
+  final CourseProgress progress;
+  final void Function(BuildContext context, String moduleId) onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = (constraints.maxWidth * 0.84)
+            .clamp(280.0, 360.0)
+            .toDouble();
+        return SizedBox(
+          height: 380,
+          child: ListView.separated(
+            key: const ValueKey('learn-recommendations-carousel'),
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(right: 20),
+            itemCount: modules.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final module = modules[index];
+              return SizedBox(
+                width: cardWidth,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ModuleRow(
+                    module: module,
+                    completed: progress.isCompleted(module.id),
+                    bestScore: progress.bestFor(module.id),
+                    onTap: () => onOpen(context, module.id),
+                    featured: true,
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

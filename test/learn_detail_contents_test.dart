@@ -120,9 +120,7 @@ void main() {
       // Medallion memakai tint identitas modul, bukan primer generik:
       // seksi 2 (non-featured) modul clickbait berikon primaryDark,
       // warna tint motif seed 0.
-      final secondIcon = tester.widget<Icon>(
-        find.byIcon(Icons.timer_outlined),
-      );
+      final secondIcon = tester.widget<Icon>(find.byIcon(Icons.timer_outlined));
       expect(secondIcon.color, AppColors.primaryDark);
       expect(tester.takeException(), isNull);
     });

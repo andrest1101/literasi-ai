@@ -106,7 +106,7 @@ class HistoryCard extends StatelessWidget {
                                   const SizedBox(width: 6),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 7,
+                                      horizontal: 6,
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
@@ -118,7 +118,7 @@ class HistoryCard extends StatelessWidget {
                                       style: TextStyle(
                                         fontSize: 9,
                                         fontWeight: FontWeight.w800,
-                                        letterSpacing: 0.8,
+                                        letterSpacing: 0.6,
                                         color: Colors.white,
                                       ),
                                     ),
@@ -127,13 +127,25 @@ class HistoryCard extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Text(
-                            '${result.confidence}%',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                              fontFeatures: [FontFeature.tabularFigures()],
-                              color: AppColors.textPrimary,
+                          // Jarak tetap: verdict panjang (mis. "TIDAK DAPAT
+                          // DIPASTIKAN") memotong label dengan ellipsis, lalu
+                          // badge TERBARU duduk di ujung kiri. Tanpa gap ini
+                          // badge menempel ke persentase dan terbaca sebagai
+                          // satu angka.
+                          const SizedBox(width: 10),
+                          Semantics(
+                            // Angka tanpa label ambigu bagi pembaca layar.
+                            label: 'Keyakinan ${result.confidence} persen',
+                            child: ExcludeSemantics(
+                              child: Text(
+                                '${result.confidence}%',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  fontFeatures: [FontFeature.tabularFigures()],
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
                             ),
                           ),
                         ],

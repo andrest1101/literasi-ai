@@ -25,6 +25,22 @@ class LearnProgressModel {
         }
       }
     }
+    // Older builds wrote dotted field names through `set()`, which stores
+    // those names literally rather than nesting them under `quizBest`.
+    // Continue reading that shape so users' already-saved progress is not
+    // lost while new writes use the proper nested map.
+    for (final entry in data.entries) {
+      const prefix = 'quizBest.';
+      if (!entry.key.startsWith(prefix)) continue;
+      final moduleId = entry.key.substring(prefix.length);
+      final score = entry.value;
+      if (moduleId.isNotEmpty && score is num && score > 0) {
+        final legacyScore = score.toInt();
+        if (legacyScore > (bestMap[moduleId] ?? 0)) {
+          bestMap[moduleId] = legacyScore;
+        }
+      }
+    }
     return CourseProgress(
       completedModuleIds: modules is List
           ? modules

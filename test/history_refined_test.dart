@@ -26,7 +26,10 @@ VerificationResult _result({Verdict verdict = Verdict.hoaks}) {
 }
 
 HistoryEntry _entry({String id = 'entry-1', Verdict verdict = Verdict.hoaks}) {
-  return HistoryEntry(id: id, result: _result(verdict: verdict));
+  return HistoryEntry(
+    id: id,
+    result: _result(verdict: verdict),
+  );
 }
 
 class _FakeHistoryRepository implements HistoryRepository {
@@ -35,8 +38,7 @@ class _FakeHistoryRepository implements HistoryRepository {
   final List<HistoryEntry> entries;
 
   @override
-  Stream<List<HistoryEntry>> watch(String userId) =>
-      Stream.value(entries);
+  Stream<List<HistoryEntry>> watch(String userId) => Stream.value(entries);
 
   @override
   Future<void> save({
@@ -75,23 +77,22 @@ void main() {
     test('menit, jam, hari, tanggal penuh', () {
       final now = DateTime(2026, 9, 26, 12, 0);
       expect(
-        historyTimeAgo(now.subtract(const Duration(seconds: 10)),
-            clockNow: now),
+        historyTimeAgo(
+          now.subtract(const Duration(seconds: 10)),
+          clockNow: now,
+        ),
         'Baru saja',
       );
       expect(
-        historyTimeAgo(now.subtract(const Duration(minutes: 5)),
-            clockNow: now),
+        historyTimeAgo(now.subtract(const Duration(minutes: 5)), clockNow: now),
         '5 mnt',
       );
       expect(
-        historyTimeAgo(now.subtract(const Duration(hours: 2)),
-            clockNow: now),
+        historyTimeAgo(now.subtract(const Duration(hours: 2)), clockNow: now),
         '2 jam',
       );
       expect(
-        historyTimeAgo(now.subtract(const Duration(days: 3)),
-            clockNow: now),
+        historyTimeAgo(now.subtract(const Duration(days: 3)), clockNow: now),
         '3 hari',
       );
       expect(
@@ -123,12 +124,12 @@ void main() {
   });
 
   group('Spine + badge TERBARU kartu', () {
-    testWidgets('spine warna verdict menempel di kiri kartu', (
-      tester,
-    ) async {
+    testWidgets('spine warna verdict menempel di kiri kartu', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: HistoryCard(entry: _entry(), onTap: () {})),
+          home: Scaffold(
+            body: HistoryCard(entry: _entry(), onTap: () {}),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -157,7 +158,10 @@ void main() {
           home: Scaffold(
             body: Column(
               children: [
-                HistoryCard(entry: _entry(id: 'a'), onTap: () {}),
+                HistoryCard(
+                  entry: _entry(id: 'a'),
+                  onTap: () {},
+                ),
                 HistoryCard(
                   entry: _entry(id: 'b'),
                   isLatest: true,
@@ -170,6 +174,49 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('TERBARU'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('badge TERBARU tidak menempel ke persentase', (tester) async {
+      // Handle semantik wajib dilepas di dalam body tes: flutter_test
+      // memeriksa handle aktif sebelum tearDown berjalan, sehingga
+      // addTearDown(semantics.dispose) memicu "SemanticsHandle was active".
+      final semantics = tester.ensureSemantics();
+      // 320px = lebar konten nyata pada layar 360px (padding 20px kiri-kanan):
+      // verdict panjang terpotong dan badge duduk di ujung kiri, sehingga
+      // jarak ke persentase harus eksplisit.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 320,
+                child: HistoryCard(
+                  entry: _entry(verdict: Verdict.tidakDapatDipastikan),
+                  isLatest: true,
+                  onTap: () {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final badge = tester.getRect(find.text('TERBARU'));
+      final percent = tester.getRect(find.text('87%'));
+      expect(
+        percent.left - badge.right,
+        greaterThanOrEqualTo(12),
+        reason: 'badge TERBARU dan angka keyakinan butuh jarak baca',
+      );
+      // Round-trip accessibility: angka tidak dibacakan telanjang. Node
+      // semantik kartu menggabungkan label anak, jadi cocokkan via RegExp.
+      expect(
+        find.bySemanticsLabel(RegExp('Keyakinan 87 persen')),
+        findsOneWidget,
+      );
+      semantics.dispose();
       expect(tester.takeException(), isNull);
     });
 

@@ -219,7 +219,7 @@ class _FeaturedCard extends StatelessWidget {
     final quizTotal = module.quizCount;
     final quizDone = bestScore.clamp(0, quizTotal);
     final ctaLabel = cta == ModuleCta.progress
-        ? AppStrings.learnModuleContinue
+        ? AppStrings.learnModuleAgain
         : AppStrings.learnModuleStart;
     return _RowShell(
       label: '${AppStrings.learnOpenModule}: ${module.title}',
@@ -229,7 +229,7 @@ class _FeaturedCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            height: 120,
+            constraints: const BoxConstraints(minHeight: 120),
             decoration: const BoxDecoration(
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               gradient: LinearGradient(
@@ -271,33 +271,44 @@ class _FeaturedCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  module.title,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.4,
-                    color: AppColors.textPrimary,
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
+                  child: Text(
+                    module.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  module.subtitle,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    height: 1.6,
-                    color: AppColors.textSecondary,
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 42),
+                  child: Text(
+                    module.subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      height: 1.6,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
-                _MetaRow(module: module, bestScore: bestScore),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 26),
+                  child: _MetaRow(module: module, bestScore: bestScore),
+                ),
                 const SizedBox(height: 10),
                 _QuizBar(done: quizDone, total: quizTotal),
                 const SizedBox(height: 12),
-                SizedBox(
-                  height: 48,
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48),
                   child: FilledButton(
                     onPressed: onTap,
                     style: FilledButton.styleFrom(
@@ -311,7 +322,10 @@ class _FeaturedCard extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    child: Text(ctaLabel, overflow: TextOverflow.ellipsis),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(ctaLabel),
+                    ),
                   ),
                 ),
               ],
@@ -336,23 +350,18 @@ class _StatusText extends StatelessWidget {
   Widget build(BuildContext context) {
     final label = switch (cta) {
       ModuleCta.done => AppStrings.learnModuleDone,
-      ModuleCta.progress => AppStrings.learnModuleContinue,
+      ModuleCta.progress => AppStrings.learnModuleAgain,
       ModuleCta.fresh => AppStrings.learnModuleStart,
     };
     final color = cta == ModuleCta.done
         ? AppColors.successDark
         : AppColors.primary;
-    return ExcludeSemantics(
-      child: Text(
-        label,
-        textAlign: TextAlign.center,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w800,
-          color: color,
-        ),
-      ),
+    return Text(
+      label,
+      textAlign: TextAlign.center,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: color),
     );
   }
 }
@@ -370,9 +379,13 @@ class _QuizRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ratio = total == 0 ? 0.0 : (done / total).clamp(0.0, 1.0);
+    // Belum pernah dikerjakan → cerita statusnya: "Kuis belum dikerjakan",
+    // bukan angka 0/4 yang buta. Sudah ada progres → "Progres kuis: x/y".
+    final semanticsLabel = done > 0
+        ? '${AppStrings.learnQuizProgressLabel}: $done/$total'
+        : AppStrings.learnQuizNotStarted;
     return Semantics(
-      label: '${AppStrings.learnQuizProgressLabel}: $done/$total',
-      excludeSemantics: true,
+      label: semanticsLabel,
       child: SizedBox(
         width: 40,
         height: 40,

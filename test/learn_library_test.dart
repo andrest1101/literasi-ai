@@ -134,11 +134,11 @@ void main() {
   });
 
   group('Q2 motif satu sumber', () {
-    test('tiga modul tiga motif berbeda dari accentSeed data', () {
+    test('sembilan modul memiliki motif berbeda dari accentSeed data', () {
       final modules = LearnContentDatasource().modules();
       final motifs = modules.map((m) => motifForModule(m.accentSeed)).toList();
-      expect(motifs.map((m) => m.icon).toSet(), hasLength(3));
-      expect(motifs.map((m) => m.tint).toSet(), hasLength(3));
+      expect(motifs.map((m) => m.icon).toSet(), hasLength(9));
+      expect(motifs.map((m) => m.tint).toSet(), hasLength(6));
     });
   });
 
@@ -158,25 +158,16 @@ void main() {
     });
   });
 
-  group('Q4 featured biru solid + seksi terpisah', () {
-    testWidgets('progres kosong: featured modul 1 satu FilledButton', (
-      tester,
-    ) async {
+  group('Q4 carousel rekomendasi + daftar ringkas', () {
+    testWidgets('progres kosong: rekomendasi bisa digeser', (tester) async {
       await _pumpList(tester, const CourseProgress());
 
-      expect(find.byType(ModuleRow), findsNWidgets(3));
+      expect(find.byType(ModuleRow), findsNWidgets(8));
       expect(find.text(AppStrings.learnPopularModules), findsOneWidget);
       expect(find.textContaining(AppStrings.learnAllModules), findsOneWidget);
       expect(find.text(AppStrings.learnFeaturedStart), findsOneWidget);
-      // Satu-satunya FilledButton di tab = CTA featured.
-      expect(find.byType(FilledButton), findsOneWidget);
-      expect(
-        find.descendant(
-          of: find.byType(FilledButton),
-          matching: find.text('Mulai'),
-        ),
-        findsOneWidget,
-      );
+      expect(find.byType(ListView), findsWidgets);
+      expect(find.byType(FilledButton), findsNWidgets(2));
       expect(tester.takeException(), isNull);
     });
 
@@ -185,9 +176,8 @@ void main() {
     ) async {
       await _pumpList(tester, const CourseProgress());
 
-      // Featured v4: banner gradien hero 120px di atas (bukan seluruh
-      // badan), konten putih di bawah dengan CTA primer biru.
-      final cta = tester.widget<FilledButton>(find.byType(FilledButton));
+      // Kartu rekomendasi memakai banner gradien dan CTA primer.
+      final cta = tester.widget<FilledButton>(find.byType(FilledButton).first);
       expect(
         cta.style?.backgroundColor?.resolve(const <WidgetState>{}),
         AppColors.primary,
@@ -217,6 +207,12 @@ void main() {
             'clickbait',
             'gambar-manipulasi',
             'verifikasi-sumber',
+            'cek-konteks-media',
+            'statistik-menyesatkan',
+            'literasi-kesehatan',
+            'anti-phishing',
+            'konten-ai-deepfake',
+            'fakta-opini-satire',
           ],
         ),
       );
@@ -240,10 +236,10 @@ void main() {
         ),
       );
 
-      expect(find.text(AppStrings.learnModuleContinue), findsOneWidget);
-      expect(find.text(AppStrings.learnModuleDone), findsOneWidget);
-      expect(find.text(AppStrings.learnModuleStart), findsOneWidget);
-      expect(find.byType(FilledButton), findsOneWidget);
+      expect(find.text(AppStrings.learnModuleAgain), findsWidgets);
+      expect(find.text(AppStrings.learnModuleDone), findsWidgets);
+      expect(find.text(AppStrings.learnModuleStart), findsWidgets);
+      expect(find.byType(FilledButton), findsNWidgets(2));
       expect(tester.takeException(), isNull);
     });
 
@@ -252,7 +248,7 @@ void main() {
 
       // Baris compact memakai Material permukaan polos: tidak ada
       // Container ber-border di dalam ModuleRow non-featured.
-      expect(find.byType(ModuleRow), findsNWidgets(3));
+      expect(find.byType(ModuleRow), findsNWidgets(8));
       expect(tester.takeException(), isNull);
     });
   });
@@ -285,9 +281,8 @@ void main() {
       expect(spans[0].style?.color, AppColors.successDark);
       expect(spans[2].text, contains('+${LiteracyScore.quizPoints}'));
       expect(spans[2].style?.color, AppColors.warningDark);
-      // Urutan: bar hero di atas strip, bar featured di bawah strip
-      // (dua LinearProgressIndicator: hero + featured).
-      expect(find.byType(LinearProgressIndicator), findsNWidgets(2));
+      // Hero dan setiap kartu rekomendasi memiliki indikator progres.
+      expect(find.byType(LinearProgressIndicator), findsNWidgets(3));
       final heroBar = tester.getTopLeft(
         find.byType(LinearProgressIndicator).first,
       );
@@ -303,12 +298,18 @@ void main() {
     });
   });
 
-  group('Q7 hero detail memakai motif modul', () {
-    testWidgets('tiga modul tiga ikon hero berbeda', (tester) async {
+  group('Q7 detail memakai motif modul', () {
+    testWidgets('motif seluruh modul tampil pada detail', (tester) async {
       for (final id in [
         'clickbait',
         'gambar-manipulasi',
         'verifikasi-sumber',
+        'cek-konteks-media',
+        'statistik-menyesatkan',
+        'literasi-kesehatan',
+        'anti-phishing',
+        'konten-ai-deepfake',
+        'fakta-opini-satire',
       ]) {
         await tester.pumpWidget(
           ProviderScope(
@@ -340,7 +341,12 @@ void main() {
           find.textContaining(AppStrings.learnAllModules),
         );
         await tester.pumpAndSettle();
-        await tester.ensureVisible(find.text('Verifikasi Sumber Berita'));
+        final carousel = find.byKey(
+          const ValueKey('learn-recommendations-carousel'),
+        );
+        await tester.ensureVisible(carousel.first);
+        await tester.pumpAndSettle();
+        await tester.drag(carousel.first, const Offset(-500, 0));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
       });

@@ -165,14 +165,12 @@ class _TrendingSection extends ConsumerWidget {
   }
 }
 
-/// Heading compact tab Cek: judul two-tone + subtitle 2 baris + hairline.
+/// Heading compact tab Cek: judul two-tone + hairline, tanpa subtitle.
 ///
-/// Menggantikan header editorial penuh (wordmark + pill eyebrow + judul
-/// 26px + subtitle 3 baris) yang memakan ±230px sebelum konten. Pill
-/// "VERIFIKASI AI" dihapus karena redundan dengan label "AI live" di
-/// kartu status; wordmark dihapus karena brand sudah ada di navbar.
-/// Judul 24px tetap two-tone sebagai identitas; hairline dipertahankan
-/// sebagai jangkar visual.
+/// Judul dan hairline adalah satu blok jangkar; penjelasan "satu sesi fokus
+/// untuk teks, gambar, atau link" dihapus karena mengulang isi pill status
+/// AI + tiga tile mode tepat di bawahnya, sekaligus menahan kartu skor dan
+/// hero ±50px lebih rendah. Identitas tetap: dua baris 24px two-tone.
 class _CheckHeading extends StatelessWidget {
   const _CheckHeading();
 
@@ -186,12 +184,7 @@ class _CheckHeading extends StatelessWidget {
           AppStrings.homeCheckTitle2,
           style: AppTabTitles.displayLine2(AppColors.primary),
         ),
-        const SizedBox(height: 6),
-        const Text(
-          AppStrings.homeCheckSubtitle,
-          style: AppTabTitles.displaySubtitle,
-        ),
-        const SizedBox(height: AppTabTitles.titleToContentGap),
+        const SizedBox(height: 8),
         Container(height: 1, color: AppColors.neutral.withValues(alpha: 0.18)),
       ],
     );

@@ -63,9 +63,12 @@ public static class BrandAssets
     // little breathing room for launcher masks.
     private const double IconGlyphRatio = 0.80;
 
+    // Android launcher icons need extra breathing room under launcher masks.
+    private const double AndroidGlyphRatio = 0.68;
+
     // Adaptive icons show roughly 72dp of the 108dp layer, so 55% of the layer
     // reproduces the logo's glyph-to-field proportion inside the mask.
-    private const double AdaptiveGlyphRatio = 0.55;
+    private const double AdaptiveGlyphRatio = 0.46;
 
     public static string[] Generate(string repoRoot, string sourceLogo)
     {
@@ -119,9 +122,9 @@ public static class BrandAssets
             // Legacy launchers (API < 26) get a rounded icon with transparent
             // corners: a baked square used to leave black wedges behind.
             SaveIcon(Path.Combine(folder, "ic_launcher.png"), densityPx[i], glyph, top, bottom,
-                IconGlyphRatio, true, true);
+                AndroidGlyphRatio, true, true);
             SaveIcon(Path.Combine(folder, "ic_launcher_round.png"), densityPx[i], glyph, top, bottom,
-                IconGlyphRatio, true, true);
+                AndroidGlyphRatio, true, true);
             SaveGlyphOnly(Path.Combine(folder, "launch_mark.png"),
                 (int)Math.Round(densityPx[i] * 1.75), glyph, 0.92, true);
 

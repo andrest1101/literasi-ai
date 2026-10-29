@@ -28,7 +28,9 @@ class LearnRemoteDatasource {
 
   Future<void> submitQuizBest(String userId, String moduleId, int best) =>
       _doc(userId).set({
-        'quizBest.$moduleId': best,
+        // `set()` treats dotted keys literally. Use a nested map so the
+        // document shape matches LearnProgressModel's `quizBest` reader.
+        'quizBest': {moduleId: best},
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 }

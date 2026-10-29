@@ -12,6 +12,7 @@ import '../../data/datasources/learn_remote_datasource.dart';
 import '../../data/repositories/learn_repository_impl.dart';
 import '../../domain/entities/course_module.dart';
 import '../../domain/entities/course_progress.dart';
+import '../../domain/entities/quiz_submission.dart';
 import '../../domain/repositories/learn_repository.dart';
 
 final learnContentProvider = Provider<List<CourseModule>>((ref) {
@@ -74,23 +75,31 @@ class LearnActionController extends AsyncNotifier<void> {
   @override
   FutureOr<void> build() {}
 
-  Future<bool> completeModule(String moduleId) async {
+  Future<ModuleCompletion> completeModule(String moduleId) async {
     final userId = ref.read(historyUserIdProvider);
     if (userId == null) {
+      final local = ref.read(learnLocalDatasourceProvider);
       try {
-        await ref.read(learnLocalDatasourceProvider).completeModule(moduleId);
+        final before = await local.readProgress();
+        await local.completeModule(moduleId);
         ref.invalidate(learnProgressProvider);
-        return true;
+        return before.isCompleted(moduleId)
+            ? ModuleCompletion.alreadyDone
+            : ModuleCompletion.firstTime;
       } catch (error, stackTrace) {
         state = AsyncError(error, stackTrace);
-        return false;
+        return ModuleCompletion.failed;
       }
     }
+    var outcome = ModuleCompletion.firstTime;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final firstClaim = await ref
           .read(learnRepositoryProvider)
           .completeModule(userId, moduleId);
+      outcome = firstClaim
+          ? ModuleCompletion.firstTime
+          : ModuleCompletion.alreadyDone;
       if (firstClaim) {
         unawaited(
           ref.read(awardModuleProvider)(userId, moduleId).catchError((
@@ -102,11 +111,15 @@ class LearnActionController extends AsyncNotifier<void> {
         );
       }
     });
-    return !state.hasError;
+    return state.hasError ? ModuleCompletion.failed : outcome;
   }
 
-  /// Mengembalikan poin kuis baru yang diklaim (0 bila tidak ada yang baru).
-  Future<int> submitQuiz(String moduleId, int correctCount) async {
+  /// Menyimpan skor kuis (best-score) dan mengembalikan status eksplisit.
+  ///
+  /// Dipanggil otomatis begitu kuis selesai, sehingga hasil tidak bergantung
+  /// pada satu ketukan tombol klaim. Kegagalan tidak lagi disamarkan sebagai
+  /// "tidak ada poin baru".
+  Future<QuizSubmission> submitQuiz(String moduleId, int correctCount) async {
     final userId = ref.read(historyUserIdProvider);
     if (userId == null) {
       try {
@@ -114,10 +127,12 @@ class LearnActionController extends AsyncNotifier<void> {
             .read(learnLocalDatasourceProvider)
             .submitQuiz(moduleId, correctCount);
         ref.invalidate(learnProgressProvider);
-        return fresh;
+        return fresh > 0
+            ? QuizSubmission(status: QuizSaveStatus.saved, points: fresh)
+            : const QuizSubmission.unchanged();
       } catch (error, stackTrace) {
         state = AsyncError(error, stackTrace);
-        return 0;
+        return const QuizSubmission.failed();
       }
     }
     var awarded = 0;
@@ -138,6 +153,9 @@ class LearnActionController extends AsyncNotifier<void> {
         );
       }
     });
-    return state.hasError ? 0 : awarded;
+    if (state.hasError) return const QuizSubmission.failed();
+    return awarded > 0
+        ? QuizSubmission(status: QuizSaveStatus.saved, points: awarded)
+        : const QuizSubmission.unchanged();
   }
 }
