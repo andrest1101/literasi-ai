@@ -236,7 +236,7 @@ void main() {
         ),
       );
 
-      expect(find.text(AppStrings.learnModuleContinue), findsWidgets);
+      expect(find.text(AppStrings.learnModuleAgain), findsWidgets);
       expect(find.text(AppStrings.learnModuleDone), findsWidgets);
       expect(find.text(AppStrings.learnModuleStart), findsWidgets);
       expect(find.byType(FilledButton), findsNWidgets(2));

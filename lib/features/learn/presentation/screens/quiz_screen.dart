@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,14 +8,18 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../history/presentation/providers/history_providers.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
+import '../../domain/entities/course_module.dart';
 import '../../domain/entities/quiz_question.dart';
+import '../../domain/entities/quiz_submission.dart';
 import '../providers/learn_providers.dart';
 
-/// Kuis 3 soal: 1 soal per halaman, terkunci berurutan.
+/// Kuis berurutan: 1 soal per halaman, jawaban terkunci, bisa kembali ke
+/// soal yang sudah dijawab untuk ditinjau.
 ///
-/// Pola heterogen vs kartu modul: progress dots atas, kartu soal putih,
-/// opsi sebagai radio card berwarna saat dikunci (hijau benar / merah salah
-/// + penjelasan), hasil akhir berupa panel skor + klaim poin best-score.
+/// Pola heterogen vs kartu modul: progres dots atas (bernomor, status
+/// terjawab/aktif), kartu soal putih, opsi sebagai radio card berwarna saat
+/// dikunci (hijau benar / merah salah + penjelasan), hasil akhir berupa panel
+/// skor + status penyimpanan.
 class QuizScreen extends ConsumerStatefulWidget {
   const QuizScreen({super.key, required this.moduleId});
 
@@ -25,13 +31,22 @@ class QuizScreen extends ConsumerStatefulWidget {
 
 class _QuizScreenState extends ConsumerState<QuizScreen> {
   final _pager = PageController();
+  final List<int?> _picks = <int?>[];
+  CourseModule? _module;
   int _index = 0;
-  int? _selected;
-  bool _locked = false;
-  final _answers = <int>[];
   bool _finished = false;
-  int _claimed = 0;
-  bool _claiming = false;
+  bool _submitting = false;
+  QuizSubmission? _outcome;
+
+  @override
+  void initState() {
+    super.initState();
+    final module = ref
+        .read(learnContentProvider)
+        .where((m) => m.id == widget.moduleId)
+        .firstOrNull;
+    _module = module;
+  }
 
   @override
   void dispose() {
@@ -39,56 +54,146 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     super.dispose();
   }
 
+  /// Jumlah soal modul yang sedang dikaji.
+  int get _quizTotal => _module?.quiz.length ?? 0;
+
+  bool _answered(int questionIndex) =>
+      questionIndex < _picks.length && _picks[questionIndex] != null;
+
+  /// Indeks soal terakhir yang bisa dikunjungi: semua soal yang dijawab,
+  /// atau soal berikutnya yang belum dijawab untuk diposisikan.
+  int get _furthestQuestion {
+    for (var i = 0; i < _quizTotal; i++) {
+      if (!_answered(i)) return i;
+    }
+    return _quizTotal;
+  }
+
+  bool _canVisit(int questionIndex) =>
+      questionIndex < _quizTotal && questionIndex <= _furthestQuestion;
+
+  int get _correctCount {
+    final questions = _module?.quiz ?? const <QuizQuestion>[];
+    var correct = 0;
+    for (var i = 0; i < questions.length; i++) {
+      final answer = i < _picks.length ? _picks[i] : null;
+      if (answer != null && questions[i].isCorrect(answer)) {
+        correct++;
+      }
+    }
+    return correct;
+  }
+
   void _choose(int option) {
-    if (_locked || _finished) return;
+    if (_finished || _answered(_index)) return;
     setState(() {
-      _selected = option;
-      _locked = true;
+      while (_picks.length <= _index) {
+        _picks.add(null);
+      }
+      _picks[_index] = option;
     });
   }
 
-  void _next(int total) {
-    if (!_locked) return;
-    _answers.add(_selected ?? -1);
-    if (_index >= total - 1) {
-      setState(() => _finished = true);
+  void _jumpTo(int questionIndex) {
+    if (_finished || !_canVisit(questionIndex) || questionIndex == _index) {
       return;
     }
-    setState(() {
-      _index++;
-      _selected = null;
-      _locked = false;
-    });
-    _pager.nextPage(
+    setState(() => _index = questionIndex);
+    _pager.animateToPage(
+      questionIndex,
       duration: const Duration(milliseconds: 280),
       curve: Curves.easeOutCubic,
     );
   }
 
-  Future<void> _claim(int correct) async {
-    if (_claiming || _claimed > 0) return;
-    setState(() => _claiming = true);
-    final fresh = await ref
+  void _advance() {
+    if (!_answered(_index)) return;
+    if (_index >= _quizTotal - 1) {
+      unawaited(_finish());
+      return;
+    }
+    final next = _index + 1;
+    setState(() => _index = next);
+    _pager.animateToPage(
+      next,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  Future<void> _finish() async {
+    if (_finished) return;
+    setState(() => _finished = true);
+    final correct = _correctCount;
+    await _submitQuiz(correct);
+  }
+
+  Future<void> _submitQuiz(int correct) async {
+    if (_submitting) return;
+    setState(() => _submitting = true);
+    final submission = await ref
         .read(learnActionProvider.notifier)
         .submitQuiz(widget.moduleId, correct);
     if (!mounted) return;
-    final isGuest = ref.read(historyUserIdProvider) == null;
     setState(() {
-      _claiming = false;
-      _claimed = fresh;
+      _submitting = false;
+      _outcome = submission;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          fresh > 0
-              ? isGuest
-                    ? AppStrings.learnQuizLocalSaved
-                    : '$fresh ${AppStrings.learnQuizClaimed}'
-              : AppStrings.learnQuizNoNew,
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    switch (submission.status) {
+      case QuizSaveStatus.failed:
+        messenger.showSnackBar(
+          SnackBar(
+            content: const Text(AppStrings.learnQuizSaveFailed),
+            backgroundColor: AppColors.danger,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      case QuizSaveStatus.saved:
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              submission.points > 0
+                  ? AppStrings.learnQuizClaimedHint
+                  : AppStrings.learnQuizNoNew,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            backgroundColor: AppColors.successDark,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      case QuizSaveStatus.unchanged:
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text(AppStrings.learnQuizNoNew),
+            backgroundColor: AppColors.successDark,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+    }
+  }
+
+  void _retryQuiz() {
+    setState(() {
+      _index = 0;
+      _picks.clear();
+      _finished = false;
+      _outcome = null;
+      _submitting = false;
+    });
+    _pager.jumpToPage(0);
+  }
+
+  List<int> get _answers {
+    final questions = _module?.quiz ?? const <QuizQuestion>[];
+    return [
+      for (var i = 0; i < questions.length; i++)
+        (i < _picks.length ? _picks[i] : null) ?? -1,
+    ];
   }
 
   @override
@@ -103,11 +208,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         body: const Center(child: Text('Kuis tidak ditemukan.')),
       );
     }
-    final correct = [
-      for (var i = 0; i < _answers.length; i++)
-        if (module.quiz[i].isCorrect(_answers[i])) 1,
-    ].length;
-    final perfect = correct >= module.quiz.length;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -145,29 +245,27 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           constraints: const BoxConstraints(maxWidth: 680),
           child: _finished
               ? _ResultPanel(
-                  correct: correct,
+                  correct: _correctCount,
                   total: module.quiz.length,
-                  perfect: perfect,
-                  claimed: _claimed,
-                  claiming: _claiming,
+                  perfect: _correctCount >= module.quiz.length,
+                  outcome: _outcome,
+                  submitting: _submitting,
                   isGuest: ref.read(historyUserIdProvider) == null,
-                  answers: List.of(_answers),
+                  answers: _answers,
                   questions: module.quiz,
-                  onClaim: () => _claim(correct),
-                  onRetry: () => setState(() {
-                    _index = 0;
-                    _selected = null;
-                    _locked = false;
-                    _answers.clear();
-                    _finished = false;
-                    _claimed = 0;
-                    _pager.jumpToPage(0);
-                  }),
+                  onRetryQuiz: _retryQuiz,
+                  onRetrySave: () => unawaited(_submitQuiz(_correctCount)),
                   onBack: () => Navigator.of(context).maybePop(),
                 )
               : Column(
                   children: [
-                    _ProgressDots(index: _index, total: module.quiz.length),
+                    _QuestionOverview(
+                      picks: _picks,
+                      index: _index,
+                      enabledUntil: _furthestQuestion,
+                      total: module.quiz.length,
+                      onSelect: _jumpTo,
+                    ),
                     Expanded(
                       child: PageView.builder(
                         controller: _pager,
@@ -175,6 +273,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         itemCount: module.quiz.length,
                         itemBuilder: (context, i) {
                           final q = module.quiz[i];
+                          final answered = _answered(i);
                           return SingleChildScrollView(
                             padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
                             child: Column(
@@ -204,30 +303,30 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                   if (o > 0) const SizedBox(height: 10),
                                   _OptionCard(
                                     text: q.options[o],
-                                    state: !_locked
+                                    state: !answered
                                         ? _OptionState.idle
                                         : o == q.correctIndex
                                         ? _OptionState.correct
-                                        : o == _selected
+                                        : o == _picks[i]
                                         ? _OptionState.wrong
                                         : _OptionState.dimmed,
-                                    onTap: () => _choose(o),
+                                    onTap: answered ? null : () => _choose(o),
                                   ),
                                 ],
-                                if (_locked) ...[
+                                if (answered) ...[
                                   const SizedBox(height: 12),
                                   Container(
                                     padding: const EdgeInsets.all(13),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(15),
                                       color:
-                                          (_selected == q.correctIndex
+                                          (_picks[i] == q.correctIndex
                                                   ? AppColors.success
                                                   : AppColors.danger)
                                               .withValues(alpha: 0.08),
                                       border: Border.all(
                                         color:
-                                            (_selected == q.correctIndex
+                                            (_picks[i] == q.correctIndex
                                                     ? AppColors.success
                                                     : AppColors.danger)
                                                 .withValues(alpha: 0.3),
@@ -238,11 +337,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Icon(
-                                          _selected == q.correctIndex
+                                          _picks[i] == q.correctIndex
                                               ? Icons.check_circle_rounded
                                               : Icons.cancel_rounded,
                                           size: 19,
-                                          color: _selected == q.correctIndex
+                                          color: _picks[i] == q.correctIndex
                                               ? AppColors.success
                                               : AppColors.danger,
                                         ),
@@ -253,7 +352,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                _selected == q.correctIndex
+                                                _picks[i] == q.correctIndex
                                                     ? AppStrings
                                                           .learnQuizCorrect
                                                     : AppStrings.learnQuizWrong,
@@ -292,9 +391,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         height: 52,
                         width: double.infinity,
                         child: FilledButton(
-                          onPressed: _locked
-                              ? () => _next(module.quiz.length)
-                              : null,
+                          onPressed: _answered(_index) ? _advance : null,
                           style: FilledButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
@@ -308,7 +405,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                             ),
                           ),
                           child: Text(
-                            _index >= module.quiz.length - 1
+                            _index >= _quizTotal - 1
                                 ? AppStrings.learnQuizFinish
                                 : AppStrings.learnQuizNext,
                           ),
@@ -326,15 +423,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 enum _OptionState { idle, correct, wrong, dimmed }
 
 class _OptionCard extends StatelessWidget {
-  const _OptionCard({
-    required this.text,
-    required this.state,
-    required this.onTap,
-  });
+  const _OptionCard({required this.text, required this.state, this.onTap});
 
   final String text;
   final _OptionState state;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -417,33 +510,135 @@ class _OptionCard extends StatelessWidget {
   }
 }
 
-class _ProgressDots extends StatelessWidget {
-  const _ProgressDots({required this.index, required this.total});
+class _QuestionOverview extends StatelessWidget {
+  const _QuestionOverview({
+    required this.picks,
+    required this.index,
+    required this.enabledUntil,
+    required this.total,
+    required this.onSelect,
+  });
 
+  final List<int?> picks;
   final int index;
+  final int enabledUntil;
   final int total;
+  final void Function(int) onSelect;
+
+  bool _isAnswered(int questionIndex) =>
+      questionIndex < picks.length && picks[questionIndex] != null;
 
   @override
   Widget build(BuildContext context) {
+    final answeredCount = picks.where((p) => p != null).length.clamp(0, total);
+    final answeredLabel = AppStrings.learnQuizAnsweredLabel;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
       child: Row(
         children: [
           for (var i = 0; i < total; i++) ...[
-            if (i > 0) const SizedBox(width: 6),
-            Expanded(
-              child: Container(
-                height: 6,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(999),
-                  color: i <= index
-                      ? AppColors.primary
+            if (i > 0) const SizedBox(width: 8),
+            _QuestionDot(
+              key: ValueKey('quiz-dot-${i + 1}'),
+              index: i,
+              answered: _isAnswered(i),
+              active: i == index,
+              enabledUntil: enabledUntil,
+              onTap: onSelect,
+            ),
+          ],
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              '$answeredCount dari $total $answeredLabel',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textSecondary,
+                fontFeatures: [FontFeature.tabularFigures()],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuestionDot extends StatelessWidget {
+  const _QuestionDot({
+    super.key,
+    required this.index,
+    required this.answered,
+    required this.active,
+    required this.enabledUntil,
+    required this.onTap,
+  });
+
+  final int index;
+  final bool answered;
+  final bool active;
+  final int enabledUntil;
+  final void Function(int) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isEnabled = index < enabledUntil;
+    final fillColor = switch ((isEnabled, active, answered)) {
+      (true, true, _) => AppColors.primary,
+      (true, false, true) => AppColors.primary.withValues(alpha: 0.12),
+      _ => AppColors.neutral.withValues(alpha: 0.08),
+    };
+    final labelColor = switch ((isEnabled, active, answered)) {
+      (true, true, _) => Colors.white,
+      (true, false, true) => AppColors.primary,
+      _ => AppColors.textSecondary,
+    };
+    final stateLabel = answered
+        ? AppStrings.learnQuizAnsweredLabel
+        : AppStrings.learnQuizNotAnsweredLabel;
+    return Semantics(
+      button: isEnabled,
+      selected: active,
+      label: 'Soal ${index + 1}, $stateLabel${active ? ", sedang dibuka" : ""}',
+      child: SizedBox(
+        width: 44,
+        height: 44,
+        child: Center(
+          child: InkWell(
+            onTap: isEnabled ? () => onTap(index) : () {},
+            customBorder: const CircleBorder(),
+            child: Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: fillColor,
+                border: Border.all(
+                  color: isEnabled
+                      ? (active || answered
+                            ? AppColors.primary.withValues(alpha: 0.6)
+                            : AppColors.neutral.withValues(alpha: 0.25))
                       : AppColors.neutral.withValues(alpha: 0.2),
+                  width: 2,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  '${index + 1}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: labelColor,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
               ),
             ),
-          ],
-        ],
+          ),
+        ),
       ),
     );
   }
@@ -557,18 +752,179 @@ class _ReviewRow extends StatelessWidget {
   }
 }
 
+class _QuizStatusCard extends StatelessWidget {
+  const _QuizStatusCard({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    this.subtitle,
+    required this.backgroundColor,
+    required this.borderColor,
+    required this.textColor,
+    this.onActionLabel,
+    this.onAction,
+  });
+
+  final Widget icon;
+  final Color iconColor;
+  final String title;
+  final String? subtitle;
+  final Color backgroundColor;
+  final Color borderColor;
+  final Color textColor;
+  final String? onActionLabel;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: backgroundColor,
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: iconColor.withValues(alpha: 0.15),
+            ),
+            child: IconTheme(
+              data: IconThemeData(size: 22, color: iconColor),
+              child: icon,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: textColor,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      height: 1.5,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+                if (onActionLabel != null && onAction != null) ...[
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: FilledButton.icon(
+                      onPressed: onAction,
+                      icon: const Icon(Icons.refresh_rounded, size: 17),
+                      label: Text(onActionLabel!),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(13),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SaveFailedStatus extends StatelessWidget {
+  const _SaveFailedStatus({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: AppColors.danger.withValues(alpha: 0.06),
+        border: Border.all(color: AppColors.danger.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.cloud_off_rounded, size: 20, color: AppColors.danger),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  AppStrings.learnQuizSaveFailed,
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text(AppStrings.learnQuizRetrySave),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                textStyle: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ResultPanel extends StatelessWidget {
   const _ResultPanel({
     required this.correct,
     required this.total,
     required this.perfect,
-    required this.claimed,
-    required this.claiming,
+    required this.outcome,
+    required this.submitting,
     required this.isGuest,
     required this.answers,
     required this.questions,
-    required this.onClaim,
-    required this.onRetry,
+    required this.onRetryQuiz,
+    required this.onRetrySave,
     required this.onBack,
   });
 
@@ -578,8 +934,8 @@ class _ResultPanel extends StatelessWidget {
   /// Hasil sempurna (semua benar): hero hijau + catatan sempurna.
   /// Parsial memakai biru + hint belajar lagi. Tanpa string merendahkan.
   final bool perfect;
-  final int claimed;
-  final bool claiming;
+  final QuizSubmission? outcome;
+  final bool submitting;
   final bool isGuest;
 
   /// Jawaban user per soal (indeks opsi terpilih): dipakai daftar review.
@@ -587,8 +943,8 @@ class _ResultPanel extends StatelessWidget {
 
   /// Soal modul: dipakai kunci jawaban + teks opsi benar di review.
   final List<QuizQuestion> questions;
-  final VoidCallback onClaim;
-  final VoidCallback onRetry;
+  final VoidCallback onRetryQuiz;
+  final VoidCallback onRetrySave;
   final VoidCallback onBack;
 
   @override
@@ -622,45 +978,37 @@ class _ResultPanel extends StatelessWidget {
           const SizedBox(height: 14),
           _ReviewList(answers: answers, questions: questions),
           const SizedBox(height: 20),
-          if (claimed > 0)
+          if (submitting)
+            _QuizStatusCard(
+              icon: const CircularProgressIndicator(strokeWidth: 2.2),
+              iconColor: AppColors.primary,
+              title: AppStrings.learnQuizSaving,
+              subtitle: null,
+              backgroundColor: AppColors.neutral.withValues(alpha: 0.08),
+              borderColor: AppColors.neutral.withValues(alpha: 0.2),
+              textColor: AppColors.textPrimary,
+              onActionLabel: null,
+              onAction: null,
+            )
+          else if (outcome?.isFailed ?? false)
+            _SaveFailedStatus(onRetry: onRetrySave)
+          else if (outcome?.isSaved ?? false)
             _ClaimedStatus(
-              claimed: claimed,
+              claimed: outcome?.points ?? 0,
               isGuest: isGuest,
               onCountDone: () => HapticFeedback.mediumImpact(),
             )
           else
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: FilledButton.icon(
-                onPressed: claiming ? null : onClaim,
-                icon: claiming
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.emoji_events_outlined, size: 19),
-                label: Text(
-                  isGuest
-                      ? AppStrings.learnQuizLocalClaim
-                      : AppStrings.learnQuizClaim,
-                ),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: AppColors.neutral.withValues(
-                    alpha: 0.2,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  textStyle: const TextStyle(fontWeight: FontWeight.w800),
-                ),
-              ),
+            _QuizStatusCard(
+              icon: const Icon(Icons.emoji_events_outlined, size: 22),
+              iconColor: AppColors.successDark,
+              title: AppStrings.learnQuizNoNew,
+              subtitle: AppStrings.learnQuizBestSaved,
+              backgroundColor: AppColors.success.withValues(alpha: 0.08),
+              borderColor: AppColors.success.withValues(alpha: 0.35),
+              textColor: AppColors.successDark,
+              onActionLabel: null,
+              onAction: null,
             ),
           const SizedBox(height: 10),
           Row(
@@ -669,10 +1017,7 @@ class _ResultPanel extends StatelessWidget {
                 child: SizedBox(
                   height: 48,
                   child: OutlinedButton.icon(
-                    // Nonaktif permanen setelah klaim: status persisten di
-                    // atas adalah bukti klaim; menekan ulang hanya mengulang
-                    // request best-score yang idempoten.
-                    onPressed: claimed > 0 ? null : onRetry,
+                    onPressed: onRetryQuiz,
                     icon: const Icon(Icons.refresh_rounded, size: 18),
                     label: const Text(AppStrings.learnQuizRetry),
                     style: OutlinedButton.styleFrom(

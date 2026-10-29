@@ -32,10 +32,7 @@ class _FakeHistoryRepository implements HistoryRepository {
   }
 
   @override
-  Future<void> save({
-    required String userId,
-    required result,
-  }) async {}
+  Future<void> save({required String userId, required result}) async {}
 
   @override
   Future<void> delete({
@@ -151,10 +148,7 @@ void main() {
 
       // Bila stream langsung data, skeleton tidak tampil: tetap kunci
       // bahwa daftar modul render tanpa exception (regresi bentuk).
-      expect(
-        find.text('Kenali Judul Clickbait'),
-        findsWidgets,
-      );
+      expect(find.text('Kenali Judul Clickbait'), findsWidgets);
       expect(tester.takeException(), isNull);
     });
 

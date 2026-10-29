@@ -8,6 +8,7 @@ import 'package:literasi_ai/features/learn/data/datasources/learn_content_dataso
 import 'package:literasi_ai/features/learn/data/models/learn_progress_model.dart';
 import 'package:literasi_ai/features/learn/domain/entities/course_module.dart';
 import 'package:literasi_ai/features/learn/domain/entities/course_progress.dart';
+import 'package:literasi_ai/features/learn/domain/entities/quiz_submission.dart';
 import 'package:literasi_ai/features/learn/domain/repositories/learn_repository.dart';
 import 'package:literasi_ai/features/learn/presentation/providers/learn_providers.dart';
 import 'package:literasi_ai/features/learn/presentation/screens/course_detail_screen.dart';
@@ -111,6 +112,16 @@ void main() {
       expect(progress.completedCount, 0);
       expect(progress.bestFor('clickbait'), 0);
     });
+
+    test('membaca best score dari map bertingkat dan field legacy dotted', () {
+      final progress = LearnProgressModel.fromMap({
+        'quizBest': {'fakta-opini-satire': 4},
+        'quizBest.clickbait': 3,
+      });
+
+      expect(progress.bestFor('fakta-opini-satire'), 4);
+      expect(progress.bestFor('clickbait'), 3);
+    });
   });
 
   group('Learn providers', () {
@@ -123,9 +134,20 @@ void main() {
         );
         addTearDown(container.dispose);
         final actions = container.read(learnActionProvider.notifier);
-        expect(await actions.completeModule('clickbait'), isTrue);
-        expect(await actions.submitQuiz('clickbait', 2), 2);
-        expect(await actions.submitQuiz('clickbait', 1), 0);
+        expect(
+          await actions.completeModule('clickbait'),
+          ModuleCompletion.firstTime,
+        );
+        expect(
+          await actions.completeModule('clickbait'),
+          ModuleCompletion.alreadyDone,
+        );
+        final firstQuiz = await actions.submitQuiz('clickbait', 2);
+        expect(firstQuiz.status, QuizSaveStatus.saved);
+        expect(firstQuiz.points, 2);
+        final secondQuiz = await actions.submitQuiz('clickbait', 1);
+        expect(secondQuiz.status, QuizSaveStatus.unchanged);
+        expect(secondQuiz.points, 0);
         final progress = await container
             .read(learnLocalDatasourceProvider)
             .readProgress();
@@ -207,18 +229,21 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('kuis kunci jawaban dan klaim poin', (WidgetTester tester) async {
+  testWidgets('kuis: hasil tersimpan otomatis saat selesai', (
+    WidgetTester tester,
+  ) async {
     tester.view.physicalSize = const Size(800, 1400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
       tester.view.resetPhysicalSize();
       tester.view.resetDevicePixelRatio();
     });
+    final learn = _FakeLearnRepository();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           historyUserIdProvider.overrideWithValue('u1'),
-          learnRepositoryProvider.overrideWithValue(_FakeLearnRepository()),
+          learnRepositoryProvider.overrideWithValue(learn),
           scoreRepositoryProvider.overrideWithValue(_FakeScoreRepository()),
         ],
         child: const MaterialApp(home: QuizScreen(moduleId: 'clickbait')),
@@ -248,16 +273,16 @@ void main() {
     }
     expect(find.text('Hasil kuismu'), findsOneWidget);
     expect(find.text('3/3'), findsOneWidget);
-
-    await tester.tap(find.text('Klaim poin'));
+    // Hasil kuis otomatis tersimpan begitu kuis selesai (best-score 3/3).
     await tester.pumpAndSettle();
+    expect(learn.submits, 1);
     expect(find.textContaining('poin kuis diklaim'), findsWidgets);
-    // Status klaim persisten nonaktif: trofi + angka + sublabel tetap
-    // tampil (bukti klaim tidak menguap bersama snackbar).
-    expect(find.text('Sudah masuk ke skormu.'), findsOneWidget);
+    // Status klaim tampil langsung: trofi + angka + sublabel.
+    expect(find.text('Sudah masuk ke skormu.'), findsWidgets);
     expect(find.byIcon(Icons.check_circle_rounded), findsWidgets);
-    // Tombol klaim hilang (diganti status), Ulangi nonaktif permanen.
-    expect(find.text('Klaim poin'), findsNothing);
+    expect(find.byIcon(Icons.cloud_off_rounded), findsNothing);
+    // Ulangi kuis selalu aktif dari hasil.
+    expect(find.text('Ulangi kuis'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -308,6 +333,9 @@ void main() {
       find.text('Pelajari lagi bagian yang salah, lalu ulangi kuis.'),
       findsOneWidget,
     );
+    // Hasil parsial otomatis tersimpan sebagai best-score 2/3.
+    await tester.pumpAndSettle();
+    expect(find.text('Sudah masuk ke skormu.'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 }

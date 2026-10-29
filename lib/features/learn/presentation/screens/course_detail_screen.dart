@@ -6,6 +6,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../history/presentation/providers/history_providers.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
 import '../../domain/entities/course_module.dart';
+import '../../domain/entities/quiz_submission.dart';
 import '../providers/learn_providers.dart';
 import '../widgets/module_motif.dart';
 import 'quiz_screen.dart';
@@ -30,7 +31,11 @@ class CourseDetailScreen extends ConsumerStatefulWidget {
 class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
   bool _claiming = false;
   final _scrollController = ScrollController();
+  final GlobalKey _scrollKey = GlobalKey();
+  final Map<int, GlobalKey> _sectionKeys = {};
   double _readProgress = 0.0;
+  int _activeSection = 0;
+  int _moduleSectionCount = 0;
 
   static const _sectionIcons = [
     Icons.visibility_outlined,
@@ -43,6 +48,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_updateProgress);
+    final module = ref
+        .read(learnContentProvider)
+        .where((m) => m.id == widget.moduleId)
+        .firstOrNull;
+    _moduleSectionCount = module?.sections.length ?? 0;
   }
 
   @override
@@ -52,27 +62,67 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
     super.dispose();
   }
 
+  GlobalKey _sectionKeyFor(int index) {
+    return _sectionKeys.putIfAbsent(index, () => GlobalKey());
+  }
+
+  void _scrollToSection(int index) {
+    final sectionContext = _sectionKeys[index]?.currentContext;
+    if (sectionContext == null) return;
+    setState(() => _activeSection = index);
+    Scrollable.ensureVisible(
+      sectionContext,
+      alignment: 0.0,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
   void _updateProgress() {
     if (!_scrollController.hasClients) return;
     final max = _scrollController.position.maxScrollExtent;
     final value = max <= 0
         ? 1.0
         : (_scrollController.offset / max).clamp(0.0, 1.0);
-    if ((value - _readProgress).abs() > 0.005) {
-      setState(() => _readProgress = value);
+    final activeSection = _computeActiveSection(_moduleSectionCount);
+    if ((value - _readProgress).abs() > 0.005 ||
+        activeSection != _activeSection) {
+      setState(() {
+        _readProgress = value;
+        _activeSection = activeSection;
+      });
     }
+  }
+
+  /// Angka bagian aktif: seksi terakhir yang menyentuh kira-kira sepertiga
+  /// viewport setelah bagian aktif. Dipakai untuk penanda biru bagian yang
+  /// sedang dibaca.
+  int _computeActiveSection(int moduleSectionCount) {
+    final viewportContext = _scrollKey.currentContext;
+    if (viewportContext == null) return _activeSection;
+    final viewportBox = viewportContext.findRenderObject();
+    if (viewportBox is! RenderBox) return _activeSection;
+    final viewportTop = viewportBox.localToGlobal(Offset.zero).dy;
+    final viewportHeight = viewportBox.size.height;
+    final threshold = viewportHeight * 0.25;
+    var active = 0;
+    for (var i = 0; i < moduleSectionCount; i++) {
+      final context = _sectionKeys[i]?.currentContext;
+      if (context == null) continue;
+      final box = context.findRenderObject();
+      if (box is! RenderBox) continue;
+      final top = box.localToGlobal(Offset.zero).dy - viewportTop;
+      if (top <= threshold) {
+        active = i;
+      }
+    }
+    return active;
   }
 
   Future<void> _claim() async {
     if (_claiming) return;
-    final alreadyDone =
-        ref
-            .read(learnProgressProvider)
-            .valueOrNull
-            ?.isCompleted(widget.moduleId) ??
-        false;
     setState(() => _claiming = true);
-    final ok = await ref
+    final completion = await ref
         .read(learnActionProvider.notifier)
         .completeModule(widget.moduleId);
     if (!mounted) return;
@@ -80,13 +130,14 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
     setState(() => _claiming = false);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          !ok || alreadyDone
-              ? AppStrings.learnMarkedDoneAgain
-              : isGuest
-              ? AppStrings.learnMarkedDoneLocal
-              : AppStrings.learnMarkedDone,
-        ),
+        content: Text(switch (completion) {
+          ModuleCompletion.failed => AppStrings.learnMarkedDoneRetry,
+          ModuleCompletion.alreadyDone => AppStrings.learnMarkedDoneAgain,
+          ModuleCompletion.firstTime =>
+            isGuest
+                ? AppStrings.learnMarkedDoneLocal
+                : AppStrings.learnMarkedDone,
+        }),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -156,6 +207,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
         ),
       ),
       body: SingleChildScrollView(
+        key: _scrollKey,
         controller: _scrollController,
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
         child: Center(
@@ -166,11 +218,16 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
               children: [
                 _ModuleHero(moduleId: module.id, done: done),
                 const SizedBox(height: 14),
-                _ContentsCard(module: module),
+                _ContentsCard(
+                  module: module,
+                  activeSection: _activeSection,
+                  onSelect: _scrollToSection,
+                ),
                 const SizedBox(height: 18),
                 for (var i = 0; i < module.sections.length; i++) ...[
                   if (i > 0) const SizedBox(height: 14),
                   _ArticleSection(
+                    key: _sectionKeyFor(i),
                     number: i + 1,
                     icon: _sectionIcons[i % _sectionIcons.length],
                     heading: module.sections[i].heading,
@@ -178,6 +235,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                     featured: i == 0,
                     ink: motif.ink,
                     last: i == module.sections.length - 1,
+                    active: _activeSection == i,
                   ),
                 ],
               ],
@@ -228,7 +286,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
               SizedBox(
                 height: 46,
                 child: OutlinedButton.icon(
-                  onPressed: _claiming ? null : _claim,
+                  onPressed: _claiming || done ? null : _claim,
                   icon: _claiming
                       ? const SizedBox(
                           width: 17,
@@ -236,7 +294,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2.2),
                         )
                       : const Icon(Icons.emoji_events_outlined, size: 18),
-                  label: const Text(AppStrings.learnMarkDone),
+                  label: Text(
+                    done
+                        ? AppStrings.learnModuleDoneCta
+                        : AppStrings.learnMarkDone,
+                  ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: BorderSide(
@@ -439,9 +501,15 @@ class _HeroMotifPattern extends CustomPainter {
 /// judul tiap [CourseSection] + nomor motif modul (bukan nomor ghost
 /// dekoratif). Satu kartu putih, tanpa CTA (aksi milik sticky bottom bar).
 class _ContentsCard extends StatelessWidget {
-  const _ContentsCard({required this.module});
+  const _ContentsCard({
+    required this.module,
+    required this.activeSection,
+    required this.onSelect,
+  });
 
   final CourseModule module;
+  final int activeSection;
+  final void Function(int) onSelect;
 
   @override
   Widget build(BuildContext context) {
@@ -484,6 +552,8 @@ class _ContentsCard extends StatelessWidget {
               number: i + 1,
               heading: module.sections[i].heading,
               ink: motif.ink,
+              active: activeSection == i,
+              onSelect: () => onSelect(i),
             ),
           ],
         ],
@@ -496,55 +566,72 @@ class _ContentsCard extends StatelessWidget {
 ///
 /// Nomor memakai tint motif modul (identitas, bukan warna acak): konsisten
 /// dengan thumbnail daftar + medallion hero. Judul 1 baris ellipsis agar
-/// tidak mendorong kartu terlalu tinggi di layar kecil.
+/// tidak mendorong kartu terlalu tinggi di layar kecil. Baris bisa dipilih
+/// untuk scroll ke bagian yang sama (navigasi tajam dari daftar isi).
 class _ContentsRow extends StatelessWidget {
   const _ContentsRow({
     required this.number,
     required this.heading,
     required this.ink,
+    required this.active,
+    required this.onSelect,
   });
 
   final int number;
   final String heading;
   final Color ink;
+  final bool active;
+  final VoidCallback onSelect;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 30,
-          height: 30,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: ink.withValues(alpha: 0.12),
-          ),
-          child: Center(
-            child: Text(
-              '$number',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-                color: ink,
-                fontFeatures: const [FontFeature.tabularFigures()],
+    return Semantics(
+      label: heading,
+      selected: active,
+      button: true,
+      child: InkWell(
+        onTap: onSelect,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          child: Row(
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: ink.withValues(alpha: active ? 0.2 : 0.12),
+                ),
+                child: Center(
+                  child: Text(
+                    '$number',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: ink,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  heading,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            heading,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 13.5,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -557,9 +644,10 @@ class _ContentsRow extends StatelessWidget {
 /// pertama ([featured]) tetap aksen primer sebagai pembuka. Konektor
 /// terakhir diputus via [last] dari panjang seksi data (tanpa hardcode
 /// angka). Label `Bagian N`, heading, body, CTA tidak berubah
-/// (dikunci test).
+/// (dikunci test). [active] = seksi yang sedang dibaca (penanda biru).
 class _ArticleSection extends StatelessWidget {
   const _ArticleSection({
+    super.key,
     required this.number,
     required this.icon,
     required this.heading,
@@ -567,6 +655,7 @@ class _ArticleSection extends StatelessWidget {
     required this.ink,
     required this.last,
     this.featured = false,
+    this.active = false,
   });
 
   final int number;
@@ -576,6 +665,7 @@ class _ArticleSection extends StatelessWidget {
   final Color ink;
   final bool last;
   final bool featured;
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
@@ -583,7 +673,7 @@ class _ArticleSection extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _SectionRail(number: number, last: last),
+          _SectionRail(number: number, last: last, active: active),
           const SizedBox(width: 12),
           Expanded(
             child: Container(
@@ -674,13 +764,19 @@ class _ArticleSection extends StatelessWidget {
 /// 26px agar tidak menggeser kartu di layar 360px. Dekoratif
 /// (nomor nyata tetap di label `Bagian N` dalam kartu).
 class _SectionRail extends StatelessWidget {
-  const _SectionRail({required this.number, required this.last});
+  const _SectionRail({
+    required this.number,
+    required this.last,
+    this.active = false,
+  });
 
   final int number;
   final bool last;
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
+    final railColor = AppColors.primary.withValues(alpha: active ? 0.6 : 0.25);
     return ExcludeSemantics(
       child: SizedBox(
         width: 26,
@@ -693,7 +789,9 @@ class _SectionRail extends StatelessWidget {
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
-                color: AppColors.neutral.withValues(alpha: 0.55),
+                color: active
+                    ? AppColors.primary.withValues(alpha: 0.85)
+                    : AppColors.neutral.withValues(alpha: 0.55),
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
@@ -704,7 +802,7 @@ class _SectionRail extends StatelessWidget {
                   margin: const EdgeInsets.only(top: 8),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(1),
-                    color: AppColors.neutral.withValues(alpha: 0.25),
+                    color: railColor,
                   ),
                 ),
               ),

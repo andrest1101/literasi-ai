@@ -243,7 +243,8 @@ abstract final class AppStrings {
   static const String learnFeaturedStart = 'Mulai dari sini';
   static const String learnFeaturedContinue = 'Lanjutkan belajarmu';
   static const String learnModuleStart = 'Mulai';
-  static const String learnModuleContinue = 'Lanjutkan';
+  static const String learnModuleAgain = 'Ulangi';
+  static const String learnModuleDoneCta = 'Modul selesai';
   static const String learnAllDone = 'Semua modul selesai';
   static const String learnAllDoneHint =
       'Ulangi kuis mana pun untuk pertahankan skormu.';
@@ -261,6 +262,8 @@ abstract final class AppStrings {
   static const String learnMarkedDoneLocal =
       'Progres modul tersimpan di perangkat. Masuk untuk mengumpulkan poin.';
   static const String learnMarkedDoneAgain = 'Modul ini sudah selesai.';
+  static const String learnMarkedDoneRetry =
+      'Gagal menandai modul selesai. Coba lagi.';
   static const String learnQuizTitle = 'Kuis pemahaman';
   static const String learnQuizOf = 'Soal';
   static const String learnQuizNext = 'Lanjut';
@@ -284,6 +287,15 @@ abstract final class AppStrings {
       'Tidak ada poin baru. Skor terbaikmu bertahan.';
   static const String learnQuizRetry = 'Ulangi kuis';
   static const String learnQuizBack = 'Kembali ke modul';
+  static const String learnQuizSaving = 'Menyimpan hasil kuis...';
+  static const String learnQuizSaveFailed =
+      'Hasil kuis belum tersimpan. Periksa koneksi lalu coba lagi.';
+  static const String learnQuizRetrySave = 'Coba simpan lagi';
+  static const String learnQuizBestSaved = 'Skor terbaikmu sudah tersimpan.';
+  static const String learnQuizBestLabel = 'Skor terbaik kuis';
+  static const String learnQuizNotStarted = 'Kuis belum dikerjakan';
+  static const String learnQuizAnsweredLabel = 'sudah dijawab';
+  static const String learnQuizNotAnsweredLabel = 'belum dijawab';
   static const String homeProfileTitle1 = 'Kelola';
   static const String homeProfileTitle2 = 'profilmu.';
   static const String homeProfileSubtitle =
