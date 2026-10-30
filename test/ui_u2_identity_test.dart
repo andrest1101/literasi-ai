@@ -69,6 +69,44 @@ Element? _parentOf(Element element) {
   return parent;
 }
 
+/// Menjawab seluruh soal modul lewat data katalog, bukan teks opsi hardcoded.
+///
+/// [wrongAt] membuat satu soal dijawab salah untuk menguji skor parsial.
+Future<void> _answerModule(
+  WidgetTester tester,
+  String moduleId, {
+  int wrongAt = -1,
+}) async {
+  final module = LearnContentDatasource().byId(moduleId)!;
+  for (var i = 0; i < module.quiz.length; i++) {
+    final question = module.quiz[i];
+    final isWrong = i == wrongAt;
+    final optionIndex = isWrong
+        ? (question.correctIndex + 1) % question.options.length
+        : question.correctIndex;
+    final option = find.byKey(ValueKey('quiz-option-$i-$optionIndex'));
+    await tester.ensureVisible(option);
+    await tester.pumpAndSettle();
+    await tester.tap(option);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        isWrong ? AppStrings.learnQuizWrong : AppStrings.learnQuizCorrect,
+      ),
+      findsOneWidget,
+    );
+    final next = find.text(
+      i == module.quiz.length - 1
+          ? AppStrings.learnQuizFinish
+          : AppStrings.learnQuizNext,
+    );
+    await tester.ensureVisible(next);
+    await tester.pumpAndSettle();
+    await tester.tap(next);
+    await tester.pumpAndSettle();
+  }
+}
+
 void main() {
   group('U2.1 aksen header per tab', () {
     testWidgets('default tetap biru brand (kompatibel mundur)', (tester) async {
@@ -295,28 +333,19 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      const correctTexts = [
-        'HEBOH! Minum ini sembuh total dalam semalam, sebarkan!',
-        'Periksa penerbit, tanggal, dan isi artikel',
-        'Karena hoaks dirancang memicu reaksi sebelum berpikir',
-      ];
-      for (var i = 0; i < 3; i++) {
-        final option = find.text(correctTexts[i]);
-        await tester.ensureVisible(option);
-        await tester.pumpAndSettle();
-        await tester.tap(option);
-        await tester.pumpAndSettle();
-        final next = find.text(i == 2 ? 'Lihat hasil' : 'Lanjut');
-        await tester.ensureVisible(next);
-        await tester.pumpAndSettle();
-        await tester.tap(next);
-        await tester.pumpAndSettle();
-      }
+      await _answerModule(tester, 'clickbait');
       expect(find.text('Hasil kuismu'), findsOneWidget);
       expect(find.text('Tinjau jawabanmu'), findsOneWidget);
       expect(find.text('Soal 1'), findsOneWidget);
       expect(find.text('Soal 3'), findsOneWidget);
-      expect(find.text(correctTexts[0]), findsWidgets);
+      final firstQuestion = LearnContentDatasource()
+          .byId('clickbait')!
+          .quiz
+          .first;
+      expect(
+        find.text(firstQuestion.options[firstQuestion.correctIndex]),
+        findsWidgets,
+      );
       expect(tester.takeException(), isNull);
     });
   });
