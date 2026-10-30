@@ -216,15 +216,43 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        toolbarHeight: 64,
+        toolbarHeight: 72,
         leadingWidth: 56,
         leading: SessionBackButton(
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: Text(
-          '${AppStrings.learnQuizTitle} - ${module.title}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        // Dua baris: eyebrow tetap + judul modul penuh. Judul tidak lagi
+        // dipaksa satu baris sehingga nama modul panjang tetap terbaca.
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppStrings.learnQuizTitle.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.8,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Semantics(
+              label: '${AppStrings.learnQuizTitle}: ${module.title}',
+              child: Text(
+                module.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 15,
+                  height: 1.15,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.2,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ],
         ),
         centerTitle: false,
         titleTextStyle: const TextStyle(
@@ -302,6 +330,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                 for (var o = 0; o < q.options.length; o++) ...[
                                   if (o > 0) const SizedBox(height: 10),
                                   _OptionCard(
+                                    key: ValueKey('quiz-option-$i-$o'),
+                                    letter: String.fromCharCode(65 + o),
                                     text: q.options[o],
                                     state: !answered
                                         ? _OptionState.idle
@@ -423,8 +453,15 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 enum _OptionState { idle, correct, wrong, dimmed }
 
 class _OptionCard extends StatelessWidget {
-  const _OptionCard({required this.text, required this.state, this.onTap});
+  const _OptionCard({
+    super.key,
+    required this.letter,
+    required this.text,
+    required this.state,
+    this.onTap,
+  });
 
+  final String letter;
   final String text;
   final _OptionState state;
   final VoidCallback? onTap;
@@ -453,56 +490,76 @@ class _OptionCard extends StatelessWidget {
         AppColors.textPrimary,
       ),
     };
-    return Material(
-      color: bg,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: state == _OptionState.idle ? onTap : null,
+    final badgeColor = switch (state) {
+      _OptionState.correct => AppColors.success,
+      _OptionState.wrong => AppColors.danger,
+      _ => AppColors.neutral.withValues(alpha: 0.2),
+    };
+    return Semantics(
+      button: state == _OptionState.idle,
+      label: 'Opsi $letter. $text',
+      child: Material(
+        color: bg,
         borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: border, width: 1.3),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 26,
-                height: 26,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: state == _OptionState.correct
-                      ? AppColors.success
-                      : state == _OptionState.wrong
-                      ? AppColors.danger
-                      : AppColors.neutral.withValues(alpha: 0.2),
-                ),
-                child: Icon(
-                  state == _OptionState.correct
-                      ? Icons.check_rounded
-                      : state == _OptionState.wrong
-                      ? Icons.close_rounded
-                      : Icons.circle_outlined,
-                  size: 15,
-                  color: state == _OptionState.idle
-                      ? AppColors.textSecondary
-                      : Colors.white,
-                ),
-              ),
-              const SizedBox(width: 11),
-              Expanded(
-                child: Text(
-                  text,
-                  style: TextStyle(
-                    fontSize: 14,
-                    height: 1.5,
-                    fontWeight: FontWeight.w600,
-                    color: fg,
+        child: InkWell(
+          onTap: state == _OptionState.idle ? onTap : null,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: border, width: 1.3),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: badgeColor,
+                  ),
+                  child: Text(
+                    letter,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: state == _OptionState.idle
+                          ? AppColors.textSecondary
+                          : Colors.white,
+                    ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: 14,
+                      height: 1.5,
+                      fontWeight: FontWeight.w600,
+                      color: fg,
+                    ),
+                  ),
+                ),
+                if (state == _OptionState.correct) ...[
+                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    size: 20,
+                    color: AppColors.success,
+                  ),
+                ] else if (state == _OptionState.wrong) ...[
+                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.cancel_rounded,
+                    size: 20,
+                    color: AppColors.danger,
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
       ),
@@ -510,6 +567,11 @@ class _OptionCard extends StatelessWidget {
   }
 }
 
+/// Header progres kuis: satu baris status + deretan segmen bernomor.
+///
+/// Desain ini menggantikan deretan dot selebar tetap yang dulu mendorong
+/// penghitung "0 dari 4 sudah dijawab" sampai terpotong. Segmen memakai
+/// [Expanded] sehingga jumlah soal berapa pun tetap muat tanpa ellipsis.
 class _QuestionOverview extends StatelessWidget {
   const _QuestionOverview({
     required this.picks,
@@ -531,35 +593,64 @@ class _QuestionOverview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final answeredCount = picks.where((p) => p != null).length.clamp(0, total);
-    final answeredLabel = AppStrings.learnQuizAnsweredLabel;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (var i = 0; i < total; i++) ...[
-            if (i > 0) const SizedBox(width: 8),
-            _QuestionDot(
-              key: ValueKey('quiz-dot-${i + 1}'),
-              index: i,
-              answered: _isAnswered(i),
-              active: i == index,
-              enabledUntil: enabledUntil,
-              onTap: onSelect,
-            ),
-          ],
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              '$answeredCount dari $total $answeredLabel',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textSecondary,
-                fontFeatures: [FontFeature.tabularFigures()],
+          Row(
+            children: [
+              // Label kiri diskalakan turun bila layar sangat sempit agar
+              // tidak pernah terpotong atau menabrak penghitung di kanan.
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '${AppStrings.learnQuizOf} ${index + 1} '
+                    '${AppStrings.learnQuizFrom} $total',
+                    maxLines: 1,
+                    softWrap: false,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 10),
+              Text(
+                '$answeredCount/$total '
+                '${AppStrings.learnQuizAnsweredShort}',
+                maxLines: 1,
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textSecondary,
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              for (var i = 0; i < total; i++) ...[
+                if (i > 0) const SizedBox(width: 6),
+                Expanded(
+                  child: _QuestionStep(
+                    key: ValueKey('quiz-step-$i'),
+                    index: i,
+                    answered: _isAnswered(i),
+                    active: i == index,
+                    enabledUntil: enabledUntil,
+                    onTap: onSelect,
+                  ),
+                ),
+              ],
+            ],
           ),
         ],
       ),
@@ -567,8 +658,13 @@ class _QuestionOverview extends StatelessWidget {
   }
 }
 
-class _QuestionDot extends StatelessWidget {
-  const _QuestionDot({
+/// Satu segmen bernomor pada header progres.
+///
+/// Status memakai tiga tingkat yang jelas: aktif (biru solid), terjawab
+/// (biru tint), dan terkunci (abu). Nomor tetap terlihat di semua status
+/// agar orientasi soal tidak hilang.
+class _QuestionStep extends StatelessWidget {
+  const _QuestionStep({
     super.key,
     required this.index,
     required this.answered,
@@ -589,7 +685,13 @@ class _QuestionDot extends StatelessWidget {
     final fillColor = switch ((isEnabled, active, answered)) {
       (true, true, _) => AppColors.primary,
       (true, false, true) => AppColors.primary.withValues(alpha: 0.12),
-      _ => AppColors.neutral.withValues(alpha: 0.08),
+      (true, false, false) => AppColors.neutral.withValues(alpha: 0.08),
+      _ => AppColors.neutral.withValues(alpha: 0.05),
+    };
+    final borderColor = switch ((isEnabled, active, answered)) {
+      (true, true, _) => AppColors.primary,
+      (true, _, true) => AppColors.primary.withValues(alpha: 0.5),
+      _ => AppColors.neutral.withValues(alpha: 0.2),
     };
     final labelColor = switch ((isEnabled, active, answered)) {
       (true, true, _) => Colors.white,
@@ -602,38 +704,30 @@ class _QuestionDot extends StatelessWidget {
     return Semantics(
       button: isEnabled,
       selected: active,
-      label: 'Soal ${index + 1}, $stateLabel${active ? ", sedang dibuka" : ""}',
+      label:
+          '${AppStrings.learnQuizOf} ${index + 1}, $stateLabel'
+          '${active ? ', sedang dibuka' : ''}',
       child: SizedBox(
-        width: 44,
-        height: 44,
-        child: Center(
+        height: 40,
+        child: Material(
+          color: fillColor,
+          borderRadius: BorderRadius.circular(12),
           child: InkWell(
-            onTap: isEnabled ? () => onTap(index) : () {},
-            customBorder: const CircleBorder(),
+            onTap: isEnabled ? () => onTap(index) : null,
+            borderRadius: BorderRadius.circular(12),
             child: Container(
-              width: 34,
-              height: 34,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: fillColor,
-                border: Border.all(
-                  color: isEnabled
-                      ? (active || answered
-                            ? AppColors.primary.withValues(alpha: 0.6)
-                            : AppColors.neutral.withValues(alpha: 0.25))
-                      : AppColors.neutral.withValues(alpha: 0.2),
-                  width: 2,
-                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderColor, width: 1.2),
               ),
-              child: Center(
-                child: Text(
-                  '${index + 1}',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: labelColor,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
+              child: Text(
+                '${index + 1}',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: labelColor,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
             ),

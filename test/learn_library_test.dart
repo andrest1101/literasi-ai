@@ -134,10 +134,10 @@ void main() {
   });
 
   group('Q2 motif satu sumber', () {
-    test('sembilan modul memiliki motif berbeda dari accentSeed data', () {
+    test('dua belas modul memiliki motif berbeda dari accentSeed data', () {
       final modules = LearnContentDatasource().modules();
       final motifs = modules.map((m) => motifForModule(m.accentSeed)).toList();
-      expect(motifs.map((m) => m.icon).toSet(), hasLength(9));
+      expect(motifs.map((m) => m.icon).toSet(), hasLength(12));
       expect(motifs.map((m) => m.tint).toSet(), hasLength(6));
     });
   });
@@ -162,7 +162,7 @@ void main() {
     testWidgets('progres kosong: rekomendasi bisa digeser', (tester) async {
       await _pumpList(tester, const CourseProgress());
 
-      expect(find.byType(ModuleRow), findsNWidgets(8));
+      expect(find.byType(ModuleRow), findsNWidgets(11));
       expect(find.text(AppStrings.learnPopularModules), findsOneWidget);
       expect(find.textContaining(AppStrings.learnAllModules), findsOneWidget);
       expect(find.text(AppStrings.learnFeaturedStart), findsOneWidget);
@@ -213,6 +213,9 @@ void main() {
             'anti-phishing',
             'konten-ai-deepfake',
             'fakta-opini-satire',
+            'privasi-data',
+            'jejak-digital',
+            'algoritma-filter-bubble',
           ],
         ),
       );
@@ -248,7 +251,7 @@ void main() {
 
       // Baris compact memakai Material permukaan polos: tidak ada
       // Container ber-border di dalam ModuleRow non-featured.
-      expect(find.byType(ModuleRow), findsNWidgets(8));
+      expect(find.byType(ModuleRow), findsNWidgets(11));
       expect(tester.takeException(), isNull);
     });
   });
@@ -310,6 +313,9 @@ void main() {
         'anti-phishing',
         'konten-ai-deepfake',
         'fakta-opini-satire',
+        'privasi-data',
+        'jejak-digital',
+        'algoritma-filter-bubble',
       ]) {
         await tester.pumpWidget(
           ProviderScope(

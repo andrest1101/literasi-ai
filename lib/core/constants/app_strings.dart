@@ -266,6 +266,8 @@ abstract final class AppStrings {
       'Gagal menandai modul selesai. Coba lagi.';
   static const String learnQuizTitle = 'Kuis pemahaman';
   static const String learnQuizOf = 'Soal';
+  static const String learnQuizFrom = 'dari';
+  static const String learnQuizAnsweredShort = 'dijawab';
   static const String learnQuizNext = 'Lanjut';
   static const String learnQuizFinish = 'Lihat hasil';
   static const String learnQuizCorrect = 'Benar!';

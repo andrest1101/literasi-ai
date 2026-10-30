@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:literasi_ai/app/home_screen.dart';
+import 'package:literasi_ai/core/constants/app_strings.dart';
 import 'package:literasi_ai/features/history/presentation/providers/history_providers.dart';
 import 'package:literasi_ai/features/learn/data/datasources/learn_content_datasource.dart';
 import 'package:literasi_ai/features/learn/data/models/learn_progress_model.dart';
@@ -74,11 +75,49 @@ class _FakeScoreRepository implements ScoreRepository {
   }
 }
 
+/// Menjawab seluruh soal modul lewat data konten, bukan teks opsi hardcoded.
+///
+/// [wrongAt] membuat satu soal dijawab salah untuk menguji skor parsial.
+Future<void> _answerModule(
+  WidgetTester tester,
+  String moduleId, {
+  int wrongAt = -1,
+}) async {
+  final module = LearnContentDatasource().byId(moduleId)!;
+  for (var i = 0; i < module.quiz.length; i++) {
+    final question = module.quiz[i];
+    final isWrong = i == wrongAt;
+    final optionIndex = isWrong
+        ? (question.correctIndex + 1) % question.options.length
+        : question.correctIndex;
+    final option = find.byKey(ValueKey('quiz-option-$i-$optionIndex'));
+    await tester.ensureVisible(option);
+    await tester.pumpAndSettle();
+    await tester.tap(option);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        isWrong ? AppStrings.learnQuizWrong : AppStrings.learnQuizCorrect,
+      ),
+      findsOneWidget,
+    );
+    final next = find.text(
+      i == module.quiz.length - 1
+          ? AppStrings.learnQuizFinish
+          : AppStrings.learnQuizNext,
+    );
+    await tester.ensureVisible(next);
+    await tester.pumpAndSettle();
+    await tester.tap(next);
+    await tester.pumpAndSettle();
+  }
+}
+
 void main() {
   group('Katalog modul literasi digital', () {
-    test('9 modul unik dengan materi dan kuis yang lengkap', () {
+    test('12 modul unik dengan materi dan kuis yang lengkap', () {
       final modules = LearnContentDatasource().modules();
-      expect(modules, hasLength(9));
+      expect(modules, hasLength(12));
       expect(modules.map((m) => m.id), [
         'clickbait',
         'gambar-manipulasi',
@@ -89,6 +128,9 @@ void main() {
         'anti-phishing',
         'konten-ai-deepfake',
         'fakta-opini-satire',
+        'privasi-data',
+        'jejak-digital',
+        'algoritma-filter-bubble',
       ]);
       for (final module in modules) {
         expect(module.sections, hasLength(4));
@@ -99,7 +141,28 @@ void main() {
           expect(q.explanation.isNotEmpty, isTrue);
         }
       }
-      expect(modules.map((m) => m.id).toSet(), hasLength(9));
+      expect(modules.map((m) => m.id).toSet(), hasLength(12));
+    });
+
+    test('distribusi jawaban benar tersebar, tidak menumpuk di satu opsi', () {
+      final modules = LearnContentDatasource().modules();
+      final perIndex = List<int>.filled(4, 0);
+      for (final module in modules) {
+        final indices = module.quiz.map((q) => q.correctIndex).toSet();
+        expect(
+          indices.length,
+          greaterThanOrEqualTo(2),
+          reason: '${module.id} memakai satu posisi jawaban terus',
+        );
+        for (final q in module.quiz) {
+          perIndex[q.correctIndex]++;
+        }
+      }
+      final total = perIndex.reduce((a, b) => a + b);
+      expect(perIndex.every((count) => count > 0), isTrue);
+      for (final count in perIndex) {
+        expect(count / total, lessThanOrEqualTo(0.3));
+      }
     });
   });
 
@@ -225,7 +288,7 @@ void main() {
     await tester.tap(quizButton);
     await tester.pumpAndSettle();
     expect(find.byType(QuizScreen), findsOneWidget);
-    expect(find.textContaining('Soal 1/3'), findsOneWidget);
+    expect(find.textContaining('Soal 1 dari 3'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -251,26 +314,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Jawaban benar per soal modul clickbait (indeks 0, 1, 1).
-    const correctTexts = [
-      'HEBOH! Minum ini sembuh total dalam semalam, sebarkan!',
-      'Periksa penerbit, tanggal, dan isi artikel',
-      'Karena hoaks dirancang memicu reaksi sebelum berpikir',
-    ];
-    for (var i = 0; i < 3; i++) {
-      final option = find.text(correctTexts[i]);
-      await tester.ensureVisible(option);
-      await tester.pumpAndSettle();
-      await tester.tap(option);
-      await tester.pumpAndSettle();
-      // Penjelasan tampil = jawaban terkunci benar.
-      expect(find.text('Benar!'), findsOneWidget);
-      final next = find.text(i == 2 ? 'Lihat hasil' : 'Lanjut');
-      await tester.ensureVisible(next);
-      await tester.pumpAndSettle();
-      await tester.tap(next);
-      await tester.pumpAndSettle();
-    }
+    // Semua soal clickbait dijawab benar lewat data katalog.
+    await _answerModule(tester, 'clickbait');
     expect(find.text('Hasil kuismu'), findsOneWidget);
     expect(find.text('3/3'), findsOneWidget);
     // Hasil kuis otomatis tersimpan begitu kuis selesai (best-score 3/3).
@@ -307,24 +352,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // 2 benar 1 salah: jawab soal terakhir dengan opsi salah.
-    const answers = [
-      'HEBOH! Minum ini sembuh total dalam semalam, sebarkan!',
-      'Periksa penerbit, tanggal, dan isi artikel',
-      'Karena emosi membuat kuota internet habis',
-    ];
-    for (var i = 0; i < 3; i++) {
-      final option = find.text(answers[i]);
-      await tester.ensureVisible(option);
-      await tester.pumpAndSettle();
-      await tester.tap(option);
-      await tester.pumpAndSettle();
-      final next = find.text(i == 2 ? 'Lihat hasil' : 'Lanjut');
-      await tester.ensureVisible(next);
-      await tester.pumpAndSettle();
-      await tester.tap(next);
-      await tester.pumpAndSettle();
-    }
+    // 2 benar 1 salah: soal terakhir sengaja dijawab dengan opsi lain.
+    await _answerModule(tester, 'clickbait', wrongAt: 2);
     expect(find.text('Hasil kuismu'), findsOneWidget);
     expect(find.text('2/3'), findsOneWidget);
     // Hero parsial: tanpa catatan sempurna, dengan hint belajar lagi.

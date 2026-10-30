@@ -21,7 +21,7 @@ class ModuleMotif {
 }
 
 ModuleMotif motifForModule(int seed) {
-  return switch (seed % 9) {
+  return switch (seed % 12) {
     0 => const ModuleMotif(
       icon: Icons.ads_click_rounded,
       tint: Color(0xFFE3EEFD),
@@ -62,8 +62,23 @@ ModuleMotif motifForModule(int seed) {
       tint: Color(0xFFE9E5FA),
       ink: Color(0xFF59469B),
     ),
-    _ => const ModuleMotif(
+    8 => const ModuleMotif(
       icon: Icons.forum_outlined,
+      tint: Color(0xFFDFF3F0),
+      ink: Color(0xFF0B6B5F),
+    ),
+    9 => const ModuleMotif(
+      icon: Icons.lock_outline_rounded,
+      tint: Color(0xFFE3EEFD),
+      ink: AppColors.primaryDark,
+    ),
+    10 => const ModuleMotif(
+      icon: Icons.fingerprint_rounded,
+      tint: Color(0xFFE9E5FA),
+      ink: Color(0xFF59469B),
+    ),
+    _ => const ModuleMotif(
+      icon: Icons.hub_outlined,
       tint: Color(0xFFDFF3F0),
       ink: Color(0xFF0B6B5F),
     ),

@@ -65,6 +65,44 @@ class _FlowScoreRepository implements ScoreRepository {
   Future<void> awardQuiz(String userId, {required bool correct}) async {}
 }
 
+/// Menjawab seluruh soal modul lewat data katalog, bukan teks opsi hardcoded.
+///
+/// [wrongAt] membuat satu soal dijawab salah untuk menguji skor parsial.
+Future<void> _answerModule(
+  WidgetTester tester,
+  String moduleId, {
+  int wrongAt = -1,
+}) async {
+  final module = LearnContentDatasource().byId(moduleId)!;
+  for (var i = 0; i < module.quiz.length; i++) {
+    final question = module.quiz[i];
+    final isWrong = i == wrongAt;
+    final optionIndex = isWrong
+        ? (question.correctIndex + 1) % question.options.length
+        : question.correctIndex;
+    final option = find.byKey(ValueKey('quiz-option-$i-$optionIndex'));
+    await tester.ensureVisible(option);
+    await tester.pumpAndSettle();
+    await tester.tap(option);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        isWrong ? AppStrings.learnQuizWrong : AppStrings.learnQuizCorrect,
+      ),
+      findsOneWidget,
+    );
+    final next = find.text(
+      i == module.quiz.length - 1
+          ? AppStrings.learnQuizFinish
+          : AppStrings.learnQuizNext,
+    );
+    await tester.ensureVisible(next);
+    await tester.pumpAndSettle();
+    await tester.tap(next);
+    await tester.pumpAndSettle();
+  }
+}
+
 void main() {
   group('Alur modul Belajar: hasil kuis -> penyimpanan -> ring', () {
     testWidgets(
@@ -92,30 +130,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Jawab soal kedua dengan opsi salah untuk skenario 3/4.
-        const scripts = <String>[
-          'Pernyataan pertama dapat diuji',
-          'Anggap benar karena banyak dibagikan',
-          'Pisahkan klaim yang bisa diuji dari tafsiran',
-          'Tidak; klaim faktual tetap perlu bukti',
-        ];
-        for (var i = 0; i < scripts.length; i++) {
-          final option = find.textContaining(scripts[i]);
-          expect(option, findsOneWidget);
-          await tester.tap(option);
-          await tester.pumpAndSettle();
-          final isRight = i != 1;
-          expect(
-            find.text(isRight ? 'Benar!' : 'Kurang tepat.'),
-            findsOneWidget,
-          );
-          final next = find.text(
-            i == scripts.length - 1 ? 'Lihat hasil' : 'Lanjut',
-          );
-          await tester.ensureVisible(next);
-          await tester.pumpAndSettle();
-          await tester.tap(next);
-          await tester.pumpAndSettle();
-        }
+        await _answerModule(tester, 'fakta-opini-satire', wrongAt: 1);
 
         // Hasil: 3/4 benar.
         expect(find.text('Hasil kuismu'), findsOneWidget);
@@ -155,25 +170,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 3 soal clickbait: semua benar.
-      const correctTexts = [
-        'HEBOH! Minum ini sembuh total dalam semalam, sebarkan!',
-        'Periksa penerbit, tanggal, dan isi artikel',
-        'Karena hoaks dirancang memicu reaksi sebelum berpikir',
-      ];
-      for (var i = 0; i < 3; i++) {
-        final option = find.text(correctTexts[i]);
-        await tester.ensureVisible(option);
-        await tester.pumpAndSettle();
-        await tester.tap(option);
-        await tester.pumpAndSettle();
-        expect(find.text('Benar!'), findsOneWidget);
-        final next = find.text(i == 2 ? 'Lihat hasil' : 'Lanjut');
-        await tester.ensureVisible(next);
-        await tester.pumpAndSettle();
-        await tester.tap(next);
-        await tester.pumpAndSettle();
-      }
+      // Semua soal clickbait dijawab benar.
+      await _answerModule(tester, 'clickbait');
       expect(find.text('Hasil kuismu'), findsOneWidget);
 
       // Penyimpanan gagal: banner retry wajib tampil, bukan "tidak ada poin".

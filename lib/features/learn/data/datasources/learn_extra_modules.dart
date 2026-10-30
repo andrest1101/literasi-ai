@@ -35,54 +35,55 @@ const extraLearnModules = <CourseModule>[
     quiz: [
       QuizQuestion(
         question:
-            'Video banjir yang beredar tampak nyata. Langkah apa yang paling tepat?',
+            'Video banjir terlihat sangat nyata. Apa langkah paling tepat sebelum kamu membagikannya?',
         options: [
-          'Langsung percaya karena videonya terlihat jelas',
-          'Periksa unggahan terdahulu dan cocokkan lokasi serta tanggal',
-          'Menilai kebenaran hanya dari jumlah penonton',
-          'Menganggap semua video lama pasti palsu',
+          'Cari unggahan terdahulu, lalu cocokkan lokasi dan tanggalnya',
+          'Percaya karena gambarnya terlihat jelas',
+          'Nilai kebenarannya dari jumlah penonton',
+          'Anggap semua video lama pasti palsu',
         ],
-        correctIndex: 1,
+        correctIndex: 0,
         explanation:
-            'Video dapat asli tetapi berasal dari peristiwa lain. Asal, waktu, dan lokasi perlu diperiksa terpisah.',
-      ),
-      QuizQuestion(
-        question: 'Apa kegunaan pencarian gambar terbalik?',
-        options: [
-          'Memastikan semua klaim dalam caption benar',
-          'Menemukan kemunculan gambar dan kemungkinan sumber lebih awal',
-          'Mengetahui niat pembuat gambar dengan pasti',
-          'Menghapus bagian gambar yang menyesatkan',
-        ],
-        correctIndex: 1,
-        explanation:
-            'Pencarian membantu menemukan jejak gambar, tetapi hasilnya tetap perlu dinilai dan dibandingkan dengan sumber lain.',
+            'Video bisa asli tetapi berasal dari peristiwa lain. Asal, waktu, dan lokasi perlu diperiksa secara terpisah.',
       ),
       QuizQuestion(
         question:
-            'Satu rambu terlihat cocok dengan lokasi klaim. Kesimpulan terbaik?',
+            'Kamu menemukan gambar yang sama di unggahan tiga tahun lalu. Apa gunanya temuan ini?',
+        options: [
+          'Memastikan semua isi caption benar',
+          'Menghapus bagian gambar yang salah',
+          'Menunjukkan bahwa narasi “baru” mungkin mendaur ulang peristiwa lama',
+          'Membuktikan pembuat gambar punya niat jahat',
+        ],
+        correctIndex: 2,
+        explanation:
+            'Kemunculan lebih awal menunjukkan konteks aslinya. Narasi yang mengklaim peristiwa baru jadi patut dicurigai.',
+      ),
+      QuizQuestion(
+        question:
+            'Satu rambu jalan di video cocok dengan lokasi yang diklaim. Kesimpulan paling jujur?',
         options: [
           'Lokasi pasti benar',
           'Lokasi pasti salah',
-          'Itu petunjuk awal; cari bukti dan pembanding tambahan',
-          'Abaikan tanggal dan sumber unggahan',
+          'Tanggal dan sumber tidak perlu diperiksa lagi',
+          'Itu petunjuk awal; masih perlu bukti dan pembanding lain',
         ],
-        correctIndex: 2,
+        correctIndex: 3,
         explanation:
             'Satu petunjuk bisa kebetulan atau tidak lengkap. Verifikasi yang baik memakai beberapa bukti yang saling mendukung.',
       ),
       QuizQuestion(
         question:
-            'Jika tanggal asli belum ditemukan, bagaimana sebaiknya membagikan hasil cek?',
+            'Tanggal asli video belum ditemukan. Bagaimana cara menyampaikan hasil penelusuranmu?',
         options: [
-          'Tulis tanggal perkiraan sebagai fakta',
-          'Nyatakan bagian yang belum pasti dan tahan penyebaran',
-          'Hapus sumber yang tidak mendukung dugaan',
+          'Tulis perkiraan tanggal sebagai fakta',
+          'Sebutkan bagian yang belum pasti dan tahan penyebaran',
           'Pilih tanggal dari komentar terbanyak',
+          'Hapus sumber yang tidak mendukung dugaan',
         ],
         correctIndex: 1,
         explanation:
-            'Kesimpulan harus sebanding dengan bukti. Menyebut batas informasi lebih bertanggung jawab daripada menebak.',
+            'Kesimpulan harus sepadan dengan bukti. Menyatakan batas informasi lebih bertanggung jawab daripada menebak.',
       ),
     ],
   ),
@@ -117,54 +118,54 @@ const extraLearnModules = <CourseModule>[
     quiz: [
       QuizQuestion(
         question:
-            'Sebuah unggahan menyebut “naik 100%”. Apa yang perlu diketahui dahulu?',
+            'Sebuah unggahan menyebut “kenaikan 100%”. Informasi apa yang perlu kamu cari lebih dulu?',
         options: [
-          'Warna grafik yang digunakan',
+          'Warna grafik yang dipakai',
+          'Jumlah suka pada unggahan',
           'Nilai awal, pembanding, periode, dan satuannya',
-          'Jumlah tanda suka unggahan',
           'Apakah judulnya memakai huruf kapital',
         ],
-        correctIndex: 1,
+        correctIndex: 2,
         explanation:
-            'Persentase tanpa nilai awal dan pembanding mudah disalahartikan. Periode dan satuan juga menentukan makna angka.',
+            'Naik 100% dari 2 menjadi 4 berbeda maknanya dari 1.000 menjadi 2.000. Nilai awal, pembanding, periode, dan satuan menentukan arti angka.',
       ),
       QuizQuestion(
         question:
-            'Grafik batang dimulai dari angka 95, bukan nol. Apa tindakan yang tepat?',
+            'Grafik batang dimulai dari angka 95, bukan nol. Apa yang sebaiknya kamu lakukan?',
         options: [
-          'Anggap otomatis palsu',
-          'Periksa skala karena perbedaan visual mungkin tampak lebih besar',
-          'Baca tinggi batang saja tanpa label',
+          'Periksa skala karena selisih visual bisa tampak lebih besar dari kenyataan',
+          'Anggap grafik otomatis palsu',
+          'Baca tinggi batang tanpa melihat label',
           'Sebarkan karena grafik selalu objektif',
-        ],
-        correctIndex: 1,
-        explanation:
-            'Sumbu yang dipotong dapat memperbesar kesan selisih. Ini alasan untuk membaca skala, bukan bukti tunggal bahwa datanya palsu.',
-      ),
-      QuizQuestion(
-        question:
-            'Survei daring di satu grup disebut mewakili seluruh Indonesia. Apa yang perlu diperiksa?',
-        options: [
-          'Apakah sampel dan metode mewakili populasi yang diklaim',
-          'Apakah poster surveinya menarik',
-          'Apakah responden memiliki ponsel baru',
-          'Apakah hasilnya sesuai pendapat kita',
         ],
         correctIndex: 0,
         explanation:
-            'Cara memilih responden menentukan apakah hasil dapat digeneralisasi. Sampel satu grup bisa memiliki bias.',
+            'Sumbu yang dipotong dapat memperbesar kesan selisih. Itu alasan membaca skala dengan hati-hati, bukan langsung menuduh data palsu.',
       ),
       QuizQuestion(
-        question: 'Dua angka hanya layak dibandingkan jika…',
+        question:
+            'Survei daring di satu grup WhatsApp diklaim mewakili seluruh Indonesia. Apa yang perlu diperiksa?',
         options: [
-          'Ditampilkan dengan warna yang sama',
-          'Memiliki definisi, satuan, dan konteks pengukuran yang sebanding',
-          'Berjumlah sama besar',
-          'Diambil dari unggahan yang viral',
+          'Apakah poster surveinya menarik',
+          'Apakah sampel dan metodenya mewakili populasi yang diklaim',
+          'Apakah responden memakai ponsel baru',
+          'Apakah hasilnya sesuai pendapat kita',
         ],
         correctIndex: 1,
         explanation:
-            'Perbandingan bermakna jika yang diukur dan cara pengukurannya sepadan.',
+            'Cara memilih responden menentukan apakah hasil bisa digeneralisasi. Satu grup punya bias yang belum tentu mewakili semua orang.',
+      ),
+      QuizQuestion(
+        question: 'Dua angka baru layak dibandingkan jika…',
+        options: [
+          'Ditampilkan dengan warna yang sama',
+          'Jumlahnya sama besar',
+          'Diambil dari unggahan yang viral',
+          'Definisi, satuan, dan konteks pengukurannya sebanding',
+        ],
+        correctIndex: 3,
+        explanation:
+            'Perbandingan bermakna hanya jika yang diukur dan cara mengukurnya sepadan.',
       ),
     ],
   ),
@@ -199,53 +200,53 @@ const extraLearnModules = <CourseModule>[
     quiz: [
       QuizQuestion(
         question:
-            'Pesan viral menjanjikan obat yang “pasti sembuh untuk semua orang”. Respons terbaik?',
+            'Pesan viral menjanjikan obat yang “pasti sembuh untuk semua orang”. Apa respons paling bijak?',
         options: [
-          'Mencoba karena ada testimoni',
-          'Periksa sumber dan bukti; konsultasikan keputusan medis dengan tenaga kesehatan',
+          'Mencobanya karena ada testimoni',
           'Berhenti minum obat yang diresepkan',
-          'Meneruskan agar semua orang mencoba',
+          'Meneruskannya agar orang lain mencoba',
+          'Periksa sumber dan buktinya, lalu konsultasikan keputusan medis dengan tenaga kesehatan',
         ],
-        correctIndex: 1,
+        correctIndex: 3,
         explanation:
-            'Janji mutlak dan testimoni bukan bukti yang cukup. Jangan mengubah perawatan tanpa konsultasi profesional.',
+            'Janji mutlak dan testimoni pribadi bukan bukti yang cukup. Keputusan pengobatan tetap perlu dibahas dengan tenaga kesehatan.',
       ),
       QuizQuestion(
         question:
-            'Penelitian awal pada hewan menunjukkan hasil positif. Kesimpulan yang aman?',
+            'Sebuah penelitian awal pada hewan menunjukkan hasil positif. Kesimpulan yang aman?',
         options: [
-          'Pengobatan terbukti aman untuk semua manusia',
-          'Temuan menarik, tetapi belum membuktikan manfaat klinis pada manusia',
+          'Obat itu sudah terbukti aman untuk semua manusia',
+          'Temuannya menarik, tetapi belum membuktikan manfaat pada manusia',
           'Semua penelitian hewan tidak berguna',
-          'Produk yang dijual pasti disetujui regulator',
+          'Produk yang dijual pasti sudah disetujui regulator',
         ],
         correctIndex: 1,
         explanation:
-            'Jenis penelitian menentukan batas kesimpulannya. Hasil awal perlu penelitian lanjutan dan tidak otomatis berlaku pada manusia.',
+            'Jenis penelitian menentukan batas kesimpulan. Temuan awal perlu penelitian lanjutan sebelum berlaku untuk manusia.',
       ),
       QuizQuestion(
         question:
-            'Apa yang sebaiknya dilakukan sebelum meneruskan klaim kesehatan?',
+            'Sebelum meneruskan klaim kesehatan, apa yang paling perlu kamu periksa?',
         options: [
-          'Cek sumber, tanggal, bukti, dan konteksnya',
-          'Percaya jika dikirim keluarga',
-          'Hanya membaca judul',
-          'Mengandalkan jumlah share',
+          'Sumber, tanggal, bukti, dan konteks klaimnya',
+          'Apakah pengirimnya keluarga sendiri',
+          'Apakah judulnya sudah cukup meyakinkan',
+          'Berapa banyak orang yang sudah membagikan',
         ],
         correctIndex: 0,
         explanation:
-            'Sumber, waktu, bukti, dan konteks memberi dasar lebih kuat daripada popularitas pesan.',
+            'Sumber, waktu, bukti, dan konteks memberi dasar yang lebih kuat daripada popularitas atau kedekatan pengirim.',
       ),
       QuizQuestion(
         question:
             'Pesan meminta pembaca menghentikan obat resep. Langkah paling aman?',
         options: [
           'Ikuti karena pesannya mendesak',
-          'Tanyakan kepada tenaga kesehatan sebelum mengubah perawatan',
           'Ganti dengan produk yang dipromosikan',
-          'Sebarkan dahulu baru cek nanti',
+          'Tanyakan kepada tenaga kesehatan sebelum mengubah perawatan',
+          'Sebarkan dulu, diperiksa nanti',
         ],
-        correctIndex: 1,
+        correctIndex: 2,
         explanation:
             'Perubahan perawatan perlu dibahas dengan tenaga kesehatan yang memahami kondisi pasien.',
       ),
@@ -282,54 +283,55 @@ const extraLearnModules = <CourseModule>[
     quiz: [
       QuizQuestion(
         question:
-            'Pesan mengaku dari bank dan meminta OTP untuk membatalkan transaksi. Apa tindakan terbaik?',
+            'Seseorang mengaku dari bank dan meminta kode OTP untuk membatalkan transaksi. Apa yang kamu lakukan?',
         options: [
-          'Kirim OTP agar transaksi batal',
-          'Jangan bagikan kode; hubungi bank lewat kanal resmi',
+          'Kirim kode agar transaksinya batal',
+          'Tolak membagikan kode dan hubungi bank lewat kanal resmi',
           'Kirim hanya jika nama pengirim terlihat resmi',
-          'Minta tautan lain melalui pesan yang sama',
+          'Minta tautan lain dari pengirim yang sama',
         ],
         correctIndex: 1,
         explanation:
-            'OTP adalah rahasia untuk mengotorisasi akses atau transaksi. Hubungi bank melalui aplikasi atau nomor resmi yang dicari sendiri.',
-      ),
-      QuizQuestion(
-        question: 'Cara lebih aman membuka layanan yang disebut dalam pesan?',
-        options: [
-          'Klik tautan dan masukkan data secepatnya',
-          'Buka aplikasi atau ketik alamat resmi secara mandiri',
-          'Gunakan tautan dengan banyak tanda seru',
-          'Minta teman meneruskan tautan yang sama',
-        ],
-        correctIndex: 1,
-        explanation:
-            'Mengakses layanan lewat kanal yang dibuka sendiri mengurangi risiko halaman tiruan.',
+            'OTP adalah kunci untuk mengotorisasi akses atau transaksi. Hubungi bank lewat aplikasi atau nomor resmi yang kamu cari sendiri.',
       ),
       QuizQuestion(
         question:
-            'Apa yang patut dicurigai dari pesan “hadiah hangus dalam 5 menit”?',
+            'Kamu menerima pesan berisi tautan layanan. Cara paling aman membukanya?',
         options: [
-          'Tekanan waktu yang mendorong tindakan tanpa pemeriksaan',
+          'Klik tautannya dan isi data secepat mungkin',
+          'Gunakan tautan yang dikirim berulang kali',
+          'Minta teman meneruskan tautan yang sama',
+          'Buka aplikasi atau ketik alamat resmi secara mandiri',
+        ],
+        correctIndex: 3,
+        explanation:
+            'Mengakses layanan lewat kanal yang kamu buka sendiri mengurangi risiko halaman tiruan.',
+      ),
+      QuizQuestion(
+        question:
+            'Pesan menulis “hadiah hangus dalam 5 menit”. Bagian mana yang paling mencurigakan?',
+        options: [
           'Penggunaan angka dalam pesan',
           'Panjang pesan yang pendek',
+          'Tekanan waktu yang mendorong tindakan tanpa pemeriksaan',
           'Waktu pengiriman pada siang hari',
+        ],
+        correctIndex: 2,
+        explanation:
+            'Urgensi palsu dibuat agar kamu tidak sempat memeriksa sumber dan alamat tautan.',
+      ),
+      QuizQuestion(
+        question:
+            'Kamu terlanjur memasukkan kata sandi di situs mencurigakan. Langkah pertama?',
+        options: [
+          'Ganti kata sandi lewat kanal resmi dan amankan akun',
+          'Tunggu sampai ada transaksi mencurigakan',
+          'Kirim OTP kepada pengirim untuk konfirmasi',
+          'Pakai kata sandi yang sama di layanan lain',
         ],
         correctIndex: 0,
         explanation:
-            'Urgensi palsu sering dipakai agar korban tidak sempat memeriksa sumber dan alamat tautan.',
-      ),
-      QuizQuestion(
-        question:
-            'Jika kata sandi sudah dimasukkan pada situs yang mencurigakan, apa langkah awal?',
-        options: [
-          'Tunggu sampai ada transaksi',
-          'Ganti kata sandi melalui kanal resmi dan amankan akun',
-          'Kirim OTP kepada pengirim untuk konfirmasi',
-          'Gunakan kata sandi yang sama di tempat lain',
-        ],
-        correctIndex: 1,
-        explanation:
-            'Segera amankan akun melalui aplikasi atau situs resmi dan hubungi penyedia layanan jika ada risiko transaksi.',
+            'Amankan akun segera lewat aplikasi atau situs resmi. Jika ada risiko transaksi, hubungi penyedia layanan atau bank.',
       ),
     ],
   ),
@@ -364,54 +366,54 @@ const extraLearnModules = <CourseModule>[
     quiz: [
       QuizQuestion(
         question:
-            'Video memiliki gerak bibir yang tampak janggal. Apa kesimpulan paling bertanggung jawab?',
+            'Video seorang tokoh tampak janggal di bagian gerak bibirnya. Kesimpulan paling bertanggung jawab?',
         options: [
+          'Itu petunjuk untuk diperiksa lebih lanjut, bukan bukti tunggal',
           'Pasti deepfake',
-          'Petunjuk untuk diperiksa lebih lanjut, bukan bukti tunggal',
           'Pasti rekaman asli',
-          'Tidak perlu memeriksa sumbernya',
+          'Sumbernya tidak perlu diperiksa',
         ],
-        correctIndex: 1,
+        correctIndex: 0,
         explanation:
-            'Kompresi dan penyuntingan juga dapat menimbulkan artefak. Verifikasi asal dan pembanding independen sebelum menyimpulkan.',
+            'Kompresi dan penyuntingan juga bisa menimbulkan artefak. Verifikasi asal dan pembanding independen sebelum menyimpulkan.',
       ),
       QuizQuestion(
-        question: 'Cara paling kuat untuk memeriksa video tokoh yang viral?',
+        question: 'Cara paling kuat memeriksa video tokoh yang sedang viral?',
         options: [
-          'Mengandalkan satu aplikasi deteksi saja',
-          'Menelusuri sumber dan mencari konfirmasi independen',
+          'Mengandalkan satu aplikasi deteksi',
           'Menghitung komentar yang menyebut palsu',
-          'Memastikan video terlihat tajam',
+          'Memastikan videonya terlihat tajam',
+          'Menelusuri sumber dan mencari konfirmasi independen',
         ],
-        correctIndex: 1,
+        correctIndex: 3,
         explanation:
-            'Alat deteksi dapat keliru. Asal konten dan konfirmasi independen memberi konteks yang lebih dapat diuji.',
+            'Alat deteksi bisa keliru. Asal konten dan konfirmasi independen memberi konteks yang lebih dapat diuji.',
       ),
       QuizQuestion(
         question:
-            'Tidak ada label AI pada sebuah gambar. Apakah itu membuktikan gambar asli?',
+            'Sebuah gambar tidak memiliki label AI. Apakah itu membuktikan gambar tersebut asli?',
         options: [
-          'Ya, label selalu wajib ada',
+          'Ya, label AI selalu wajib ada',
           'Tidak; ketiadaan label bukan bukti asal gambar',
-          'Ya, jika gambarnya beresolusi tinggi',
-          'Tidak, semua gambar tanpa label adalah palsu',
+          'Ya, asalkan resolusinya tinggi',
+          'Tidak; semua gambar tanpa label pasti palsu',
         ],
         correctIndex: 1,
         explanation:
-            'Penanda asal tidak selalu tersedia atau dipertahankan. Periksa sumber dan konteks dengan beberapa cara.',
+            'Penanda asal tidak selalu tersedia atau ikut tersimpan. Periksa sumber dan konteksnya lewat beberapa cara.',
       ),
       QuizQuestion(
         question:
-            'Konten belum bisa dipastikan asli atau buatan AI. Apa yang sebaiknya dilakukan?',
+            'Konten belum bisa dipastikan asli atau buatan AI. Apa yang sebaiknya kamu lakukan?',
         options: [
           'Sebarkan dengan caption “pasti asli”',
-          'Nyatakan belum terverifikasi dan tahan penyebaran',
           'Tuduh pembuatnya tanpa bukti',
+          'Nyatakan belum terverifikasi dan tahan penyebarannya',
           'Hapus konteks sumber agar lebih meyakinkan',
         ],
-        correctIndex: 1,
+        correctIndex: 2,
         explanation:
-            'Sampaikan batas bukti secara jujur dan jangan mengubah dugaan menjadi kepastian.',
+            'Sampaikan batas bukti secara jujur. Dugaan tidak boleh diubah menjadi kepastian.',
       ),
     ],
   ),
@@ -446,51 +448,51 @@ const extraLearnModules = <CourseModule>[
     quiz: [
       QuizQuestion(
         question:
-            '“Acara dimulai pukul 10.00” dan “acaranya sangat membosankan” adalah…',
+            '“Acara dimulai pukul 10.00” dan “acaranya sangat membosankan”. Bagaimana kamu membedakan keduanya?',
         options: [
           'Keduanya opini',
-          'Pernyataan pertama dapat diuji; kedua merupakan penilaian',
           'Keduanya pasti fakta',
+          'Pernyataan pertama bisa diuji; kedua adalah penilaian',
           'Pernyataan pertama satire',
         ],
-        correctIndex: 1,
+        correctIndex: 2,
         explanation:
-            'Waktu mulai bisa dicocokkan dengan catatan. “Membosankan” adalah penilaian subjektif.',
+            'Waktu mulai bisa dicocokkan dengan catatan atau saksi. “Membosankan” adalah penilaian yang bergantung pada pengalaman orang.',
       ),
       QuizQuestion(
         question:
-            'Sebuah unggahan lucu dikutip sebagai berita tanpa sumber aslinya. Apa yang perlu dilakukan?',
+            'Unggahan lucu dikutip sebagai berita tanpa sumber aslinya. Apa langkah yang paling tepat?',
         options: [
-          'Periksa akun dan konteks publikasi lengkapnya',
           'Anggap benar karena banyak dibagikan',
-          'Menilai hanya dari banyaknya emoji',
+          'Periksa akun dan konteks publikasi lengkapnya',
+          'Nilai hanya dari banyaknya emoji',
           'Hapus bagian yang menunjukkan humor',
         ],
-        correctIndex: 0,
+        correctIndex: 1,
         explanation:
-            'Konteks sumber membantu mengenali apakah unggahan merupakan satire, parodi, atau laporan faktual.',
+            'Konteks sumber membantu mengenali apakah unggahan itu satire, parodi, atau laporan faktual.',
       ),
       QuizQuestion(
-        question: 'Bagaimana memeriksa artikel yang mencampur fakta dan opini?',
+        question: 'Artikel mencampur fakta dan opini. Cara memeriksanya?',
         options: [
-          'Tolak seluruh isi tanpa membaca',
-          'Pisahkan klaim yang bisa diuji dari tafsiran, lalu cek bukti klaim',
+          'Tolak seluruh isi tanpa membacanya',
           'Anggap semua kalimat sebagai data',
-          'Percaya jika penulis terdengar yakin',
+          'Percaya karena penulisnya terdengar yakin',
+          'Pisahkan klaim yang bisa diuji dari tafsiran, lalu periksa buktinya',
         ],
-        correctIndex: 1,
+        correctIndex: 3,
         explanation:
             'Memisahkan klaim dan tafsiran membuat pemeriksaan lebih terarah dan adil.',
       ),
       QuizQuestion(
-        question: 'Apakah gaya bahasa serius menjamin sebuah klaim benar?',
+        question: 'Apakah gaya bahasa yang serius menjamin sebuah klaim benar?',
         options: [
-          'Ya, gaya serius selalu akurat',
           'Tidak; klaim faktual tetap perlu bukti dan sumber',
-          'Ya, jika artikelnya panjang',
+          'Ya, gaya serius selalu akurat',
+          'Ya, asalkan artikelnya panjang',
           'Tidak; semua tulisan serius adalah satire',
         ],
-        correctIndex: 1,
+        correctIndex: 0,
         explanation:
             'Nada tulisan tidak menggantikan bukti. Periksa klaim dan sumbernya secara langsung.',
       ),
