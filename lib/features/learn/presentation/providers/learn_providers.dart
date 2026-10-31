@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/utils/first_event_timeout.dart';
 import '../../../history/presentation/providers/history_providers.dart';
 import '../../../score/presentation/providers/score_providers.dart';
 import '../../data/datasources/learn_content_datasource.dart';
@@ -46,22 +47,31 @@ final learnProgressProvider = StreamProvider<CourseProgress>((ref) {
     return Stream<CourseProgress>.multi((controller) {
       controller.add(source.readCachedProgress());
       unawaited(
-        source.readProgress().then((progress) {
-          controller
-            ..add(progress)
-            ..close();
-        }),
+        source.readProgress().then(
+          (progress) {
+            controller
+              ..add(progress)
+              ..close();
+          },
+          // Kegagalan baca lokal tidak boleh meninggalkan stream menggantung
+          // tanpa data maupun error.
+          onError: (Object error, StackTrace stackTrace) {
+            controller
+              ..addError(error, stackTrace)
+              ..close();
+          },
+        ),
       );
     });
   }
-  return ref
-      .watch(learnRepositoryProvider)
-      .watchProgress(userId)
-      .timeout(
-        const Duration(seconds: 10),
-        onTimeout: (sink) =>
-            sink.addError(TimeoutException('Progres tidak dapat dimuat.')),
-      );
+  // Snapshot Firestore hidup terus dan boleh diam lama tanpa berarti gagal.
+  // Timeout hanya untuk event pertama agar progres tersimpan tidak berubah
+  // menjadi 0 setelah 10 detik idle.
+  return timeoutFirstEvent(
+    ref.watch(learnRepositoryProvider).watchProgress(userId),
+    limit: const Duration(seconds: 10),
+    error: TimeoutException('Progres tidak dapat dimuat.'),
+  );
 });
 
 /// Aksi belajar: selesaikan modul (+20) dan klaim kuis (+5 per benar baru).
