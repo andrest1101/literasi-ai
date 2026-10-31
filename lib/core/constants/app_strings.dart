@@ -235,6 +235,10 @@ abstract final class AppStrings {
   static const String homeLearnTitle2 = 'literasimu.';
   static const String learnProgressSuffix = 'modul selesai';
   static const String learnProgressLoading = 'Memuat progres belajar...';
+  static const String learnProgressError = 'Progres belajar belum bisa dimuat.';
+  static const String learnProgressStale =
+      'Gagal memperbarui. Data terakhir tetap ditampilkan.';
+  static const String learnProgressRetry = 'Coba lagi';
   static const String learnPopularModules = 'Rekomendasi untukmu';
   static const String learnSectionDoneSuffix = 'selesai';
   static const String learnAllModules = 'Semua modul';
@@ -338,6 +342,8 @@ abstract final class AppStrings {
   static const String scoreLoadFailed = 'Skor tidak dapat dimuat.';
   static const String scoreLoadFailedSubtitle =
       'Skor kamu sedang tidak bisa dimuat. Ini soal penyimpanan skor, bukan kunci API: periksa koneksi atau aturan Firestore, lalu coba lagi.';
+  static const String scoreStale =
+      'Gagal memperbarui. Skor terakhir tetap ditampilkan.';
   static const String chatEyebrow = 'ASISTEN AI';
   static const String chatTitle1 = 'Tanya';
   static const String chatTitle2 = 'apa saja.';
@@ -512,6 +518,7 @@ abstract final class AppStrings {
   static const String verdictHeadlineTidakPasti = 'Belum bisa dipastikan';
   static const String quickCheckNewCheck = 'Periksa informasi lain';
   static const String quickCheckRetry = 'Coba lagi';
+  static const String retry = 'Coba lagi';
   static const String quickCheckShare = 'Bagikan Hasil';
   static const String quickCheckCopy = 'Salin hasil';
   static const String quickCheckCopied =

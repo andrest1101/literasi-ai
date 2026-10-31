@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/first_event_timeout.dart';
 import '../../../history/presentation/providers/history_providers.dart';
 import '../../data/datasources/score_remote_datasource.dart';
 import '../../data/repositories/score_repository_impl.dart';
@@ -41,10 +42,12 @@ final scoreProvider = StreamProvider<LiteracyScore>((ref) {
   final userId = ref.watch(historyUserIdProvider);
   if (userId == null) return Stream.value(const LiteracyScore());
   final repository = ref.watch(scoreRepositoryProvider);
-  return _watchWithRetry(repository, userId).timeout(
-    const Duration(seconds: 10),
-    onTimeout: (sink) =>
-        sink.addError(TimeoutException('Skor tidak dapat dimuat. Coba lagi.')),
+  // Sama seperti progres belajar: timer hanya untuk snapshot pertama. Setelah
+  // skor muncul, stream boleh diam tanpa memicu kartu error berulang.
+  return timeoutFirstEvent(
+    _watchWithRetry(repository, userId),
+    limit: const Duration(seconds: 10),
+    error: TimeoutException('Skor tidak dapat dimuat. Coba lagi.'),
   );
 });
 

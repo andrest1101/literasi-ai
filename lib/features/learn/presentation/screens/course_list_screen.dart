@@ -27,6 +27,8 @@ class CourseListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final modules = ref.watch(learnContentProvider);
     final progress = ref.watch(learnProgressProvider);
+    final value = progress.valueOrNull;
+    void retry() => ref.invalidate(learnProgressProvider);
     return SingleChildScrollView(
       // 160px: zona FAB Chat (navbar ~76 + gap 8 + badan 60 = ~144 dari
       // bawah) + margin, sehingga baris terakhir tidak pernah tertutup
@@ -40,23 +42,26 @@ class CourseListScreen extends ConsumerWidget {
             children: [
               const _LearnToolbarTitle(),
               const SizedBox(height: AppTabTitles.titleToContentGap),
-              _HeroSummary(modules: modules, progress: progress),
+              _HeroSummary(
+                modules: modules,
+                progress: progress,
+                onRetry: retry,
+              ),
               const SizedBox(height: 10),
               const _RewardStrip(),
               const SizedBox(height: 16),
-              progress.when(
-                loading: () => const _SectionSkeleton(),
-                error: (_, _) => _ModuleSections(
+              if (progress.isLoading && value == null)
+                const _SectionSkeleton()
+              else if (progress.hasError && value == null)
+                // Kartu error sudah tampil di hero; daftar modul tidak
+                // dipalsukan menjadi "semua belum dimulai".
+                const SizedBox.shrink()
+              else
+                _ModuleSections(
                   modules: modules,
-                  progress: const CourseProgress(),
+                  progress: value ?? const CourseProgress(),
                   onOpen: _openDetail,
                 ),
-                data: (value) => _ModuleSections(
-                  modules: modules,
-                  progress: value,
-                  onOpen: _openDetail,
-                ),
-              ),
               if (ref.watch(historyUserIdProvider) == null) ...[
                 const SizedBox(height: 14),
                 const _GuestProgressNote(),
@@ -410,10 +415,15 @@ class _AllDoneStrip extends StatelessWidget {
 /// Tanpa CTA (peran aksi milik featured/strip), tanpa guest note
 /// (duplikat CTA profil).
 class _HeroSummary extends StatelessWidget {
-  const _HeroSummary({required this.modules, required this.progress});
+  const _HeroSummary({
+    required this.modules,
+    required this.progress,
+    required this.onRetry,
+  });
 
   final List<CourseModule> modules;
   final AsyncValue<CourseProgress> progress;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -421,17 +431,144 @@ class _HeroSummary extends StatelessWidget {
     final minutes = modules.fold<int>(0, (s, m) => s + m.minutes);
     final aggregate =
         '${modules.length} modul · $quizTotal soal · ±$minutes mnt';
-    return progress.when(
-      loading: () => const _ProgressSkeleton(),
-      error: (_, _) => _HeroSummaryBody(
-        aggregate: aggregate,
-        done: 0,
-        total: modules.length,
+    // Data terakhir tetap dipakai saat refresh gagal: progres yang sudah
+    // diketuk pengguna tidak boleh berubah menjadi 0 hanya karena stream
+    // Firestore sedang diam atau putus.
+    final value = progress.valueOrNull;
+    if (value == null) {
+      return progress.isLoading
+          ? const _ProgressSkeleton()
+          : _ProgressLoadFailed(onRetry: onRetry);
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _HeroSummaryBody(
+          aggregate: aggregate,
+          done: value.completedCount.clamp(0, modules.length),
+          total: modules.length,
+        ),
+        if (progress.hasError) ...[
+          const SizedBox(height: 8),
+          _ProgressStaleStrip(onRetry: onRetry),
+        ],
+      ],
+    );
+  }
+}
+
+/// Kartu kegagalan saat belum ada data progres sama sekali.
+///
+/// Bukan angka 0: menampilkan "0 modul selesai" untuk kegagalan jaringan
+/// membuat pengguna mengira progresnya hilang.
+class _ProgressLoadFailed extends StatelessWidget {
+  const _ProgressLoadFailed({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
       ),
-      data: (value) => _HeroSummaryBody(
-        aggregate: aggregate,
-        done: value.completedCount.clamp(0, modules.length),
-        total: modules.length,
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.neutral.withValues(alpha: 0.14),
+            ),
+            child: const Icon(
+              Icons.cloud_off_rounded,
+              size: 20,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              AppStrings.learnProgressError,
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.5,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: onRetry,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(0, 36),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text(
+              AppStrings.learnProgressRetry,
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Strip tipis saat pembaruan progres gagal padahal data terakhir tersedia.
+class _ProgressStaleStrip extends StatelessWidget {
+  const _ProgressStaleStrip({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: AppColors.warning.withValues(alpha: 0.1),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.warning_amber_rounded,
+            size: 16,
+            color: AppColors.warningDark,
+          ),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Text(
+              AppStrings.learnProgressStale,
+              style: TextStyle(
+                fontSize: 12,
+                height: 1.4,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: onRetry,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(0, 32),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text(
+              AppStrings.learnProgressRetry,
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
       ),
     );
   }

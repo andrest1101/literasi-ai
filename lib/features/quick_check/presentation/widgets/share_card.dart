@@ -186,9 +186,11 @@ class _BrandStrip extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.16),
             ),
             child: Center(
+              // Mark mengisi badge ~80% agar proporsional dengan container
+              // dan tidak terlalu kecil.
               child: Image(
                 image: const AssetImage('assets/branding/app_mark.png'),
-                height: 28,
+                height: 32,
                 excludeFromSemantics: true,
               ),
             ),
