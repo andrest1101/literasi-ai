@@ -31,7 +31,9 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final score = ref.watch(scoreProvider);
+    final scoreValue = score.valueOrNull;
     final userId = ref.watch(historyUserIdProvider);
+    void retry() => ref.invalidate(scoreProvider);
     return SingleChildScrollView(
       // 120px: ruang pill navbar mengambang + FAB Chat 60px di atasnya.
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
@@ -45,17 +47,79 @@ class ProfileScreen extends ConsumerWidget {
               const SizedBox(height: AppTabTitles.titleToContentGap),
               _IdentityCard(synced: userId != null, scoreOk: score.hasValue),
               const SizedBox(height: 14),
-              score.when(
-                loading: () => const _ScoreShimmer(),
-                error: (_, _) =>
-                    _ScoreError(onRetry: () => ref.invalidate(scoreProvider)),
-                data: (value) => _ScoreGroup(score: value),
-              ),
+              // Skor terakhir tetap tampil saat refresh gagal: poin yang sudah
+              // dikumpulkan tidak boleh "hilang" hanya karena stream diam atau
+              // koneksi putus sesaat.
+              if (scoreValue == null)
+                score.isLoading
+                    ? const _ScoreShimmer()
+                    : _ScoreError(onRetry: retry)
+              else ...[
+                _ScoreGroup(score: scoreValue),
+                if (score.hasError) ...[
+                  const SizedBox(height: 8),
+                  _ScoreStaleStrip(onRetry: retry),
+                ],
+              ],
               const SizedBox(height: 14),
               _SettingsGroup(synced: userId != null),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Strip peringatan ringan saat skor terakhir masih ditampilkan tetapi
+/// pembaruannya gagal.
+class _ScoreStaleStrip extends StatelessWidget {
+  const _ScoreStaleStrip({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: AppColors.warning.withValues(alpha: 0.1),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.warning_amber_rounded,
+            size: 16,
+            color: AppColors.warningDark,
+          ),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Text(
+              AppStrings.scoreStale,
+              style: TextStyle(
+                fontSize: 12,
+                height: 1.4,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: onRetry,
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(0, 32),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text(
+              AppStrings.retry,
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
       ),
     );
   }
