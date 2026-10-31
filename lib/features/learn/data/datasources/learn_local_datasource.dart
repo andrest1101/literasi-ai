@@ -18,6 +18,10 @@ class LearnLocalDatasource {
   SharedPreferences? _preferences;
   final Map<String, Object> _memory = {};
 
+  /// Snapshot terakhir yang sudah diketahui, dipakai [readCachedProgress]
+  /// agar invalidasi provider tidak sempat mengirim progres kosong.
+  CourseProgress? _lastProgress;
+
   Future<void> _ensurePreferences() async {
     final pending = _preferencesFuture;
     if (_preferences == null && pending != null) {
@@ -40,26 +44,34 @@ class LearnLocalDatasource {
 
   /// Immediate cache snapshot used to keep the screen out of a loading
   /// shimmer while the platform preferences plugin initializes.
+  ///
+  /// Selalu mengembalikan progres terakhir yang diketahui. Nilai kosong hanya
+  /// dipakai saat sesi benar-benar belum pernah membaca/menulis progres.
   CourseProgress readCachedProgress() {
+    final cached = _lastProgress;
+    if (cached != null) return cached;
     final completed = List<String>.from(
       _memory[_completedKey] as List<String>? ?? const [],
     );
-    final encodedBest = _memory[_quizBestKey] as String?;
-    final best = <String, int>{};
-    if (encodedBest != null) {
-      try {
-        final decoded = jsonDecode(encodedBest);
-        if (decoded is Map<String, dynamic>) {
-          for (final entry in decoded.entries) {
-            final score = entry.value;
-            if (score is num && score > 0) best[entry.key] = score.toInt();
-          }
-        }
-      } on FormatException {
-        // Ignore malformed cache data.
-      }
-    }
+    final best = _decodeBest(_memory[_quizBestKey] as String?);
     return CourseProgress(completedModuleIds: completed, quizBest: best);
+  }
+
+  static Map<String, int> _decodeBest(String? encodedBest) {
+    final best = <String, int>{};
+    if (encodedBest == null) return best;
+    try {
+      final decoded = jsonDecode(encodedBest);
+      if (decoded is Map<String, dynamic>) {
+        for (final entry in decoded.entries) {
+          final score = entry.value;
+          if (score is num && score > 0) best[entry.key] = score.toInt();
+        }
+      }
+    } on FormatException {
+      // Ignore malformed cache data.
+    }
+    return best;
   }
 
   Future<CourseProgress> readProgress() async {
@@ -70,37 +82,27 @@ class LearnLocalDatasource {
     final encodedBest =
         _preferences?.getString(_quizBestKey) ??
         _memory[_quizBestKey] as String?;
-    final best = <String, int>{};
-    if (encodedBest != null) {
-      try {
-        final decoded = jsonDecode(encodedBest);
-        if (decoded is Map<String, dynamic>) {
-          for (final entry in decoded.entries) {
-            final score = entry.value;
-            if (score is num && score > 0) best[entry.key] = score.toInt();
-          }
-        }
-      } on FormatException {
-        // Corrupted local cache should not block access to the learning area.
-      }
-    }
-    return CourseProgress(completedModuleIds: completed, quizBest: best);
+    final progress = CourseProgress(
+      completedModuleIds: completed,
+      quizBest: _decodeBest(encodedBest),
+    );
+    _lastProgress = progress;
+    return progress;
   }
 
   Future<void> completeModule(String moduleId) async {
     await _ensurePreferences();
-    final completed =
-        ((_preferences?.getStringList(_completedKey) ??
-                List<String>.from(
-                  _memory[_completedKey] as List<String>? ?? const [],
-                )))
-            .toSet()
-          ..add(moduleId);
+    final progress = await readProgress();
+    final completed = {...progress.completedModuleIds, moduleId}.toList();
     if (_preferences == null) {
-      _memory[_completedKey] = completed.toList();
+      _memory[_completedKey] = completed;
     } else {
-      await _preferences!.setStringList(_completedKey, completed.toList());
+      await _preferences!.setStringList(_completedKey, completed);
     }
+    _lastProgress = CourseProgress(
+      completedModuleIds: completed,
+      quizBest: progress.quizBest,
+    );
   }
 
   Future<int> submitQuiz(String moduleId, int correctCount) async {
@@ -116,6 +118,10 @@ class LearnLocalDatasource {
     } else {
       await _preferences!.setString(_quizBestKey, encoded);
     }
+    _lastProgress = CourseProgress(
+      completedModuleIds: progress.completedModuleIds,
+      quizBest: best,
+    );
     return correctCount - previousBest;
   }
 }
