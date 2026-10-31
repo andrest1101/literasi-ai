@@ -62,10 +62,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           children: [
             // Mark yang sama dengan launch screen native (iOS LaunchImage +
             // Android launch_mark) agar tidak ada pergantian logo saat
-            // transisi ke frame Flutter pertama.
+            // transisi ke frame Flutter pertama. Ukuran mark dititik-titik
+            // proporsional dengan wordmark (font 32) agar splash tidak terlalu
+            // penuh/tidak kecil.
             Image(
               image: AssetImage('assets/branding/app_mark.png'),
-              height: 88,
+              height: 96,
               excludeFromSemantics: true,
             ),
             SizedBox(height: 16),
