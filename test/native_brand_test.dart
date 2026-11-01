@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -102,6 +103,12 @@ void main() {
       }
     });
 
+    test('ikon utama iOS memakai artwork logo berwarna', () {
+      final header = _readPngHeader('$iosIconDir/Icon-App-1024x1024@1x.png');
+      expect(header.width, 1024);
+      expect(header.colorType, isNot(anyOf(4, 6)));
+    });
+
     test('tidak ada PNG yatim di AppIcon.appiconset', () {
       final catalog =
           jsonDecode(File('$iosIconDir/Contents.json').readAsStringSync())
@@ -151,6 +158,14 @@ void main() {
       });
     }
 
+    test('adaptive launcher foreground memakai logo berwarna', () {
+      final header = _readPngHeader(
+        '$androidRes/drawable-xxxhdpi/ic_launcher_foreground_glyph.png',
+      );
+      expect(header.width, 432);
+      expect(header.colorType, 6);
+    });
+
     test('adaptive icon memakai layer vector + monochrome', () {
       for (final name in ['ic_launcher.xml', 'ic_launcher_round.xml']) {
         final xml = File(
@@ -193,7 +208,7 @@ void main() {
       expect(colors, contains('#1A73E8'));
     });
 
-    test('splash Android 12 memakai bidang brand + ikon vector', () {
+    test('splash Android 12 memakai bidang brand + mark putih', () {
       final xml = File('$androidRes/values-v31/styles.xml').readAsStringSync();
 
       expect(xml, contains('android:windowSplashScreenBackground'));
@@ -202,9 +217,123 @@ void main() {
         xml,
         contains(
           '<item name="android:windowSplashScreenAnimatedIcon">'
-          '@drawable/ic_launcher_foreground</item>',
+          '@drawable/splash_mark</item>',
         ),
       );
+      expect(
+        xml,
+        isNot(contains('@drawable/ic_launcher_foreground')),
+        reason: 'splash tidak boleh memakai glyph berwarna launcher',
+      );
+
+      final splashMark = File(
+        '$androidRes/drawable/splash_mark.xml',
+      ).readAsStringSync();
+      expect(splashMark, contains('@drawable/splash_mark_glyph'));
+
+      // Kualifikasi `night` mengalahkan `v31`; tanpa override ini Android 12
+      // mode gelap kembali memakai ikon launcher.
+      final nightXml = File(
+        '$androidRes/values-night-v31/styles.xml',
+      ).readAsStringSync();
+      expect(nightXml, contains('@color/brand_primary'));
+      expect(nightXml, contains('@drawable/splash_mark'));
+    });
+
+    testWidgets('mark splash putih, transparan, dan proporsional', (
+      tester,
+    ) async {
+      const marks = [
+        (path: 'assets/branding/app_mark.png', widthRatio: 0.82),
+        (
+          path: 'android/app/src/main/res/mipmap-xxxhdpi/launch_mark.png',
+          widthRatio: 0.82,
+        ),
+        (
+          path:
+              'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png',
+          widthRatio: 0.82,
+        ),
+        (
+          path:
+              'android/app/src/main/res/drawable-xxxhdpi/splash_mark_glyph.png',
+          widthRatio: 0.20,
+        ),
+      ];
+
+      for (final entry in marks) {
+        final path = entry.path;
+        // Decoding PNG memakai mesin asli, bukan fake async widget test.
+        final stats = await tester.runAsync(() async {
+          final codec = await ui.instantiateImageCodec(
+            File(path).readAsBytesSync(),
+          );
+          final image = (await codec.getNextFrame()).image;
+          final data = await image.toByteData(
+            format: ui.ImageByteFormat.rawRgba,
+          );
+          final pixels = data!.buffer.asUint8List();
+
+          var minX = image.width, minY = image.height, maxX = -1, maxY = -1;
+          var worstChannelDelta = 0;
+          for (var i = 0; i < pixels.length; i += 4) {
+            final alpha = pixels[i + 3];
+            if (alpha == 0) continue;
+
+            // rawRgba premultiplied: glyph putih berarti RGB == alpha.
+            for (var channel = 0; channel < 3; channel++) {
+              final delta = alpha - pixels[i + channel];
+              if (delta > worstChannelDelta) worstChannelDelta = delta;
+            }
+
+            final index = i ~/ 4;
+            final x = index % image.width;
+            final y = index ~/ image.width;
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+
+          final result = (
+            width: image.width,
+            worstChannelDelta: worstChannelDelta,
+            minX: minX,
+            minY: minY,
+            maxX: maxX,
+            maxY: maxY,
+          );
+          image.dispose();
+          codec.dispose();
+          return result;
+        });
+
+        expect(stats, isNotNull, reason: '$path gagal didekode');
+        final mark = stats!;
+
+        expect(
+          mark.worstChannelDelta,
+          lessThanOrEqualTo(12),
+          reason: '$path punya piksel berwarna (bukan putih)',
+        );
+        expect(mark.maxX, greaterThanOrEqualTo(0), reason: '$path kosong');
+
+        final glyphWidth = mark.maxX - mark.minX + 1;
+        final glyphHeight = mark.maxY - mark.minY + 1;
+
+        // Mark harus mengisi target kanvas (tidak kekecilan) dan tetap punya
+        // margin, dengan rasio glyph sumber 1.315:1.
+        expect(
+          glyphWidth / mark.width,
+          closeTo(entry.widthRatio, 0.06),
+          reason: '$path terlalu kecil/besar',
+        );
+        expect(
+          glyphWidth / glyphHeight,
+          closeTo(1.31, 0.12),
+          reason: '$path bentuknya tidak sesuai master putih',
+        );
+      }
     });
 
     test('storyboard iOS memakai bidang brand + mark 120pt', () {
