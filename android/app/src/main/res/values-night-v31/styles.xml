@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- API 31+ mode gelap: kualifikasi `night` lebih diutamakan daripada
+         `v31`, jadi tanpa file ini Android 12 akan jatuh ke tema tanpa
+         windowSplashScreen* dan menampilkan ikon launcher. Nilainya sengaja
+         sama dengan values-v31 supaya splash selalu bidang brand + mark
+         putih, baik mode terang maupun gelap. -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:windowSplashScreenBackground">@color/brand_primary</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_mark</item>
+    </style>
+</resources>

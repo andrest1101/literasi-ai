@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ikon splash Android 12: mark putih murni di atas bidang brand.
+     Bitmap memiliki padding transparan yang cukup karena Android memperbesar
+     drawable intrinsic saat menampilkannya; rasio glyph hasil render ~100dp,
+     setara dengan splash Flutter dan aman di dalam mask platform. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/splash_mark_glyph" />
+    </item>
+</layer-list>

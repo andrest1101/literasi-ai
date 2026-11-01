@@ -3,27 +3,36 @@
   Generates every native brand asset from the LiterasiAI logo.
 
 .DESCRIPTION
-  Source of truth for the app identity is `assets/image/logo_literasiAI.png`
-  (open book + circuit tree on an azure squircle). This script:
+  Two sources, each used for what it actually is:
 
-    1. extracts the glyph from that PNG (flood-fills the white frame, models
-       the field gradient, removes the field colour from the glyph edges),
-    2. fits the field gradient with least squares so native icons reproduce
-       the original colours instead of approximating them,
-    3. rebuilds each asset at its native resolution (no single master that
-       gets downscaled and blurred).
+    * `assets/image/logo_literasiAI.png` is the reference artwork for the app
+      icon. Its glyph is extracted from the blue field (the white frame is
+      flood-filled away, the field colour already blended into the
+      anti-aliased edges is removed) and the field gradient is fitted with
+      least squares, so launcher icons keep the artwork that was already
+      approved and reproduce the brand colours instead of guessing two stops.
+    * `assets/image/logo_literasiAI_white.png` is the master *shape* for every
+      white mark (splash / launch / share card / monochrome layer). It is a
+      pure-white glyph on a transparent canvas, so it is used as-is (cropped,
+      RGB normalised to white, alpha preserved). Nothing is traced, flood
+      filled, or re-coloured from a screenshot, which is what used to mangle
+      the mark.
+
+  The app icon therefore stays full colour, while every white mark (splash /
+  launch / share card / monochrome layer) is drawn from the same white shape,
+  so the splash logo can never drift between screens.
 
   Outputs:
     * iOS       AppIcon.appiconset (15 PNG, RGB / no alpha) + LaunchImage
     * Android   legacy launcher (rounded, transparent corners),
-                launch mark, adaptive foreground + monochrome bitmaps
-                (layers referenced by the VectorDrawable wrappers in
+                launch mark, splash mark, adaptive foreground + monochrome
+                bitmaps (layers referenced by the layer-list wrappers in
                 android/app/src/main/res/drawable/)
     * Branding  assets/branding/app_icon_1024.png (documentation master)
                 assets/branding/app_mark.png (white mark for the splash)
 
   Regenerated PNGs are committed, so `flutter build` never needs this script.
-  Re-run it when the logo or the field gradient changes:
+  Re-run it when either logo file changes:
 
       powershell -ExecutionPolicy Bypass -File tool/generate_brand_assets.ps1
 
@@ -58,30 +67,48 @@ using System.Text;
 
 public static class BrandAssets
 {
-    // The glyph occupies this share of the square canvas. The source logo has
-    // it at ~83% of its squircle; 80% keeps the same visual weight with a
-    // little breathing room for launcher masks.
+    // Glyph width as a share of the square canvas. The colour glyph is
+    // 1.315:1 (wider than tall), so a single width ratio keeps the visual
+    // weight the same as the previous square-ish mark instead of shrinking it.
     private const double IconGlyphRatio = 0.80;
 
-    // Android launcher icons need extra breathing room under launcher masks.
+    // Android legacy launchers crop less than adaptive ones; a slightly
+    // wider glyph still leaves breathing room inside the rounded mask.
     private const double AndroidGlyphRatio = 0.68;
 
-    // Adaptive icons show roughly 72dp of the 108dp layer, so 55% of the layer
-    // reproduces the logo's glyph-to-field proportion inside the mask.
+    // Adaptive icons show roughly 72dp of the 108dp layer, so 46% of the
+    // layer reproduces the logo's glyph-to-field proportion inside the mask.
     private const double AdaptiveGlyphRatio = 0.46;
 
-    public static string[] Generate(string repoRoot, string sourceLogo)
+    // White splash / launch / share mark: 82% of the canvas leaves a calm
+    // margin around the glyph without making it look small.
+    private const double MarkGlyphRatio = 0.82;
+
+    // Android 12 enlarges the intrinsic bitmap when displaying
+    // windowSplashScreenAnimatedIcon. Device capture showed a 0.35 asset ratio
+    // rendered as a ~173dp glyph, so 0.20 produces a ~100dp mark like Flutter.
+    private const double SplashGlyphRatio = 0.20;
+
+    public static string[] Generate(string repoRoot, string colorLogo, string whiteLogo)
     {
-        if (!File.Exists(sourceLogo))
+        if (!File.Exists(colorLogo))
         {
-            throw new FileNotFoundException("Logo sumber tidak ditemukan: " + sourceLogo);
+            throw new FileNotFoundException("Logo sumber (field) tidak ditemukan: " + colorLogo);
+        }
+        if (!File.Exists(whiteLogo))
+        {
+            throw new FileNotFoundException("Logo putih (mark) tidak ditemukan: " + whiteLogo);
         }
 
         Color top, bottom;
-        Bitmap glyph = ExtractGlyph(sourceLogo, out top, out bottom);
+        Bitmap iconGlyph = ExtractGlyph(colorLogo, out top, out bottom);
+        Bitmap markGlyph = LoadWhiteGlyph(whiteLogo);
 
         StringBuilder log = new StringBuilder();
-        log.AppendLine("glyph " + glyph.Width + "x" + glyph.Height + " px");
+        log.AppendLine("icon glyph " + iconGlyph.Width + "x" + iconGlyph.Height
+            + " px (berwarna, diekstrak dari logo)");
+        log.AppendLine("mark glyph " + markGlyph.Width + "x" + markGlyph.Height
+            + " px (putih, dari master)");
         log.AppendLine("field " + Hex(top) + " -> " + Hex(bottom));
 
         string iosIcons = Path.Combine(repoRoot, "ios/Runner/Assets.xcassets/AppIcon.appiconset");
@@ -100,7 +127,7 @@ public static class BrandAssets
         };
         for (int i = 0; i < iosSizes.Length; i++)
         {
-            SaveIcon(Path.Combine(iosIcons, iosNames[i]), iosSizes[i], glyph, top, bottom,
+            SaveIcon(Path.Combine(iosIcons, iosNames[i]), iosSizes[i], iconGlyph, top, bottom,
                 IconGlyphRatio, false, false);
         }
         log.AppendLine("ios           15 app icons + 3 launch images");
@@ -109,7 +136,8 @@ public static class BrandAssets
         int[] launchSizes = { 120, 240, 360 };
         for (int i = 0; i < launchNames.Length; i++)
         {
-            SaveGlyphOnly(Path.Combine(iosLaunch, launchNames[i]), launchSizes[i], glyph, 0.92, true);
+            SaveGlyphOnly(Path.Combine(iosLaunch, launchNames[i]), launchSizes[i], markGlyph,
+                MarkGlyphRatio);
         }
 
         string[] densities = { "mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi" };
@@ -121,28 +149,37 @@ public static class BrandAssets
             Ensure(folder);
             // Legacy launchers (API < 26) get a rounded icon with transparent
             // corners: a baked square used to leave black wedges behind.
-            SaveIcon(Path.Combine(folder, "ic_launcher.png"), densityPx[i], glyph, top, bottom,
+            SaveIcon(Path.Combine(folder, "ic_launcher.png"), densityPx[i], iconGlyph, top, bottom,
                 AndroidGlyphRatio, true, true);
-            SaveIcon(Path.Combine(folder, "ic_launcher_round.png"), densityPx[i], glyph, top, bottom,
-                AndroidGlyphRatio, true, true);
+            SaveIcon(Path.Combine(folder, "ic_launcher_round.png"), densityPx[i], iconGlyph,
+                top, bottom, AndroidGlyphRatio, true, true);
+            // Native launch mark: 120dp canvas so the mark matches the iOS
+            // LaunchImage (120pt) and the Flutter splash (120 logical px),
+            // with no size jump while the native splash hands off.
             SaveGlyphOnly(Path.Combine(folder, "launch_mark.png"),
-                (int)Math.Round(densityPx[i] * 1.75), glyph, 0.92, true);
+                (int)Math.Round(densityPx[i] * 2.5), markGlyph, MarkGlyphRatio);
 
             string drawableFolder = Path.Combine(androidRes, "drawable-" + densities[i]);
             Ensure(drawableFolder);
             SaveGlyphOnly(Path.Combine(drawableFolder, "ic_launcher_foreground_glyph.png"),
-                adaptivePx[i], glyph, AdaptiveGlyphRatio, false);
+                adaptivePx[i], iconGlyph, AdaptiveGlyphRatio);
             SaveGlyphOnly(Path.Combine(drawableFolder, "ic_launcher_monochrome_glyph.png"),
-                adaptivePx[i], glyph, AdaptiveGlyphRatio, true);
+                adaptivePx[i], markGlyph, AdaptiveGlyphRatio);
+            // Android 12 splash icon: the platform renders it on a 288dp
+            // canvas and keeps only the centre 192dp circle, so the glyph
+            // needs its own, smaller ratio (see SplashGlyphRatio).
+            SaveGlyphOnly(Path.Combine(drawableFolder, "splash_mark_glyph.png"),
+                (int)Math.Round(densityPx[i] * 6.0), markGlyph, SplashGlyphRatio);
         }
         log.AppendLine("android       legacy + round + launch mark + adaptive layers");
 
-        SaveIcon(Path.Combine(branding, "app_icon_1024.png"), 1024, glyph, top, bottom,
+        SaveIcon(Path.Combine(branding, "app_icon_1024.png"), 1024, iconGlyph, top, bottom,
             IconGlyphRatio, false, false);
-        SaveGlyphOnly(Path.Combine(branding, "app_mark.png"), 384, glyph, 0.92, true);
+        SaveGlyphOnly(Path.Combine(branding, "app_mark.png"), 384, markGlyph, MarkGlyphRatio);
         log.AppendLine("branding      app_icon_1024.png + app_mark.png");
 
-        glyph.Dispose();
+        iconGlyph.Dispose();
+        markGlyph.Dispose();
         return log.ToString().Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
     }
 
@@ -156,18 +193,84 @@ public static class BrandAssets
         if (!Directory.Exists(path)) Directory.CreateDirectory(path);
     }
 
-    // --- glyph extraction ---------------------------------------------------
+    // --- sources -------------------------------------------------------------
 
-    private static Bitmap ExtractGlyph(string sourcePath, out Color top, out Color bottom)
+    /// Loads the white master and keeps its alpha as the glyph silhouette.
+    /// RGB is forced to white so anti-aliased export fringes cannot carry a
+    /// blue halo onto the brand field.
+    private static Bitmap LoadWhiteGlyph(string sourcePath)
     {
         Bitmap src = new Bitmap(sourcePath);
         int w = src.Width, h = src.Height;
-        Bitmap bmp = new Bitmap(w, h, PixelFormat.Format32bppArgb);
-        using (Graphics g = Graphics.FromImage(bmp))
+        Bitmap bmp = ToArgb(src);
+        src.Dispose();
+
+        BitmapData bd = bmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.ReadWrite,
+            PixelFormat.Format32bppArgb);
+        int stride = bd.Stride;
+        byte[] buf = new byte[stride * h];
+        System.Runtime.InteropServices.Marshal.Copy(bd.Scan0, buf, 0, buf.Length);
+
+        int minX = w, minY = h, maxX = -1, maxY = -1;
+        for (int y = 0; y < h; y++)
+        {
+            int row = y * stride;
+            for (int x = 0; x < w; x++)
+            {
+                int o = row + x * 4;
+                byte a = buf[o + 3];
+                buf[o] = 255; buf[o + 1] = 255; buf[o + 2] = 255;
+                if (a <= 8) { buf[o + 3] = 0; continue; }
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+            }
+        }
+        System.Runtime.InteropServices.Marshal.Copy(buf, 0, bd.Scan0, buf.Length);
+        bmp.UnlockBits(bd);
+
+        if (maxX < 0) throw new InvalidDataException("Logo putih tidak punya piksel opaque.");
+
+        int pad = 2;
+        int x0 = Math.Max(0, minX - pad), y0 = Math.Max(0, minY - pad);
+        int x1 = Math.Min(w - 1, maxX + pad), y1 = Math.Min(h - 1, maxY + pad);
+        Rectangle rect = new Rectangle(x0, y0, x1 - x0 + 1, y1 - y0 + 1);
+        Bitmap cropped = new Bitmap(rect.Width, rect.Height, PixelFormat.Format32bppArgb);
+        using (Graphics g = Graphics.FromImage(cropped))
         {
             g.CompositingMode = CompositingMode.SourceCopy;
-            g.DrawImageUnscaled(src, 0, 0);
+            g.DrawImage(bmp, new Rectangle(0, 0, rect.Width, rect.Height), rect,
+                GraphicsUnit.Pixel);
         }
+        cropped.SetResolution(96, 96);
+        bmp.Dispose();
+        return cropped;
+    }
+
+    /// Extracts the colour glyph from the reference logo and, in the same
+    /// pass, fits the blue field gradient:
+    ///
+    /// 1. flood fill the white frame that touches the canvas border (the book
+    ///    pages are white too, but they are enclosed by the field),
+    /// 2. erode the inside mask so the anti-aliased squircle rim never leaks
+    ///    into the glyph,
+    /// 3. model the field from four patches that never touch the glyph, then
+    ///    turn every pixel into straight alpha against that local field
+    ///    colour (removing the blue already blended into the edges),
+    /// 4. least-squares fit the field colour over (x, y) so launcher icons
+    ///    rebuild the same gradient instead of guessing two stops.
+    ///
+    /// The result is the artwork reviewers already approved; it is only used
+    /// for the launcher icons. Splash marks come from the white master.
+    private static Bitmap ExtractGlyph(string sourcePath, out Color top, out Color bottom)
+    {
+        top = Color.FromArgb(6, 181, 255);
+        bottom = Color.FromArgb(6, 47, 230);
+
+        Bitmap src = new Bitmap(sourcePath);
+        int w = src.Width, h = src.Height;
+        Bitmap bmp = ToArgb(src);
         src.Dispose();
 
         BitmapData bd = bmp.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.ReadWrite,
@@ -178,14 +281,18 @@ public static class BrandAssets
 
         int n = w * h;
         bool[] white = new bool[n];
-        for (int i = 0; i < n; i++)
+        for (int y = 0; y < h; y++)
         {
-            int o = i * 4;
-            white[i] = buf[o + 2] >= 232 && buf[o + 1] >= 232 && buf[o] >= 232;
+            int row = y * stride;
+            for (int x = 0; x < w; x++)
+            {
+                int o = row + x * 4;
+                white[x + y * w] = buf[o] >= 232 && buf[o + 1] >= 232 && buf[o + 2] >= 232;
+            }
         }
 
-        // Flood fill the white frame that touches the canvas border. The book
-        // pages are white too, but they are enclosed by the blue field.
+        // Flood fill the white frame that touches the canvas border, then
+        // erode so the anti-aliased squircle rim never enters the sample.
         bool[] outside = new bool[n];
         int[] queue = new int[n];
         int head = 0, tail = 0;
@@ -209,8 +316,6 @@ public static class BrandAssets
             if (cy < h - 1) tail = Seed(idx + w, white, outside, queue, tail);
         }
 
-        // Shrink the inside mask so the anti-aliased squircle rim (a white/blue
-        // blend, far from the field colour) never leaks into the glyph.
         bool[] inside = new bool[n];
         for (int i = 0; i < n; i++) inside[i] = !outside[i];
         for (int pass = 0; pass < 10; pass++)
@@ -221,8 +326,8 @@ public static class BrandAssets
                 for (int x = 1; x < w - 1; x++)
                 {
                     int i = x + y * w;
-                    if (!inside[i]) continue;
-                    if (inside[i - 1] && inside[i + 1] && inside[i - w] && inside[i + w])
+                    if (inside[i] && inside[i - 1] && inside[i + 1]
+                        && inside[i - w] && inside[i + w])
                     {
                         next[i] = true;
                     }
@@ -231,8 +336,6 @@ public static class BrandAssets
             inside = next;
         }
 
-        // Bilinear field model from four patches that never touch the glyph:
-        // the local field colour is what the alpha threshold compares against.
         double[] patchX = { 0.09, 0.91, 0.09, 0.91 };
         double[] patchY = { 0.18, 0.18, 0.82, 0.82 };
         double[] fieldR = new double[4], fieldG = new double[4], fieldB = new double[4];
@@ -245,30 +348,31 @@ public static class BrandAssets
             {
                 for (int xx = px - 10; xx <= px + 10; xx++)
                 {
-                    int i = xx + yy * w, o = i * 4;
+                    int i = xx + yy * w;
                     if (!inside[i]) continue;
-                    byte b = buf[o], gg = buf[o + 1], r = buf[o + 2];
+                    int o = yy * stride + xx * 4;
+                    int b = buf[o], g = buf[o + 1], r = buf[o + 2];
                     // Field pixels are blue-dominant and never near-white.
-                    if (r > 90 && gg > 170) continue;
+                    if (r > 90 && g > 170) continue;
                     if (b < 200) continue;
-                    sumR += r; sumG += gg; sumB += b; hits++;
+                    sumR += r; sumG += g; sumB += b; hits++;
                 }
             }
             if (hits == 0) { sumR = 0; sumG = 120; sumB = 255; hits = 1; }
             fieldR[k] = sumR / hits; fieldG[k] = sumG / hits; fieldB[k] = sumB / hits;
         }
 
-        // Least-squares fit of the field colour over (x, y): the native icons
-        // rebuild the same gradient instead of guessing two stops.
         double count = 0, fx = 0, fy = 0, fxx = 0, fxy = 0, fyy = 0;
         double[] sz = new double[3], sxz = new double[3], syz = new double[3];
 
         int minX = w, minY = h, maxX = -1, maxY = -1;
         for (int y = 0; y < h; y++)
         {
+            int row = y * stride;
             for (int x = 0; x < w; x++)
             {
-                int i = x + y * w, o = i * 4;
+                int i = x + y * w;
+                int o = row + x * 4;
                 if (!inside[i]) { buf[o + 3] = 0; continue; }
 
                 double u = (double)x / (w - 1), v = (double)y / (h - 1);
@@ -288,6 +392,7 @@ public static class BrandAssets
 
                 if (alpha == 0)
                 {
+                    // Flat field pixel: safe sample for the gradient fit.
                     count += 1; fx += x; fy += y; fxx += x * x; fxy += x * y; fyy += y * y;
                     sz[0] += buf[o + 2]; sz[1] += buf[o + 1]; sz[2] += buf[o];
                     sxz[0] += x * buf[o + 2]; sxz[1] += x * buf[o + 1]; sxz[2] += x * buf[o];
@@ -316,22 +421,21 @@ public static class BrandAssets
         System.Runtime.InteropServices.Marshal.Copy(buf, 0, bd.Scan0, buf.Length);
         bmp.UnlockBits(bd);
 
-        double[] solR = Solve3(
-            new double[,] { { count, fx, fy }, { fx, fxx, fxy }, { fy, fxy, fyy } },
-            new double[] { sz[0], sxz[0], syz[0] });
-        double[] solG = Solve3(
-            new double[,] { { count, fx, fy }, { fx, fxx, fxy }, { fy, fxy, fyy } },
-            new double[] { sz[1], sxz[1], syz[1] });
-        double[] solB = Solve3(
-            new double[,] { { count, fx, fy }, { fx, fxx, fxy }, { fy, fxy, fyy } },
-            new double[] { sz[2], sxz[2], syz[2] });
+        if (maxX < 0) throw new InvalidDataException("Logo tidak punya piksel opaque.");
 
-        top = Color.FromArgb(
-            Clamp255(solR[0]), Clamp255(solG[0]), Clamp255(solB[0]));
-        bottom = Color.FromArgb(
-            Clamp255(solR[0] + solR[1] * w + solR[2] * h),
-            Clamp255(solG[0] + solG[1] * w + solG[2] * h),
-            Clamp255(solB[0] + solB[1] * w + solB[2] * h));
+        if (count >= 100)
+        {
+            double[,] m = new double[,] { { count, fx, fy }, { fx, fxx, fxy }, { fy, fxy, fyy } };
+            double[] solR = Solve3(m, new double[] { sz[0], sxz[0], syz[0] });
+            double[] solG = Solve3(m, new double[] { sz[1], sxz[1], syz[1] });
+            double[] solB = Solve3(m, new double[] { sz[2], sxz[2], syz[2] });
+
+            top = Color.FromArgb(Clamp255(solR[0]), Clamp255(solG[0]), Clamp255(solB[0]));
+            bottom = Color.FromArgb(
+                Clamp255(solR[0] + solR[1] * w + solR[2] * h),
+                Clamp255(solG[0] + solG[1] * w + solG[2] * h),
+                Clamp255(solB[0] + solB[1] * w + solB[2] * h));
+        }
 
         int pad = 6;
         int x0 = Math.Max(0, minX - pad), y0 = Math.Max(0, minY - pad);
@@ -363,6 +467,17 @@ public static class BrandAssets
         if (value < 0) value = 0;
         if (value > 255) value = 255;
         return (byte)Math.Round(value);
+    }
+
+    private static Bitmap ToArgb(Bitmap src)
+    {
+        Bitmap bmp = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppArgb);
+        using (Graphics g = Graphics.FromImage(bmp))
+        {
+            g.CompositingMode = CompositingMode.SourceCopy;
+            g.DrawImageUnscaled(src, 0, 0);
+        }
+        return bmp;
     }
 
     private static int Clamp255(double value)
@@ -418,48 +533,14 @@ public static class BrandAssets
         }
     }
 
-    private static Bitmap Monochrome(Bitmap glyph)
-    {
-        Bitmap copy = new Bitmap(glyph.Width, glyph.Height, PixelFormat.Format32bppArgb);
-        using (Graphics g = Graphics.FromImage(copy))
-        {
-            g.CompositingMode = CompositingMode.SourceCopy;
-            g.DrawImageUnscaled(glyph, 0, 0);
-        }
-        Rectangle area = new Rectangle(0, 0, copy.Width, copy.Height);
-        BitmapData bd = copy.LockBits(area, ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-        byte[] buf = new byte[bd.Stride * copy.Height];
-        System.Runtime.InteropServices.Marshal.Copy(bd.Scan0, buf, 0, buf.Length);
-        for (int i = 0; i < buf.Length; i += 4)
-        {
-            byte b = buf[i], g = buf[i + 1], r = buf[i + 2], a = buf[i + 3];
-            // White pages and cyan circuitry stay; the soft field shadow around
-            // the book is dropped so a single-colour mark does not render as a
-            // grey haze on a flat splash background.
-            int minChannel = Math.Min(r, Math.Min(g, b));
-            double white = (minChannel - 150) / 60.0;
-            double cyan = (g - r - 30) / 60.0;
-            double score = Math.Max(white, cyan);
-            if (score < 0) score = 0;
-            if (score > 1) score = 1;
-            buf[i] = 255; buf[i + 1] = 255; buf[i + 2] = 255;
-            buf[i + 3] = (byte)Math.Round(a * score);
-        }
-        System.Runtime.InteropServices.Marshal.Copy(buf, 0, bd.Scan0, buf.Length);
-        copy.UnlockBits(bd);
-        return copy;
-    }
-
-    private static void DrawGlyph(Graphics g, Bitmap glyph, int canvas, double widthRatio, bool white)
+    private static void DrawGlyph(Graphics g, Bitmap glyph, int canvas, double widthRatio)
     {
         int targetW = (int)Math.Round(canvas * widthRatio);
         int targetH = (int)Math.Round(targetW * (double)glyph.Height / glyph.Width);
-        Bitmap source = white ? Monochrome(glyph) : glyph;
         g.InterpolationMode = InterpolationMode.HighQualityBicubic;
         g.PixelOffsetMode = PixelOffsetMode.HighQuality;
         g.CompositingQuality = CompositingQuality.HighQuality;
-        g.DrawImage(source, (canvas - targetW) / 2, (canvas - targetH) / 2, targetW, targetH);
-        if (white) source.Dispose();
+        g.DrawImage(glyph, (canvas - targetW) / 2, (canvas - targetH) / 2, targetW, targetH);
     }
 
     private static void SaveIcon(string path, int size, Bitmap glyph, Color top, Color bottom,
@@ -482,7 +563,7 @@ public static class BrandAssets
                     }
                 }
                 FillField(g, size, top, bottom);
-                DrawGlyph(g, glyph, size, ratio, false);
+                DrawGlyph(g, glyph, size, ratio);
             }
             canvas.Save(path, ImageFormat.Png);
         }
@@ -500,7 +581,7 @@ public static class BrandAssets
         return path;
     }
 
-    private static void SaveGlyphOnly(string path, int size, Bitmap glyph, double ratio, bool white)
+    private static void SaveGlyphOnly(string path, int size, Bitmap glyph, double ratio)
     {
         using (Bitmap canvas = new Bitmap(size, size, PixelFormat.Format32bppArgb))
         {
@@ -509,7 +590,7 @@ public static class BrandAssets
             {
                 g.SmoothingMode = SmoothingMode.AntiAlias;
                 g.Clear(Color.Transparent);
-                DrawGlyph(g, glyph, size, ratio, white);
+                DrawGlyph(g, glyph, size, ratio);
             }
             canvas.Save(path, ImageFormat.Png);
         }
@@ -519,8 +600,9 @@ public static class BrandAssets
 
 Add-Type -TypeDefinition $brandCode -ReferencedAssemblies System.Drawing
 
-$sourceLogo = Join-Path $RepoRoot 'assets/image/logo_literasiAI.png'
-$lines = [BrandAssets]::Generate($RepoRoot, $sourceLogo)
+$colorLogo = Join-Path $RepoRoot 'assets/image/logo_literasiAI.png'
+$whiteLogo = Join-Path $RepoRoot 'assets/image/logo_literasiAI_white.png'
+$lines = [BrandAssets]::Generate($RepoRoot, $colorLogo, $whiteLogo)
 foreach ($line in $lines) { Write-Host "  $line" }
 Write-Host ''
-Write-Host 'Brand assets regenerated from assets/image/logo_literasiAI.png' -ForegroundColor Green
+Write-Host 'Brand assets regenerated: colour app icon + white splash mark.' -ForegroundColor Green
