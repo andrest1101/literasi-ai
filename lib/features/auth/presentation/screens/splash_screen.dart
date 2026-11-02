@@ -56,41 +56,59 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primary,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Mark yang sama dengan launch screen native (iOS LaunchImage +
-            // Android launch_mark): glyph putih dari master putih, di atas
-            // bidang brand, jadi logo selalu terpisah jelas dari background.
-            // Kanvas 120 menyamakan launch native (iOS 120pt, Android 120dp);
-            // Android 12 memakai kanvas 288dp dengan glyph ~100dp agar aman
-            // dari mask lingkaran 192dp.
-            Image(
-              image: AssetImage('assets/branding/app_mark.png'),
-              height: 120,
-              excludeFromSemantics: true,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            // Jaga napas kiri-kanan: tanpa ini tagline 14sp hampir menyentuh
+            // tepi layar 360dp (lebar teksnya ~342dp).
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Mark yang sama dengan launch screen native (iOS LaunchImage +
+                // Android launch_mark): glyph putih dari master putih, di atas
+                // bidang brand, jadi logo selalu terpisah jelas dari background.
+                // Aset ini sudah rapat ke glyph, jadi lebar 100dp = glyph 98dp
+                // dan tidak ada margin transparan yang mendorong judul menjauh.
+                Image(
+                  image: const AssetImage('assets/branding/app_mark.png'),
+                  width: 100,
+                  excludeFromSemantics: true,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  AppStrings.appName,
+                  style: AppStyles.heading.copyWith(
+                    fontSize: 32,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 320),
+                  child: Text(
+                    AppStrings.tagline,
+                    textAlign: TextAlign.center,
+                    // Putih penuh: white70 hanya 2.9:1 di atas brand blue
+                    // (WCAG AA butuh 4.5:1 untuk teks kecil).
+                    style: AppTabTitles.displaySubtitle.copyWith(
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 16),
-            Text(
-              AppStrings.appName,
-              style: AppStyles.heading.copyWith(
-                fontSize: 32,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              AppStrings.tagline,
-              textAlign: TextAlign.center,
-              style: AppTabTitles.displaySubtitle.copyWith(
-                fontSize: 14,
-                color: Colors.white70,
-              ),
-            ),
-            SizedBox(height: 24),
-            const CircularProgressIndicator(color: Colors.white),
-          ],
+          ),
         ),
       ),
     );
