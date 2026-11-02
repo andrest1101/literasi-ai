@@ -244,7 +244,7 @@ void main() {
       tester,
     ) async {
       const marks = [
-        (path: 'assets/branding/app_mark.png', widthRatio: 0.82),
+        (path: 'assets/branding/app_mark.png', widthRatio: 0.98),
         (
           path: 'android/app/src/main/res/mipmap-xxxhdpi/launch_mark.png',
           widthRatio: 0.82,
@@ -360,7 +360,8 @@ void main() {
       expect(pubspec, contains('assets/branding/app_mark.png'));
 
       final header = _readPngHeader('assets/branding/app_mark.png');
-      expect(header.width, 384);
+      expect(header.width, 392);
+      expect(header.height, 300);
       expect(header.colorType, 6);
 
       final splash = File(
@@ -368,6 +369,151 @@ void main() {
       ).readAsStringSync();
       expect(splash, contains('assets/branding/app_mark.png'));
       expect(splash, isNot(contains('Icons.fact_check')));
+    });
+  });
+
+  group('Branding desktop & web', () {
+    test('Windows memakai judul dan metadata LiterasiAI', () {
+      final mainCpp = File('windows/runner/main.cpp').readAsStringSync();
+      expect(mainCpp, contains('window.Create(L"LiterasiAI"'));
+
+      final rc = File('windows/runner/Runner.rc').readAsStringSync();
+      expect(rc, contains('VALUE "ProductName", "LiterasiAI"'));
+      expect(rc, contains('VALUE "FileDescription", "LiterasiAI"'));
+      expect(rc, contains('VALUE "CompanyName", "LiterasiAI"'));
+      expect(rc, isNot(contains('"com.example"')));
+      // Nama exe tidak diubah: build output tetap literasi_ai.exe.
+      expect(rc, contains('VALUE "OriginalFilename", "literasi_ai.exe"'));
+    });
+
+    test('Linux memakai judul jendela LiterasiAI', () {
+      final linux = File('linux/runner/my_application.cc').readAsStringSync();
+      expect(
+        linux,
+        contains('gtk_header_bar_set_title(header_bar, "LiterasiAI")'),
+      );
+      expect(linux, contains('gtk_window_set_title(window, "LiterasiAI")'));
+      expect(linux, isNot(contains('"literasi_ai"')));
+    });
+
+    test('app_icon.ico memuat frame PNG untuk semua ukuran Windows', () {
+      final bytes = File(
+        'windows/runner/resources/app_icon.ico',
+      ).readAsBytesSync();
+      final data = ByteData.sublistView(bytes);
+
+      expect(data.getUint16(0, Endian.little), 0, reason: 'reserved');
+      expect(data.getUint16(2, Endian.little), 1, reason: 'tipe icon');
+      final count = data.getUint16(4, Endian.little);
+      expect(count, 7);
+
+      final sizes = <int>[];
+      for (var i = 0; i < count; i++) {
+        final entry = 6 + i * 16;
+        sizes.add(bytes[entry] == 0 ? 256 : bytes[entry]);
+      }
+      expect(sizes, [16, 24, 32, 48, 64, 128, 256]);
+
+      for (var i = 0; i < count; i++) {
+        final entry = 6 + i * 16;
+        final length = data.getUint32(entry + 8, Endian.little);
+        final offset = data.getUint32(entry + 12, Endian.little);
+        expect(offset + length, lessThanOrEqualTo(bytes.length));
+        expect(bytes[offset], 0x89, reason: 'frame $i bukan PNG');
+        expect(
+          String.fromCharCodes(bytes.sublist(offset + 1, offset + 4)),
+          'PNG',
+          reason: 'frame $i bukan PNG',
+        );
+        // Dimensi PNG harus sama dengan entri direktori.
+        final frame = ByteData.sublistView(bytes.sublist(offset));
+        expect(frame.getUint32(16), sizes[i], reason: 'lebar frame $i');
+        expect(frame.getUint32(20), sizes[i], reason: 'tinggi frame $i');
+      }
+    });
+
+    test('web memakai judul, manifest, dan ikon brand', () {
+      final html = File('web/index.html').readAsStringSync();
+      expect(html, contains('<title>LiterasiAI</title>'));
+      expect(html, contains('content="LiterasiAI"'));
+      expect(html, isNot(contains('literasi_ai')));
+      expect(html, isNot(contains('A new Flutter project.')));
+      expect(html, contains('content="#1A73E8"'));
+
+      final manifest =
+          jsonDecode(File('web/manifest.json').readAsStringSync())
+              as Map<String, dynamic>;
+      expect(manifest['name'], 'LiterasiAI');
+      expect(manifest['short_name'], 'LiterasiAI');
+      expect(manifest['background_color'], '#1A73E8');
+      expect(manifest['theme_color'], '#1A73E8');
+      expect(manifest['description'], isNot(contains('Flutter')));
+
+      final icons = (manifest['icons'] as List).cast<Map<String, dynamic>>();
+      expect(
+        icons.map((icon) => icon['src']),
+        containsAll([
+          'icons/Icon-192.png',
+          'icons/Icon-512.png',
+          'icons/Icon-maskable-192.png',
+          'icons/Icon-maskable-512.png',
+        ]),
+      );
+      expect(
+        icons.where((icon) => icon['purpose'] == 'maskable'),
+        hasLength(2),
+      );
+
+      for (final icon in icons) {
+        final src = icon['src'] as String;
+        final expected = int.parse((icon['sizes'] as String).split('x').first);
+        final header = _readPngHeader('web/$src');
+        expect(header.width, expected, reason: src);
+        expect(header.height, expected, reason: src);
+        expect(
+          header.colorType,
+          isNot(anyOf(4, 6)),
+          reason: '$src butuh opaque',
+        );
+      }
+
+      final favicon = _readPngHeader('web/favicon.png');
+      expect(favicon.width, 32);
+      expect(favicon.height, 32);
+    });
+
+    test('ikon macOS mengikuti grid squircle Big Sur', () {
+      final appInfo = File('macos/Runner/Info.plist').readAsStringSync();
+      expect(appInfo, contains('<key>CFBundleDisplayName</key>'));
+      expect(appInfo, contains('<string>LiterasiAI</string>'));
+
+      final catalog =
+          jsonDecode(
+                File(
+                  'macos/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json',
+                ).readAsStringSync(),
+              )
+              as Map<String, dynamic>;
+      final images = (catalog['images'] as List).cast<Map<String, dynamic>>();
+
+      final expected = <String, int>{};
+      for (final image in images) {
+        final filename = image['filename'] as String;
+        final size = double.parse((image['size'] as String).split('x').first);
+        final scale = double.parse(
+          (image['scale'] as String).replaceAll('x', ''),
+        );
+        expected[filename] = (size * scale).round();
+      }
+      // Setiap berkas yang direferensikan harus ada dan bersudut transparan.
+      for (final entry in expected.entries) {
+        final header = _readPngHeader(
+          'macos/Runner/Assets.xcassets/AppIcon.appiconset/${entry.key}',
+        );
+        expect(header.width, entry.value, reason: entry.key);
+        expect(header.height, entry.value, reason: entry.key);
+        expect(header.colorType, 6, reason: '${entry.key} butuh alpha');
+      }
     });
   });
 }
