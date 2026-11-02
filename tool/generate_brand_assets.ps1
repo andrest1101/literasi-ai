@@ -28,8 +28,13 @@
                 launch mark, splash mark, adaptive foreground + monochrome
                 bitmaps (layers referenced by the layer-list wrappers in
                 android/app/src/main/res/drawable/)
-    * Branding  assets/branding/app_icon_1024.png (documentation master)
-                assets/branding/app_mark.png (white mark for the splash)
+    * Windows   windows/runner/resources/app_icon.ico (multi-size, PNG frames)
+    * macOS     AppIcon.appiconset (squircle on transparent, Big Sur grid)
+    * Web       icons/Icon-{192,512}.png, maskable variants, favicon.png
+    * Branding  assets/branding/app_icon_1024.png (colour icon master)
+                assets/branding/app_mark.png (tight white mark for the splash
+                and the share card: the canvas hugs the glyph, so a widget
+                size of N dp renders an N dp glyph)
 
   Regenerated PNGs are committed, so `flutter build` never needs this script.
   Re-run it when either logo file changes:
@@ -80,14 +85,30 @@ public static class BrandAssets
     // layer reproduces the logo's glyph-to-field proportion inside the mask.
     private const double AdaptiveGlyphRatio = 0.46;
 
-    // White splash / launch / share mark: 82% of the canvas leaves a calm
-    // margin around the glyph without making it look small.
+    // Native launch marks (Android < 31 / iOS LaunchImage) are centred in a
+    // square canvas that the platform positions as a whole, so a calm margin
+    // inside the bitmap is what defines their visual size.
     private const double MarkGlyphRatio = 0.82;
+
+    // Padding of the tight splash mark, in pixels of its 384px glyph. The
+    // canvas hugs the glyph so the Flutter splash can size it directly.
+    private const int MarkPadPx = 4;
 
     // Android 12 enlarges the intrinsic bitmap when displaying
     // windowSplashScreenAnimatedIcon. Device capture showed a 0.35 asset ratio
     // rendered as a ~173dp glyph, so 0.20 produces a ~100dp mark like Flutter.
     private const double SplashGlyphRatio = 0.20;
+
+    // Launcher-style icons (Windows / web). Web icons are full-bleed because
+    // the browser applies the mask; maskable variants keep the glyph inside
+    // the safe zone of that mask.
+    private const double WebGlyphRatio = 0.80;
+    private const double MaskableGlyphRatio = 0.52;
+
+    // macOS Big Sur icon grid: the rounded square covers ~80.5% of the canvas
+    // and is centred with transparent surroundings instead of being masked.
+    private const double MacIconContent = 0.805;
+    private const double MacIconRadius = 0.225;
 
     public static string[] Generate(string repoRoot, string colorLogo, string whiteLogo)
     {
@@ -115,7 +136,12 @@ public static class BrandAssets
         string iosLaunch = Path.Combine(repoRoot, "ios/Runner/Assets.xcassets/LaunchImage.imageset");
         string androidRes = Path.Combine(repoRoot, "android/app/src/main/res");
         string branding = Path.Combine(repoRoot, "assets/branding");
+        string windowsIcon = Path.Combine(repoRoot, "windows/runner/resources");
+        string macIcons = Path.Combine(repoRoot, "macos/Runner/Assets.xcassets/AppIcon.appiconset");
+        string webIcons = Path.Combine(repoRoot, "web/icons");
+        string webRoot = Path.Combine(repoRoot, "web");
         Ensure(iosIcons); Ensure(iosLaunch); Ensure(branding);
+        Ensure(windowsIcon); Ensure(macIcons); Ensure(webIcons); Ensure(webRoot);
 
         int[] iosSizes = { 20, 40, 60, 29, 58, 87, 40, 80, 120, 120, 180, 76, 152, 167, 1024 };
         string[] iosNames = {
@@ -175,8 +201,43 @@ public static class BrandAssets
 
         SaveIcon(Path.Combine(branding, "app_icon_1024.png"), 1024, iconGlyph, top, bottom,
             IconGlyphRatio, false, false);
-        SaveGlyphOnly(Path.Combine(branding, "app_mark.png"), 384, markGlyph, MarkGlyphRatio);
-        log.AppendLine("branding      app_icon_1024.png + app_mark.png");
+        SaveTightMark(Path.Combine(branding, "app_mark.png"), markGlyph, 384, MarkPadPx);
+
+        // Windows executable icon: several sizes in one ICO so Explorer, the
+        // taskbar and the title bar all have a native frame to pick from.
+        SaveIco(Path.Combine(windowsIcon, "app_icon.ico"),
+            new int[] { 16, 24, 32, 48, 64, 128, 256 },
+            iconGlyph, top, bottom, IconGlyphRatio);
+
+        // macOS icons are not masked by the OS: draw the squircle ourselves on
+        // a transparent canvas, following the Big Sur icon grid.
+        int[] macSizes = { 16, 32, 64, 128, 256, 512, 1024 };
+        for (int i = 0; i < macSizes.Length; i++)
+        {
+            SaveMacIcon(Path.Combine(macIcons, "app_icon_" + macSizes[i] + ".png"),
+                macSizes[i], iconGlyph, top, bottom, IconGlyphRatio);
+        }
+
+        // Web: full-bleed icons for the manifest/favicon plus maskable variants
+        // whose glyph stays inside the browser's safe circle.
+        SaveIcon(Path.Combine(webIcons, "Icon-192.png"), 192, iconGlyph, top, bottom,
+            WebGlyphRatio, false, false);
+        SaveIcon(Path.Combine(webIcons, "Icon-512.png"), 512, iconGlyph, top, bottom,
+            WebGlyphRatio, false, false);
+        // Maskable variants: browsers crop these to a circle, so they use the
+        // white mark over the brand field instead of the square artwork (which
+        // would otherwise show its own squircle edge inside the mask).
+        SaveMarkField(Path.Combine(webIcons, "Icon-maskable-192.png"), 192, markGlyph,
+            MaskableGlyphRatio, top, bottom);
+        SaveMarkField(Path.Combine(webIcons, "Icon-maskable-512.png"), 512, markGlyph,
+            MaskableGlyphRatio, top, bottom);
+        SaveIcon(Path.Combine(webRoot, "favicon.png"), 32, iconGlyph, top, bottom,
+            WebGlyphRatio, false, false);
+
+        log.AppendLine("branding      app_icon_1024.png + app_mark.png (rapat)");
+        log.AppendLine("windows       app_icon.ico (16-256)");
+        log.AppendLine("macos         app_icon 16-1024 (squircle transparan)");
+        log.AppendLine("web           Icon-192/512 + maskable + favicon");
 
         iconGlyph.Dispose();
         markGlyph.Dispose();
@@ -591,6 +652,128 @@ public static class BrandAssets
                 g.SmoothingMode = SmoothingMode.AntiAlias;
                 g.Clear(Color.Transparent);
                 DrawGlyph(g, glyph, size, ratio);
+            }
+            canvas.Save(path, ImageFormat.Png);
+        }
+    }
+
+    /// White mark whose canvas hugs the glyph (with a hairline pad), so a
+    /// widget that asks for N dp gets an N dp glyph instead of N dp worth of
+    /// invisible margin.
+    private static void SaveTightMark(string path, Bitmap glyph, int glyphWidth, int pad)
+    {
+        int targetW = glyphWidth;
+        int targetH = (int)Math.Round(targetW * (double)glyph.Height / glyph.Width);
+        int canvasW = targetW + pad * 2;
+        int canvasH = targetH + pad * 2;
+        using (Bitmap canvas = new Bitmap(canvasW, canvasH, PixelFormat.Format32bppArgb))
+        {
+            canvas.SetResolution(96, 96);
+            using (Graphics g = Graphics.FromImage(canvas))
+            {
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                g.CompositingQuality = CompositingQuality.HighQuality;
+                g.Clear(Color.Transparent);
+                g.DrawImage(glyph, pad, pad, targetW, targetH);
+            }
+            canvas.Save(path, ImageFormat.Png);
+        }
+    }
+
+    /// Opaque square icon (Windows frames and web tiles).
+    private static Bitmap RenderIcon(int size, Bitmap glyph, Color top, Color bottom,
+        double ratio)
+    {
+        Bitmap canvas = new Bitmap(size, size, PixelFormat.Format24bppRgb);
+        canvas.SetResolution(96, 96);
+        using (Graphics g = Graphics.FromImage(canvas))
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            FillField(g, size, top, bottom);
+            DrawGlyph(g, glyph, size, ratio);
+        }
+        return canvas;
+    }
+
+    /// White mark centred on the brand field (maskable web icons).
+    private static void SaveMarkField(string path, int size, Bitmap glyph, double ratio,
+        Color top, Color bottom)
+    {
+        using (Bitmap canvas = RenderIcon(size, glyph, top, bottom, ratio))
+        {
+            canvas.Save(path, ImageFormat.Png);
+        }
+    }
+
+    /// Multi-resolution .ico with PNG-compressed frames (supported since
+    /// Windows Vista), written by hand so the brand can be rebuilt with no
+    /// extra tooling.
+    private static void SaveIco(string path, int[] sizes, Bitmap glyph, Color top,
+        Color bottom, double ratio)
+    {
+        byte[][] frames = new byte[sizes.Length][];
+        for (int i = 0; i < sizes.Length; i++)
+        {
+            using (Bitmap frame = RenderIcon(sizes[i], glyph, top, bottom, ratio))
+            using (MemoryStream buffer = new MemoryStream())
+            {
+                frame.Save(buffer, ImageFormat.Png);
+                frames[i] = buffer.ToArray();
+            }
+        }
+
+        using (FileStream file = new FileStream(path, FileMode.Create, FileAccess.Write))
+        using (BinaryWriter writer = new BinaryWriter(file))
+        {
+            writer.Write((ushort)0);                  // reserved
+            writer.Write((ushort)1);                  // 1 = icon
+            writer.Write((ushort)sizes.Length);
+
+            int offset = 6 + 16 * sizes.Length;
+            for (int i = 0; i < sizes.Length; i++)
+            {
+                int size = sizes[i];
+                writer.Write((byte)(size >= 256 ? 0 : size));
+                writer.Write((byte)(size >= 256 ? 0 : size));
+                writer.Write((byte)0);                // palette entries
+                writer.Write((byte)0);                // reserved
+                writer.Write((ushort)1);              // colour planes
+                writer.Write((ushort)32);             // bits per pixel
+                writer.Write((uint)frames[i].Length);
+                writer.Write((uint)offset);
+                offset += frames[i].Length;
+            }
+            for (int i = 0; i < frames.Length; i++) writer.Write(frames[i]);
+        }
+    }
+
+    /// macOS icon: rounded squircle on a transparent canvas (Big Sur grid),
+    /// because macOS applies no mask of its own.
+    private static void SaveMacIcon(string path, int size, Bitmap glyph, Color top,
+        Color bottom, double ratio)
+    {
+        int inner = (int)Math.Round(size * MacIconContent);
+        int offset = (size - inner) / 2;
+        using (Bitmap canvas = new Bitmap(size, size, PixelFormat.Format32bppArgb))
+        {
+            canvas.SetResolution(96, 96);
+            using (Graphics g = Graphics.FromImage(canvas))
+            {
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.Clear(Color.Transparent);
+                using (Matrix shift = new Matrix())
+                {
+                    shift.Translate(offset, offset);
+                    g.Transform = shift;
+                    using (GraphicsPath clip = RoundedRect(inner, (float)(inner * MacIconRadius)))
+                    {
+                        g.SetClip(clip);
+                    }
+                    FillField(g, inner, top, bottom);
+                    DrawGlyph(g, glyph, inner, ratio);
+                }
             }
             canvas.Save(path, ImageFormat.Png);
         }

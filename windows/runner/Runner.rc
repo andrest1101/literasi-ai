@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "literasi_ai" "\0"
+            VALUE "CompanyName", "LiterasiAI" "\0"
+            VALUE "FileDescription", "LiterasiAI" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "literasi_ai" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 LiterasiAI. All rights reserved." "\0"
             VALUE "OriginalFilename", "literasi_ai.exe" "\0"
-            VALUE "ProductName", "literasi_ai" "\0"
+            VALUE "ProductName", "LiterasiAI" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

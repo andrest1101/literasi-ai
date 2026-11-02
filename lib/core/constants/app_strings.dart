@@ -3,8 +3,11 @@ import '../errors/failures.dart';
 // String terpusat: Bahasa Indonesia (PRD: AI response santai tapi informatif).
 abstract final class AppStrings {
   static const String appName = 'LiterasiAI';
+  // Baris dipisah eksplisit: pembungkusan otomatis pada 360-400dp menyisakan
+  // kata "detik." sendirian di baris kedua. Dua baris seimbang ini tetap muat
+  // dengan margin 32dp bahkan di layar 320dp.
   static const String tagline =
-      'Cek dulu sebelum sebar. Hasil dalam hitungan detik.';
+      'Cek dulu sebelum sebar.\nHasil dalam hitungan detik.';
 
   static const String onboardingTitle1 = 'Cek Hoaks Instan dengan AI';
   static const String onboardingEyebrow1 = 'VERIFIKASI TEKS';

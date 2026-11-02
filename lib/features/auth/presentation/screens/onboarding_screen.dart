@@ -129,16 +129,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  const Text(
-                    AppStrings.appName,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                      letterSpacing: -0.2,
+                  // Expanded (bukan Spacer + Text): pada layar 320dp header
+                  // ini kelebihan 4px, dan dengan text scale besar nama brand
+                  // juga bisa meluber. Expanded memberi ruang sisa ke brand
+                  // dan memotong dengan elipsis hanya bila benar-benar sempit.
+                  const Expanded(
+                    child: Text(
+                      AppStrings.appName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.2,
+                      ),
                     ),
                   ),
-                  const Spacer(),
                   AnimatedOpacity(
                     opacity: _isLast ? 0 : 1,
                     duration: const Duration(milliseconds: 250),

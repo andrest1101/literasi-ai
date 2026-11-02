@@ -186,12 +186,12 @@ class _BrandStrip extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.16),
             ),
             child: Center(
-              // Kanvas mark persegi (glyph 1.315:1): lebar 36 memberi glyph
-              // ~29 px di dalam badge 40 px, sama dengan mark sebelumnya,
+              // Mark rapat (kanvas mengikuti glyph 1.315:1): lebar 30 memberi
+              // glyph ~29 px di dalam badge 40 px, sama dengan mark sebelumnya,
               // tanpa melebar keluar lingkaran.
               child: Image(
                 image: const AssetImage('assets/branding/app_mark.png'),
-                width: 36,
+                width: 30,
                 excludeFromSemantics: true,
               ),
             ),

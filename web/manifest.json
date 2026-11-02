@@ -1,11 +1,11 @@
 {
-    "name": "literasi_ai",
-    "short_name": "literasi_ai",
+    "name": "LiterasiAI",
+    "short_name": "LiterasiAI",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1A73E8",
+    "theme_color": "#1A73E8",
+    "description": "Cek fakta klaim, gambar, dan tautan dengan AI sebelum kamu sebar.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
