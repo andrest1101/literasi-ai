@@ -15,7 +15,7 @@ hoaks.
 [![Tests](https://img.shields.io/badge/tests-399%20passed-34A853?logo=flutter&logoColor=white)](#-pengujian)
 [![Analyze](https://img.shields.io/badge/flutter%20analyze-clean-34A853)](#-pengujian)
 
-> **Purpose.** Indonesia termasuk negara dengan penyebaran hoaks tertinggi,
+> **Purpose:** Indonesia termasuk negara dengan penyebaran hoaks tertinggi,
 > mayoritas lewat WhatsApp, Instagram, dan Facebook (Kominfo). Masyarakat
 > tidak punya alat yang mudah, cepat, dan tepercaya untuk verifikasi
 > mandiri. LiterasiAI menjawabnya: verifikasi fakta AI dalam hitungan detik
