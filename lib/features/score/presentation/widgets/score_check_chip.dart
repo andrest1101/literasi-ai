@@ -48,6 +48,7 @@ class ScoreCheckChip extends ConsumerWidget {
           child: Row(
             children: [
               Expanded(
+                flex: 3,
                 child: _ScoreZone(score: score, onTap: onOpenProfile),
               ),
               Container(
@@ -55,7 +56,9 @@ class ScoreCheckChip extends ConsumerWidget {
                 height: 38,
                 color: AppColors.neutral.withValues(alpha: 0.18),
               ),
-              _KeyZone(status: keyStatus, onTap: onOpenKeySettings),
+              Flexible(
+                child: _KeyZone(status: keyStatus, onTap: onOpenKeySettings),
+              ),
             ],
           ),
         ),
@@ -259,12 +262,16 @@ class _KeyContent extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 7),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
+            ),
           ),
         ),
         const SizedBox(width: 2),
