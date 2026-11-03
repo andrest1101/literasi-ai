@@ -539,6 +539,16 @@ abstract final class AppStrings {
   static const String quickCheckSharing = 'Menyiapkan gambar...';
   static const String quickCheckShareFailed =
       'Gagal menyiapkan gambar. Mencoba bagikan sebagai teks.';
+  static const String shareTargetInvalidImage =
+      'Gambar yang dibagikan tidak bisa dibuka atau formatnya tidak didukung.';
+  static const String shareTargetUnsupported =
+      'Format yang dibagikan belum didukung. Bagikan teks, link, JPG, PNG, atau WebP.';
+  static const String shareTargetTooLarge =
+      'Gambar yang dibagikan lebih dari 5 MB.';
+  static const String shareTargetEmpty =
+      'Tidak ada teks atau gambar yang dibagikan.';
+  static const String shareTargetInvalid =
+      'Gagal membuka kiriman dari aplikasi lain.';
   static const String quickCheckTipsTitle = 'Cara dapat hasil terbaik';
   static const String quickCheckTip1 =
       'Tempel kalimat secara utuh, bukan potongan yang ambigu.';

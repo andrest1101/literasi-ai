@@ -30,12 +30,16 @@ class QuickCheckSessionScreen extends ConsumerStatefulWidget {
     super.key,
     this.initialMode = QuickCheckInitialMode.text,
     this.initialClaim,
+    this.initialUrl,
+    this.initialImage,
   });
 
   static const route = '/quick-check-session';
 
   final QuickCheckInitialMode initialMode;
   final String? initialClaim;
+  final String? initialUrl;
+  final ImageAttachment? initialImage;
 
   @override
   ConsumerState<QuickCheckSessionScreen> createState() =>
@@ -102,13 +106,20 @@ class _QuickCheckSessionScreenState
     if (seed != null && seed.isNotEmpty) {
       _controller.text = seed;
     }
+    final url = widget.initialUrl?.trim();
+    if (url != null && url.isNotEmpty) {
+      _urlController.text = url;
+    }
+    _image = widget.initialImage;
   }
 
   @override
   void didUpdateWidget(QuickCheckSessionScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialMode != widget.initialMode ||
-        oldWidget.initialClaim != widget.initialClaim) {
+        oldWidget.initialClaim != widget.initialClaim ||
+        oldWidget.initialUrl != widget.initialUrl ||
+        oldWidget.initialImage != widget.initialImage) {
       _applyInitialArgs();
     }
   }
@@ -629,14 +640,19 @@ class _ModeButton extends StatelessWidget {
                   color: selected ? AppColors.primary : AppColors.textSecondary,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                    color: selected
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                      color: selected
+                          ? AppColors.textPrimary
+                          : AppColors.textSecondary,
+                    ),
                   ),
                 ),
               ],

@@ -1,12 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/constants/app_colors.dart';
+import '../core/constants/app_strings.dart';
 import '../features/chat/presentation/screens/chat_screen.dart';
 import '../features/chat/presentation/widgets/chat_fab.dart';
 import '../features/history/presentation/screens/history_list_screen.dart';
 import '../features/learn/presentation/screens/course_list_screen.dart';
+import '../features/quick_check/data/datasources/share_target_service.dart';
+import '../features/quick_check/domain/entities/share_target_payload.dart';
 import '../features/quick_check/presentation/screens/quick_check_home_tab.dart';
+import '../features/quick_check/presentation/screens/quick_check_session_screen.dart';
+import '../features/quick_check/presentation/widgets/share_target_launch.dart';
 import '../features/score/presentation/screens/profile_screen.dart';
 import '../shared/widgets/bottom_nav_bar.dart';
 
@@ -39,6 +46,66 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// Indeks tab yang sudah pernah dibuka. Tab lain tetap berupa placeholder
   /// sampai pengguna benar-benar mengunjunginya.
   final Set<int> _mounted = {0};
+
+  final ShareTargetService _shareTargetService = ShareTargetService();
+  StreamSubscription<ShareTargetPayload>? _shareSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_openInitialShareTarget());
+    _shareSubscription = _shareTargetService.watchShareTargets().listen(
+      _handleIncomingShare,
+      onError: (_) {
+        if (!mounted) return;
+        _showShareTargetError(AppStrings.shareTargetInvalid);
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _shareSubscription?.cancel();
+    super.dispose();
+  }
+
+  /// Share Target saat cold start: payload diambil satu kali saat Home sudah
+  /// siap, sehingga auth/onboarding tidak perlu diubah atau dibypass.
+  Future<void> _openInitialShareTarget() async {
+    final payload = await _shareTargetService.fetchInitialShare();
+    if (payload == null || !mounted) return;
+    _openShareTarget(payload);
+  }
+
+  void _handleIncomingShare(ShareTargetPayload payload) {
+    if (!mounted) return;
+    _openShareTarget(payload);
+  }
+
+  void _openShareTarget(ShareTargetPayload payload) {
+    final launch = ShareTargetLaunch.fromPayload(payload);
+    if (launch.errorMessage != null) {
+      _showShareTargetError(launch.errorMessage!);
+      return;
+    }
+
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => QuickCheckSessionScreen(
+          initialMode: launch.mode,
+          initialClaim: launch.initialClaim,
+          initialUrl: launch.initialUrl,
+          initialImage: launch.image,
+        ),
+      ),
+    );
+  }
+
+  void _showShareTargetError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+    );
+  }
 
   void _openChat() {
     Navigator.of(context).pushNamed(ChatScreen.route);
