@@ -5,7 +5,7 @@
 Aplikasi mobile verifikasi fakta berbasis AI untuk masyarakat Indonesia.
 Tempel teks, gambar, atau link, dapatkan verdict dalam hitungan detik,
 lalu bagikan ke WhatsApp. Dilengkapi asisten chat literasi, riwayat
-Firestore per pengguna, mini-course, skor literasi, dan feed trending
+Firestore per pengguna, mini course, skor literasi, dan feed trending
 hoaks.
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.32+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
@@ -304,8 +304,3 @@ flutter test --plain-name "cache"     # filter berdasarkan nama
 | Selalu `TIDAK_DAPAT_DIPASTIKAN` | Kunci Gemini kosong/invalid — cek **Profil → Kunci API Gemini**, atau pakai mode demo |
 | `flutter` CLI macet di terminal | Biasanya terkunci daemon VS Code yang sedang berjalan; tunggu atau tutup run aktif, lalu ulangi |
 
-## 📚 Dokumentasi
-
-- `PRD.md` — spesifikasi produk: fitur, screen map, strategi prompt AI, fase pengembangan
-- `progress.md` — riwayat pengerjaan per batch beserta hasil verifikasi
-- `agents.md` — aturan main AI agent: arsitektur, standar koding, commit policy
