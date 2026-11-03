@@ -67,12 +67,19 @@ class HistoryActionController extends AsyncNotifier<void> {
   @override
   FutureOr<void> build() {}
 
-  Future<void> delete(String entryId) async {
+  /// Hapus satu entri dan laporkan hasilnya.
+  ///
+  /// Mengembalikan `true` hanya bila entri benar-benar terhapus. Swipe di
+  /// daftar memakai nilai ini sebagai `confirmDismiss`: kartu baru dilepas
+  /// setelah hapus sukses, sehingga request yang lambat/gagal tidak
+  /// meninggalkan kartu hantu di pohon widget.
+  Future<bool> delete(String entryId) async {
     final userId = ref.read(historyUserIdProvider);
-    if (userId == null) return;
+    if (userId == null) return false;
     state = const AsyncLoading();
     state = await AsyncValue.guard(
       () => ref.read(deleteHistoryProvider)(userId: userId, entryId: entryId),
     );
+    return !state.hasError;
   }
 }

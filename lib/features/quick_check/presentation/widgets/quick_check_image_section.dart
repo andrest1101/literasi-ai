@@ -7,6 +7,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../domain/entities/image_attachment.dart';
 import '../../domain/repositories/image_picker_service.dart';
 import '../../domain/usecases/verify_claim.dart';
+import '../screens/image_preview_screen.dart';
 import 'char_counter_text.dart';
 
 /// Panel lampiran gambar sesi Quick Check.
@@ -317,6 +318,15 @@ class _ImagePreview extends StatelessWidget {
   final ValueChanged<ImagePickSource> onReplace;
   final VoidCallback onRemove;
 
+  void _openPreview(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) => ImagePreviewScreen(image: image),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -341,9 +351,21 @@ class _ImagePreview extends StatelessWidget {
         children: [
           Stack(
             children: [
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: _PreviewImage(bytes: image.bytes),
+              Tooltip(
+                message: AppStrings.imagePreviewOpen,
+                child: Semantics(
+                  button: true,
+                  label: AppStrings.imagePreviewOpen,
+                  onTap: () => _openPreview(context),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => _openPreview(context),
+                    child: AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: _PreviewImage(bytes: image.bytes),
+                    ),
+                  ),
+                ),
               ),
               Positioned(
                 top: 10,
@@ -376,6 +398,31 @@ class _ImagePreview extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 10,
+                bottom: 10,
+                child: IgnorePointer(
+                  child: Tooltip(
+                    message: AppStrings.imagePreviewOpen,
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.black.withValues(alpha: 0.55),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.zoom_in_rounded,
+                        color: Colors.white,
+                        size: 21,
+                      ),
+                    ),
                   ),
                 ),
               ),

@@ -18,6 +18,7 @@ import 'package:literasi_ai/features/quick_check/domain/entities/verification_re
 import 'package:literasi_ai/features/quick_check/presentation/screens/quick_check_home_tab.dart';
 import 'package:literasi_ai/features/quick_check/presentation/widgets/quick_check_result_section.dart';
 import 'package:literasi_ai/features/score/presentation/screens/api_key_screen.dart';
+import 'package:literasi_ai/shared/widgets/app_medallion_dialog.dart';
 import 'package:literasi_ai/features/score/presentation/screens/profile_screen.dart';
 import 'package:literasi_ai/features/score/presentation/widgets/score_check_chip.dart';
 
@@ -250,6 +251,31 @@ void main() {
     expect(find.text(AppStrings.apiKeyHowToTitle), findsOneWidget);
     // Belum ada hasil probe: judul rincian tahap tidak tampil.
     expect(find.text(AppStrings.apiKeyProbeStepsTitle), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('hapus kunci memakai dialog medallion yang sama', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [apiKeyStoreProvider.overrideWithValue(_MemoryKeyStore())],
+        child: const MaterialApp(home: ApiKeyScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final remove = find.text(AppStrings.apiKeyRemove);
+    await tester.ensureVisible(remove);
+    await tester.pumpAndSettle();
+    await tester.tap(remove);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AppMedallionDialog), findsOneWidget);
+    expect(find.text(AppStrings.apiKeyRemoveConfirm), findsOneWidget);
+    await tester.tap(find.text(AppStrings.chatCancel));
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.apiKeyRemoveConfirm), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

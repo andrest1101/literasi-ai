@@ -5,6 +5,7 @@ import 'package:literasi_ai/app/home_screen.dart';
 import 'package:literasi_ai/core/constants/app_colors.dart';
 import 'package:literasi_ai/features/chat/presentation/screens/chat_screen.dart';
 import 'package:literasi_ai/features/quick_check/presentation/screens/quick_check_session_screen.dart';
+import 'package:literasi_ai/features/score/presentation/widgets/score_breakdown.dart';
 import 'package:literasi_ai/shared/widgets/app_section_header.dart';
 
 void main() {
@@ -47,7 +48,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('LiterasiAI'), findsNothing);
     expect(find.textContaining('Kelola'), findsOneWidget);
-    expect(find.text('0 x 10'), findsOneWidget);
+    expect(find.byKey(ScoreBreakdown.verificationsKey), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -71,7 +72,7 @@ void main() {
 
     await tester.tap(find.text('Profil'));
     await tester.pumpAndSettle();
-    expect(find.text('0 x 10'), findsOneWidget);
+    expect(find.byKey(ScoreBreakdown.verificationsKey), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

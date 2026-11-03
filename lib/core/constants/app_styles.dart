@@ -67,6 +67,7 @@ abstract final class AppStyles {
           disabledBackgroundColor: AppColors.disabledSurface,
           disabledForegroundColor: AppColors.disabledInk,
           textStyle: const TextStyle(
+            fontFamily: fontFamily,
             fontSize: 15,
             fontWeight: FontWeight.w800,
           ),
@@ -78,10 +79,11 @@ abstract final class AppStyles {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
-          side: BorderSide(
-            color: AppColors.primary.withValues(alpha: 0.4),
+          side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
+          textStyle: const TextStyle(
+            fontFamily: fontFamily,
+            fontWeight: FontWeight.w700,
           ),
-          textStyle: const TextStyle(fontWeight: FontWeight.w700),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadii.small),
           ),
@@ -91,9 +93,7 @@ abstract final class AppStyles {
         backgroundColor: AppColors.surface,
         selectedColor: AppColors.primary.withValues(alpha: 0.14),
         disabledColor: AppColors.disabledSurface,
-        side: BorderSide(
-          color: AppColors.neutral.withValues(alpha: 0.25),
-        ),
+        side: BorderSide(color: AppColors.neutral.withValues(alpha: 0.25)),
         labelStyle: const TextStyle(
           fontWeight: FontWeight.w700,
           color: AppColors.textSecondary,

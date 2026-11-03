@@ -47,6 +47,29 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('FAB chat disembunyikan di tab Profil', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: HomeScreen())),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(ChatFab), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('nav-tab-3')));
+    await tester.pumpAndSettle();
+    // Tanpa FAB: tidak ada dua lingkaran biru bertumpuk di kanan bawah dan
+    // kartu skor tidak tertutup.
+    expect(find.byType(ChatFab), findsNothing);
+    expect(find.textContaining('Kelola'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.byKey(const ValueKey('nav-tab-0')));
+    await tester.pumpAndSettle();
+    expect(find.byType(ChatFab), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('FAB chat: tekan menyusut lalu kembali + tap buka chat', (
     WidgetTester tester,
   ) async {

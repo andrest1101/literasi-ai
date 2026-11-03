@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,13 +38,25 @@ HistoryEntry _entry({String id = 'entry-1', Verdict verdict = Verdict.hoaks}) {
 }
 
 class _FakeHistoryRepository implements HistoryRepository {
-  _FakeHistoryRepository({this.entries = const []});
+  _FakeHistoryRepository({
+    List<HistoryEntry> entries = const [],
+    this.deleteFailure,
+  }) : entries = [...entries];
 
+  /// Daftar hidup: `delete` benar-benar mengeluarkan entri lalu menyiarkan
+  /// snapshot baru, meniru `snapshots()` Firestore.
   final List<HistoryEntry> entries;
+
+  /// Bila diisi, `delete` melempar error (skenario offline/gagal).
+  final Object? deleteFailure;
+  final _updates = StreamController<List<HistoryEntry>>.broadcast();
   int deletes = 0;
 
   @override
-  Stream<List<HistoryEntry>> watch(String userId) => Stream.value(entries);
+  Stream<List<HistoryEntry>> watch(String userId) async* {
+    yield List<HistoryEntry>.unmodifiable(entries);
+    yield* _updates.stream;
+  }
 
   @override
   Future<void> save({
@@ -53,18 +67,22 @@ class _FakeHistoryRepository implements HistoryRepository {
   @override
   Future<void> delete({required String userId, required String entryId}) async {
     deletes++;
+    if (deleteFailure != null) throw deleteFailure!;
+    entries.removeWhere((entry) => entry.id == entryId);
+    _updates.add(List<HistoryEntry>.unmodifiable(entries));
   }
 }
 
 Future<void> _pumpList(
   WidgetTester tester, {
   required List<HistoryEntry> entries,
+  HistoryRepository? repository,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         historyRepositoryProvider.overrideWithValue(
-          _FakeHistoryRepository(entries: entries),
+          repository ?? _FakeHistoryRepository(entries: entries),
         ),
         historyUserIdProvider.overrideWithValue('user-1'),
         historyFilterProvider.overrideWith((ref) => HistoryFilter.all),
@@ -185,6 +203,25 @@ void main() {
       expect(find.byType(HistoryCard), findsNothing);
       expect(find.text(AppStrings.historyDeleted), findsOneWidget);
       expect(find.text(AppStrings.historyUndo), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('hapus gagal: kartu kembali, tanpa assertion', (tester) async {
+      // Regresi: dulu hapus berjalan di onDismissed sehingga kegagalan
+      // meninggalkan Dismissible yang sudah dismissed di pohon widget.
+      final repository = _FakeHistoryRepository(
+        entries: [_entry(id: 'a', verdict: Verdict.hoaks)],
+        deleteFailure: Exception('offline'),
+      );
+      await _pumpList(tester, entries: const [], repository: repository);
+
+      await tester.drag(find.byType(HistoryCard), const Offset(-420, 0));
+      await tester.pumpAndSettle();
+
+      expect(repository.deletes, 1);
+      expect(find.byType(HistoryCard), findsOneWidget);
+      expect(find.text(AppStrings.historyDeleteFailed), findsOneWidget);
+      expect(find.text(AppStrings.historyDeleted), findsNothing);
       expect(tester.takeException(), isNull);
     });
   });

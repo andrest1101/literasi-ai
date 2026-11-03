@@ -29,87 +29,167 @@ class HistoryListScreen extends ConsumerWidget {
     final query = ref.watch(historySearchProvider).trim().toLowerCase();
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(historyEntriesProvider),
-      child: SingleChildScrollView(
+      child: CustomScrollView(
+        // Virtualisasi: hanya kartu yang terlihat yang dibangun, sehingga
+        // riwayat ratusan entri tetap ringan. Physics selalu-scrollable
+        // menjaga pull-to-refresh tetap hidup saat daftar kosong/pendek.
         physics: const AlwaysScrollableScrollPhysics(),
-        // 120px: ruang pill navbar mengambang + FAB Chat 60px di atasnya.
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const _HistoryToolbarTitle(),
-                const SizedBox(height: 4),
-                _HistorySubContext(entries: entries),
-                const SizedBox(height: AppTabTitles.titleToContentGap),
-                _HistorySearchField(
-                  onChanged: (value) =>
-                      ref.read(historySearchProvider.notifier).state = value,
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            sliver: SliverToBoxAdapter(
+              child: _TabContentWidth(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const _HistoryToolbarTitle(),
+                    const SizedBox(height: 4),
+                    _HistorySubContext(entries: entries),
+                    const SizedBox(height: AppTabTitles.titleToContentGap),
+                    _HistorySearchField(
+                      onChanged: (value) =>
+                          ref.read(historySearchProvider.notifier).state =
+                              value,
+                    ),
+                    const SizedBox(height: 12),
+                    entries.maybeWhen(
+                      data: (items) => HistoryFilterBar(
+                        selected: filter,
+                        counts: _filterCounts(items),
+                        onSelected: (value) =>
+                            ref.read(historyFilterProvider.notifier).state =
+                                value,
+                      ),
+                      orElse: () => HistoryFilterBar(
+                        selected: filter,
+                        onSelected: (value) =>
+                            ref.read(historyFilterProvider.notifier).state =
+                                value,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                entries.maybeWhen(
-                  data: (items) => HistoryFilterBar(
-                    selected: filter,
-                    counts: _filterCounts(items),
-                    onSelected: (value) =>
-                        ref.read(historyFilterProvider.notifier).state = value,
-                  ),
-                  orElse: () => HistoryFilterBar(
-                    selected: filter,
-                    onSelected: (value) =>
-                        ref.read(historyFilterProvider.notifier).state = value,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                entries.when(
-                  loading: () => const _HistoryLoading(),
-                  error: (error, _) => _HistoryError(
-                    onRetry: () => ref.invalidate(historyEntriesProvider),
-                  ),
-                  data: (items) {
-                    final visible = items
-                        .where((entry) => filter.matches(entry.result.verdict))
-                        .where(
-                          (entry) =>
-                              query.isEmpty ||
-                              entry.result.claim.toLowerCase().contains(
-                                query,
-                              ) ||
-                              (entry.result.sourceUrl?.toLowerCase().contains(
-                                    query,
-                                  ) ??
-                                  false),
-                        )
-                        .toList();
-                    if (visible.isEmpty) {
-                      return HistoryEmptyState(
-                        filtered:
-                            filter != HistoryFilter.all || query.isNotEmpty,
-                        onStartCheck: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const QuickCheckSessionScreen(),
-                          ),
-                        ),
-                      );
-                    }
-                    // Badge TERBARU hanya bila daftar utuh (>1, tanpa filter
-                    // atau search): menandai entri pertama sebagai titik
-                    // orientasi tanpa menyesatkan saat daftar disaring.
-                    final markLatest =
-                        filter == HistoryFilter.all &&
-                        query.isEmpty &&
-                        visible.length > 1;
-                    return _HistoryList(
-                      entries: visible,
-                      markLatest: markLatest,
-                    );
-                  },
-                ),
-              ],
+              ),
             ),
           ),
+          ..._contentSlivers(
+            ref,
+            context,
+            entries: entries,
+            filter: filter,
+            query: query,
+          ),
+          // 120px: ruang pill navbar mengambang + FAB Chat 60px di atasnya.
+          const SliverToBoxAdapter(child: SizedBox(height: 120)),
+        ],
+      ),
+    );
+  }
+
+  /// Isi daftar sebagai sliver, supaya header tetap satu blok dan kartu
+  /// dibangun malas (lazy) oleh [SliverList].
+  List<Widget> _contentSlivers(
+    WidgetRef ref,
+    BuildContext context, {
+    required AsyncValue<List<HistoryEntry>> entries,
+    required HistoryFilter filter,
+    required String query,
+  }) {
+    Widget boxed(Widget child) => SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      sliver: SliverToBoxAdapter(child: _TabContentWidth(child: child)),
+    );
+
+    return entries.when(
+      loading: () => [boxed(const _HistoryLoading())],
+      error: (error, _) => [
+        boxed(
+          _HistoryError(onRetry: () => ref.invalidate(historyEntriesProvider)),
         ),
+      ],
+      data: (items) {
+        final visible = items
+            .where((entry) => filter.matches(entry.result.verdict))
+            .where(
+              (entry) =>
+                  query.isEmpty ||
+                  entry.result.claim.toLowerCase().contains(query) ||
+                  (entry.result.sourceUrl?.toLowerCase().contains(query) ??
+                      false),
+            )
+            .toList();
+        if (visible.isEmpty) {
+          return [
+            boxed(
+              HistoryEmptyState(
+                filtered: filter != HistoryFilter.all || query.isNotEmpty,
+                onStartCheck: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const QuickCheckSessionScreen(),
+                  ),
+                ),
+              ),
+            ),
+          ];
+        }
+        // Badge TERBARU hanya bila daftar utuh (>1, tanpa filter atau
+        // search): menandai entri pertama sebagai titik orientasi tanpa
+        // menyesatkan saat daftar disaring.
+        final markLatest =
+            filter == HistoryFilter.all && query.isEmpty && visible.length > 1;
+        return [
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            sliver: SliverToBoxAdapter(
+              child: _TabContentWidth(
+                child: const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: _SwipeHint(),
+                ),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                childCount: visible.length,
+                (context, index) => _TabContentWidth(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _HistoryDismissible(
+                      entry: visible[index],
+                      isLatest: markLatest && index == 0,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ];
+      },
+    );
+  }
+}
+
+/// Pembungkus lebar baca: satu-satunya sumber batas 640px di tab ini.
+///
+/// Dipakai per-item (bukan membungkus seluruh sliver) agar tetap konsisten
+/// saat daftar divisualisasikan dan saat layar melebar di tablet/desktop.
+class _TabContentWidth extends StatelessWidget {
+  const _TabContentWidth({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 640),
+        // Lebar penuh sampai 640: perilaku yang sama dengan Column
+        // `stretch` sebelumnya, kini berlaku juga untuk item SliverList.
+        child: SizedBox(width: double.infinity, child: child),
       ),
     );
   }
@@ -347,87 +427,82 @@ class _SwipeHint extends StatelessWidget {
   }
 }
 
-class _HistoryList extends ConsumerWidget {
-  const _HistoryList({required this.entries, this.markLatest = false});
+/// Satu kartu riwayat yang bisa digeser dua arah untuk menghapus.
+///
+/// Dua arah horizontal: pengguna kidal maupun kanan-dominan sama-sama
+/// menemukan hapus, dan keduanya memakai jalur hapus + Urungkan yang sama.
+class _HistoryDismissible extends StatelessWidget {
+  const _HistoryDismissible({required this.entry, required this.isLatest});
 
-  final List<HistoryEntry> entries;
-  final bool markLatest;
+  final HistoryEntry entry;
+  final bool isLatest;
+
+  /// Hapus ditunggu SEBELUM kartu dilepas dari daftar.
+  ///
+  /// Versi lama menjalankan hapus di `onDismissed`: Dismissible sudah
+  /// melepas kartunya sementara entri masih ada di stream, sehingga request
+  /// yang lambat/gagal memicu assertion "A dismissed Dismissible widget is
+  /// still part of the tree" dan menyisakan kartu hantu. Dengan
+  /// `confirmDismiss`, `true` hanya dikembalikan setelah hapus benar-benar
+  /// sukses; gagal = `false` dan kartu kembali ke posisinya.
+  Future<bool> _confirmDelete(BuildContext context) async {
+    // Container diambil sebelum await: aksi Urungkan pada SnackBar bisa
+    // ditekan setelah widget ini tidak lagi di pohon.
+    final container = ProviderScope.containerOf(context, listen: false);
+    final deleted = await container
+        .read(historyActionProvider.notifier)
+        .delete(entry.id);
+    if (!context.mounted) return false;
+
+    final messenger = ScaffoldMessenger.of(context);
+    if (!deleted) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(AppStrings.historyDeleteFailed),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return false;
+    }
+    messenger.clearSnackBars();
+    messenger.showSnackBar(
+      SnackBar(
+        content: const Text(AppStrings.historyDeleted),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: AppStrings.historyUndo,
+          onPressed: () {
+            final userId = container.read(historyUserIdProvider);
+            if (userId == null) return;
+            container.read(saveHistoryProvider)(
+              userId: userId,
+              result: entry.result,
+            );
+          },
+        ),
+      ),
+    );
+    return true;
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      children: [
-        const _SwipeHint(),
-        const SizedBox(height: 8),
-        // Entri pertama = terbaru (stream terurut waktu menurun).
-        for (var i = 0; i < entries.length; i++) ...[
-          Builder(
-            builder: (context) {
-              final entry = entries[i];
-              final latest = markLatest && i == 0;
-              // Dua arah horizontal: pengguna kidal maupun kanan-dominan
-              // sama-sama menemukan hapus; kedua arah memakai jalur hapus
-              // dan Urungkan yang sama persis.
-              return Dismissible(
-                key: ValueKey(entry.id),
-                direction: DismissDirection.horizontal,
-                onDismissed: (_) async {
-                  await ref
-                      .read(historyActionProvider.notifier)
-                      .delete(entry.id);
-                  final action = ref.read(historyActionProvider);
-                  if (!context.mounted) return;
-                  if (action.hasError) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(AppStrings.historyDeleteFailed),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                    return;
-                  }
-                  final messenger = ScaffoldMessenger.of(context);
-                  messenger.clearSnackBars();
-                  messenger.showSnackBar(
-                    SnackBar(
-                      content: const Text(AppStrings.historyDeleted),
-                      behavior: SnackBarBehavior.floating,
-                      duration: const Duration(seconds: 4),
-                      action: SnackBarAction(
-                        label: AppStrings.historyUndo,
-                        onPressed: () {
-                          final userId = ref.read(historyUserIdProvider);
-                          if (userId == null) return;
-                          ref.read(saveHistoryProvider)(
-                            userId: userId,
-                            result: entry.result,
-                          );
-                        },
-                      ),
-                    ),
-                  );
-                },
-                background: const SwipeDeleteBackground(
-                  side: SwipeDeleteSide.leading,
-                ),
-                secondaryBackground: const SwipeDeleteBackground(
-                  side: SwipeDeleteSide.trailing,
-                ),
-                child: HistoryCard(
-                  entry: entry,
-                  isLatest: latest,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => HistoryDetailScreen(entry: entry),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-        ],
-      ],
+  Widget build(BuildContext context) {
+    return Dismissible(
+      key: ValueKey(entry.id),
+      direction: DismissDirection.horizontal,
+      confirmDismiss: (_) => _confirmDelete(context),
+      background: const SwipeDeleteBackground(side: SwipeDeleteSide.leading),
+      secondaryBackground: const SwipeDeleteBackground(
+        side: SwipeDeleteSide.trailing,
+      ),
+      child: HistoryCard(
+        entry: entry,
+        isLatest: isLatest,
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => HistoryDetailScreen(entry: entry)),
+        ),
+      ),
     );
   }
 }

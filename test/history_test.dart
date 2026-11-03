@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -34,22 +36,32 @@ VerificationResult _result({Verdict verdict = Verdict.hoaks}) {
 }
 
 HistoryEntry _entry({String id = 'entry-1', Verdict verdict = Verdict.hoaks}) {
-  return HistoryEntry(id: id, result: _result(verdict: verdict));
+  return HistoryEntry(
+    id: id,
+    result: _result(verdict: verdict),
+  );
 }
 
 class _FakeHistoryRepository implements HistoryRepository {
-  _FakeHistoryRepository({this.entries = const [], this.failure});
+  _FakeHistoryRepository({List<HistoryEntry> entries = const [], this.failure})
+    : entries = [...entries];
 
+  /// Daftar hidup: `delete` benar-benar mengeluarkan entri lalu menyiarkan
+  /// snapshot baru, meniru `snapshots()` Firestore. Tanpa ini, `confirmDismiss`
+  /// akan melepas kartu yang masih ada di stream (kondisi yang justru ingin
+  /// dicegah oleh perubahan di layar riwayat).
   final List<HistoryEntry> entries;
   final Object? failure;
+  final _updates = StreamController<List<HistoryEntry>>.broadcast();
   int saves = 0;
   int deletes = 0;
   String? lastSavedUser;
 
   @override
-  Stream<List<HistoryEntry>> watch(String userId) {
-    if (failure != null) return Stream.error(failure!);
-    return Stream.value(entries);
+  Stream<List<HistoryEntry>> watch(String userId) async* {
+    if (failure != null) throw failure!;
+    yield List<HistoryEntry>.unmodifiable(entries);
+    yield* _updates.stream;
   }
 
   @override
@@ -66,6 +78,8 @@ class _FakeHistoryRepository implements HistoryRepository {
   Future<void> delete({required String userId, required String entryId}) async {
     deletes++;
     if (failure != null) throw failure!;
+    entries.removeWhere((entry) => entry.id == entryId);
+    _updates.add(List<HistoryEntry>.unmodifiable(entries));
   }
 }
 
@@ -133,8 +147,10 @@ void main() {
       expect(entry.result.verdict, Verdict.valid);
       expect(entry.result.source, VerificationSource.url);
       expect(entry.result.sourceUrl, 'https://contoh.id/berita');
-      expect(entry.result.checkedAt.toUtc().toIso8601String(),
-          '2026-09-15T10:00:00.000Z');
+      expect(
+        entry.result.checkedAt.toUtc().toIso8601String(),
+        '2026-09-15T10:00:00.000Z',
+      );
     });
 
     test('fromMap falls back safely for corrupt docs', () {
@@ -176,7 +192,12 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           historyRepositoryProvider.overrideWithValue(
-            _FakeHistoryRepository(entries: [_entry(), _entry(id: 'entry-2')]),
+            _FakeHistoryRepository(
+              entries: [
+                _entry(),
+                _entry(id: 'entry-2'),
+              ],
+            ),
           ),
           historyUserIdProvider.overrideWithValue('user-1'),
         ],
@@ -199,11 +220,31 @@ void main() {
       );
       addTearDown(container.dispose);
 
-      await container
+      final deleted = await container
           .read(historyActionProvider.notifier)
           .delete('entry-1');
 
+      expect(deleted, isFalse);
       expect(container.read(historyActionProvider).hasError, isTrue);
+    });
+
+    test('delete action reports success', () async {
+      final container = ProviderContainer(
+        overrides: [
+          historyRepositoryProvider.overrideWithValue(
+            _FakeHistoryRepository(entries: [_entry()]),
+          ),
+          historyUserIdProvider.overrideWithValue('user-1'),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final deleted = await container
+          .read(historyActionProvider.notifier)
+          .delete('entry-1');
+
+      expect(deleted, isTrue);
+      expect(container.read(historyActionProvider).hasError, isFalse);
     });
   });
 
@@ -217,11 +258,14 @@ void main() {
     });
   });
 
-  testWidgets('history card shows verdict, confidence, host, and claim',
-      (tester) async {
+  testWidgets('history card shows verdict, confidence, host, and claim', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: HistoryCard(entry: _entry(), onTap: () {})),
+        home: Scaffold(
+          body: HistoryCard(entry: _entry(), onTap: () {}),
+        ),
       ),
     );
 
@@ -232,8 +276,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('empty state distinguishes no data from empty filter',
-      (tester) async {
+  testWidgets('empty state distinguishes no data from empty filter', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(body: HistoryEmptyState(filtered: false)),
@@ -273,10 +318,12 @@ void main() {
       ProviderScope(
         overrides: [
           historyRepositoryProvider.overrideWithValue(
-            _FakeHistoryRepository(entries: [
-              _entry(id: 'hoaks', verdict: Verdict.hoaks),
-              _entry(id: 'valid', verdict: Verdict.valid),
-            ]),
+            _FakeHistoryRepository(
+              entries: [
+                _entry(id: 'hoaks', verdict: Verdict.hoaks),
+                _entry(id: 'valid', verdict: Verdict.valid),
+              ],
+            ),
           ),
           historyUserIdProvider.overrideWithValue('user-1'),
         ],

@@ -316,19 +316,19 @@ abstract final class AppStrings {
   static const String scoreVerifyRow = 'Verifikasi';
   static const String scoreModuleRow = 'Modul selesai';
   static const String scoreQuizRow = 'Kuis benar';
-  static const String scoreModuleSoon =
-      'Poin dihitung dari skor terbaik: modul +20 sekali klaim, kuis +5 per jawaban benar baru.';
+  static const String scorePointsRule =
+      'Verifikasi +10 · Modul +20 per modul · Kuis +5 per jawaban benar baru.';
   static const String scoreGuestLabel = 'Tamu LiterasiAI';
   static const String scoreLoginCta = 'Masuk untuk sinkron';
   static const String scoreAnonymousNote =
-      'Kamu masuk tanpa akun. Skor tersimpan lokal sesi ini; masuk untuk sinkron ke semua perangkat.';
-  static const String scoreSyncedNote =
-      'Skor tersinkron ke akunmu dan bertambah otomatis setiap verifikasi.';
+      'Mode tamu: skor tidak disimpan di perangkat ini. Masuk agar poin tersimpan di akunmu.';
   static const String scoreLoading = 'Memuat skor...';
   static const String profileSyncedLabel = 'Tersinkron';
+  static const String profileSyncingLabel = 'Menyinkronkan…';
   static const String profileOfflineLabel = 'Offline';
   static const String profileGuestPill = 'Tamu';
-  static const String profileMenuTitle = 'Pengaturan';
+  static const String profileAccountFallback = 'Akun LiterasiAI';
+  static const String profileMenuTitle = 'PENGATURAN';
   static const String profileApiKeyRow = 'Kunci API Gemini';
   static const String profileLogoutRow = 'Keluar akun';
   static const String profileLogoutTitle = 'Keluar dari akun?';
@@ -462,6 +462,16 @@ abstract final class AppStrings {
   static const String quickCheckPickCamera = 'Kamera';
   static const String quickCheckReplaceImage = 'Ganti gambar';
   static const String quickCheckRemoveImage = 'Hapus gambar';
+  static const String imagePreviewOpen = 'Buka pratinjau gambar';
+  static const String imagePreviewClose = 'Tutup pratinjau';
+  static const String imagePreviewTitle = 'Detail gambar';
+  static const String imagePreviewZoomIn = 'Perbesar gambar';
+  static const String imagePreviewZoomOut = 'Perkecil gambar';
+  static const String imagePreviewZoomReset = 'Kembalikan ukuran gambar';
+  static const String imagePreviewRotate = 'Putar gambar';
+  static const String imagePreviewShare = 'Bagikan gambar';
+  static const String imageShareFailed =
+      'Perangkat ini belum dapat membagikan file.';
   static const String quickCheckCaptionLabel = 'Caption opsional';
   static const String quickCheckCaptionHint =
       'Contoh: tangkapan layar grup WhatsApp tentang vaksin, 12 Mei 2026.';

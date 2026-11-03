@@ -15,6 +15,7 @@ import 'package:literasi_ai/features/score/domain/repositories/score_repository.
 import 'package:literasi_ai/features/score/presentation/providers/score_providers.dart';
 import 'package:literasi_ai/features/score/presentation/screens/api_key_screen.dart';
 import 'package:literasi_ai/features/score/presentation/screens/profile_screen.dart';
+import 'package:literasi_ai/features/score/presentation/widgets/score_breakdown.dart';
 
 class _MemoryKeyStore implements ApiKeyStore {
   String? value;
@@ -144,17 +145,35 @@ void main() {
 
       // Kartu identitas: tamu (ikon person, tanpa huruf "T") + pill.
       expect(find.text(AppStrings.scoreGuestLabel), findsOneWidget);
-      expect(find.textContaining(AppStrings.scoreLevelPrefix), findsOneWidget);
+      expect(find.text('Pemula'), findsOneWidget);
       expect(find.text(AppStrings.profileGuestPill), findsOneWidget);
       expect(find.byIcon(Icons.person_outline_rounded), findsOneWidget);
       expect(find.text('T'), findsNothing);
-      // Grup skor: ring + rincian tanpa judul ganda.
+      // Hero skor: ring + strip tiga stat, tanpa judul ganda.
       expect(find.text('Skor & sumber poin'), findsNothing);
       expect(find.text('Sumber poin'), findsNothing);
-      expect(find.text('0 x 10'), findsOneWidget);
-      expect(find.text('0 x 20'), findsOneWidget);
-      expect(find.text('0 x 5'), findsOneWidget);
-      expect(find.text(AppStrings.scoreModuleSoon), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(ScoreBreakdown.verificationsKey),
+          matching: find.text('0'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(ScoreBreakdown.modulesKey),
+          matching: find.text('0'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(ScoreBreakdown.quizzesKey),
+          matching: find.text('0'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text(AppStrings.scorePointsRule), findsOneWidget);
       // Grup menu tamu: 2 baris fungsi nyata, tanpa baris Keluar.
       expect(find.text(AppStrings.profileMenuTitle), findsOneWidget);
       expect(find.text(AppStrings.profileApiKeyRow), findsOneWidget);
@@ -232,12 +251,17 @@ void main() {
       // Retry otomatis 2x backoff menyembuhkan stream putus sesaat
       // (kasus Alt+Tab): data tampil, tanpa kartu error.
       expect(find.text(AppStrings.scoreLoadFailed), findsNothing);
-      expect(find.text('0 x 10'), findsOneWidget);
+      expect(find.byKey(ScoreBreakdown.verificationsKey), findsOneWidget);
+      expect(find.text(AppStrings.profileSyncedLabel), findsOneWidget);
       expect(repo.calls, 3);
       expect(tester.takeException(), isNull);
     });
 
-    for (final size in [const Size(360, 800), const Size(412, 915)]) {
+    for (final size in [
+      const Size(320, 720),
+      const Size(360, 800),
+      const Size(412, 915),
+    ]) {
       testWidgets('render ${size.width.toInt()}px tanpa exception', (
         tester,
       ) async {
