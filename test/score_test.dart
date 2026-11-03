@@ -228,7 +228,14 @@ void main() {
     expect(find.text('60'), findsOneWidget);
     expect(find.text('Waspada'), findsOneWidget);
     expect(find.text('90 poin lagi ke Kritis.'), findsOneWidget);
-    expect(find.text('6 x 10'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(ScoreBreakdown.verificationsKey),
+        matching: find.text('6'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('+60'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -250,10 +257,10 @@ void main() {
     // Judul ganda dihapus: ring + rincian tanpa "Skor & sumber poin".
     expect(find.text('Skor & sumber poin'), findsNothing);
     expect(find.text('Sumber poin'), findsNothing);
-    expect(find.text('0 x 10'), findsOneWidget);
+    expect(find.byKey(ScoreBreakdown.verificationsKey), findsOneWidget);
     expect(find.text('Tamu LiterasiAI'), findsOneWidget);
     expect(find.text('Masuk untuk sinkron'), findsOneWidget);
-    expect(find.textContaining('tanpa akun'), findsOneWidget);
+    expect(find.textContaining('Mode tamu'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -272,7 +279,7 @@ void main() {
     await tester.tap(find.byType(ScoreCheckChip));
     await tester.pumpAndSettle();
     expect(find.textContaining('Kelola'), findsOneWidget);
-    expect(find.text('0 x 10'), findsOneWidget);
+    expect(find.byKey(ScoreBreakdown.verificationsKey), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

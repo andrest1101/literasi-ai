@@ -16,6 +16,7 @@ import 'package:literasi_ai/features/score/domain/entities/literacy_score.dart';
 import 'package:literasi_ai/features/score/domain/repositories/score_repository.dart';
 import 'package:literasi_ai/features/score/presentation/providers/score_providers.dart';
 import 'package:literasi_ai/features/score/presentation/screens/profile_screen.dart';
+import 'package:literasi_ai/features/score/presentation/widgets/score_breakdown.dart';
 
 class _MemoryKeyStore implements ApiKeyStore {
   String? value;
@@ -121,16 +122,33 @@ void main() {
       addTearDown(repository.controller.close);
       await _pumpProfile(tester, repository);
 
+      // Sebelum snapshot pertama: status jujur "Menyinkronkan…", bukan
+      // "Offline" palsu.
+      expect(find.text(AppStrings.profileSyncingLabel), findsOneWidget);
+      expect(find.text(AppStrings.profileOfflineLabel), findsNothing);
+
       repository.controller.add(const LiteracyScore(verifications: 6));
       await tester.pump();
-      expect(find.text('6 x 10'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(ScoreBreakdown.verificationsKey),
+          matching: find.text('6'),
+        ),
+        findsOneWidget,
+      );
 
       // Inti regresi: timeout lama menyala setelah 10 detik idle sehingga
       // kartu "Skor tidak dapat dimuat" muncul, lalu hilang saat retry,
       // berulang tanpa henti.
       await tester.pump(const Duration(seconds: 11));
 
-      expect(find.text('6 x 10'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(ScoreBreakdown.verificationsKey),
+          matching: find.text('6'),
+        ),
+        findsOneWidget,
+      );
       expect(find.text(AppStrings.scoreLoadFailed), findsNothing);
       expect(find.text(AppStrings.scoreStale), findsNothing);
       expect(tester.takeException(), isNull);
@@ -145,13 +163,25 @@ void main() {
 
       repository.controller.add(const LiteracyScore(verifications: 6));
       await tester.pump();
-      expect(find.text('6 x 10'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(ScoreBreakdown.verificationsKey),
+          matching: find.text('6'),
+        ),
+        findsOneWidget,
+      );
 
       repository.controller.addError(Exception('skor putus'));
       await tester.pump();
 
       // Skor yang sudah dikumpulkan tidak boleh menghilang dari UI.
-      expect(find.text('6 x 10'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(ScoreBreakdown.verificationsKey),
+          matching: find.text('6'),
+        ),
+        findsOneWidget,
+      );
       expect(find.text(AppStrings.scoreStale), findsOneWidget);
       expect(find.text(AppStrings.retry), findsOneWidget);
       expect(find.text(AppStrings.scoreLoadFailed), findsNothing);

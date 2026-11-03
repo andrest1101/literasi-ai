@@ -7,24 +7,42 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_styles.dart';
 import '../../../../core/utils/api_key_resolver.dart';
+import '../../../../shared/widgets/app_medallion_dialog.dart';
 import '../../../auth/presentation/screens/auth_screen.dart';
 import '../../../auth/presentation/providers/auth_controller.dart';
 import '../../../history/presentation/providers/history_providers.dart';
-import '../../domain/entities/literacy_score.dart';
 import '../providers/score_providers.dart';
 import '../widgets/score_breakdown.dart';
 import '../widgets/score_ring.dart';
 import 'api_key_screen.dart';
 
+/// Status sinkronisasi yang ditampilkan ke pengguna.
+enum _ProfileSyncState {
+  /// Tanpa akun: tidak ada yang disinkronkan.
+  guest,
+
+  /// Akun ada, snapshot skor belum tiba.
+  syncing,
+
+  /// Akun ada, pembaruan skor gagal.
+  offline,
+
+  /// Akun ada dan snapshot skor tersedia.
+  synced,
+}
+
 /// Tab Profil: identitas + skor + menu pengaturan.
 ///
-/// Tiga blok satu bahasa: kartu identitas (avatar inisial + email/label +
-/// pill level + status sinkron + CTA masuk bagi tamu), kartu grup skor
-/// ([ScoreRing] hero + [ScoreBreakdown] tanpa permukaan ganda), dan grup
-/// menu "Pengaturan" ala settings profesional (baris ikon + chevron +
-/// divider, baris destruktif terpisah). Hanya menu yang fungsinya nyata:
-/// Kunci API (navigasi ada), Keluar (aksi baru, sebelumnya bolong), Tentang
-/// (dialog versi). Tanpa password/notifikasi/dark-mode palsu.
+/// Tiga permukaan saja, tanpa kartu di dalam kartu:
+/// 1. kartu identitas (avatar + nama/email + satu pill status; CTA masuk
+///    hanya untuk tamu),
+/// 2. satu hero gradien skor ([ScoreRing] + strip [ScoreBreakdown] di dalam
+///    permukaan yang sama),
+/// 3. satu grup pengaturan (kunci API, Tentang, dan Keluar sebagai baris
+///    terakhir bagi pengguna login).
+///
+/// Status sinkron jujur terhadap stream skor: `Menyinkronkan…` saat menunggu,
+/// `Offline` saat gagal, `Tersinkron` hanya ketika data benar-benar ada.
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -34,9 +52,16 @@ class ProfileScreen extends ConsumerWidget {
     final scoreValue = score.valueOrNull;
     final userId = ref.watch(historyUserIdProvider);
     void retry() => ref.invalidate(scoreProvider);
+    final syncState = userId == null
+        ? _ProfileSyncState.guest
+        : score.hasError
+        ? _ProfileSyncState.offline
+        : scoreValue != null
+        ? _ProfileSyncState.synced
+        : _ProfileSyncState.syncing;
     return SingleChildScrollView(
-      // 120px: ruang pill navbar mengambang + FAB Chat 60px di atasnya.
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
+      // FAB Chat tidak tampil di tab ini, jadi tidak perlu zona kosong 120px.
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),
@@ -45,7 +70,7 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               const _ProfileHeading(),
               const SizedBox(height: AppTabTitles.titleToContentGap),
-              _IdentityCard(synced: userId != null, scoreOk: score.hasValue),
+              _IdentityCard(syncState: syncState),
               const SizedBox(height: 14),
               // Skor terakhir tetap tampil saat refresh gagal: poin yang sudah
               // dikumpulkan tidak boleh "hilang" hanya karena stream diam atau
@@ -55,13 +80,16 @@ class ProfileScreen extends ConsumerWidget {
                     ? const _ScoreShimmer()
                     : _ScoreError(onRetry: retry)
               else ...[
-                _ScoreGroup(score: scoreValue),
+                ScoreRing(
+                  score: scoreValue,
+                  footer: ScoreBreakdown(score: scoreValue, onHero: true),
+                ),
                 if (score.hasError) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
                   _ScoreStaleStrip(onRetry: retry),
                 ],
               ],
-              const SizedBox(height: 14),
+              const SizedBox(height: 18),
               _SettingsGroup(synced: userId != null),
             ],
           ),
@@ -162,9 +190,7 @@ Future<bool> _safeSignOut(WidgetRef ref) async {
 }
 
 /// Heading compact tab Profil: judul two-tone 20px + 1 baris cara skor
-/// bertambah. ScoreRing di bawahnya TIDAK disentuh: ring adalah konten
-/// utama tab ini, bukan dekorasi. Menggantikan header editorial penuh;
-/// aksen biru-personal dipertahankan pada kata kedua.
+/// bertambah. Ring di bawahnya adalah konten utama tab ini, bukan dekorasi.
 class _ProfileHeading extends StatelessWidget {
   const _ProfileHeading();
 
@@ -203,186 +229,174 @@ class _ProfileHeading extends StatelessWidget {
   }
 }
 
-/// Kartu identitas: avatar + nama + pill level + status sinkron.
+/// Kartu identitas: avatar + nama/email + satu pill status.
 ///
-/// Tamu (tanpa email) memakai ikon person netral sebagai placeholder akun
-/// yang jelas, bukan huruf "T" yang membingungkan. User login memakai
-/// inisial email. CTA Masuk hanya bagi tamu (route `/auth` yang sudah
-/// ada, tanpa flow baru). Tidak ada klaim nama yang tidak dimiliki data.
+/// Tamu memakai ikon person netral sebagai placeholder akun yang jelas.
+/// Pengguna login memakai inisial email/nama. CTA Masuk hanya bagi tamu.
+/// Level tidak diulang di sini: level sudah menjadi bagian hero skor.
 class _IdentityCard extends ConsumerWidget {
-  const _IdentityCard({required this.synced, required this.scoreOk});
+  const _IdentityCard({required this.syncState});
 
-  final bool synced;
-  final bool scoreOk;
+  final _ProfileSyncState syncState;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(historyUserIdProvider) != null ? _safeUser() : null;
     final email = user?.email;
+    final displayName = user?.displayName;
     final hasEmail = email != null && email.isNotEmpty;
-    final shownName = resolveProfileName(user?.displayName, email);
-    final accent = synced ? AppColors.success : AppColors.primary;
-    final score = ref.watch(scoreProvider).valueOrNull;
-    final levelLabel = score?.level.label ?? '';
+    final resolvedName = resolveProfileName(displayName, email);
+    // UID ada tetapi data profil belum terbaca (mis. sesi dipulihkan):
+    // jangan tampilkan "Tamu" di sebelah pill "Tersinkron".
+    final shownName =
+        syncState != _ProfileSyncState.guest &&
+            resolvedName == AppStrings.scoreGuestLabel
+        ? AppStrings.profileAccountFallback
+        : resolvedName;
+    final initial = hasEmail
+        ? email.trim()[0].toUpperCase()
+        : (displayName != null && displayName.trim().isNotEmpty)
+        ? displayName.trim()[0].toUpperCase()
+        : null;
+    final isGuest = syncState == _ProfileSyncState.guest;
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(AppRadii.card),
         color: AppColors.surface,
-        border: Border.all(color: accent.withValues(alpha: 0.3)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D101A33),
-            blurRadius: 16,
-            offset: Offset(0, 6),
-          ),
-        ],
+        border: Border.all(color: AppColors.hairline),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [accent, accent.withValues(alpha: 0.65)],
-              ),
-            ),
-            child: Center(
-              child: hasEmail
-                  ? Text(
-                      email.trim()[0].toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(
-                      Icons.person_outline_rounded,
-                      size: 30,
-                      color: Colors.white,
-                    ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  shownName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.2,
-                    color: AppColors.textPrimary,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.heroBegin, AppColors.heroEnd],
                   ),
                 ),
-                if (hasEmail) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    email,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12.5,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 6),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
+                child: Center(
+                  child: initial != null
+                      ? Text(
+                          initial,
+                          style: const TextStyle(
+                            fontSize: 21,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.person_outline_rounded,
+                          size: 28,
+                          color: Colors.white,
+                        ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (levelLabel.isNotEmpty)
-                      _MiniPill(
-                        icon: Icons.emoji_events_outlined,
-                        text: '${AppStrings.scoreLevelPrefix} $levelLabel',
-                        color: AppColors.primaryDark,
+                    Text(
+                      shownName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 17.5,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.3,
+                        color: AppColors.textPrimary,
                       ),
-                    // Pill status jujur terhadap stream skor: hijau hanya
-                    // bila data skor benar-benar ada, netral Offline bila
-                    // stream error/loading (bukan dari UID semata).
-                    _MiniPill(
-                      icon: synced && scoreOk
-                          ? Icons.cloud_done_outlined
-                          : Icons.cloud_off_outlined,
-                      text: !synced
-                          ? AppStrings.profileGuestPill
-                          : scoreOk
-                          ? AppStrings.profileSyncedLabel
-                          : AppStrings.profileOfflineLabel,
-                      color: synced && scoreOk ? accent : AppColors.neutral,
+                    ),
+                    if (hasEmail) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        email,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 9),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: _StatusPill(state: syncState),
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  synced
-                      ? AppStrings.scoreSyncedNote
-                      : AppStrings.scoreAnonymousNote,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    height: 1.6,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                if (!synced) ...[
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: 42,
-                    child: OutlinedButton.icon(
-                      onPressed: () =>
-                          Navigator.of(context).pushNamed(AuthScreen.route),
-                      icon: const Icon(Icons.login_rounded, size: 18),
-                      label: const Text(AppStrings.scoreLoginCta),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        side: BorderSide(
-                          color: AppColors.primary.withValues(alpha: 0.4),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        textStyle: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
+              ),
+            ],
           ),
+          if (isGuest) ...[
+            const SizedBox(height: 14),
+            const Divider(height: 1, color: AppColors.hairline),
+            const SizedBox(height: 12),
+            const Text(
+              AppStrings.scoreAnonymousNote,
+              style: TextStyle(
+                fontSize: 12.5,
+                height: 1.55,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 46,
+              child: FilledButton.icon(
+                onPressed: () =>
+                    Navigator.of(context).pushNamed(AuthScreen.route),
+                icon: const Icon(Icons.login_rounded, size: 18),
+                label: const Text(AppStrings.scoreLoginCta),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-/// Pill kecil identitas: ikon + teks dalam tint aksen.
-///
-/// Satu bahasa dengan pill meta modul: tint 10%, tanpa border, ellipsis
-/// agar tidak overflow di baris sempit.
-class _MiniPill extends StatelessWidget {
-  const _MiniPill({
-    required this.icon,
-    required this.text,
-    required this.color,
-  });
+/// Satu pill status sinkron: ikon + teks, warna mengikuti keadaan.
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.state});
 
-  final IconData icon;
-  final String text;
-  final Color color;
+  final _ProfileSyncState state;
 
   @override
   Widget build(BuildContext context) {
+    final (icon, text, color) = switch (state) {
+      _ProfileSyncState.guest => (
+        Icons.badge_outlined,
+        AppStrings.profileGuestPill,
+        AppColors.textSecondary,
+      ),
+      _ProfileSyncState.syncing => (
+        Icons.cloud_sync_outlined,
+        AppStrings.profileSyncingLabel,
+        AppColors.primary,
+      ),
+      _ProfileSyncState.offline => (
+        Icons.cloud_off_outlined,
+        AppStrings.profileOfflineLabel,
+        AppColors.warningDark,
+      ),
+      _ProfileSyncState.synced => (
+        Icons.cloud_done_outlined,
+        AppStrings.profileSyncedLabel,
+        AppColors.successDark,
+      ),
+    };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
@@ -394,59 +408,14 @@ class _MiniPill extends StatelessWidget {
         children: [
           Icon(icon, size: 13, color: color),
           const SizedBox(width: 5),
-          Flexible(
-            child: Text(
-              text,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w800,
-                color: color,
-              ),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+              color: color,
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Grup skor: ring hero + rincian sumber dalam satu kartu tanpa judul ganda.
-///
-/// [ScoreRing] dan [ScoreBreakdown] dipertahankan utuh, hanya pembungkusnya
-/// disatukan + divider agar tidak terbaca dua kartu bertumpuk gaya beda.
-/// Judul ganda ("Skor & sumber poin" + "Sumber poin") dihapus: ring hero
-/// sudah menjelaskan dirinya sendiri.
-class _ScoreGroup extends StatelessWidget {
-  const _ScoreGroup({required this.score});
-
-  final LiteracyScore score;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D101A33),
-            blurRadius: 16,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ScoreRing(score: score),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(height: 1, color: AppColors.hairline),
-          ),
-          ScoreBreakdown(score: score),
         ],
       ),
     );
@@ -485,11 +454,9 @@ class _ScoreShimmerState extends State<_ScoreShimmer>
             height: 148,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(26),
+              borderRadius: BorderRadius.circular(AppRadii.hero),
               color: AppColors.surface,
-              border: Border.all(
-                color: AppColors.neutral.withValues(alpha: 0.18),
-              ),
+              border: Border.all(color: AppColors.hairline),
             ),
             child: Row(
               children: [
@@ -552,12 +519,12 @@ class _ScoreShimmerState extends State<_ScoreShimmer>
   }
 }
 
-/// Grup menu Pengaturan: hanya baris yang fungsinya nyata.
+/// Grup pengaturan: satu permukaan putih tanpa bayangan.
 ///
-/// Kunci API (navigasi ke layar pengaturan yang sudah ada), Keluar
-/// (aksi baru: konfirmasi + signOut + invalidate agar UI ikut logout),
-/// Tentang (dialog versi, bukan layar baru). Baris destruktif terpisah
-/// ala settings profesional. Tanpa password/notifikasi/dark-mode palsu.
+/// Kunci API (navigasi ke layar pengaturan yang sudah ada), Tentang (dialog
+/// versi, bukan layar baru), dan Keluar sebagai baris terakhir hanya bila
+/// pengguna login. Tamu tidak melihat baris keluar: tidak ada sesi Firebase
+/// yang bisa dibersihkan. Tanpa password/notifikasi/dark-mode palsu.
 class _SettingsGroup extends ConsumerWidget {
   const _SettingsGroup({required this.synced});
 
@@ -576,84 +543,69 @@ class _SettingsGroup extends ConsumerWidget {
       },
     );
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Padding(
-          padding: EdgeInsets.only(left: 4, bottom: 8),
+          padding: EdgeInsets.only(left: 4, bottom: 10),
           child: Text(
             AppStrings.profileMenuTitle,
             style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.3,
               color: AppColors.textSecondary,
             ),
           ),
         ),
         Container(
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(AppRadii.card),
             color: AppColors.surface,
-            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x0D101A33),
-                blurRadius: 16,
-                offset: Offset(0, 6),
-              ),
-            ],
+            border: Border.all(color: AppColors.hairline),
           ),
-          child: Column(
-            children: [
-              _SettingsRow(
-                icon: Icons.key_outlined,
-                title: AppStrings.profileApiKeyRow,
-                subtitle: keySubtitle,
-                onTap: () =>
-                    Navigator.of(context).pushNamed(ApiKeyScreen.route),
-              ),
-              _SettingsRow(
-                icon: Icons.info_outline_rounded,
-                title: AppStrings.profileAboutRow,
-                subtitle: null,
-                last: true,
-                onTap: () => showDialog<void>(
-                  context: context,
-                  builder: (_) => _ProfileDialog(
-                    icon: Icons.info_outline_rounded,
-                    accent: AppColors.primary,
-                    title: AppStrings.profileAboutRow,
-                    body: AppStrings.profileAboutBody,
-                    primaryLabel: AppStrings.profileAboutClose,
-                    onPrimary: () => Navigator.of(context).pop(),
+          child: Material(
+            color: Colors.transparent,
+            child: Column(
+              children: [
+                _SettingsRow(
+                  icon: Icons.key_outlined,
+                  title: AppStrings.profileApiKeyRow,
+                  subtitle: keySubtitle,
+                  onTap: () =>
+                      Navigator.of(context).pushNamed(ApiKeyScreen.route),
+                ),
+                const _SettingsDivider(),
+                _SettingsRow(
+                  icon: Icons.info_outline_rounded,
+                  title: AppStrings.profileAboutRow,
+                  subtitle: null,
+                  onTap: () => showDialog<void>(
+                    context: context,
+                    builder: (_) => AppMedallionDialog(
+                      icon: Icons.info_outline_rounded,
+                      accent: AppColors.primary,
+                      title: AppStrings.profileAboutRow,
+                      body: AppStrings.profileAboutBody,
+                      primaryLabel: AppStrings.profileAboutClose,
+                      onPrimary: () => Navigator.of(context).pop(),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                if (synced) ...[
+                  const _SettingsDivider(),
+                  _SettingsRow(
+                    icon: Icons.logout_rounded,
+                    title: AppStrings.profileLogoutRow,
+                    subtitle: null,
+                    destructive: true,
+                    onTap: () => _confirmLogout(context, ref),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 12),
-        // Baris keluar hanya bila login: tamu tidak punya sesi Firebase
-        // sehingga tidak ada yang bisa dibersihkan; menampilkan tombol
-        // keluar untuk tamu = dishonest UI. Aksi akun tamu cukup CTA
-        // "Masuk untuk sinkron" di kartu identitas.
-        if (synced)
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: AppColors.surface,
-              border: Border.all(
-                color: AppColors.danger.withValues(alpha: 0.3),
-              ),
-            ),
-            child: _SettingsRow(
-              icon: Icons.logout_rounded,
-              title: AppStrings.profileLogoutRow,
-              subtitle: null,
-              last: true,
-              destructive: true,
-              onTap: () => _confirmLogout(context, ref),
-            ),
-          ),
       ],
     );
   }
@@ -662,7 +614,7 @@ class _SettingsGroup extends ConsumerWidget {
     HapticFeedback.mediumImpact();
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => _ProfileDialog(
+      builder: (_) => AppMedallionDialog(
         icon: Icons.logout_rounded,
         accent: AppColors.danger,
         title: AppStrings.profileLogoutTitle,
@@ -683,7 +635,7 @@ class _SettingsGroup extends ConsumerWidget {
       // untuk present).
       await showDialog<void>(
         context: context,
-        builder: (_) => _ProfileDialog(
+        builder: (_) => AppMedallionDialog(
           icon: Icons.cloud_off_outlined,
           accent: AppColors.danger,
           title: AppStrings.profileLogoutTitle,
@@ -701,119 +653,32 @@ class _SettingsGroup extends ConsumerWidget {
   }
 }
 
-/// Dialog khas Profil: ikon medallion + judul + body + aksi.
-///
-/// Menggantikan `AlertDialog` generik di 3 callsite tab ini (konfirmasi
-/// keluar, gagal keluar, Tentang) agar satu keluarga: medallion 48px
-/// tint aksen + judul 17px + body 14px + tombol primer penuh + sekunder
-/// teks. Copy tidak berubah (dikunci test).
-class _ProfileDialog extends StatelessWidget {
-  const _ProfileDialog({
-    required this.icon,
-    required this.accent,
-    required this.title,
-    required this.body,
-    required this.primaryLabel,
-    required this.onPrimary,
-    this.primaryDanger = false,
-    this.secondaryLabel,
-    this.onSecondary,
-  });
-
-  final IconData icon;
-  final Color accent;
-  final String title;
-  final String body;
-  final String primaryLabel;
-  final VoidCallback onPrimary;
-  final bool primaryDanger;
-  final String? secondaryLabel;
-  final VoidCallback? onSecondary;
+/// Divider antar baris pengaturan, menjorok sejajar judul (setelah ikon).
+class _SettingsDivider extends StatelessWidget {
+  const _SettingsDivider();
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(22, 24, 22, 18),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              width: 52,
-              height: 52,
-              alignment: Alignment.centerLeft,
-              child: Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: accent.withValues(alpha: 0.12),
-                ),
-                child: Icon(icon, size: 27, color: accent),
-              ),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.2,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              body,
-              style: const TextStyle(
-                fontSize: 14,
-                height: 1.6,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 18),
-            SizedBox(
-              height: 48,
-              child: FilledButton(
-                onPressed: onPrimary,
-                style: FilledButton.styleFrom(
-                  backgroundColor: primaryDanger
-                      ? AppColors.danger
-                      : AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  textStyle: const TextStyle(fontWeight: FontWeight.w800),
-                ),
-                child: Text(primaryLabel, overflow: TextOverflow.ellipsis),
-              ),
-            ),
-            if (secondaryLabel != null && onSecondary != null) ...[
-              const SizedBox(height: 4),
-              TextButton(onPressed: onSecondary, child: Text(secondaryLabel!)),
-            ],
-          ],
-        ),
-      ),
+    return const Divider(
+      height: 1,
+      thickness: 1,
+      indent: 66,
+      color: AppColors.hairline,
     );
   }
 }
 
 /// Satu baris menu: ikon tint + judul + sublabel + chevron.
 ///
-/// Bahasa baris konsisten (bukan kartu per baris): divider hairline antar
-/// baris, chevron netral, baris destruktif memakai warna danger untuk
-/// ikon + judul. Tap milik InkWell penuh baris (48px+ target sentuh).
+/// Ripple mengikuti bentuk grup ([Material] dengan `clipBehavior`), sehingga
+/// sudut baris pertama/terakhir tidak pernah terlihat persegi. Tap memenuhi
+/// seluruh baris (target sentuh 48px+).
 class _SettingsRow extends StatelessWidget {
   const _SettingsRow({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.onTap,
-    this.last = false,
     this.destructive = false,
   });
 
@@ -821,77 +686,63 @@ class _SettingsRow extends StatelessWidget {
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
-  final bool last;
   final bool destructive;
 
   @override
   Widget build(BuildContext context) {
     final color = destructive ? AppColors.danger : AppColors.primary;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.vertical(
-              top: last ? Radius.zero : const Radius.circular(20),
-              bottom: last ? const Radius.circular(20) : Radius.zero,
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: color.withValues(alpha: 0.1),
+              ),
+              child: Icon(icon, size: 19, color: color),
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-              child: Row(
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(13),
-                      color: color.withValues(alpha: 0.1),
-                    ),
-                    child: Icon(icon, size: 19, color: color),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: destructive
-                                ? AppColors.danger
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                        if (subtitle != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            subtitle!,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              height: 1.5,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ],
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: destructive
+                          ? AppColors.danger
+                          : AppColors.textPrimary,
                     ),
                   ),
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    size: 22,
-                    color: AppColors.neutral,
-                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle!,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        height: 1.5,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
-          ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              size: 22,
+              color: AppColors.neutral,
+            ),
+          ],
         ),
-        if (!last) const Divider(height: 1, color: AppColors.hairline),
-      ],
+      ),
     );
   }
 }
@@ -909,7 +760,7 @@ class _ScoreError extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(AppRadii.hero),
         color: AppColors.surface,
         border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
       ),
@@ -951,7 +802,10 @@ class _ScoreError extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
-              textStyle: const TextStyle(fontWeight: FontWeight.w700),
+              textStyle: const TextStyle(
+                fontFamily: AppStyles.fontFamily,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],

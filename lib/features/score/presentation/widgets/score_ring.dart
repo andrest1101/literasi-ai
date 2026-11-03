@@ -9,10 +9,15 @@ import 'literacy_level_ui.dart';
 /// Total poin di tengah, arc mengikuti progres dalam level, warna dan ikon
 /// mengikuti level aktif. Animasi implisit 600ms membuat kenaikan poin
 /// terasa hidup tanpa norak.
+///
+/// [footer] menempel di dalam permukaan gradien yang sama (dipisah hairline
+/// putih transparan) sehingga rincian poin tidak perlu kartu putih kedua di
+/// dalam hero. Tanpa footer, ring tetap bisa dipakai mandiri.
 class ScoreRing extends StatelessWidget {
-  const ScoreRing({super.key, required this.score});
+  const ScoreRing({super.key, required this.score, this.footer});
 
   final LiteracyScore score;
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -36,102 +41,115 @@ class ScoreRing extends StatelessWidget {
             ),
           ],
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: score.progressInLevel),
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeOutCubic,
-              builder: (context, value, _) {
-                return SizedBox(
-                  width: 108,
-                  height: 108,
-                  child: CustomPaint(
-                    painter: _RingPainter(
-                      progress: value,
-                      color: Colors.white,
-                      trackColor: Colors.white.withValues(alpha: 0.25),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${score.total}',
-                            style: const TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
-                              color: Colors.white,
-                              fontFeatures: [
-                                FontFeature.tabularFigures(),
-                              ],
-                            ),
-                          ),
-                          const Text(
-                            'poin',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.8,
-                              color: AppColors.heroInkSoft,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(999),
-                      color: Colors.white.withValues(alpha: 0.16),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(level.icon, size: 14, color: Colors.white),
-                        const SizedBox(width: 6),
-                        Text(
-                          level.label,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.6,
-                            color: Colors.white,
+            Row(
+              children: [
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: score.progressInLevel),
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, _) {
+                    return SizedBox(
+                      width: 108,
+                      height: 108,
+                      child: CustomPaint(
+                        painter: _RingPainter(
+                          progress: value,
+                          color: Colors.white,
+                          trackColor: Colors.white.withValues(alpha: 0.25),
+                        ),
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${score.total}',
+                                style: const TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.5,
+                                  color: Colors.white,
+                                  fontFeatures: [FontFeature.tabularFigures()],
+                                ),
+                              ),
+                              const Text(
+                                'poin',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.8,
+                                  color: AppColors.heroInkSoft,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(999),
+                          color: Colors.white.withValues(alpha: 0.16),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(level.icon, size: 14, color: Colors.white),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                level.label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.6,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        score.pointsToNext == 0
+                            ? 'Level tertinggi tercapai.'
+                            : '${score.pointsToNext} poin lagi ke ${level.next!.label}.',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          height: 1.55,
+                          color: AppColors.heroInkSoft,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    score.pointsToNext == 0
-                        ? 'Level tertinggi tercapai.'
-                        : '${score.pointsToNext} poin lagi ke ${level.next!.label}.',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      height: 1.55,
-                      color: AppColors.heroInkSoft,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
+            if (footer != null) ...[
+              const SizedBox(height: 18),
+              Container(height: 1, color: Colors.white.withValues(alpha: 0.18)),
+              const SizedBox(height: 16),
+              footer!,
+            ],
           ],
         ),
       ),

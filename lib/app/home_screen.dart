@@ -87,13 +87,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ],
           ),
         ),
-        floatingActionButton: Transform.translate(
-          // Turun 8px dari margin bawaan Scaffold (16px): FAB duduk rapat
-          // 8px di atas zona badge navbar. Tidak lebih rendah: badge tab
-          // Profil butuh zona itu (test no-overlap mengunci gap >= 8px).
-          offset: const Offset(0, 8),
-          child: ChatFab(onTap: _openChat),
-        ),
+        // Tab Profil tidak memakai FAB: badge nav di kanan bawah akan
+        // bertumpuk dengan FAB dan kartu skor tertutup. Tiga tab lain tetap
+        // punya akses cepat ke Chat AI.
+        floatingActionButton: _index == _tabCount - 1
+            ? null
+            : Transform.translate(
+                // Turun 8px dari margin bawaan Scaffold (16px): FAB duduk
+                // rapat 8px di atas zona badge navbar. Tidak lebih rendah:
+                // badge tab Profil butuh zona itu (test no-overlap).
+                offset: const Offset(0, 8),
+                child: ChatFab(onTap: _openChat),
+              ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         bottomNavigationBar: AppBottomNavBar(
           currentIndex: _index,
