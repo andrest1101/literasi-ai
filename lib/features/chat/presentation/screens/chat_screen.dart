@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../shared/widgets/app_medallion_dialog.dart';
 import '../../../../shared/widgets/assistant_mark.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
 import '../../../score/presentation/screens/api_key_screen.dart';
@@ -64,19 +65,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (ref.read(chatControllerProvider).messages.isEmpty) return;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(AppStrings.chatClear),
-        content: const Text(AppStrings.chatClearConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(AppStrings.chatCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text(AppStrings.chatClear),
-          ),
-        ],
+      builder: (context) => AppMedallionDialog(
+        icon: Icons.refresh_rounded,
+        accent: AppColors.primary,
+        title: AppStrings.chatClear,
+        body: AppStrings.chatClearConfirm,
+        primaryLabel: AppStrings.chatClear,
+        onPrimary: () => Navigator.of(context).pop(true),
+        secondaryLabel: AppStrings.chatCancel,
+        onSecondary: () => Navigator.of(context).pop(false),
       ),
     );
     if (confirmed == true) notifier.clear();
@@ -336,7 +333,10 @@ class _ArchiveSheet extends StatelessWidget {
     final answerCount = archive.messages.where((m) => !m.isUser).length;
     return SafeArea(
       top: false,
-      child: Padding(
+      // Sheet arsip bisa lebih tinggi dari batas default (9/16 layar) di
+      // ponsel pendek; scrollable agar tidak RenderFlex overflow dan tombol
+      // "Hapus arsip" tetap terjangkau.
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,

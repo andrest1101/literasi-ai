@@ -312,6 +312,46 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('arsip terbaca di ponsel pendek tanpa overflow', (tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    // 320x568: batas tinggi sheet default (9/16 layar) lebih kecil dari
+    // isi sheet, sehingga isi wajib scrollable.
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          chatRepositoryProvider.overrideWithValue(_FakeChatRepository()),
+        ],
+        child: const MaterialApp(home: ChatScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final suggestion = find.text('Cara kenali judul clickbait?');
+    await tester.ensureVisible(suggestion);
+    await tester.pumpAndSettle();
+    await tester.tap(suggestion);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip(AppStrings.chatClear));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppStrings.chatClear).last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip(AppStrings.chatHistoryTooltip));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(find.text(AppStrings.chatHistoryContinue), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('tombol kirim berubah jadi hentikan saat AI menjawab', (
     WidgetTester tester,
   ) async {

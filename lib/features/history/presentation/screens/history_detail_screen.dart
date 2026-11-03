@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../shared/widgets/app_medallion_dialog.dart';
 import '../../../quick_check/presentation/widgets/quick_check_result_section.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
 import '../../domain/entities/history_entry.dart';
@@ -14,53 +15,48 @@ import '../widgets/history_card.dart';
 /// Hapus di sini adalah jalur discoverable kedua selain swipe di daftar
 /// (swipe tidak punya affordance visual). Alur sama persis: dialog
 /// konfirmasi, hapus via [DeleteHistory], snackbar + Urungkan, kembali
-/// ke daftar. Stateless diubah menjadi ConsumerStateful agar guard
-/// `_deleting` mencegah ketuk ganda saat request berjalan.
-class HistoryDetailScreen extends ConsumerStatefulWidget {
+/// ke daftar. Stateful agar guard `_deleting` mencegah ketuk ganda saat
+/// request berjalan.
+class HistoryDetailScreen extends StatefulWidget {
   const HistoryDetailScreen({super.key, required this.entry});
 
   final HistoryEntry entry;
 
   @override
-  ConsumerState<HistoryDetailScreen> createState() =>
-      _HistoryDetailScreenState();
+  State<HistoryDetailScreen> createState() => _HistoryDetailScreenState();
 }
 
-class _HistoryDetailScreenState extends ConsumerState<HistoryDetailScreen> {
+class _HistoryDetailScreenState extends State<HistoryDetailScreen> {
   var _deleting = false;
 
   Future<void> _confirmDelete() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(AppStrings.historyDeleteTitle),
-        content: const Text(AppStrings.historyDeleteBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(AppStrings.historyDeleteCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.danger,
-            ),
-            child: const Text(AppStrings.historyDeleteConfirm),
-          ),
-        ],
+      builder: (context) => AppMedallionDialog(
+        icon: Icons.delete_outline_rounded,
+        accent: AppColors.danger,
+        title: AppStrings.historyDeleteTitle,
+        body: AppStrings.historyDeleteBody,
+        primaryLabel: AppStrings.historyDeleteConfirm,
+        primaryDanger: true,
+        onPrimary: () => Navigator.of(context).pop(true),
+        secondaryLabel: AppStrings.historyDeleteCancel,
+        onSecondary: () => Navigator.of(context).pop(false),
       ),
     );
     if (confirmed != true || !mounted) return;
     setState(() => _deleting = true);
+    // Container diambil sebelum pop: Urungkan bisa ditekan setelah layar
+    // ini meninggalkan pohon widget, sehingga `ref` tidak lagi aman.
+    final container = ProviderScope.containerOf(context, listen: false);
     try {
-      final userId = ref.read(historyUserIdProvider);
+      final userId = container.read(historyUserIdProvider);
       if (userId == null || !mounted) return;
-      await ref.read(historyActionProvider.notifier).delete(
-            widget.entry.id,
-          );
+      final deleted = await container
+          .read(historyActionProvider.notifier)
+          .delete(widget.entry.id);
       if (!mounted) return;
-      final action = ref.read(historyActionProvider);
-      if (action.hasError) {
+      if (!deleted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(AppStrings.historyDeleteFailed),
@@ -80,9 +76,9 @@ class _HistoryDetailScreenState extends ConsumerState<HistoryDetailScreen> {
             action: SnackBarAction(
               label: AppStrings.historyUndo,
               onPressed: () {
-                final restoreId = ref.read(historyUserIdProvider);
+                final restoreId = container.read(historyUserIdProvider);
                 if (restoreId == null) return;
-                ref.read(saveHistoryProvider)(
+                container.read(saveHistoryProvider)(
                   userId: restoreId,
                   result: widget.entry.result,
                 );
@@ -107,7 +103,9 @@ class _HistoryDetailScreenState extends ConsumerState<HistoryDetailScreen> {
         scrolledUnderElevation: 0,
         toolbarHeight: 64,
         leadingWidth: 56,
-        leading: SessionBackButton(onPressed: () => Navigator.of(context).maybePop()),
+        leading: SessionBackButton(
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
         title: const Text(AppStrings.historyDetailTitle),
         titleTextStyle: const TextStyle(
           fontSize: 14,
@@ -133,7 +131,10 @@ class _HistoryDetailScreenState extends ConsumerState<HistoryDetailScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.neutral.withValues(alpha: 0.2)),
+          child: Container(
+            height: 1,
+            color: AppColors.neutral.withValues(alpha: 0.2),
+          ),
         ),
       ),
       body: SingleChildScrollView(

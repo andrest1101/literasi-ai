@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/home_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../shared/widgets/app_medallion_dialog.dart';
 import '../../domain/entities/auth_failure.dart';
 import '../providers/auth_controller.dart';
 import '../widgets/auth_form_parts.dart';
@@ -139,20 +140,16 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen>
   Future<void> _deleteAccount() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text(AppStrings.verifyEmailDeleteTitle),
-        content: const Text(AppStrings.verifyEmailDeleteBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text(AppStrings.verifyEmailDeleteCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
-            child: const Text(AppStrings.verifyEmailDeleteConfirm),
-          ),
-        ],
+      builder: (dialogContext) => AppMedallionDialog(
+        icon: Icons.person_remove_rounded,
+        accent: AppColors.danger,
+        title: AppStrings.verifyEmailDeleteTitle,
+        body: AppStrings.verifyEmailDeleteBody,
+        primaryLabel: AppStrings.verifyEmailDeleteConfirm,
+        primaryDanger: true,
+        onPrimary: () => Navigator.of(dialogContext).pop(true),
+        secondaryLabel: AppStrings.verifyEmailDeleteCancel,
+        onSecondary: () => Navigator.of(dialogContext).pop(false),
       ),
     );
     if (confirmed != true || !mounted) return;
