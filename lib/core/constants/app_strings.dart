@@ -167,26 +167,26 @@ abstract final class AppStrings {
   static const String quickCheckTileImageSubtitle = 'Screenshot maks 5 MB';
   static const String quickCheckExampleTitle = 'Coba contoh sekali ketuk';
   static const String quickCheckExampleSubtitle =
-      'Contoh pesan yang sering beredar di WhatsApp. Ketuk untuk langsung mengisi sesi pemeriksaan.';
+      'Contoh pesan yang sering beredar. Ketuk untuk langsung mengisinya di sesi cek.';
   static const String quickCheckExampleCta = 'Cek ini';
   static const String quickCheckExampleTag1 = 'Kesehatan';
   static const String quickCheckExample1 =
-      'Diteruskan berkali-kali: minum rebusan daun kelor setiap pagi bisa membersihkan paru-paru dan menyembuhkan semua penyakit.';
+      'Minum rebusan daun kelor bisa bersihkan paru-paru dan sembuhkan semua penyakit.';
   static const String quickCheckExampleTag2 = 'Bansos';
   static const String quickCheckExample2 =
-      'Pesan berantai: bantuan tunai Rp5 juta cair hari ini, cukup isi data rekening lewat tautan berikut.';
+      'Bantuan tunai Rp5 juta cair hari ini. Isi data rekening lewat link ini.';
   static const String quickCheckExampleTag3 = 'Kebijakan';
   static const String quickCheckExample3 =
-      'Broadcast grup: pemerintah menambah libur nasional minggu ini, tapi tidak ada surat resminya.';
+      'Pemerintah menambah libur nasional minggu ini, tapi belum ada surat resminya.';
   static const String quickCheckExampleTag4 = 'Bencana';
   static const String quickCheckExample4 =
-      'Pesan darurat: gempa besar diprediksi terjadi besok di kota tertentu, sebarkan sebelum terlambat.';
+      'Gempa besar diramalkan terjadi besok. Sebarkan sebelum terlambat.';
   static const String quickCheckExampleTag5 = 'Loker';
   static const String quickCheckExample5 =
-      'Tawaran kerja: gaji besar tanpa seleksi, cukup bayar biaya pendaftaran di awal via chat pribadi.';
+      'Gaji besar tanpa seleksi. Bayar dulu biaya pendaftaran lewat chat.';
   static const String trendingTitle = 'Trending hoaks';
   static const String trendingSubtitle =
-      'Pola hoaks yang sering beredar, dikurasi offline. Ketuk untuk detail dan verifikasi serupa.';
+      'Pola hoaks yang sering muncul, dikurasi offline. Ketuk untuk lihat detailnya.';
   static const String trendingHot = 'HOT';
   static const String trendingOfflineBadge = 'Kurasi offline';
   static const String trendingReference = 'Rujukan';

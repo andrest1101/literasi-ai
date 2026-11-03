@@ -139,7 +139,7 @@ void main() {
     WidgetTester tester,
   ) async {
     const seed =
-        'Diteruskan berkali-kali: minum rebusan daun kelor setiap pagi bisa membersihkan paru-paru dan menyembuhkan semua penyakit.';
+        'Minum rebusan daun kelor bisa bersihkan paru-paru dan sembuhkan semua penyakit.';
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(
