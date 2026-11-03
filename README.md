@@ -1,12 +1,12 @@
 <div align="center">
 
-# LiterasiAI — Cek dulu sebelum sebar
+# LiterasiAI: Cek dulu sebelum sebar
 
 Aplikasi mobile verifikasi fakta berbasis AI untuk masyarakat Indonesia.
 Tempel teks, gambar, atau link, dapatkan verdict dalam hitungan detik,
 lalu bagikan ke WhatsApp. Dilengkapi asisten chat literasi, riwayat
 Firestore per pengguna, mini-course, skor literasi, dan feed trending
-hoaks. Dibangun sebagai portfolio Apple Developer Academy 2026.
+hoaks.
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.32+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.8+-0175C2?logo=dart&logoColor=white)](https://dart.dev)
