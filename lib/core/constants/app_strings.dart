@@ -462,6 +462,16 @@ abstract final class AppStrings {
   static const String quickCheckPickCamera = 'Kamera';
   static const String quickCheckReplaceImage = 'Ganti gambar';
   static const String quickCheckRemoveImage = 'Hapus gambar';
+  static const String imagePreviewOpen = 'Buka pratinjau gambar';
+  static const String imagePreviewClose = 'Tutup pratinjau';
+  static const String imagePreviewTitle = 'Detail gambar';
+  static const String imagePreviewZoomIn = 'Perbesar gambar';
+  static const String imagePreviewZoomOut = 'Perkecil gambar';
+  static const String imagePreviewZoomReset = 'Kembalikan ukuran gambar';
+  static const String imagePreviewRotate = 'Putar gambar';
+  static const String imagePreviewShare = 'Bagikan gambar';
+  static const String imageShareFailed =
+      'Perangkat ini belum dapat membagikan file.';
   static const String quickCheckCaptionLabel = 'Caption opsional';
   static const String quickCheckCaptionHint =
       'Contoh: tangkapan layar grup WhatsApp tentang vaksin, 12 Mei 2026.';
