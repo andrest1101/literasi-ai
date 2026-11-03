@@ -77,31 +77,37 @@ class QuickCheckHomeTab extends ConsumerWidget {
                 subtitle: AppStrings.quickCheckModePickerSubtitle,
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _ModeTile(
-                      icon: Icons.text_snippet_outlined,
-                      title: AppStrings.quickCheckTileTextTitle,
-                      subtitle: AppStrings.quickCheckTileTextSubtitle,
-                      tint: AppColors.primary,
-                      onTap: () => _openSession(context),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _ModeTile(
-                      icon: Icons.image_outlined,
-                      title: AppStrings.quickCheckTileImageTitle,
-                      subtitle: AppStrings.quickCheckTileImageSubtitle,
-                      tint: AppColors.primaryDeep,
-                      onTap: () => _openSession(
-                        context,
-                        mode: QuickCheckInitialMode.image,
+              // Tinggi disamakan: subtitle "Gambar" lebih panjang dari
+              // "Teks", dan tanpa IntrinsicHeight tile kanan lebih tinggi
+              // sehingga pasangan terlihat miring di layar sempit.
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: _ModeTile(
+                        icon: Icons.text_snippet_outlined,
+                        title: AppStrings.quickCheckTileTextTitle,
+                        subtitle: AppStrings.quickCheckTileTextSubtitle,
+                        tint: AppColors.primary,
+                        onTap: () => _openSession(context),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _ModeTile(
+                        icon: Icons.image_outlined,
+                        title: AppStrings.quickCheckTileImageTitle,
+                        subtitle: AppStrings.quickCheckTileImageSubtitle,
+                        tint: AppColors.primaryDeep,
+                        onTap: () => _openSession(
+                          context,
+                          mode: QuickCheckInitialMode.image,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 12),
               _UrlModeBanner(
