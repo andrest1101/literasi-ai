@@ -4,8 +4,10 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/constants/app_styles.dart';
 import '../../../../core/utils/api_key_resolver.dart';
 import '../../../../core/utils/gemini_connectivity_probe.dart';
+import '../../../../shared/widgets/app_medallion_dialog.dart';
 import '../../../chat/presentation/providers/chat_providers.dart';
 import '../../../quick_check/data/datasources/gemini_text_datasource.dart';
 import '../../../quick_check/presentation/providers/verification_provider.dart';
@@ -130,19 +132,16 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
   Future<void> _confirmRemove() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(AppStrings.apiKeyRemove),
-        content: const Text(AppStrings.apiKeyRemoveConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text(AppStrings.chatCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text(AppStrings.apiKeyRemove),
-          ),
-        ],
+      builder: (context) => AppMedallionDialog(
+        icon: Icons.delete_outline_rounded,
+        accent: AppColors.danger,
+        title: AppStrings.apiKeyRemove,
+        body: AppStrings.apiKeyRemoveConfirm,
+        primaryLabel: AppStrings.apiKeyRemove,
+        primaryDanger: true,
+        onPrimary: () => Navigator.of(context).pop(true),
+        secondaryLabel: AppStrings.chatCancel,
+        onSecondary: () => Navigator.of(context).pop(false),
       ),
     );
     if (confirmed == true) {
@@ -464,7 +463,10 @@ class _TestCard extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-                textStyle: const TextStyle(fontWeight: FontWeight.w800),
+                textStyle: const TextStyle(
+                  fontFamily: AppStyles.fontFamily,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),
@@ -684,7 +686,10 @@ class _KeyFormCard extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-                textStyle: const TextStyle(fontWeight: FontWeight.w800),
+                textStyle: const TextStyle(
+                  fontFamily: AppStyles.fontFamily,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),
