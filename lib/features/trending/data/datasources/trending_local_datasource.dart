@@ -7,19 +7,19 @@ import '../../domain/entities/trending_item.dart';
 /// tanggal cek, dan rujukan verifikasi. Tanpa login, tanpa API key, tanpa
 /// Firebase: guest offline tetap melihat feed penuh.
 class TrendingLocalDatasource {
-  /// Paket konten offline v1.1, dikurasi Oktober 2026.
+  /// Paket konten offline v1.2, dikurasi Oktober 2026.
   /// Bukan feed live: tanggal per item sengaja dilepas agar tidak basi,
   /// penilaian redaksi ditandai jujur di UI sebagai kurasi offline.
-  static const String packVersion = 'v1.1';
+  static const String packVersion = 'v1.2';
   static final DateTime packUpdatedAt = DateTime(2026, 10, 6);
 
   // Non-const karena DateTime bukan constant expression.
   List<TrendingItem> items() => [
     TrendingItem(
       id: 'bantuan-tunai-berantai',
-      title: 'Pesan bantuan tunai Rp5 juta yang minta data rekening',
+      title: 'Bantuan tunai Rp5 juta minta data rekening',
       summary:
-          'Pesan berantai menjanjikan bantuan cair hari ini asal mengisi data rekening lewat tautan. Pola tautan asing, urgensi, dan permintaan data pribadi adalah ciri khas penipuan bansos.',
+          'Pesan ini menjanjikan bantuan yang katanya cair hari ini. Tapi link mencurigakan dan permintaan data rekening adalah ciri penipuan bansos.',
       verdict: Verdict.hoaks,
       confidence: 93,
       category: 'Penipuan',
@@ -30,9 +30,9 @@ class TrendingLocalDatasource {
     ),
     TrendingItem(
       id: 'libur-nasional-tambahan',
-      title: 'Broadcast libur nasional tambahan tanpa surat resmi',
+      title: 'Libur nasional tambahan tanpa pengumuman resmi',
       summary:
-          'Pesan viral menyebut ada libur tambahan tanpa melampirkan keputusan resmi. Hari libur nasional hanya sah bila diumumkan pemerintah melalui keputusan resmi.',
+          'Pesan heboh soal libur tambahan, tapi belum ada surat atau pengumuman resmi. Hari libur tidak muncul hanya karena pesan grup.',
       verdict: Verdict.perluDicek,
       confidence: 71,
       category: 'Kebijakan',
@@ -43,9 +43,9 @@ class TrendingLocalDatasource {
     ),
     TrendingItem(
       id: 'air-rebusan-sembuh-total',
-      title: 'Rebusan daun kelor diklaim bersihkan paru-paru',
+      title: 'Daun kelor diklaim bisa bersihkan paru-paru',
       summary:
-          'Unggahan menyebut rebusan daun kelor bisa membersihkan paru-paru dari racun dan polusi. Belum ada bukti klinis yang mendukung klaim penyembuhan total tersebut.',
+          'Banyak unggahan bilang kelor bisa bersihkan paru-paru. Belum ada penelitian yang membuktikan klaim ini atau soal menyembuhkan semua penyakit.',
       verdict: Verdict.hoaks,
       confidence: 91,
       category: 'Kesehatan',
@@ -56,9 +56,9 @@ class TrendingLocalDatasource {
     ),
     TrendingItem(
       id: 'undian-telepon-seluler',
-      title: 'SMS undian berhadiah yang minta transfer pajak kemenangan',
+      title: 'Undian palsu minta bayar pajak hadiah dulu',
       summary:
-          'SMS dari nomor tak dikenal mengaku pemenang undian, lalu meminta pajak kemenangan ditransfer dulu. Penyelenggara resmi tidak memungut biaya lewat nomor pribadi.',
+          'SMS ini minta kamu bayar pajak dulu sebelum hadiahnya cair. Hadiah resmi tidak pernah minta transfer ke nomor pribadi.',
       verdict: Verdict.hoaks,
       confidence: 95,
       category: 'Penipuan',
@@ -69,9 +69,9 @@ class TrendingLocalDatasource {
     ),
     TrendingItem(
       id: 'foto-banjir-daur-ulang',
-      title: 'Foto banjir lama disebar ulang sebagai kejadian kemarin',
+      title: 'Foto banjir lama dipakai untuk cerita banjir baru',
       summary:
-          'Foto yang sama pernah muncul pada peristiwa tahun-tahun sebelumnya, lalu disebar ulang dengan narasi baru. Pencarian gambar terbalik bisa menemukan sumber aslinya.',
+          'Foto lama disebar dengan cerita seolah-olah itu kejadian baru. Coba cari gambarnya; sumber aslinya biasanya langsung muncul.',
       verdict: Verdict.perluDicek,
       confidence: 78,
       category: 'Visual',
@@ -82,9 +82,9 @@ class TrendingLocalDatasource {
     ),
     TrendingItem(
       id: 'vaksin-autisme',
-      title: 'Klaim lama vaksin menyebabkan autisme pada anak',
+      title: 'Klaim vaksin sebabkan autisme masih beredar',
       summary:
-          'Klaim ini sudah dibantah banyak studi besar dan konsensus medis dunia. Bila ragu soal jadwal imunisasi, konsultasikan langsung ke dokter anak atau puskesmas.',
+          'Klaim ini sudah dibantah banyak penelitian besar dan dokter anak. Kalau ragu soal jadwal imunisasi, tanya puskesmas atau dokter yang merawat.',
       verdict: Verdict.hoaks,
       confidence: 94,
       category: 'Kesehatan',
@@ -95,9 +95,9 @@ class TrendingLocalDatasource {
     ),
     TrendingItem(
       id: 'lowongan-kerja-palsu',
-      title: 'Lowongan gaji besar tanpa seleksi yang minta biaya di awal',
+      title: 'Loker gaji besar minta biaya daftar dulu',
       summary:
-          'Tawaran kerja instan meminta biaya pendaftaran atau data KTP di awal percakapan. Rekrutmen resmi selalu lewat kanal perusahaan dan tidak memungut biaya pendaftaran.',
+          'Lowongan ini minta biaya pendaftaran atau data KTP di awal. Perusahaan resmi tidak memungut biaya pendaftaran.',
       verdict: Verdict.perluDicek,
       confidence: 74,
       category: 'Penipuan',
