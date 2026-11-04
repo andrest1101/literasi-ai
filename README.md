@@ -1,5 +1,3 @@
-<div align="center">
-
 <img src="assets/branding/app_mark.png" alt="Logo LiterasiAI" width="84" />
 
 # LiterasiAI: Cek dulu sebelum sebar
