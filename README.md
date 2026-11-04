@@ -11,19 +11,13 @@ Periksa teks, gambar, atau tautan, pahami verdict beserta alasannya, lalu bagika
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-DD2C00?logo=firebase&logoColor=white)](https://firebase.google.com)
 [![Gemini](https://img.shields.io/badge/Gemini%20API-AI-4285F4?logo=google&logoColor=white)](https://ai.google.dev)
 
-> **Tujuan**
-> Informasi menyebar cepat melalui media sosial dan aplikasi pesan. LiterasiAI membantu pengguna berhenti sejenak, memeriksa klaim, dan memahami konteks sebelum membagikannya. Tujuannya bukan menggantikan sumber tepercaya, melainkan mendukung kebiasaan literasi digital yang lebih baik.
+<p><strong>Purpose:</strong> Informasi menyebar cepat melalui media sosial dan aplikasi pesan. LiterasiAI membantu pengguna berhenti sejenak, memeriksa klaim, dan memahami konteks sebelum membagikannya. Tujuannya bukan menggantikan sumber tepercaya, melainkan mendukung kebiasaan literasi digital yang lebih baik.</p>
 
 </div>
 
 <p align="center">
   <img src="assets/image/LiterasiAI_Presentation.jpg" alt="Cuplikan aplikasi LiterasiAI yang menampilkan halaman Cek, hasil verifikasi, dan Asisten LiterasiAI" width="100%" />
 </p>
-> Purpose: Indonesia termasuk negara dengan penyebaran hoaks tertinggi,
-> mayoritas lewat WhatsApp, Instagram, dan Facebook (Kominfo). Masyarakat
-> tidak punya alat yang mudah, cepat, dan tepercaya untuk verifikasi
-> mandiri. LiterasiAI menjawabnya: verifikasi fakta AI dalam hitungan detik
-> langsung dari smartphone, plus edukasi literasi digital yang ringkas.
 
 <p align="center"><sub>Cuplikan aplikasi: Cek, hasil verifikasi, dan Asisten LiterasiAI</sub></p>
 
@@ -265,4 +259,3 @@ APK didistribusikan secara manual dan belum diterbitkan di Play Store. Dukungan 
 | Skor/history gagal tersimpan padahal kunci valid | `firestore.rules` belum di-deploy (bukan masalah kunci API) |
 | Selalu `TIDAK_DAPAT_DIPASTIKAN` | Kunci Gemini kosong/invalid — cek **Profil → Kunci API Gemini**, atau pakai mode demo |
 | `flutter` CLI macet di terminal | Biasanya terkunci daemon VS Code yang sedang berjalan; tunggu atau tutup run aktif, lalu ulangi |
-
