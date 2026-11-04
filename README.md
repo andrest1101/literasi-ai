@@ -1,26 +1,19 @@
-<div align="center">
-
-<img src="assets/branding/app_mark.png" alt="Logo LiterasiAI" width="84" />
-
 # LiterasiAI: Cek dulu sebelum sebar
 
-Aplikasi Android literasi digital untuk membantu pengguna memeriksa klaim dari teks, gambar, dan tautan. LiterasiAI menyajikan verdict, penjelasan, serta saran tindak lanjut dalam satu alur yang mudah dipahami.
+Aplikasi Android untuk memeriksa klaim dari teks, gambar, dan tautan. Lihat verdict, penjelasan, serta saran tindak lanjut sebelum membagikan informasi.
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.32%2B-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.8%2B-0175C2?logo=dart&logoColor=white)](https://dart.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-DD2C00?logo=firebase&logoColor=white)](https://firebase.google.com)
 [![Gemini](https://img.shields.io/badge/Gemini%20API-AI-4285F4?logo=google&logoColor=white)](https://ai.google.dev)
 
-> **Tujuan produk**
-> LiterasiAI dibuat sebagai alat bantu agar pengguna dapat berhenti sejenak, memeriksa informasi, dan memahami alasan di balik hasil pemeriksaan sebelum membagikannya. Aplikasi ini juga menyediakan materi singkat untuk membangun kebiasaan literasi digital.
-
-</div>
+Dirancang untuk membantu pengguna berhenti sejenak, memeriksa informasi, dan memahami alasan di balik hasilnya. LiterasiAI juga menyediakan materi singkat untuk membangun kebiasaan literasi digital.
 
 <p align="center">
   <img src="assets/image/LiterasiAI_Presentation.jpg" alt="Cuplikan aplikasi LiterasiAI yang menampilkan halaman Cek, hasil verifikasi, dan Asisten LiterasiAI" width="100%" />
 </p>
 
-<p align="center"><sub>Cuplikan UI: Cek · Hasil verifikasi · Asisten LiterasiAI</sub></p>
+<p align="center"><sub>Cuplikan aplikasi: Cek, hasil verifikasi, dan Asisten LiterasiAI</sub></p>
 
 ---
 
