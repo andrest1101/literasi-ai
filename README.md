@@ -1,13 +1,20 @@
+<div align="center">
+
 # LiterasiAI: Cek dulu sebelum sebar
 
-Aplikasi Android untuk memeriksa klaim dari teks, gambar, dan tautan. Lihat verdict, penjelasan, serta saran tindak lanjut sebelum membagikan informasi.
+**Aplikasi mobile literasi digital berbasis AI untuk masyarakat Indonesia.**
+
+Periksa teks, gambar, atau tautan, pahami verdict beserta alasannya, lalu bagikan hasilnya. LiterasiAI juga dilengkapi asisten chat, riwayat pemeriksaan, materi belajar, skor literasi, dan contoh klaim yang dikurasi.
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.32%2B-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.8%2B-0175C2?logo=dart&logoColor=white)](https://dart.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-DD2C00?logo=firebase&logoColor=white)](https://firebase.google.com)
 [![Gemini](https://img.shields.io/badge/Gemini%20API-AI-4285F4?logo=google&logoColor=white)](https://ai.google.dev)
 
-Dirancang untuk membantu pengguna berhenti sejenak, memeriksa informasi, dan memahami alasan di balik hasilnya. LiterasiAI juga menyediakan materi singkat untuk membangun kebiasaan literasi digital.
+> **Tujuan**
+> Informasi menyebar cepat melalui media sosial dan aplikasi pesan. LiterasiAI membantu pengguna berhenti sejenak, memeriksa klaim, dan memahami konteks sebelum membagikannya. Tujuannya bukan menggantikan sumber tepercaya, melainkan mendukung kebiasaan literasi digital yang lebih baik.
+
+</div>
 
 <p align="center">
   <img src="assets/image/LiterasiAI_Presentation.jpg" alt="Cuplikan aplikasi LiterasiAI yang menampilkan halaman Cek, hasil verifikasi, dan Asisten LiterasiAI" width="100%" />
