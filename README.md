@@ -1,311 +1,162 @@
 <div align="center">
 
-# LiterasiAI — Cek dulu sebelum sebar
+<img src="assets/branding/app_mark.png" alt="Logo LiterasiAI" width="88" />
 
-Aplikasi mobile verifikasi fakta berbasis AI untuk masyarakat Indonesia.
-Tempel teks, gambar, atau link, dapatkan verdict dalam hitungan detik,
-lalu bagikan ke WhatsApp. Dilengkapi asisten chat literasi, riwayat
-Firestore per pengguna, mini-course, skor literasi, dan feed trending
-hoaks. Dibangun sebagai portfolio Apple Developer Academy 2026.
+# LiterasiAI
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.32+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
-[![Dart](https://img.shields.io/badge/Dart-3.8+-0175C2?logo=dart&logoColor=white)](https://dart.dev)
+### Cek dulu sebelum sebar.
+
+Aplikasi Android literasi digital yang membantu pengguna memeriksa klaim dari teks, gambar, dan tautan—serta memahami alasan dan langkah lanjutnya.
+
+**Lihat pratinjau aplikasi di bawah tanpa perlu mengunduh APK.**
+
+[![Flutter](https://img.shields.io/badge/Flutter-3.32%2B-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.8%2B-0175C2?logo=dart&logoColor=white)](https://dart.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-DD2C00?logo=firebase&logoColor=white)](https://firebase.google.com)
-[![Gemini](https://img.shields.io/badge/Gemini-3.6--flash%20%2B%20failover-1A73E8?logo=google&logoColor=white)](https://ai.google.dev)
-[![Tests](https://img.shields.io/badge/tests-399%20passed-34A853?logo=flutter&logoColor=white)](#-pengujian)
-[![Analyze](https://img.shields.io/badge/flutter%20analyze-clean-34A853)](#-pengujian)
-
-> **Purpose.** Indonesia termasuk negara dengan penyebaran hoaks tertinggi,
-> mayoritas lewat WhatsApp, Instagram, dan Facebook (Kominfo). Masyarakat
-> tidak punya alat yang mudah, cepat, dan tepercaya untuk verifikasi
-> mandiri. LiterasiAI menjawabnya: verifikasi fakta AI dalam hitungan detik
-> langsung dari smartphone, plus edukasi literasi digital yang ringkas.
+[![Gemini](https://img.shields.io/badge/AI-Gemini%20API-4285F4?logo=googlegemini&logoColor=white)](https://ai.google.dev)
+[![Tests](https://img.shields.io/badge/tests-459%20passed-34A853?logo=flutter&logoColor=white)](#verifikasi-proyek)
 
 </div>
 
+<p align="center">
+  <img src="assets/image/LiterasiAI_Presentation.jpg" alt="Pratinjau UI LiterasiAI: halaman Cek, hasil pemeriksaan klaim, dan percakapan Asisten LiterasiAI" width="100%" />
+</p>
+
+<p align="center"><sub>Cuplikan aplikasi: Cek · Hasil verifikasi · Asisten LiterasiAI</sub></p>
+
 ---
 
-## Daftar isi
+## Tentang proyek
 
-- [Fitur](#-fitur)
-- [Demo 60 detik](#-demo-60-detik)
-- [Mulai cepat](#-mulai-cepat)
-- [Konfigurasi](#-konfigurasi)
-- [Arsitektur](#-arsitektur)
-- [Arsitektur data](#-arsitektur-data)
-- [Keamanan](#-keamanan)
-- [Mekanisme BYOK](#-mekanisme-byok)
-- [Pengujian](#-pengujian)
-- [Status dan roadmap](#-status-dan-roadmap)
-- [Troubleshooting](#-troubleshooting)
-- [Dokumentasi](#-dokumentasi)
+LiterasiAI dirancang untuk membuat pemeriksaan informasi lebih mudah dijangkau. Pengguna dapat memulai pemeriksaan dari aplikasi atau membagikan teks, tautan, maupun gambar ke LiterasiAI dari aplikasi Android lain. Hasil menyajikan verdict, tingkat keyakinan, penjelasan, dan saran tindak lanjut.
 
-## ✨ Fitur
+> **Penting:** hasil AI adalah alat bantu, bukan penentu kebenaran atau pengganti pemeriksaan sumber primer. Periksa kembali informasi penting melalui sumber tepercaya sebelum mengambil keputusan atau menyebarkannya.
 
-| Fitur | Ringkasan |
-| ----- | --------- |
-| Quick Check | Tiga mode input: teks (10–2.000 karakter), gambar (JPG/PNG/WebP maks 5 MB via Gemini Vision), link artikel (fetch judul dan deskripsi, lalu nilai klaim). Output: verdict `HOAKS` / `VALID` / `PERLU DICEK` / `TIDAK_DAPAT_DIPASTIKAN` plus confidence, penjelasan, dan saran. |
-| AI Chat Assistant | Tanya-jawab literasi digital Bahasa Indonesia dengan gaya santai, bubble ala WhatsApp, dan tombol **Verifikasi ini** yang meneruskan pesan ke Quick Check. |
-| History | Riwayat per pengguna di Firestore (`users/{uid}/verifications`), filter empat verdict, swipe-to-delete dengan Undo, dan layar detail yang memakai ulang kartu hasil plus tombol Share. |
-| Share Hasil | Kartu verdict di-render ke PNG via `screenshot`, dikirim via `share_plus` (WhatsApp/medsos), dengan fallback teks bila capture gagal. |
-| Trending Hoaks | Tujuh hoaks curated offline plus badge `HOT`; ketuk untuk masuk ke detail verifikasi. |
-| Mini-Course | Tiga modul lima menit (clickbait, gambar manipulasi, verifikasi sumber): artikel empat seksi, kuis tiga soal berpenjelasan, dan badge kelulusan. |
-| Literacy Score | Poin +10 per verifikasi, +20 per modul, +5 per jawaban kuis benar. Level Pemula (0–49), Waspada (50–149), Kritis (150–299), Ahli (300+). |
-| BYOK dan Mode Demo | Tanpa kartu kredit dan tanpa Blaze: tempel kunci Gemini milik sendiri di Pengaturan untuk hasil live, atau pakai mode demo offline yang selalu berlabel `DEMO`. Tamu tanpa login tetap bisa cek, chat, dan membaca modul. |
+## Fitur
 
-## 🎬 Demo 60 detik
+| Fitur | Yang dapat dilakukan |
+| --- | --- |
+| **Cek teks** | Periksa klaim berbahasa Indonesia dan lihat verdict `HOAKS`, `VALID`, `PERLU DICEK`, atau `TIDAK_DAPAT_DIPASTIKAN`, disertai penjelasan dan saran. |
+| **Cek gambar** | Pilih gambar untuk dianalisis; pratinjau mendukung zoom, rotasi, dan berbagi lampiran. |
+| **Cek tautan** | Ambil metadata halaman yang tersedia dan gunakan sebagai konteks pemeriksaan. |
+| **Android Share Target** | Kirim teks, tautan, atau gambar dari menu **Bagikan** Android ke alur pemeriksaan LiterasiAI. Pengguna tetap meninjau dan memulai pemeriksaan. |
+| **Asisten literasi** | Ajukan pertanyaan seputar kebiasaan memeriksa informasi dan teruskan percakapan ke Cek untuk ditinjau. |
+| **Riwayat dan skor** | Simpan riwayat serta progres akun di Firestore; data cloud terkait akun hanya tersedia setelah autentikasi dan aturan Firestore dikonfigurasi. |
+| **Belajar dan trending** | Pelajari modul literasi digital dengan kuis, dan jelajahi contoh informasi trending yang dikurasi di aplikasi. |
+| **Mode demo dan BYOK** | Coba alur demo offline dengan label yang jelas, atau gunakan kunci Gemini sendiri untuk respons AI langsung. |
 
-1. Buka tab **Cek**, ketuk salah satu contoh sekali-ketuk.
-2. Sesi terbuka, verdict dan confidence tampil, ketuk **Bagikan Hasil**.
-3. Buka **Chat**, ketuk saran, lalu **Verifikasi ini**.
-4. Buka **Belajar**, selesaikan kuis, klaim poin.
+## Coba aplikasi
 
-Tanpa setup apa pun, mode demo berjalan offline dan selalu berlabel `DEMO`.
+### APK Android
 
-## 🚀 Mulai cepat
+> LiterasiAI saat ini dibagikan sebagai **APK untuk instalasi manual**. Aplikasi ini **belum tersedia di Google Play Store**. Tautan unduhan APK perlu dibagikan terpisah oleh pemilik proyek; README ini tidak mengarahkan ke tautan unduhan yang belum dipastikan.
 
-### Prasyarat
+1. Unduh APK dari tautan distribusi yang diberikan pemilik proyek.
+2. Buka file APK di perangkat Android dan izinkan pemasangan dari sumber tersebut bila diminta.
+3. Buka LiterasiAI. Mode demo dapat digunakan untuk mencoba alur tanpa memasukkan kunci API.
+4. Untuk hasil AI langsung, atur kunci Gemini milik sendiri melalui **Profil → Kunci API Gemini**.
 
-- Flutter 3.32+ (Dart 3.8+) — verifikasi dengan `flutter doctor`
-- Project Firebase (Auth dan Firestore) — lihat [Konfigurasi](#-konfigurasi)
-- Kunci Gemini gratis dari Google AI Studio (untuk hasil live; opsional bila memakai mode demo)
-- Android: `minSdk` 23+ (syarat `firebase-auth` / `cloud_firestore`)
-- Desktop Linux: `sudo apt-get install -y libsecret-1-dev` (wajib untuk plugin secure storage)
+**Catatan Google Sign-In:** SHA-1 dari signing certificate APK yang digunakan harus didaftarkan pada aplikasi Android di Firebase Console. Debug dan release dapat memakai sertifikat berbeda. Google Sign-In dapat gagal bila SHA-1 yang cocok belum didaftarkan. Fitur demo tidak memerlukan login atau kunci Gemini.
 
-### Instalasi dan run
+### Jalankan dari source
+
+**Prasyarat:** Flutter 3.32 atau lebih baru (Dart 3.8+), Android SDK untuk target Android, konfigurasi Firebase proyek, serta kunci Gemini untuk mode live. Untuk mengaktifkan autentikasi/penyimpanan cloud, siapkan Firebase Auth dan Firestore; lihat [Konfigurasi layanan](#konfigurasi-layanan).
 
 ```bash
 flutter pub get
 
-# Opsi A — kunci dibakar saat compile (mode developer):
-flutter run --dart-define=GEMINI_API_KEY=ISI_KUNCI_ANDA
-
-# Opsi B — BYOK: jalankan biasa, lalu tempel kunci di Profil → Kunci API Gemini
+# Jalankan dengan mode demo (tanpa kunci live)
 flutter run
 
-# Desktop juga didukung:
-flutter run -d linux     # atau: -d macos, -d windows
+# Atau sediakan kunci Gemini hanya untuk proses run lokal
+flutter run --dart-define=GEMINI_API_KEY=KUNCI_ANDA
 ```
 
-### Verifikasi instalasi
+> Jangan masukkan kunci API pribadi ke source control, tangkapan layar, atau log yang dibagikan. Untuk distribusi build, pertimbangkan alur penyimpanan kunci yang aman; `--dart-define` bukan mekanisme backend rahasia.
 
-```bash
-flutter analyze   # ekspektasi: No issues found!
-flutter test      # ekspektasi: All tests passed! (399 test, 44 file)
-```
+### Konfigurasi layanan
 
-## ⚙️ Konfigurasi
+1. Hubungkan project Firebase menggunakan FlutterFire CLI (`flutterfire configure`).
+2. Aktifkan metode autentikasi yang dipakai pada Firebase Authentication.
+3. Deploy aturan `firestore.rules` ke Firestore sebelum mengandalkan penyimpanan riwayat dan skor akun.
+4. Untuk Google Sign-In Android, daftarkan SHA-1 sertifikat signing yang sesuai di Firebase Console dan perbarui konfigurasi Android bila diperlukan.
+5. Untuk respons Gemini langsung, masukkan kunci sendiri melalui **Profil → Kunci API Gemini**. Tanpa kunci valid, aplikasi menggunakan mode demo dan tidak mengirim permintaan AI.
 
-| Kebutuhan | Cara |
-| --------- | ---- |
-| Project Firebase | `flutterfire configure`, hasilnya `lib/firebase_options.dart` |
-| Auth | Aktifkan provider **Google** dan **Anonymous** di Firebase Console |
-| Firestore | Aktifkan database, lalu deploy `firestore.rules` via Console → Firestore → Rules (lihat [Keamanan](#-keamanan)) |
-| Kunci Gemini | Opsi A `--dart-define`, atau opsi B BYOK di **Profil → Kunci API Gemini** (lihat [Mekanisme BYOK](#-mekanisme-byok)) |
-| Google Sign-In Android | Daftarkan SHA-1 debug di Firebase Console agar `oauth_client` terisi penuh |
+Konfigurasi Firebase client seperti `google-services.json` dan `firebase_options.dart` mengidentifikasi aplikasi, tetapi bukan pengganti aturan keamanan Firestore. Akses data tetap harus dibatasi dengan rules yang sesuai.
 
-> `apiKey` di `firebase_options.dart` adalah client key publik hasil
-> FlutterFire — aman disimpan di repo. Kunci Gemini tidak pernah
-> di-hardcode dan tidak pernah masuk repo.
+## Cara kerja singkat
 
-## 🏗️ Arsitektur
+1. Pengguna memasukkan klaim, memilih gambar, membuka tautan, atau menerima konten lewat Android Share Target.
+2. Pengguna meninjau konten lalu memulai pemeriksaan. Jika kunci Gemini tersedia, permintaan dikirim ke Gemini; tanpa kunci, jalur demo lokal menampilkan hasil demo yang ditandai.
+3. Aplikasi menyajikan verdict, confidence, penjelasan, dan saran. Jika tersedia sesi pengguna dan Firestore terkonfigurasi, hasil dapat disimpan dalam riwayat akun.
 
-Clean Architecture berbasis fitur plus Riverpod (`Notifier` /
-`AsyncNotifier` / `ConsumerWidget`):
+Model AI dapat keliru, tidak selalu memiliki konteks terbaru, dan hasil tidak menjamin bahwa suatu klaim benar atau salah. Hindari mengirim informasi sensitif. Konten yang diperiksa pada mode live diproses oleh layanan Gemini sesuai pengaturan dan kebijakan layanan Google.
 
-- **Domain** — entity Dart murni, interface repository, use case. Tanpa dependensi Flutter.
-- **Data** — model JSON, datasource (pool Gemini `gemini-3.6-flash` dengan failover otomatis, Firestore), implementasi repository.
-- **Presentation** — screen, widget reusable, dan provider Riverpod untuk state UI.
+## Arsitektur
 
-```
+Proyek menggunakan struktur fitur dengan pemisahan **Presentation**, **Domain**, dan **Data**, serta Riverpod untuk state management.
+
+```text
 lib/
-├── app/home_screen.dart            # Shell 4 tab (IndexedStack malas) + FAB Chat
-├── core/
-│   ├── constants/                  # app_colors, app_strings, app_styles
-│   ├── errors/                     # failures (sealed class)
-│   └── utils/                      # url_fetcher, image_processor,
-│                                   # api_key_store/resolver, share_service
+├── app/                  # shell aplikasi dan navigasi utama
+├── core/                 # tema, konstanta, utilitas, dan error
 ├── features/
-│   ├── auth/                       # onboarding flag + login/Google/anonim
-│   ├── quick_check/                # teks/gambar/link + share + demo
-│   ├── chat/                       # asisten literasi + demo edukatif
-│   ├── history/                    # Firestore per user + filter + undo
-│   ├── trending/                   # feed curated offline
-│   ├── learn/                      # 3 modul + kuis + progres
-│   └── score/                      # level + ring + Pengaturan BYOK
-├── firebase_options.dart           # hasil flutterfire configure
-├── main.dart                       # ProviderScope + init best-effort
-└── shared/widgets/                 # header editorial, navbar, error/loading
+│   ├── auth/              # autentikasi dan onboarding
+│   ├── quick_check/       # teks, gambar, URL, hasil, dan Share Target
+│   ├── chat/              # asisten literasi
+│   ├── history/           # riwayat pemeriksaan
+│   ├── trending/          # konten trending terkurasi
+│   ├── learn/              # modul dan kuis
+│   └── score/              # progres, profil, dan pengaturan kunci
+├── shared/                # widget yang digunakan lintas fitur
+└── main.dart              # bootstrap dan ProviderScope
+
+test/                      # unit, widget, dan regression tests
+assets/                    # font, branding, dan media aplikasi
 ```
 
-Di luar `lib/`:
+- **Domain:** entitas dan kontrak repository.
+- **Data:** datasource Gemini/Firebase, pemetaan model, dan implementasi repository.
+- **Presentation:** layar/widget Flutter dan provider Riverpod.
 
-```
-assets/branding/                    # app_icon_1024 (master) + app_mark (splash)
-tool/generate_brand_assets.ps1      # sumber kebenaran ikon iOS/Android + launch mark
-test/                               # 44 file, 399 test regresi
-```
+## Privasi dan batasan
 
-Prinsip yang dijaga di seluruh codebase:
+- Mode demo berjalan tanpa permintaan ke Gemini, tetapi hasil demo bersifat ilustratif dan bukan verifikasi faktual.
+- Mode live mengirim materi pemeriksaan ke Gemini untuk diproses. Jangan gunakan untuk data pribadi atau rahasia.
+- Riwayat dan skor cloud bergantung pada autentikasi, koneksi, konfigurasi Firebase, serta Firestore rules. Progres lokal guest tidak otomatis digabung ke akun.
+- **Belum ada offline queue** untuk mengantrekan permintaan live saat tidak ada koneksi. Mode demo offline bukan berarti analisis Gemini dapat berjalan tanpa internet.
+- APK didistribusikan manual, bukan melalui Play Store. Ketersediaan tautan APK bergantung pada pemilik proyek.
+- Pengujian otomatis dan build bukan pengganti uji penggunaan menyeluruh pada berbagai perangkat fisik. Kompatibilitas dan pengalaman perangkat tetap perlu divalidasi.
+- Android Share Target telah diimplementasikan; perilaku penerimaan konten dapat berbeda menurut aplikasi pengirim dan jenis konten.
 
-- Copy user-facing terpusat di `AppStrings`; token visual di `AppColors` / `AppStyles` (grid 8pt, radius terpusat).
-- Setiap request AI jujur soal kegagalan: timeout 30 detik, pesan ramah untuk kuota/safety/key-invalid, dan fallback `TIDAK_DAPAT_DIPASTIKAN` sebagai **hasil sukses**, bukan error.
-- Klaim respons `<5 detik` ditopang instrumentasi durasi di kartu hasil, cache klaim identik (LRU 20), dan rate limit per sesi untuk hemat kuota free tier.
-- Penulisan kode mengikuti `agents.md`: Riverpod ketat (tanpa GetX/Provider/BLoC), tanpa stub `TODO` untuk logika inti.
+## Status pengembangan
 
-## 🗄️ Arsitektur data
+**Sudah tersedia:** alur cek teks/gambar/tautan, tampilan hasil dan berbagi, Android Share Target, chat edukasi, riwayat dan skor Firebase, modul belajar, trending terkurasi, mode demo, serta penggunaan kunci Gemini milik pengguna.
 
-### Firestore (cloud, per pengguna)
+**Belum menjadi bagian dari rilis ini / masih perlu validasi:** offline queue, pengalaman `Open with` Windows, split-view tablet, parity iOS, serta uji menyeluruh pada perangkat fisik. Jangan menganggap item tersebut sudah tersedia hanya karena tercantum sebagai kemungkinan pengembangan.
 
-| Path | Isi | Pola tulis |
-| ---- | --- | ---------- |
-| `users/{uid}/verifications/{id}` | Entri riwayat: input (teks/thumbnail/URL), verdict, confidence, timestamp UTC ISO8601 | Auto-save best-effort setelah hasil AI tampil; gagal simpan hanya `debugPrint`, tidak menggagalkan verifikasi. Baca via `orderBy checkedAt desc limit 50` |
-| `users/{uid}/score/summary` | Total skor, modul selesai (`arrayUnion` idempoten), best-score kuis | Increment atomik; mapping toleran terhadap dokumen korup |
-| `users/{uid}/learn/progress` | Modul selesai dan best-score per kuis (anti-farming: hanya skor terbaik yang dihitung) | Tulis idempoten, baca stream dengan timeout |
+## Verifikasi proyek
 
-Semua path di atas berada di bawah `users/{uid}` sehingga tercakup rules owner-only. Progres belajar tamu disimpan lokal di perangkat melalui SharedPreferences (modul selesai + skor kuis terbaik), tetapi tidak dihitung sebagai poin cloud. Saat pengguna masuk dengan akun, progres guest lokal tidak otomatis disinkronkan; sinkronisasi/konversi akun harus dilakukan secara eksplisit agar tidak menggabungkan atau menggandakan skor tanpa persetujuan.
+Pemeriksaan dijalankan pada source tree saat README ini diperbarui:
 
-### Lokal (perangkat)
+| Perintah | Hasil |
+| --- | --- |
+| `flutter analyze` | Bersih — tidak ada issue. |
+| `flutter test` | **459 test lulus**. |
 
-| Penyimpanan | Isi | Mekanisme |
-| ----------- | --- | --------- |
-| Secure storage OS | Kunci Gemini milik pengguna (`gemini_api_key`) | `flutter_secure_storage` → Keychain (iOS), Keystore (Android), Credential Locker (Windows), libsecret (Linux). Tidak pernah di SharedPreferences |
-| SharedPreferences | Flag `onboarding_completed_v1` | Onboarding tampil sekali per install; gagal baca diperlakukan sebagai belum selesai |
-| Memori (LRU 20) | Cache klaim identik | Verifikasi berulang atas klaim sama dijawab instan tanpa request baru |
-| Rate limit sesi | Timestamp request terakhir | Jeda minimum 2 detik antar request di lapisan repository |
-
-## 🔐 Keamanan
-
-### Firestore rules owner-only
-
-File `firestore.rules` (deploy manual via Console, tanpa Blaze):
-
-```js
-match /users/{userId}/{document=**} {
-  allow read, write: if request.auth != null && request.auth.uid == userId;
-}
-```
-
-Alur yang dijamin aturan ini:
-
-1. Pengguna login (Google atau anonim) → Firebase Auth menerbitkan UID.
-2. Setiap baca/tulis di bawah `users/{uid}` ditolak kecuali UID pada token sama dengan `{userId}` di path.
-3. Tanpa login (`request.auth == null`) → semua ditolak di server; aplikasi sudah menangani ini sebagai empty state, bukan crash.
-4. Tidak ada koleksi publik tulis-bebas; tidak ada leaderboard lintas pengguna (sengaja dipangkas di PRD demi privasi).
-
-Gejala klasik salah konfigurasi: skor/history gagal tersimpan padahal kunci API valid — artinya rules belum di-deploy, bukan masalah kunci.
-
-### Verifikasi kepemilikan email
-
-Pendaftaran email tidak langsung membuka aplikasi. Setelah akun dibuat,
-Firebase mengirim tautan verifikasi dan pengguna ditahan di `VerifyEmailScreen`
-sampai `emailVerified` bernilai benar:
-
-1. Login/daftar email yang belum terverifikasi → layar verifikasi (bukan Home).
-2. Splash juga memeriksa status ini, sehingga menutup aplikasi tidak melewati gerbang.
-3. Tiga jalan keluar tersedia: "Saya sudah verifikasi" (memuat ulang profil), "Kirim ulang email" (jeda 60 detik), dan "Batalkan pendaftaran" (menghapus akun agar email salah ketik tidak menjadi akun yatim).
-4. Google dan sesi anonim tidak digerbangi: Google sudah terverifikasi pemiliknya, anonim memang tanpa email.
-
-Batasnya jujur: ini membuktikan penguasaan inbox, **bukan** nama asli atau KTP. Yang dicegah adalah pendaftaran memakai alamat email orang lain.
-
-Sesi email yang dibuat sebelum aturan ini berlaku juga ikut digerbangi; pengguna cukup mengirim ulang tautan dari layar tersebut.
-
-### Rahasia vs publik
-
-| Klasifikasi | Contoh | Penanganan |
-| ----------- | ------ | ---------- |
-| Publik, aman di repo | `apiKey` di `firebase_options.dart`, Application ID, `google-services.json` client info | Hasil `flutterfire configure`, dibatasi via Firebase Console (SHA-1, App Check bila perlu) |
-| Rahasia, tidak boleh masuk repo | Kunci Gemini | `--dart-define` saat compile, atau BYOK di secure storage; validasi format ringan sebelum simpan |
-
-## 🔑 Mekanisme BYOK
-
-BYOK (Bring Your Own Key) memungkinkan reviewer menjalankan fitur live tanpa kartu kredit dan tanpa backend token broker. Implementasi di `lib/core/utils/`:
-
-**Prioritas resolusi** (`api_key_resolver.dart`, tanpa tebakan):
-
-1. `ApiKeySource.compileDefine` — `String.fromEnvironment('GEMINI_API_KEY')`. Bila tidak kosong, selalu menang. Cocok untuk mode developer.
-2. `ApiKeySource.userKey` — dibaca async dari secure storage sekali saat provider dibuat. Diatur lewat **Profil → Kunci API Gemini**.
-3. `ApiKeySource.none` — tidak ada kunci. Aplikasi masuk mode demo/jujur: banner mengarahkan ke Pengaturan, request AI tidak dikirim.
-
-**Siklus simpan** (`api_key_controller.dart` via `ApiKeyController`):
-
-- Validasi ringan: minimal 20 karakter, tanpa spasi; pesan error mengarah ke Pengaturan, bukan ke terminal.
-- Simpan ke secure storage (`ApiKeyStore.write`), lalu `ref.invalidate(apiKeyStatusProvider)` sehingga repository Quick Check dan Chat memakai kunci baru **pada request berikutnya tanpa restart**.
-- Hapus kunci (`clearUserKey`) mengikuti pola invalidate yang sama.
-
-**Propagasi live:** datasource varian `*WithKey` menerima `resolveApiKey` per request, sehingga ganti kunci di tengah sesi langsung efektif. Guest tanpa login tetap bisa BYOK karena kunci disimpan per perangkat, bukan per akun.
-
-## ✅ Pengujian
-
-Kondisi terakhir terverifikasi: `flutter analyze` → `No issues found!`,
-`flutter test` → `All tests passed!` (**399 test**, 44 file), dan
-`flutter build apk --debug` → sukses. Suite berjalan offline (network
-diinjeksi lewat fake), jadi hasilnya deterministik di mesin mana pun.
-
-| Area | File test (jumlah test) | Total |
-| ---- | ----------------------- | ----- |
-| Quick Check | `quick_check_url_share` 18, `quick_check_verification` 14, `quick_check_image` 12, `quick_check_screen` 7, `verify_performance` 6, `hero_verdict` 5, `verdict_spine` 4, `check_heading` 4, `quick_check_redesign` 4, `mode_identity` 2 | 76 |
-| Gemini & BYOK | `gemini_model_pool` 22, `api_key_demo` 20, `gemini_error_mapper` 16, `gemini_probe` 9 | 67 |
-| Chat | `chat_room` 15, `chat_test` 11, `chat_polish` 7 | 33 |
-| History | `history_test` 18, `history_dedup` 8, `history_refined` 8 | 34 |
-| Learn | `learn_library` 12, `learn_test` 8, `learn_detail_contents` 5 | 25 |
-| Score & profil | `score_test` 15, `profile_menu` 9 | 24 |
-| Auth & onboarding | `auth_repository` 29, `auth_controller` 10, `email_verification` 4, `auth_android_config` 4, `onboarding_persistence` 5, `widget_test` 4 | 56 |
-| Shell, nav, brand | `native_brand` 15, `nav_pill` 9, `home_nav_chat` 5, `home_tab_state` 5, `tab_headers` 4 | 38 |
-| Polish & identitas UI | `premium_upgrade` 9, `ui_u1_polish` 9, `ui_u2_identity` 8, `font_bundle` 5, `header_compact` 4, `section_header` 4, `hero_pattern` 2 | 41 |
-| Trending | `trending_test` 5 | 5 |
-
-Suite auth memverifikasi pemetaan error Firebase dan Google Play Services ke
-pesan aman, state sesi Riverpod, sign-in/registrasi, reset kata sandi, gerbang
-verifikasi email, jeda kirim ulang, penghapusan akun, dan logout memakai fake
-repository (tanpa request ke akun sungguhan). `auth_android_config_test.dart`
-membaca manifest dan `google-services.json` langsung untuk mengunci izin
-`INTERNET` dan keberadaan OAuth client Android.
-
-Test `native_brand_test.dart` mengunci kontrak native tanpa perlu Xcode:
-nama aplikasi, 15 ikon iOS (dimensi + tanpa alpha), ikon legacy/adaptive
-Android, dan launch screen kedua platform. `home_tab_state_test.dart`
-mengunci state tab: scroll, kata kunci pencarian, lazy mount, dan back.
-
-### Cara menjalankan
+Jalankan kembali dari root proyek:
 
 ```bash
-flutter test                          # semua 399 test
-flutter test test/score_test.dart     # satu file
-flutter test --plain-name "cache"     # filter berdasarkan nama
+flutter analyze
+flutter test
 ```
 
-### Konvensi pengujian
+## Struktur dokumentasi
 
-- Setiap perubahan perilaku wajib ditemani atau memutakhirkan test regresi; file test dikelompokkan per tema (`*_test.dart`).
-- Test yang butuh network memakai injeksi fungsi/fake (contoh: `verifyTextFn`), sehingga suite berjalan offline dan deterministik.
-- Test widget memakai mock (clipboard, SharedPreferences) agar tidak hang; bug layout dikunci sebagai regresi (contoh: overlap FAB vs navbar, overflow stepper).
+- [`PRD.md`](PRD.md) — tujuan produk dan spesifikasi.
+- [`progress.md`](progress.md) — catatan progres pengembangan.
+- [`firestore.rules`](firestore.rules) — aturan akses Firestore yang harus ditinjau dan dideploy untuk proyek Firebase.
 
-## 🗺️ Status dan roadmap
+---
 
-- [x] MVP: Quick Check tiga mode, Chat, History Firestore, Share, Trending, Mini-Course, Score, BYOK/Demo, Onboarding, polish premium
-- [x] Brand pack native: ikon iOS/Android (adaptive + monochrome), launch screen brand, nama `LiterasiAI`, splash Flutter satu identitas
-- [x] Shell: tab state preservation lewat `IndexedStack` malas + back-to-tab-0
-- [x] Auth Android: email/password, daftar, reset sandi, anonymous, sesi persisten, dan logout
-- [x] Keamanan akun: verifikasi kepemilikan email, gerbang sesi belum terverifikasi, hapus akun, dan pemetaan error Google yang spesifik
-- [ ] UI polish lanjutan (micro-interactions terkurasi)
-- [ ] Parity iOS: build di Mac, Google Sign-In URL scheme, validasi TestFlight
-- [ ] Video demo 60 detik
-- [ ] Merge final `dev` → `main` dan publikasi GitHub
-
-## 🛠️ Troubleshooting
-
-| Gejala | Solusi |
-| ------ | ------ |
-| `libsecret-1>=0.18.4 not found` saat build Linux | `sudo apt-get install -y libsecret-1-dev` |
-| `Permission denied` ke `/usr/local/...` saat `flutter run -d linux` | Hapus cache CMake basi: `rm -rf build/linux`, lalu run ulang |
-| Login Google gagal di Android | Pastikan SHA-1 keystore yang dipakai (debug dan release berbeda) terdaftar di Firebase Console → Project settings → Android app, lalu unduh ulang `google-services.json`. Cek `build/app/generated/res/processDebugGoogleServices/values/values.xml` harus memuat `default_web_client_id`. Pesan error aplikasi kini menyebut konfigurasi OAuth, bukan pesan generik |
-| Skor/history gagal tersimpan padahal kunci valid | `firestore.rules` belum di-deploy (bukan masalah kunci API) |
-| Selalu `TIDAK_DAPAT_DIPASTIKAN` | Kunci Gemini kosong/invalid — cek **Profil → Kunci API Gemini**, atau pakai mode demo |
-| `flutter` CLI macet di terminal | Biasanya terkunci daemon VS Code yang sedang berjalan; tunggu atau tutup run aktif, lalu ulangi |
-
-## 📚 Dokumentasi
-
-- `PRD.md` — spesifikasi produk: fitur, screen map, strategi prompt AI, fase pengembangan
-- `progress.md` — riwayat pengerjaan per batch beserta hasil verifikasi
-- `agents.md` — aturan main AI agent: arsitektur, standar koding, commit policy
+<p align="center"><sub>Dibuat sebagai proyek portofolio LiterasiAI · Indonesia</sub></p>
