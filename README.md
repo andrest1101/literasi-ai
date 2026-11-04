@@ -12,6 +12,11 @@ Dirancang untuk membantu pengguna berhenti sejenak, memeriksa informasi, dan mem
 <p align="center">
   <img src="assets/image/LiterasiAI_Presentation.jpg" alt="Cuplikan aplikasi LiterasiAI yang menampilkan halaman Cek, hasil verifikasi, dan Asisten LiterasiAI" width="100%" />
 </p>
+> **Purpose:** Indonesia termasuk negara dengan penyebaran hoaks tertinggi,
+> mayoritas lewat WhatsApp, Instagram, dan Facebook (Kominfo). Masyarakat
+> tidak punya alat yang mudah, cepat, dan tepercaya untuk verifikasi
+> mandiri. LiterasiAI menjawabnya: verifikasi fakta AI dalam hitungan detik
+> langsung dari smartphone, plus edukasi literasi digital yang ringkas.
 
 <p align="center"><sub>Cuplikan aplikasi: Cek, hasil verifikasi, dan Asisten LiterasiAI</sub></p>
 
@@ -243,3 +248,14 @@ APK didistribusikan secara manual dan belum diterbitkan di Play Store. Dukungan 
 ---
 
 <p align="center"><sub>LiterasiAI · Proyek portofolio literasi digital</sub></p>
+## 🛠️ Troubleshooting
+
+| Gejala | Solusi |
+| ------ | ------ |
+| `libsecret-1>=0.18.4 not found` saat build Linux | `sudo apt-get install -y libsecret-1-dev` |
+| `Permission denied` ke `/usr/local/...` saat `flutter run -d linux` | Hapus cache CMake basi: `rm -rf build/linux`, lalu run ulang |
+| Login Google gagal di Android | Pastikan SHA-1 keystore yang dipakai (debug dan release berbeda) terdaftar di Firebase Console → Project settings → Android app, lalu unduh ulang `google-services.json`. Cek `build/app/generated/res/processDebugGoogleServices/values/values.xml` harus memuat `default_web_client_id`. Pesan error aplikasi kini menyebut konfigurasi OAuth, bukan pesan generik |
+| Skor/history gagal tersimpan padahal kunci valid | `firestore.rules` belum di-deploy (bukan masalah kunci API) |
+| Selalu `TIDAK_DAPAT_DIPASTIKAN` | Kunci Gemini kosong/invalid — cek **Profil → Kunci API Gemini**, atau pakai mode demo |
+| `flutter` CLI macet di terminal | Biasanya terkunci daemon VS Code yang sedang berjalan; tunggu atau tutup run aktif, lalu ulangi |
+
