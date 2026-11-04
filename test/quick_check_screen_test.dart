@@ -169,6 +169,28 @@ void main() {
     expect(find.byType(QuickCheckResultSection), findsOneWidget);
     expect(find.text('HOAKS'), findsOneWidget);
     expect(find.text('87%'), findsOneWidget);
+    expect(find.bySemanticsLabel('Langkah selesai'), findsNWidgets(3));
+  });
+
+  testWidgets('hasil tidak dicentang saat analisis gagal', (
+    WidgetTester tester,
+  ) async {
+    await _pumpQuickCheck(
+      tester,
+      _FakeRepository(failure: const NetworkFailure()),
+    );
+
+    await tester.enterText(
+      find.byType(TextField),
+      'Klaim uji yang cukup panjang untuk validasi widget.',
+    );
+    await tester.pump();
+    await _tapVerify(tester);
+    await tester.pumpAndSettle();
+
+    // Input dan Analisis selesai, Hasil tetap belum selesai.
+    expect(find.bySemanticsLabel('Langkah selesai'), findsNWidgets(2));
+    expect(find.bySemanticsLabel('Langkah aktif'), findsOneWidget);
   });
 
   testWidgets('verify button disabled until claim long enough', (
@@ -223,7 +245,10 @@ void main() {
 
     expect(find.text('Verifikasi gagal'), findsOneWidget);
     // Pesan actionable multi-baris: cari per fragmen agar tahan wrap.
-    expect(find.textContaining('tidak menjawab dalam 30 detik'), findsOneWidget);
+    expect(
+      find.textContaining('tidak menjawab dalam 30 detik'),
+      findsOneWidget,
+    );
     expect(find.textContaining('firewall/antivirus'), findsOneWidget);
     expect(find.text('Coba lagi'), findsOneWidget);
   });

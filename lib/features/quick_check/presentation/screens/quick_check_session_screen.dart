@@ -352,7 +352,7 @@ class _QuickCheckSessionScreenState
               children: [
                 const _SessionHeader(),
                 const SizedBox(height: 18),
-                _SessionStepper(step: step),
+                _SessionStepper(step: step, completed: hasResult),
                 const SizedBox(height: 18),
                 const Divider(height: 1),
                 const SizedBox(height: 16),
@@ -670,13 +670,25 @@ class _ModeButton extends StatelessWidget {
 /// tengah dot terakhir, sehingga tepi kiri/kanan stepper sejajar sempurna
 /// dengan batas kontainer input di bawahnya tanpa angka piksel hardcoded.
 class _SessionStepper extends StatelessWidget {
-  const _SessionStepper({required this.step});
+  const _SessionStepper({required this.step, required this.completed});
 
   final int step;
+
+  /// `true` hanya ketika Quick Check benar-benar mengembalikan verdict.
+  /// Error/timeout tidak dianggap menyelesaikan tahap Hasil.
+  final bool completed;
 
   static const _labels = ['Input', 'Analisis', 'Hasil'];
   static const _dotSize = 22.0;
   static const _trackHeight = 2.0;
+
+  bool _isDone(int index) {
+    return index < step || (completed && index == step);
+  }
+
+  bool _isActive(int index) {
+    return index == step && !_isDone(index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -715,7 +727,11 @@ class _SessionStepper extends StatelessWidget {
             children: [
               for (var i = 0; i < _labels.length; i++) ...[
                 if (i > 0) const Spacer(),
-                _StepDot(active: i <= step, done: i < step, size: _dotSize),
+                _StepDot(
+                  active: _isActive(i),
+                  done: _isDone(i),
+                  size: _dotSize,
+                ),
               ],
             ],
           ),
