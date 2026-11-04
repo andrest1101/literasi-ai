@@ -19,7 +19,7 @@ Periksa teks, gambar, atau tautan, pahami verdict beserta alasannya, lalu bagika
 <p align="center">
   <img src="assets/image/LiterasiAI_Presentation.jpg" alt="Cuplikan aplikasi LiterasiAI yang menampilkan halaman Cek, hasil verifikasi, dan Asisten LiterasiAI" width="100%" />
 </p>
-> **Purpose:** Indonesia termasuk negara dengan penyebaran hoaks tertinggi,
+> Purpose: Indonesia termasuk negara dengan penyebaran hoaks tertinggi,
 > mayoritas lewat WhatsApp, Instagram, dan Facebook (Kominfo). Masyarakat
 > tidak punya alat yang mudah, cepat, dan tepercaya untuk verifikasi
 > mandiri. LiterasiAI menjawabnya: verifikasi fakta AI dalam hitungan detik
