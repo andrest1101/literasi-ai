@@ -99,7 +99,7 @@ class _FilterPill extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
             color: active
@@ -124,14 +124,14 @@ class _FilterPill extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 8,
-                height: 8,
+                width: 7,
+                height: 7,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: active ? accent : accent.withValues(alpha: 0.55),
                 ),
               ),
-              const SizedBox(width: 7),
+              const SizedBox(width: 6),
               Text(
                 label,
                 style: TextStyle(
@@ -140,7 +140,7 @@ class _FilterPill extends StatelessWidget {
                   color: active ? activeInk : AppColors.textSecondary,
                 ),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 5),
               Text(
                 '$count',
                 style: TextStyle(
