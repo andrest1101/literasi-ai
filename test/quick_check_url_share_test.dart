@@ -360,6 +360,53 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('share card keeps the explanation fully visible', (
+    WidgetTester tester,
+  ) async {
+    const longExplanation =
+        'Tidur terlalu sedikit setiap malam dapat mengganggu fungsi tubuh. '
+        'Bila kebiasaan ini berlangsung selama beberapa waktu, risiko gangguan '
+        'kesehatan dapat meningkat. Tetap konsultasikan keluhan Anda ke dokter '
+        'untuk mendapatkan asesmen yang sesuai.';
+    final result = VerificationResult(
+      claim:
+          'Benarkah tidur hanya 3 jam sehari selama 1 bulan penuh setiap malam berturut-turut dapat langsung menyebabkan hipertensi akut pada orang yang sebelumnya sehat tanpa faktor risiko lain sama sekali?',
+      verdict: Verdict.valid,
+      confidence: 90,
+      explanation: longExplanation,
+      suggestion: 'Periksakan tekanan darah secara berkala.',
+      checkedAt: DateTime(2026, 11, 9, 8, 30),
+      source: VerificationSource.text,
+    );
+
+    tester.view.physicalSize = const Size(360, 1800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(child: ShareCard(result: result)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(longExplanation), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((widget) {
+        if (widget is! Text) return false;
+        final text = widget.data;
+        return text != null && text.contains('…');
+      }),
+      findsOneWidget, // kutipan klaim tetap dibatasi 160 karakter
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('share card renders verdict brand and claim', (
     WidgetTester tester,
   ) async {
@@ -382,6 +429,30 @@ void main() {
     expect(find.text('64%'), findsOneWidget);
     expect(find.text('LiterasiAI'), findsWidgets);
     expect(find.text('Cek sendiri di LiterasiAI'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('share card confidence wraps on narrow phone width', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(child: ShareCard(result: _urlResult())),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('64%'), findsOneWidget);
+    expect(find.text('Tingkat keyakinan AI'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

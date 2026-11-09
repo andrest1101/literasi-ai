@@ -76,8 +76,10 @@ class ShareCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.end,
+                        spacing: 10,
+                        runSpacing: 4,
                         children: [
                           Text(
                             '${result.confidence}%',
@@ -90,7 +92,6 @@ class ShareCard extends StatelessWidget {
                               color: AppColors.textPrimary,
                             ),
                           ),
-                          const SizedBox(width: 10),
                           const Padding(
                             padding: EdgeInsets.only(bottom: 5),
                             child: Text(
@@ -136,8 +137,6 @@ class ShareCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(36, 8, 36, 28),
             child: Text(
               result.explanation,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 15,
                 height: 1.6,

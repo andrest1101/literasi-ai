@@ -81,6 +81,7 @@ class _QuickCheckResultSectionState extends State<QuickCheckResultSection> {
             child: Material(child: ShareCard(result: widget.result)),
           ),
           context: context,
+          pixelRatio: 2,
         );
         await service.shareImage(
           imageBytes: bytes,

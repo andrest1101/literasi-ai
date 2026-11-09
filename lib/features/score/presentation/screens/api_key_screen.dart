@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
-import '../../../../core/constants/app_styles.dart';
 import '../../../../core/utils/api_key_resolver.dart';
 import '../../../../core/utils/gemini_connectivity_probe.dart';
 import '../../../../shared/widgets/app_medallion_dialog.dart';
@@ -12,6 +11,9 @@ import '../../../chat/presentation/providers/chat_providers.dart';
 import '../../../quick_check/data/datasources/gemini_text_datasource.dart';
 import '../../../quick_check/presentation/providers/verification_provider.dart';
 import '../../../quick_check/presentation/widgets/session_back_button.dart';
+import '../widgets/api_key_form_card.dart';
+import '../widgets/api_key_status_hero.dart';
+import '../widgets/api_key_test_card.dart';
 
 /// Pengaturan kunci API Gemini (BYOK): untuk tester tanpa akses terminal.
 ///
@@ -211,13 +213,13 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
                 ),
                 const SizedBox(height: 16),
                 status.when(
-                  loading: () => const _StatusHero(
+                  loading: () => const ApiKeyStatusHero(
                     icon: Icons.hourglass_empty_rounded,
                     title: AppStrings.apiKeyChecking,
                     subtitle: null,
                     accent: AppColors.textSecondary,
                   ),
-                  error: (_, _) => const _StatusHero(
+                  error: (_, _) => const ApiKeyStatusHero(
                     icon: Icons.error_outline_rounded,
                     title: AppStrings.apiKeySaveFailed,
                     subtitle: null,
@@ -225,7 +227,7 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
                   ),
                   data: (value) {
                     final live = value.configured;
-                    return _StatusHero(
+                    return ApiKeyStatusHero(
                       icon: live
                           ? Icons.check_circle_outline_rounded
                           : Icons.key_off_outlined,
@@ -242,8 +244,8 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 16),
-                _KeyFormCard(
+                const SizedBox(height: 22),
+                ApiKeyFormCard(
                   controller: _controller,
                   obscure: _obscure,
                   localError: _localError,
@@ -253,7 +255,20 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
                   onSave: _save,
                   onRemove: _confirmRemove,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 18),
+                const Divider(height: 1, color: AppColors.hairline),
+                const SizedBox(height: 18),
+                ApiKeyTestCard(
+                  testing: _testing,
+                  testOk: _testOk,
+                  testSteps: _testSteps,
+                  testResult: _testResult,
+                  canTest: status.valueOrNull?.configured ?? false,
+                  onTest: _testConnection,
+                ),
+                const SizedBox(height: 18),
+                const Divider(height: 1, color: AppColors.hairline),
+                const SizedBox(height: 14),
                 const Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -275,20 +290,11 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                _TestCard(
-                  testing: _testing,
-                  testOk: _testOk,
-                  testSteps: _testSteps,
-                  testResult: _testResult,
-                  canTest: status.valueOrNull?.configured ?? false,
-                  onTest: _testConnection,
-                ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 18),
                 ExpansionTile(
                   tilePadding: const EdgeInsets.symmetric(horizontal: 4),
-                  childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-                  leading: const Icon(Icons.help_outline_rounded, size: 20),
+                  childrenPadding: const EdgeInsets.fromLTRB(4, 0, 4, 14),
+                  leading: const _HowToBadge(),
                   title: const Text(AppStrings.apiKeyHowToTitle),
                   children: const [
                     Align(
@@ -302,6 +308,19 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
                         ),
                       ),
                     ),
+                    SizedBox(height: 12),
+                    _HowToStep(
+                      number: '1',
+                      text: AppStrings.apiKeyHowToStepGoogle,
+                    ),
+                    _HowToStep(
+                      number: '2',
+                      text: AppStrings.apiKeyHowToStepCreate,
+                    ),
+                    _HowToStep(
+                      number: '3',
+                      text: AppStrings.apiKeyHowToStepTest,
+                    ),
                   ],
                 ),
               ],
@@ -313,392 +332,73 @@ class _ApiKeyScreenState extends ConsumerState<ApiKeyScreen> {
   }
 }
 
-/// Hero status: ikon besar + label sumber + sublabel mask.
-///
-/// Fokal layar: user langsung tahu AI Live atau Mode Demo tanpa membaca
-/// kartu kecil. Warna mengikuti makna (hijau live, amber demo); warna
-/// status tidak dipakai di tempat lain di layar ini agar tidak bersaing.
-class _StatusHero extends StatelessWidget {
-  const _StatusHero({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.accent,
-  });
-
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final Color accent;
+/// Badge langkah 3 (how-to): selaras bahasa visual section badge 1 dan 2.
+class _HowToBadge extends StatelessWidget {
+  const _HowToBadge();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        color: accent.withValues(alpha: 0.08),
-        border: Border.all(color: accent.withValues(alpha: 0.3)),
+      width: 26,
+      height: 26,
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.primary,
       ),
+      child: const Text(
+        '3',
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
+/// Satu langkah cara mendapatkan kunci: angka kecil + teks.
+class _HowToStep extends StatelessWidget {
+  const _HowToStep({required this.number, required this.text});
+
+  final String number;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 52,
-            height: 52,
+            width: 20,
+            height: 20,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(17),
-              color: accent.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+              color: AppColors.primary.withValues(alpha: 0.12),
             ),
-            child: Icon(icon, size: 27, color: accent),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle!,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      height: 1.6,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Kartu tes koneksi: CTA + daftar hasil per tahap probe.
-///
-/// Meningkatkan data yang selama ini dibuang: tiap tahap (DNS/TCP/HTTPS/
-/// generate) tampil sebagai baris ikon OK/GAGAL + durasi, bukan satu
-/// string panjang. Kesimpulan + durasi tahap terlama tetap di atas
-/// sebagai ringkasan.
-class _TestCard extends StatelessWidget {
-  const _TestCard({
-    required this.testing,
-    required this.testOk,
-    required this.testSteps,
-    required this.testResult,
-    required this.canTest,
-    required this.onTest,
-  });
-
-  final bool testing;
-  final bool? testOk;
-  final List<GeminiProbeStep> testSteps;
-  final String? testResult;
-  final bool canTest;
-  final VoidCallback onTest;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D101A33),
-            blurRadius: 16,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            AppStrings.connectionTestTitle,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.2,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 50,
-            child: FilledButton.icon(
-              onPressed: testing || !canTest ? null : onTest,
-              icon: testing
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.network_check_outlined, size: 19),
-              label: Text(
-                testing
-                    ? AppStrings.connectionTestRunning
-                    : AppStrings.connectionTestRun,
-              ),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                textStyle: const TextStyle(
-                  fontFamily: AppStyles.fontFamily,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            canTest
-                ? AppStrings.apiKeyTestSavedKey
-                : AppStrings.apiKeyTestNeedsKey,
-            style: const TextStyle(
-              fontSize: 12,
-              height: 1.5,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          if (testResult != null) ...[
-            const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  testOk == true
-                      ? Icons.check_circle_rounded
-                      : Icons.error_outline_rounded,
-                  size: 18,
-                  color: testOk == true ? AppColors.success : AppColors.danger,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    testResult!,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      height: 1.6,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-          if (testSteps.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            const Text(
-              AppStrings.apiKeyProbeStepsTitle,
-              style: TextStyle(
-                fontSize: 12,
+            child: Text(
+              number,
+              style: const TextStyle(
+                fontSize: 11,
                 fontWeight: FontWeight.w800,
-                letterSpacing: 0.4,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 6),
-            for (var i = 0; i < testSteps.length; i++) ...[
-              if (i > 0) const SizedBox(height: 6),
-              _ProbeStepRow(step: testSteps[i]),
-            ],
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-/// Satu baris hasil tahap probe: ikon status + nama + durasi tabular.
-class _ProbeStepRow extends StatelessWidget {
-  const _ProbeStepRow({required this.step});
-
-  final GeminiProbeStep step;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = step.ok ? AppColors.success : AppColors.danger;
-    final secs = (step.elapsed.inMilliseconds / 1000).toStringAsFixed(1);
-    return Row(
-      children: [
-        Icon(
-          step.ok ? Icons.check_circle_rounded : Icons.cancel_rounded,
-          size: 17,
-          color: color,
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            step.name,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
-        Text(
-          '$secs dtk',
-          style: const TextStyle(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textSecondary,
-            fontFeatures: [FontFeature.tabularFigures()],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Kartu form kelola kunci: field + simpan + hapus.
-///
-/// Satu-satunya kartu dengan CTA primer ganda: Simpan (primer) di atas,
-/// Hapus (teks danger) di bawah. Tooltip tampil/sembunyi terpusat agar
-/// tidak hardcode di widget.
-class _KeyFormCard extends StatelessWidget {
-  const _KeyFormCard({
-    required this.controller,
-    required this.obscure,
-    required this.localError,
-    required this.saving,
-    required this.onToggleObscure,
-    required this.onPaste,
-    required this.onSave,
-    required this.onRemove,
-  });
-
-  final TextEditingController controller;
-  final bool obscure;
-  final String? localError;
-  final bool saving;
-  final VoidCallback onToggleObscure;
-  final VoidCallback onPaste;
-  final VoidCallback onSave;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D101A33),
-            blurRadius: 16,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            AppStrings.apiKeyFormTitle,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.2,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: controller,
-            obscureText: obscure,
-            autocorrect: false,
-            enableSuggestions: false,
-            style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
-            textInputAction: TextInputAction.done,
-            decoration: InputDecoration(
-              labelText: AppStrings.apiKeyFieldLabel,
-              hintText: AppStrings.apiKeyFieldHint,
-              errorText: localError,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              suffixIcon: IconButton(
-                tooltip: obscure
-                    ? AppStrings.apiKeyShowKey
-                    : AppStrings.apiKeyHideKey,
-                onPressed: onToggleObscure,
-                icon: Icon(
-                  obscure
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                ),
-              ),
-              prefixIcon: const Icon(Icons.key_rounded),
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              onPressed: saving ? null : onPaste,
-              icon: const Icon(Icons.content_paste_rounded, size: 17),
-              label: const Text(AppStrings.apiKeyPaste),
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 50,
-            child: FilledButton.icon(
-              onPressed: saving ? null : onSave,
-              icon: saving
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.save_outlined, size: 19),
-              label: const Text(AppStrings.apiKeySave),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                textStyle: const TextStyle(
-                  fontFamily: AppStyles.fontFamily,
-                  fontWeight: FontWeight.w800,
-                ),
+                color: AppColors.primaryDark,
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          TextButton.icon(
-            onPressed: saving ? null : onRemove,
-            icon: const Icon(Icons.delete_outline_rounded, size: 18),
-            label: const Text(AppStrings.apiKeyRemove),
-            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 12.5,
+                height: 1.5,
+                color: AppColors.textPrimary,
+              ),
+            ),
           ),
         ],
       ),

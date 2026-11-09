@@ -393,6 +393,12 @@ abstract final class AppStrings {
       'Buat gratis di Google AI Studio, salin kuncinya, lalu tempel di sini. Kunci tidak pernah dikirim ke mana pun selain API Gemini.';
   static const String apiKeySecureNote =
       'Kunci disimpan di penyimpanan aman perangkat ini dan hanya dikirim ke Google Gemini.';
+  static const String apiKeyHowToStepGoogle =
+      'Buka aistudio.google.com dan masuk dengan akun Google Anda.';
+  static const String apiKeyHowToStepCreate =
+      'Di menu "Get API key", buat kunci baru lalu salin.';
+  static const String apiKeyHowToStepTest =
+      'Tempel kuncinya di atas, lalu jalankan tes koneksi.';
   static const String apiKeyPaste = 'Tempel';
   static const String apiKeyTestNeedsKey =
       'Simpan kunci terlebih dahulu untuk menguji koneksi.';
