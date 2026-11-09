@@ -10,6 +10,7 @@ Periksa teks, gambar, atau tautan, pahami verdict beserta alasannya, lalu bagika
 [![Dart](https://img.shields.io/badge/Dart-3.8%2B-0175C2?logo=dart&logoColor=white)](https://dart.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-DD2C00?logo=firebase&logoColor=white)](https://firebase.google.com)
 [![Gemini](https://img.shields.io/badge/Gemini%20API-AI-4285F4?logo=google&logoColor=white)](https://ai.google.dev)
+[![Unduh APK](https://img.shields.io/badge/Android%20APK-Unduh%201.0.0-1A73E8?logo=android&logoColor=white)](https://www.mediafire.com/file/aqwg9jk2sa7zqei/LiterasiAI.apk/file)
 
 <p><strong>Purpose:</strong> Informasi menyebar cepat melalui media sosial dan aplikasi pesan. LiterasiAI membantu pengguna berhenti sejenak, memeriksa klaim, dan memahami konteks sebelum membagikannya. Tujuannya bukan menggantikan sumber tepercaya, melainkan mendukung kebiasaan literasi digital yang lebih baik.</p>
 
@@ -27,7 +28,7 @@ Periksa teks, gambar, atau tautan, pahami verdict beserta alasannya, lalu bagika
 
 - [Fitur](#fitur)
 - [Demo singkat](#demo-singkat)
-- [Distribusi APK](#distribusi-apk)
+- [Unduh & instal APK](#unduh--instal-apk)
 - [Mulai dari source](#mulai-dari-source)
 - [Konfigurasi layanan](#konfigurasi-layanan)
 - [Arsitektur](#arsitektur)
@@ -52,7 +53,7 @@ Periksa teks, gambar, atau tautan, pahami verdict beserta alasannya, lalu bagika
 | **Trending** | Jelajahi tujuh contoh klaim yang dikurasi secara lokal. Konten ini bukan feed berita real-time. |
 | **Belajar** | Pelajari tiga modul literasi digital melalui materi dan kuis singkat. Progres guest tersimpan lokal; progres akun tersimpan di Firestore. |
 | **Skor literasi** | Dapatkan poin dari aktivitas pemeriksaan dan belajar. Skor cloud memerlukan akun dan koneksi ke Firestore. |
-| **BYOK dan mode demo** | Gunakan kunci Gemini sendiri untuk respons live. Tanpa kunci, aplikasi tetap dapat dicoba melalui mode demo offline yang hasilnya diberi penanda demo. |
+| **BYOK dan mode demo** | Gunakan kunci Gemini sendiri di **Profil → Kunci API Gemini**: simpan kunci di bagian "Kelola kunci", lalu uji koneksinya dengan probe bertahap (DNS → TCP → HTTPS → generate) di bagian "Tes koneksi". Tanpa kunci, aplikasi tetap dapat dicoba melalui mode demo offline yang hasilnya diberi penanda demo. |
 
 ## Demo singkat
 
@@ -63,16 +64,28 @@ Periksa teks, gambar, atau tautan, pahami verdict beserta alasannya, lalu bagika
 
 > Mode demo tidak mengirim permintaan ke Gemini. Hasilnya bersifat ilustratif, bukan pemeriksaan faktual. Untuk hasil live, masukkan kunci Gemini melalui **Profil → Kunci API Gemini**.
 
-## Distribusi APK
+## Unduh & instal APK
 
-LiterasiAI dibagikan sebagai **APK untuk instalasi manual** dan belum tersedia di Google Play Store. Tautan unduhan dibagikan terpisah oleh pemilik proyek; README ini tidak mencantumkan tautan yang belum dikonfirmasi.
+**[Unduh LiterasiAI untuk Android (APK 1.0.0)](https://www.mediafire.com/file/aqwg9jk2sa7zqei/LiterasiAI.apk/file)**
 
-1. Unduh APK dari tautan distribusi yang diberikan pemilik proyek.
-2. Buka APK di perangkat Android dan izinkan pemasangan dari sumber tersebut bila Android memintanya.
-3. Jalankan aplikasi. Mode demo dapat digunakan tanpa login dan tanpa kunci Gemini.
+| | |
+| --- | --- |
+| Nama file | `literasi-ai-v1.0.0.apk` |
+| Versi | `1.0.0+1` |
+| Ukuran | 53,6 MB |
+| Dibangun | 9 November 2026 (release) |
+| SHA-256 | `5ccf4469bc52d1b97b8d90c7679b9e6a3bdcc7a31d10d13675feff1a7df2a3cf` |
+
+### Cara instal
+
+1. Unduh APK dari tautan di atas (Android 6.0+ / `minSdk` 23).
+2. Buka file APK; bila diminta, izinkan instal dari sumber tersebut.
+3. Buka LiterasiAI. Mode demo dapat langsung digunakan tanpa login dan tanpa kunci Gemini.
 4. Untuk pemeriksaan live, masukkan kunci Gemini milik sendiri di **Profil → Kunci API Gemini**.
 
 Google Sign-In memerlukan SHA-1 signing certificate yang digunakan APK terdaftar di Firebase Console. Sertifikat debug dan release dapat berbeda. Bila SHA-1 tidak cocok, Google Sign-In mungkin gagal meskipun fitur demo tetap dapat digunakan.
+
+> LiterasiAI didistribusikan sebagai APK untuk instalasi manual dan **belum tersedia di Google Play Store**. Integritas file dapat diperiksa dengan membandingkan SHA-256 di atas.
 
 ## Mulai dari source
 
@@ -209,6 +222,13 @@ Prioritas pemilihan kunci:
 2. Kunci yang dimasukkan pengguna melalui **Profil → Kunci API Gemini**, disimpan di secure storage perangkat.
 3. Jika tidak ada kunci, aplikasi menggunakan mode demo dan tidak mengirim request Gemini.
 
+Layar **Profil → Kunci API Gemini** disusun berurutan agar mudah dipantau:
+
+1. **Banner status** — langsung menunjukkan AI Live (kunci aktif) atau Mode Demo, beserta sumber kunci.
+2. **Kelola kunci** — kolom dengan aksi tempel dan tampilkan/sembunyikan, tombol Simpan (primer) dan Hapus (outlined).
+3. **Tes koneksi** — probe bertahap **DNS → TCP 443 → HTTPS → generate**, dengan hasil per tahap dan banner kesimpulan. Tes selalu menggunakan kunci yang tersimpan, jadi pengguna bisa memastikan kuncinya benar-benar bekerja.
+4. **Cara mendapatkan kunci** — tiga langkah menuju Google AI Studio.
+
 Mengubah atau menghapus kunci akan memengaruhi request berikutnya tanpa harus memulai ulang aplikasi. Kunci yang ditanam di build yang dibagikan dapat diekstrak; BYOK lebih sesuai untuk distribusi portfolio.
 
 ## Status dan batasan
@@ -227,7 +247,7 @@ Mengubah atau menghapus kunci akan memengaruhi request berikutnya tanpa harus me
 - Validasi parity iOS dan distribusi TestFlight.
 - Pengujian menyeluruh pada berbagai perangkat fisik.
 
-APK didistribusikan secara manual dan belum diterbitkan di Play Store. Dukungan sistem operasi, aplikasi pengirim Share Target, dan perilaku URL dapat berbeda menurut perangkat serta layanan pihak ketiga.
+APK tersedia untuk instalasi manual melalui tautan di [Unduh & instal APK](#unduh--instal-apk), bukan Play Store. Dukungan sistem operasi, aplikasi pengirim Share Target, dan perilaku URL dapat berbeda menurut perangkat serta layanan pihak ketiga.
 
 ## Troubleshooting
 
@@ -238,6 +258,7 @@ APK didistribusikan secara manual dan belum diterbitkan di Play Store. Dukungan 
 | Hasil selalu `TIDAK_DAPAT_DIPASTIKAN` | Periksa koneksi dan kunci Gemini melalui **Profil → Kunci API Gemini**. Tanpa kunci valid, aplikasi memakai mode demo. |
 | Tautan tidak menghasilkan konteks yang cukup | Sebagian situs membatasi pengambilan metadata. Periksa klaim menggunakan teks atau sumber lain. |
 | Konten Share Target tidak terbaca | Periksa tipe konten dan izin file dari aplikasi pengirim. Pengguna dapat membuka LiterasiAI lalu memasukkan klaim secara manual. |
+| APK ditolak/diblokir saat instal | Izinkan instal dari sumber MediaFire di pengaturan Android. Peringatan Play Protect wajar untuk APK sideload; verifikasi file dengan SHA-256 di [Unduh & instal APK](#unduh--instal-apk). |
 
 ## Dokumentasi
 
@@ -249,13 +270,3 @@ APK didistribusikan secara manual dan belum diterbitkan di Play Store. Dukungan 
 ---
 
 <p align="center"><sub>LiterasiAI · Proyek portofolio literasi digital</sub></p>
-## 🛠️ Troubleshooting
-
-| Gejala | Solusi |
-| ------ | ------ |
-| `libsecret-1>=0.18.4 not found` saat build Linux | `sudo apt-get install -y libsecret-1-dev` |
-| `Permission denied` ke `/usr/local/...` saat `flutter run -d linux` | Hapus cache CMake basi: `rm -rf build/linux`, lalu run ulang |
-| Login Google gagal di Android | Pastikan SHA-1 keystore yang dipakai (debug dan release berbeda) terdaftar di Firebase Console → Project settings → Android app, lalu unduh ulang `google-services.json`. Cek `build/app/generated/res/processDebugGoogleServices/values/values.xml` harus memuat `default_web_client_id`. Pesan error aplikasi kini menyebut konfigurasi OAuth, bukan pesan generik |
-| Skor/history gagal tersimpan padahal kunci valid | `firestore.rules` belum di-deploy (bukan masalah kunci API) |
-| Selalu `TIDAK_DAPAT_DIPASTIKAN` | Kunci Gemini kosong/invalid — cek **Profil → Kunci API Gemini**, atau pakai mode demo |
-| `flutter` CLI macet di terminal | Biasanya terkunci daemon VS Code yang sedang berjalan; tunggu atau tutup run aktif, lalu ulangi |
