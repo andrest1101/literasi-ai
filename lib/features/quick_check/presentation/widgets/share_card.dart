@@ -137,8 +137,6 @@ class ShareCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(36, 8, 36, 28),
             child: Text(
               result.explanation,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 15,
                 height: 1.6,
