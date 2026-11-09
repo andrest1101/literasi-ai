@@ -384,4 +384,28 @@ void main() {
     expect(find.text('Cek sendiri di LiterasiAI'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('share card confidence wraps on narrow phone width', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(child: ShareCard(result: _urlResult())),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('64%'), findsOneWidget);
+    expect(find.text('Tingkat keyakinan AI'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
