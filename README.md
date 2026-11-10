@@ -270,7 +270,7 @@ APK tersedia untuk instalasi manual melalui tautan di [Unduh & instal APK](#undu
 ## Author
 
 - **Author:** Andre Robert
-- **Product:** Dompetku
+- **Product:** LiterasiAI
 
 ---
 
