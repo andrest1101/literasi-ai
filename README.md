@@ -267,6 +267,11 @@ APK tersedia untuk instalasi manual melalui tautan di [Unduh & instal APK](#undu
 - [`firestore.rules`](firestore.rules): aturan akses data Firestore.
 - [`agents.md`](agents.md): panduan arsitektur dan standar pengembangan.
 
+## Author
+
+- **Author:** Andre Robert
+- **Product:** Dompetku
+
 ---
 
 <p align="center"><sub>LiterasiAI · Proyek portofolio literasi digital</sub></p>
